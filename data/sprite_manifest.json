@@ -26,7 +26,7 @@
       "path": "assets/characters/rayder/rayder_atlas.png",
       "grid": [
         10,
-        5
+        11
       ],
       "cell": [
         160,
@@ -420,12 +420,14 @@
       },
       "walk": {
         "frames": [
-          2,
-          1,
-          3,
-          1
+          92,
+          93,
+          94,
+          95,
+          96,
+          97
         ],
-        "duration": 0.12,
+        "duration": 0.1,
         "loop": true
       },
       "dash": {
@@ -441,56 +443,70 @@
       },
       "punch1": {
         "frames": [
-          10,
-          11
+          50,
+          51,
+          52
         ],
         "durations": [
-          0.08,
-          0.22
+          0.05,
+          0.12,
+          0.13
         ],
         "loop": false
       },
       "punch2": {
         "frames": [
-          12,
-          13
+          53,
+          54,
+          55
         ],
         "durations": [
-          0.08,
-          0.22
+          0.05,
+          0.13,
+          0.12
         ],
         "loop": false
       },
       "punch3": {
         "frames": [
-          14,
-          19
+          56,
+          57,
+          58,
+          59
         ],
         "durations": [
-          0.11,
-          0.31
+          0.05,
+          0.06,
+          0.16,
+          0.15
         ],
         "loop": false
       },
       "kick": {
         "frames": [
-          20,
-          21
+          60,
+          61,
+          62
         ],
         "durations": [
-          0.11,
-          0.31
+          0.08,
+          0.18,
+          0.16
         ],
         "loop": false
       },
       "energy": {
         "frames": [
-          37,
-          38
+          68,
+          69,
+          70,
+          71
         ],
         "durations": [
+          0.1,
+          0.1,
           0.2,
-          0.35
+          0.15
         ],
         "loop": false
       },
@@ -507,12 +523,18 @@
       },
       "rage_attack": {
         "frames": [
-          42,
-          43
+          63,
+          64,
+          65,
+          66,
+          67
         ],
         "durations": [
-          0.14,
-          0.41
+          0.06,
+          0.12,
+          0.1,
+          0.12,
+          0.15
         ],
         "loop": false
       },
@@ -529,43 +551,53 @@
       },
       "block": {
         "frames": [
-          8
+          88,
+          89
         ],
         "durations": [
+          0.1,
           0.1
         ],
         "loop": true
       },
       "hit_high": {
         "frames": [
-          44
+          77,
+          78
         ],
         "durations": [
-          0.13
+          0.06,
+          0.07
         ],
         "loop": false
       },
       "hit_low": {
         "frames": [
-          45
+          79,
+          80
         ],
         "durations": [
-          0.13
+          0.06,
+          0.07
         ],
         "loop": false
       },
       "airborne": {
         "frames": [
-          46
+          81,
+          82,
+          83
         ],
         "durations": [
-          0.3
+          0.1,
+          0.1,
+          0.2
         ],
         "loop": false
       },
       "knockdown": {
         "frames": [
-          47
+          84
         ],
         "durations": [
           0.1
@@ -574,19 +606,21 @@
       },
       "getup": {
         "frames": [
-          48,
-          9
+          85,
+          86,
+          87
         ],
         "durations": [
-          0.2,
-          0.12
+          0.12,
+          0.12,
+          0.08
         ],
         "loop": false
       },
       "defeat": {
         "frames": [
-          46,
-          47
+          81,
+          84
         ],
         "durations": [
           0.12,
@@ -596,12 +630,51 @@
       },
       "recovery": {
         "frames": [
-          6
+          55
         ],
         "durations": [
           0.1
         ],
         "loop": false
+      },
+      "victory": {
+        "frames": [
+          90,
+          91
+        ],
+        "durations": [
+          0.25,
+          0.6
+        ],
+        "loop": false
+      },
+      "turn": {
+        "frames": [
+          98,
+          99
+        ],
+        "durations": [
+          0.06,
+          0.06
+        ],
+        "loop": false
+      },
+      "projectile": {
+        "frames": [
+          72,
+          73,
+          74,
+          75,
+          76
+        ],
+        "durations": [
+          0.06,
+          0.06,
+          0.06,
+          0.06,
+          0.06
+        ],
+        "loop": true
       }
     },
     "enemy_default": {
@@ -651,5 +724,5 @@
       }
     }
   },
-  "notes": "v4.2: + Rayder (personaje jugable) desde la hoja de 50 poses del usuario (tools/build_rayder_sheet.py): celda 160x128, pivote [80,122], frame i = pose i+1. v4.1: Rayden 4x6 (22 frames usados). Frames 0-15 = arte original reempaquetado y limpio; 16-21 derivados de sus propios pixeles con tools/build_rayden_sheet.py (anticipo, golpe bajo, aire x2, levantarse, bloqueo). cell/pivot por atlas; clips por nombre con 'duration', 'fps' o 'durations'. Rayden usa celda 128x128 con pivote [64,126] (rayden_128.png, generado con tools/repack_sheet.py desde rayden_clean.png sin escalar); rayden_legacy_96 conserva el atlas 96x96. Los clips se indexan por nombre con 'frames' de largo libre y 'duration' (fija), 'fps' o 'durations' (una por cuadro). DF-012 agrega Mercado Antiguo y Zona Quimica como fondos de prueba 256x144 escalables exactamente 5x a 1280x720 con filtro punto. El codigo de runtime los carga como recursos visuales opcionales para no romper copias antiguas del proyecto."
+  "notes": "v4.3: Rayder 10x11 = 50 poses originales (0-49) + set v2 del usuario (50-101: jab, gancho, gancho ascendente, patadas, onda, proyectil, golpes, aire, suelo, levantarse, bloqueo, victoria, caminar, girarse). + Rayder (personaje jugable) desde la hoja de 50 poses del usuario (tools/build_rayder_sheet.py): celda 160x128, pivote [80,122], frame i = pose i+1. v4.1: Rayden 4x6 (22 frames usados). Frames 0-15 = arte original reempaquetado y limpio; 16-21 derivados de sus propios pixeles con tools/build_rayden_sheet.py (anticipo, golpe bajo, aire x2, levantarse, bloqueo). cell/pivot por atlas; clips por nombre con 'duration', 'fps' o 'durations'. Rayden usa celda 128x128 con pivote [64,126] (rayden_128.png, generado con tools/repack_sheet.py desde rayden_clean.png sin escalar); rayden_legacy_96 conserva el atlas 96x96. Los clips se indexan por nombre con 'frames' de largo libre y 'duration' (fija), 'fps' o 'durations' (una por cuadro). DF-012 agrega Mercado Antiguo y Zona Quimica como fondos de prueba 256x144 escalables exactamente 5x a 1280x720 con filtro punto. El codigo de runtime los carga como recursos visuales opcionales para no romper copias antiguas del proyecto."
 }

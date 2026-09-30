@@ -58,7 +58,7 @@ def ring(pts, W, H):
 
 
 # Solo astillas (sin quitar zonas claras): hojas de personaje generadas.
-SLIVERS_ONLY = {"assets/characters/rayden_128.png": (4, 6), "assets/characters/rayder/rayder_atlas.png": (10, 5)}
+SLIVERS_ONLY = {"assets/characters/rayden_128.png": (4, 6), "assets/characters/rayder/rayder_atlas.png": (10, 11)}
 
 
 def clean(path, cols, rows, dry, gaps_pass=True):

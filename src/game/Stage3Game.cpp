@@ -102,7 +102,7 @@ void Stage3Game::DrawWorld()const{
  for(int x=0;x<6200;x+=240){DrawRectangle(x,455,12,170,{45,55,80,255});DrawRectangle(x+55,470,170,9,{100,40,115,220});DrawCircle(x+30,445,5,{70,220,255,220});}
  combatWorld.DrawGround();
  for(const auto&p:particles)DrawCircleV({p.pos.x,p.pos.y-p.pos.z},p.size,A(p.color,p.life/p.maxLife));
- for(const auto&p:projectiles){Color c=p.fromBoss?Color{255,65,190,255}:Color{60,220,255,255};DrawCircleV({p.pos.x,p.pos.y-70},p.radius,A(c,.9f));DrawCircleV({p.pos.x,p.pos.y-70},p.radius*.42f,{245,245,255,255});}
+ for(const auto&p:projectiles){if(!p.fromBoss&&player.DrawEnergyProjectile({p.pos.x,p.pos.y-70},p.vx<0,(float)GetTime()))continue;Color c=p.fromBoss?Color{255,65,190,255}:Color{60,220,255,255};DrawCircleV({p.pos.x,p.pos.y-70},p.radius,A(c,.9f));DrawCircleV({p.pos.x,p.pos.y-70},p.radius*.42f,{245,245,255,255});}
  combatWorld.DrawEffects();
  for(const auto&e:enemies)if(e.active)e.Draw();if(!bossSpawned||!boss.defeated)player.Draw();if(bossSpawned&&(flow==Flow::BossIntro||flow==Flow::Boss))DrawBoss();EndMode2D();
 }

@@ -106,6 +106,9 @@ public:
     // Si nadie la llamo, Update la invoca solo.
     void PumpInput(float dt);
     void Draw() const;
+    // Si el personaje tiene clip "projectile" (Rayder), dibuja la onda con su
+    // sprite animado centrado en `center` y devuelve true; si no, false.
+    bool DrawEnergyProjectile(Vector2 center, bool movingLeft, float time) const;
     void TakeDamage(int damage);
     void SetState(PlayerState newState);
     void Reset();

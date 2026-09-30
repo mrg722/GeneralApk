@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 GRIDS = {  # atlas con grilla: ruta -> (cols, rows)
     "assets/characters/rayden_clean.png": (4, 4),
     "assets/characters/rayden_128.png": (4, 6),
-    "assets/characters/rayder/rayder_atlas.png": (10, 5),
+    "assets/characters/rayder/rayder_atlas.png": (10, 11),
 }
 for n in ["punk", "charger", "brute", "enforcer", "chemical_soldier", "urban_ninja", "mutant", "armored_guard"]:
     GRIDS[f"assets/enemies/{n}_clean.png"] = (4, 3)

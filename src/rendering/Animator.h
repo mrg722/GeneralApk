@@ -135,6 +135,16 @@ public:
         }
     }
 
+    // Dibuja un frame concreto del atlas (sin tocar el estado de reproduccion).
+    void DrawFrame(int frameIndex, Vector2 pivotPosition, float scale, bool flipX, Color tint = WHITE) const {
+        if (texture.id == 0 || frames.empty()) return;
+        const SpriteFrame& frame = frames[static_cast<std::size_t>(std::clamp(frameIndex, 0, static_cast<int>(frames.size()) - 1))];
+        const float width = frame.width * scale, height = frame.height * scale;
+        const Rectangle source = {frame.source.x, frame.source.y, flipX ? -frame.source.width : frame.source.width, frame.source.height};
+        const float px = flipX ? width - frame.pivotX * scale : frame.pivotX * scale;
+        DrawTexturePro(texture, source, {pivotPosition.x - px, pivotPosition.y - frame.pivotY * scale, width, height}, {0.0f, 0.0f}, 0.0f, tint);
+    }
+
     void Draw(Vector2 feetPosition, float scale, bool flipX, Color tint = WHITE) const {
         if (texture.id == 0 || texture.width <= 0 || texture.height <= 0) return;
 

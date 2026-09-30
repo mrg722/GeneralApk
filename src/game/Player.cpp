@@ -901,6 +901,17 @@ void Player::Draw() const {
     }
 }
 
+bool Player::DrawEnergyProjectile(Vector2 center, bool movingLeft, float time) const {
+    const auto it = animator.namedClips.find("projectile");
+    if (it == animator.namedClips.end() || it->second.frames.empty()) return false;
+    const auto& frames = it->second.frames;
+    const int idx = frames[static_cast<std::size_t>(static_cast<int>(time / 0.06f)) % frames.size()];
+    // El pivote del proyectil esta 40 px (atlas) bajo su centro visual.
+    const float scale = 1.20f * DepthScaleFor(position.y);
+    animator.DrawFrame(idx, {center.x, center.y + 40.0f * scale}, scale, movingLeft);
+    return true;
+}
+
 void Player::ApplyCharacter(int id) {
     skin = id;
     animator = Animator{};                     // se reinicia con el atlas del personaje

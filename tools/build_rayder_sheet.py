@@ -137,9 +137,127 @@ def main():
             cell = Image.new("RGBA", (CW, CH), (0, 0, 0, 0))
             cell.paste(small, (ox, oy), small)
             out.paste(cell, (c * CW, r * CH))
+    v2 = build_v2(out)
+    full = Image.new("RGBA", (10 * CW, 11 * CH), (0, 0, 0, 0))
+    full.paste(out, (0, 0))
+    for i, cell in enumerate(v2):
+        r, c = divmod(50 + i, 10)
+        full.paste(cell, (c * CW, r * CH))
     DST.parent.mkdir(parents=True, exist_ok=True)
-    out.save(DST)
-    print(f"OK {DST.relative_to(ROOT)}: {out.size[0]}x{out.size[1]}, 50 frames")
+    full.save(DST)
+    print(f"OK {DST.relative_to(ROOT)}: {full.size[0]}x{full.size[1]}, {50 + len(v2)} frames (50 poses + {len(v2)} del set v2)")
+
+
+# ---------------------------------------------------------------------------
+# Set v2 entregado por el usuario (rayder_set_completo_v2.png, 2172x724 RGBA):
+# 4 filas con etiquetas oscuras. Se borran las etiquetas, cada fila se corta
+# por huecos de columnas vacias y los tramos anchos por el valle de menor
+# densidad. MERGES une cortes que pertenecen a la misma pose (estallido de la
+# cuerpo en el aire/suelo partido, proyectil largo).
+# Orden de salida (indice v2 -> frame 50 + indice):
+#   0-2 jab | 3-5 gancho | 6-9 gancho ascendente | 10-12 patada media |
+#   13-17 patada giratoria | 18-21 onda | 22-26 proyectil | 27-28 golpe alto |
+#   29-30 golpe bajo | 31-33 en el aire | 34 en el suelo | 35-37 levantarse |
+#   38-39 bloqueo | 40-41 victoria | 42-47 caminar | 48-49 girarse |
+#   50-51 proyectil extra
+SRC_V2 = ROOT / "assets/characters/rayder/source/rayder_set_completo_v2.png"
+V2_ROWS = [(32, 210), (239, 383), (412, 563), (592, 724)]
+V2_LABEL_BANDS = [(5, 33), (209, 240), (382, 413), (562, 593)]
+V2_MERGES = {2: [(4, 5), (8, 9)], 3: [(9, 10)]}
+V2_DROP = {1: [3]}   # estallido suelto de la onda: el juego lo dibuja como proyectil
+V2_PROJECTILES = set(range(22, 27)) | {50, 51}
+
+
+def v2_is_label(p):
+    r, g, b, a = p
+    return a > 150 and ((b > r + 15 and b < 130 and r < 60) or min(r, g, b) > 200)
+
+
+def v2_erase_labels(img):
+    px = img.load(); W, H = img.size
+    for y0, y1 in V2_LABEL_BANDS:
+        seen = set()
+        for y in range(y0, y1):
+            for x in range(W):
+                if (x, y) in seen or not v2_is_label(px[x, y]): continue
+                comp = flood(px, [(x, y)], v2_is_label, (0, max(0, y0 - 2), W, min(H, y1 + 2)))
+                seen |= comp
+                xs = [c[0] for c in comp]; ys = [c[1] for c in comp]
+                if max(xs) - min(xs) > 40:
+                    for yy in range(min(ys) - 2, max(ys) + 3):
+                        for xx in range(min(xs) - 2, max(xs) + 3):
+                            if 0 <= xx < W and 0 <= yy < H: px[xx, yy] = (0, 0, 0, 0)
+
+
+def v2_segments(px, W, y0, y1, unit=105):
+    col = [sum(1 for y in range(y0, y1) if px[x, y][3] > 80) for x in range(W)]
+    segs, s, gap = [], None, 0
+    for x, v in enumerate(col + [0] * 6):
+        if v > 0:
+            if s is None: s = x
+            gap = 0; e = x
+        elif s is not None:
+            gap += 1
+            if gap >= 4: segs.append((s, e)); s = None
+    out = []
+    for a, b in segs:
+        w = b - a
+        if w < 25: continue
+        k = max(1, round(w / unit)); cuts = [a]
+        for i in range(1, k):
+            c = a + w * i // k
+            cuts.append(min(range(c - 30, c + 30), key=lambda x: col[x]))
+        cuts.append(b + 1)
+        out += [(cuts[i], cuts[i + 1]) for i in range(len(cuts) - 1)]
+    return out
+
+
+def build_v2(old_atlas):
+    img = Image.open(SRC_V2).convert("RGBA"); W, H = img.size
+    v2_erase_labels(img)
+    px = img.load()
+    crops = []
+    for r, (y0, y1) in enumerate(V2_ROWS):
+        segs = v2_segments(px, W, y0, y1)
+        for a, b in sorted(V2_MERGES.get(r, []), reverse=True):
+            segs[a:b + 1] = [(segs[a][0], segs[b][1])]
+        for d in sorted(V2_DROP.get(r, []), reverse=True):
+            del segs[d]
+        ground = 0
+        rowcrops = []
+        for (x0, x1) in segs:
+            c = img.crop((x0, y0, x1, y1)); bb = solid_bbox(c)
+            if bb: ground = max(ground, bb[3])
+            rowcrops.append(c)
+        crops += [(c, ground) for c in rowcrops]
+    # Escala: la figura de pie de v2 (caminar) mide lo mismo que la pose 1 del atlas viejo.
+    old_h = (lambda b: b[3] - b[1])(solid_bbox(old_atlas.crop((0, 0, CW, CH))))
+    walk, _ = crops[42]
+    wb = solid_bbox(walk)
+    scale = old_h / (wb[3] - wb[1])
+    cells = []
+    for i, (c, ground) in enumerate(crops):
+        b = solid_bbox(c) or c.getchannel("A").getbbox()
+        if i in V2_PROJECTILES:
+            cx = (b[0] + b[2]) / 2; gy = (b[1] + b[3]) / 2 + 40 / scale   # centrado, a media altura
+        else:
+            # centro del torso sin contar efectos azules (estallidos, arcos)
+            body = c.copy(); bp = body.load()
+            for yy in range(body.height):
+                for xx in range(body.width):
+                    r_, g_, b_, a_ = bp[xx, yy]
+                    if a_ > 0 and b_ > r_ + 40 and b_ > g_ + 15: bp[xx, yy] = (0, 0, 0, 0)
+            bb2 = solid_bbox(body) or b
+            torso = body.crop((bb2[0], bb2[1] + (bb2[3] - bb2[1]) * 3 // 10, bb2[2], bb2[1] + (bb2[3] - bb2[1]) * 6 // 10))
+            tb = solid_bbox(torso)
+            cx = bb2[0] + ((tb[0] + tb[2]) / 2 if tb else (bb2[2] - bb2[0]) / 2); gy = ground
+        small = c.resize((max(1, round(c.width * scale)), max(1, round(c.height * scale))), Image.LANCZOS)
+        small.putalpha(small.getchannel("A").point(lambda v: 0 if v < 24 else v))
+        cell = Image.new("RGBA", (CW, CH), (0, 0, 0, 0))
+        cell.paste(small, (round(PIVOT[0] - cx * scale), round(PIVOT[1] - gy * scale)), small)
+        cells.append(cell)
+    print(f"set v2: {len(cells)} frames, escala {scale:.3f}")
+    return cells
 
 
 if __name__ == "__main__":
