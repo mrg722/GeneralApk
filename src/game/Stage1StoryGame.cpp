@@ -1,286 +1,329 @@
-#include "game/Stage1StoryGame.h"
-#include "core/InputMap.h"
-#include "rendering/AssetManager.h"
-#include "rendering/Backdrop.h"
-#include "rendering/SpriteManifest.h"
-#include "rendering/BossSprite.h"
-#include "audio/AudioSystem.h"
-#include "ui/MainMenu.h"
-#include "ui/GameHUD.h"
-#include "game/stage/ArenaDirector.h"
-#include "game/CharacterVisual.h"
-#include "raylib.h"
-#include "core/Platform.h"
-#include <sstream>
-#include <algorithm>
-#include <cmath>
-#include <fstream>
+// Stage 1 (La ruta de las cadenas): ciclo de vida, flujo de pantallas, dificultad, guardado y puntuacion.
+#include "game/stage1/Stage1Common.h"
 
 namespace district_fury {
-namespace {
-constexpr float kStageEnd=6000.0f,kLaneMin=505.0f,kLaneMax=625.0f,kPi=3.14159265359f;
-struct Spawn{float x;float y;StreetEnemyType type;};
-const Spawn kScenarioWaves[4][5]={
- {{620,570,StreetEnemyType::Punk},{790,535,StreetEnemyType::Punk},{960,610,StreetEnemyType::Charger},{1120,545,StreetEnemyType::Punk},{0,0,StreetEnemyType::Punk}},
- {{1620,570,StreetEnemyType::Punk},{1770,525,StreetEnemyType::Charger},{1930,610,StreetEnemyType::Punk},{2090,545,StreetEnemyType::Brute},{2240,585,StreetEnemyType::Charger}},
- {{3020,575,StreetEnemyType::Charger},{3180,525,StreetEnemyType::Brute},{3350,610,StreetEnemyType::Punk},{3520,545,StreetEnemyType::Enforcer},{3670,590,StreetEnemyType::Charger}},
- {{4420,575,StreetEnemyType::Enforcer},{4580,525,StreetEnemyType::Charger},{4740,610,StreetEnemyType::Brute},{4900,545,StreetEnemyType::Enforcer},{5060,590,StreetEnemyType::Punk}}
-};
-Color A(Color c,float a){c.a=(unsigned char)(std::clamp(a,0.f,1.f)*255);return c;}
-const char* RankName(int r){static const char* n[]={"D","C","B","A","S","SS","SSS","SSS"};return n[std::clamp(r,0,7)];}
+
+Stage1StoryGame::Stage1StoryGame() = default;
+
+void Stage1StoryGame::Init() {
+    LoadSave();
+    ResetRun();
+    flow = StoryFlow::Menu;
 }
-Stage1StoryGame::Stage1StoryGame()=default;
-void Stage1StoryGame::Init(){LoadSave();ResetRun();flow=StoryFlow::Menu;}
-void Stage1StoryGame::ResetRun(){player.Reset();player.position={180,585,0};enemies.clear();projectiles.clear();particles.clear();combatWorld.Reset();scenario=1;wave=0;combo=0;maxCombo=0;defeated=0;damageTaken=0;score=0;stageTime=0;comboTimer=0;hitstop.Reset();shake=0;bannerTimer=0;transitionTimer=0;storyTimer=0;arenaLocked=false;scenarioBossSpawned=false;finalBossSpawned=false;stageComplete=false;cameraX=640;camera=StageCamera{};camera.maxX=kStageEnd-640.f;boss=StoryBoss{};boss.position={5500,575,0};storyMessage="Rayden entra al Barrio Bajo. La banda de Brakk controla la ruta hacia el astillero.";BuildScenario(1);}
-int Stage1StoryGame::ScenarioStartX()const{return scenario==1?180:scenario==2?1500:scenario==3?2900:4300;}
-int Stage1StoryGame::ScenarioEndX()const{return scenario==1?1450:scenario==2?2850:scenario==3?4250:5900;}
-const char* Stage1StoryGame::ScenarioName()const{switch(scenario){case 1:return "BARRIO BAJO // BLOQUE 17";case 2:return "MERCADO ANTIGUO // LINEA DEL CANAL";case 3:return "PUERTA DE ACERO // RUTA DE CARGA";default:return "ASTILLERO DE CADENAS // TERRITORIO DE BRAKK";}}
-const char* Stage1StoryGame::ScenarioObjective()const{switch(scenario){case 1:return "Rompe el bloqueo de la calle.";case 2:return "Atraviesa la ruta del mercado.";case 3:return "Toma la puerta de carga.";default:return "Llega al astillero de Brakk.";}}
-const char* Stage1StoryGame::DifficultyText()const{return difficulty==StoryDifficulty::Easy?"FACIL":difficulty==StoryDifficulty::Hard?"DIFICIL":"NORMAL";}
-void Stage1StoryGame::ApplyDifficulty(){float hm=difficulty==StoryDifficulty::Easy?.82f:difficulty==StoryDifficulty::Hard?1.20f:1.f,dm=difficulty==StoryDifficulty::Easy?.82f:difficulty==StoryDifficulty::Hard?1.18f:1.f;for(auto&e:enemies){e.hp=std::max(1,(int)std::round(e.hp*hm));e.maxHp=e.hp;e.attackDamage=std::max(1,(int)std::round(e.attackDamage*dm));}boss.maxHp=difficulty==StoryDifficulty::Easy?650:difficulty==StoryDifficulty::Hard?1050:820;boss.hp=boss.maxHp;}
-void Stage1StoryGame::BuildScenario(int id){enemies.clear();wave=0;scenarioBossSpawned=false;arenaLocked=false;for(const auto&s:kScenarioWaves[id-1])if(s.x>0){StreetEnemy e;e.Init({s.x,s.y,0},s.type);e.active=false;enemies.push_back(e);}ApplyDifficulty();BuildWaves();}
-// DF-014: cada escenario se divide en dos oleadas con linea de activacion.
-// Oleada 1 al entrar; oleada 2 al avanzar tras limpiar la primera. Al cruzar
-// la linea la camara se bloquea; al limpiarla aparece "GO >>".
-void Stage1StoryGame::BuildWaves(){
-    arena.Reset();
-    const int n=(int)enemies.size();if(n==0)return;
-    std::vector<int> order(n);for(int i=0;i<n;++i)order[i]=i;
-    std::sort(order.begin(),order.end(),[&](int a,int b){return enemies[a].position.x<enemies[b].position.x;});
-    const int firstCount=(n+1)/2;
-    std::vector<int> w1(order.begin(),order.begin()+firstCount),w2(order.begin()+firstCount,order.end());
-    const float t1=(float)ScenarioStartX()+60.f;
-    arena.AddWave(t1,w1);
-    if(!w2.empty())arena.AddWave(std::max(enemies[w2.front()].position.x-420.f,t1+300.f),w2);
+
+void Stage1StoryGame::ResetRun() {
+    player.Reset();
+    player.position = {180, 585, 0};
+    enemies.clear();
+    projectiles.clear();
+    particles.clear();
+    combatWorld.Reset();
+    scenario = 1;
+    wave = 0;
+    combo = 0;
+    maxCombo = 0;
+    defeated = 0;
+    damageTaken = 0;
+    score = 0;
+    stageTime = 0;
+    comboTimer = 0;
+    hitstop.Reset();
+    shake = 0;
+    bannerTimer = 0;
+    transitionTimer = 0;
+    storyTimer = 0;
+    arenaLocked = false;
+    scenarioBossSpawned = false;
+    finalBossSpawned = false;
+    stageComplete = false;
+    cameraX = 640;
+    camera = StageCamera{};
+    camera.maxX = kStageEnd - 640.f;
+    boss = StoryBoss{};
+    boss.position = {5500, 575, 0};
+    storyMessage = "Rayden entra al Barrio Bajo. La banda de Brakk controla la ruta hacia el astillero.";
+    BuildScenario(1);
 }
-void Stage1StoryGame::SpawnWave(int id){
-    wave=id+1;bannerTimer=1.2f;
-    float farX=player.position.x;
-    for(int idx:arena.Waves()[(size_t)id].enemyIndices){enemies[(size_t)idx].active=true;farX=std::max(farX,enemies[(size_t)idx].position.x);}
-    LockArenaBetween(player.position.x,farX);
-    AudioSystem::Get().Play(Sfx::Ui);
+
+int Stage1StoryGame::ScenarioStartX() const {
+    return scenario == 1 ? 180 : scenario == 2 ? 1500 : scenario == 3 ? 2900 : 4300;
 }
-void Stage1StoryGame::UpdateArena(float dt){
-    const int fired=arena.CheckTrigger(player.position.x);
-    if(fired>=0)SpawnWave(fired);
-    bool cleared=true;
-    if(arena.ActiveWave()>=0)for(int idx:arena.Waves()[(size_t)arena.ActiveWave()].enemyIndices)if(!enemies[(size_t)idx].IsDefeated())cleared=false;
-    // Guardian del escenario al final del tramo, con todas las oleadas limpias
-    // (se evalua antes de desbloquear para que haya al menos un frame libre).
-    if(!scenarioBossSpawned&&!arena.Locked()&&arena.AllWavesCleared()&&player.position.x>=(float)ScenarioEndX()-450.f){SpawnScenarioBoss();arena.ClearGo();LockArenaBetween(player.position.x,(float)ScenarioEndX()-170.f);}
-    const bool wasLocked=arena.Locked()&&!scenarioBossSpawned;
-    arena.Update(dt,cleared);
-    if(wasLocked&&!arena.Locked())AudioSystem::Get().Play(Sfx::Ui);
+
+int Stage1StoryGame::ScenarioEndX() const {
+    return scenario == 1 ? 1450 : scenario == 2 ? 2850 : scenario == 3 ? 4250 : 5900;
 }
-// Centra el bloqueo entre el jugador y el enemigo mas lejano para que la
-// oleada completa quede en pantalla (la camara se desliza hasta ahi).
-void Stage1StoryGame::LockArenaBetween(float playerX,float farX){
-    float lockX=(playerX+farX)*0.5f;
-    lockX=std::max(lockX,playerX-560.f);lockX=std::min(lockX,playerX+560.f);
-    arena.Lock(std::clamp(lockX,camera.minX,camera.maxX));
+
+const char* Stage1StoryGame::ScenarioName() const {
+    switch (scenario) {
+    case 1:
+        return "BARRIO BAJO // BLOQUE 17";
+    case 2:
+        return "MERCADO ANTIGUO // LINEA DEL CANAL";
+    case 3:
+        return "PUERTA DE ACERO // RUTA DE CARGA";
+    default:
+        return "ASTILLERO DE CADENAS // TERRITORIO DE BRAKK";
+    }
 }
-// Limita al jugador y enemigos al tramo del escenario y, con la camara
-// bloqueada, a lo que se ve en pantalla.
-void Stage1StoryGame::ClampToArena(){
-    float left=(float)ScenarioStartX(),right=arenaLocked?(float)ScenarioEndX()-170.f:(float)ScenarioEndX();
-    if(arena.Locked()){left=std::max(left,arena.LockX()-600.f);right=std::min(right,arena.LockX()+580.f);}
-    player.position.x=std::clamp(player.position.x,left,right);player.position.y=std::clamp(player.position.y,kLaneMin,kLaneMax);
-    const float eLeft=(float)ScenarioStartX(),eRight=(float)ScenarioEndX();
-    for(auto&e:enemies){e.position.x=std::clamp(e.position.x,eLeft,eRight);e.position.y=std::clamp(e.position.y,kLaneMin,kLaneMax);}
+
+const char* Stage1StoryGame::ScenarioObjective() const {
+    switch (scenario) {
+    case 1:
+        return "Rompe el bloqueo de la calle.";
+    case 2:
+        return "Atraviesa la ruta del mercado.";
+    case 3:
+        return "Toma la puerta de carga.";
+    default:
+        return "Llega al astillero de Brakk.";
+    }
 }
-void Stage1StoryGame::SpawnScenarioBoss(){scenarioBossSpawned=true;arenaLocked=true;flow=StoryFlow::SubBossIntro;bannerTimer=2.f;enemies.clear();StreetEnemy e;StreetEnemyType t=scenario==1?StreetEnemyType::Brute:scenario==2?StreetEnemyType::Enforcer:StreetEnemyType::ArmoredGuard;e.Init({(float)ScenarioEndX()-170,575,0},t);e.active=true;int bonus=scenario==1?150:scenario==2?260:380;e.hp+=bonus;e.maxHp=e.hp;e.attackDamage+=scenario*4;enemies.push_back(e);storyMessage=scenario==1?"Teniente del Bloque 17: el guardian no piensa retroceder.":scenario==2?"Ejecutor del mercado: el cruce del canal esta cerrado.":"Guardia de la puerta: protege el suministro de Brakk.";}
-void Stage1StoryGame::AdvanceScenario(){if(scenario>=4){EnterFinalBoss();return;}++scenario;wave=0;scenarioBossSpawned=false;arenaLocked=false;transitionTimer=2.2f;storyTimer=2.2f;flow=StoryFlow::ScenarioClear;if(scenario==2)storyMessage="Los simbolos de cadena conducen al viejo mercado.";if(scenario==3)storyMessage="La ruta de carga es la ultima defensa antes del territorio de Brakk.";if(scenario==4)storyMessage="Las cadenas convergen. Brakk espera al final del astillero.";}
-bool Stage1StoryGame::ScenarioWaveCleared()const{return !enemies.empty()&&std::all_of(enemies.begin(),enemies.end(),[](const StreetEnemy&e){return e.IsDefeated();});}
-bool Stage1StoryGame::AllCurrentEnemiesDefeated()const{return ScenarioWaveCleared();}
-void Stage1StoryGame::SpawnImpact(Vector3D p,Color c,bool heavy){int n=heavy?28:14;for(int i=0;i<n;++i){float a=(float)i/n*2*kPi,s=(float)GetRandomValue(70,heavy?340:220);particles.push_back({p,{std::cos(a)*s,std::sin(a)*s},heavy?.46f:.26f,heavy?.46f:.26f,(float)GetRandomValue(3,heavy?9:6),c});}}
-void Stage1StoryGame::SpawnEnergyProjectile(){float d=player.facing==Facing::Right?1.f:-1.f;projectiles.push_back({{player.position.x+d*78,player.position.y-74,0},d*760,.9f,20,player.isRageMode?32:23,true,false});SpawnImpact({player.position.x+d*45,player.position.y-74,0},{50,215,255,255},true);}
-void Stage1StoryGame::SpawnBossPower(){float d=player.position.x>=boss.position.x?-1.f:1.f;int dmg=boss.phase==3?32:boss.phase==2?27:22;projectiles.push_back({{boss.position.x+d*85,boss.position.y-72,0},d*650,1.5f,24,dmg,true,true});SpawnImpact({boss.position.x+d*55,boss.position.y-72,0},{255,80,55,255},true);}
-void Stage1StoryGame::UpdateProjectiles(float dt){for(auto&p:projectiles){if(!p.active)continue;p.position.x+=p.velocity*dt;p.life-=dt;if(p.life<=0){p.active=false;continue;}CombatBox b{p.position.x-p.radius,p.position.y-p.radius,p.radius*2,p.radius*2};if(p.fromBoss){if(b.Intersects(player.GetHurtbox())&&!player.IsBlocking()&&player.state!=PlayerState::Defeat&&player.dashInvulnerability<=0){int before=player.hp;player.TakeDamage(p.damage);damageTaken+=before-player.hp;p.active=false;combo=0;comboTimer=0;SpawnImpact(player.position,{255,70,50,255},true);hitstop.Trigger(.10f);shake=.18f;}}else{for(auto&e:enemies)if(e.active&&!e.IsDefeated()&&b.Intersects(e.GetHurtbox())){int damage=p.damage;bool dead=e.hp<=damage;e.TakeDamage(damage,{p.velocity>0?420.f:-420.f,0,0});if(dead)++defeated;p.active=false;++combo;comboTimer=1;maxCombo=std::max(maxCombo,combo);score+=150+combo*8;SpawnImpact(p.position,{40,215,255,255},true);hitstop.Trigger(.10f);shake=.13f;break;}if(flow==StoryFlow::Boss&&!boss.defeated&&p.active){CombatBox bb{boss.position.x-70,boss.position.y-140,140,140};if(b.Intersects(bb)&&boss.invulnerability<=0){int damage=p.damage;if(boss.blocking)damage=std::max(1,damage/5);boss.hp=std::max(0,boss.hp-damage);boss.invulnerability=.12f;p.active=false;++combo;comboTimer=1;maxCombo=std::max(maxCombo,combo);score+=260+combo*12;SpawnImpact(p.position,boss.blocking?Color{120,180,220,255}:Color{255,175,55,255},true);hitstop.Trigger(.12f);shake=.16f;}}}}projectiles.erase(std::remove_if(projectiles.begin(),projectiles.end(),[](const StoryProjectile&p){return !p.active;}),projectiles.end());}
-void Stage1StoryGame::HandlePlayerHits(){if(!player.AttackIsActive()||player.hasHit||player.attackType==AttackType::Energy)return;CombatBox hit=player.GetAttackHitbox();for(auto&e:enemies)if(e.active&&!e.IsDefeated()&&hit.Intersects(e.GetHurtbox())){int dmg=player.GetAttackDamage()+(player.isRageMode?5:0);bool dead=e.hp<=dmg;float d=player.facing==Facing::Right?1.f:-1.f;e.TakeDamage(dmg,{d*player.GetAttackKnockback(),0,player.CurrentAttackDef().launch});if(dead)++defeated;player.hasHit=true;++combo;comboTimer=1;maxCombo=std::max(maxCombo,combo);score+=dmg*10+combo*7;bool heavy=player.attackType==AttackType::Kick||player.comboStep>=2;SpawnImpact({e.position.x,e.position.y-68},heavy?Color{255,150,45,255}:Color{255,235,150,255},heavy);hitstop.Trigger(heavy?std::max(.08f,player.CurrentAttackDef().hitstop):HitstopClock::kDefault);shake=heavy?.14f:.07f;break;}}
-void Stage1StoryGame::HandleEnemyHits(){if(player.state==PlayerState::Defeat)return;for(auto&e:enemies)if(e.active&&!e.IsDefeated()&&e.AttackIsActive()&&!e.hasHit&&e.GetAttackHitbox().Intersects(player.GetHurtbox())){int before=player.hp;player.TakeDamage(e.attackDamage);if(before!=player.hp){damageTaken+=before-player.hp;combo=0;comboTimer=0;SpawnImpact(player.position,player.IsBlocking()?Color{80,190,255,255}:Color{255,80,70,255},false);hitstop.Trigger(.06f);shake=.08f;}e.hasHit=true;break;}}
-void Stage1StoryGame::HandleBossHits(){if(flow!=StoryFlow::Boss||boss.defeated||boss.invulnerability>0||!player.AttackIsActive()||player.hasHit||player.attackType==AttackType::Energy)return;CombatBox hit=player.GetAttackHitbox(),target{boss.position.x-78,boss.position.y-145,156,145};if(!hit.Intersects(target))return;int dmg=player.GetAttackDamage()+(player.isRageMode?8:0);if(boss.blocking){dmg=std::max(1,dmg/5);SpawnImpact({boss.position.x,boss.position.y-95},{110,180,220,255},true);}else SpawnImpact({boss.position.x,boss.position.y-95},{255,175,55,255},true);boss.hp=std::max(0,boss.hp-dmg);boss.invulnerability=.10f;player.hasHit=true;++combo;comboTimer=1;maxCombo=std::max(maxCombo,combo);score+=240+combo*12;hitstop.Trigger(.11f);shake=.18f;if(boss.hp<=0)DefeatFinalBoss();}
-void Stage1StoryGame::UpdateCombat(float dt){if(comboTimer>0)comboTimer-=dt;else combo=0;player.Update(dt);if(player.state==PlayerState::Attack&&player.attackType==AttackType::Energy&&player.energyReleased){SpawnEnergyProjectile();player.energyReleased=false;}UpdateArena(dt);for(auto&e:enemies)if(e.active)e.Update(dt,player,&combatWorld);for(size_t i=0;i<enemies.size();++i)if(enemies[i].active&&!enemies[i].IsDefeated())for(size_t j=i+1;j<enemies.size();++j)if(enemies[j].active&&!enemies[j].IsDefeated()){float dx=enemies[j].position.x-enemies[i].position.x,dy=enemies[j].position.y-enemies[i].position.y,dist=std::sqrt(dx*dx+dy*dy);if(dist<76.f){float nx=dist>.01f?dx/dist:1.f,ny=dist>.01f?dy/dist:0.f,push=(76.f-dist)*.5f;enemies[i].position.x-=nx*push;enemies[j].position.x+=nx*push;enemies[i].position.y-=ny*push;enemies[j].position.y+=ny*push;}}HandlePlayerHits();UpdateProjectiles(dt);HandleEnemyHits();combatWorld.Update(dt);combatWorld.ResolveHazards(player,enemies);ClampToArena();if(scenarioBossSpawned&&AllCurrentEnemiesDefeated()){AdvanceScenario();return;}if(player.state==PlayerState::Defeat)flow=StoryFlow::GameOver;}
-// DF-014 balance: vida de Brakk 1000/1200/1450 -> 650/820/1050. La pelea nunca
-// habia sido jugable (el jugador no se actualizaba) y con los valores
-// originales duraba ~100 s de golpes continuos en Normal. Medido con
-// tests/Stage1PlaythroughTest.cpp.
-void Stage1StoryGame::EnterFinalBoss(){finalBossSpawned=true;arenaLocked=true;flow=StoryFlow::BossIntro;bannerTimer=2.8f;boss=StoryBoss{};bossAnimMode=-1;boss.position={5480,575,0};boss.maxHp=difficulty==StoryDifficulty::Easy?650:difficulty==StoryDifficulty::Hard?1050:820;boss.hp=boss.maxHp;boss.phase=1;boss.attackTimer=1.1f;boss.powerTimer=2.0f;boss.blockTimer=.8f;storyMessage="BRAKK // LA CADENA: el ejecutor de la banda entra al astillero.";}
-void Stage1StoryGame::UpdateBoss(float dt){if(boss.invulnerability>0)boss.invulnerability-=dt;if(boss.blockTimer>0)boss.blockTimer-=dt;if(boss.powerTimer>0)boss.powerTimer-=dt;if(flow==StoryFlow::BossIntro){bannerTimer-=dt;player.position.x=std::min(player.position.x,boss.position.x-270);if(bannerTimer<=0)flow=StoryFlow::Boss;return;}if(boss.defeated)return;float ratio=(float)boss.hp/boss.maxHp;int phase=ratio<=.34f?3:ratio<=.68f?2:1;if(phase!=boss.phase){boss.phase=phase;boss.attack=StoryBossAttack::Frenzy;boss.attackElapsed=0;boss.blockTimer=.65f;boss.blocking=true;boss.powerTimer=.4f;SpawnImpact(boss.position,{255,70,45,255},true);shake=.25f;}bool threat=player.AttackIsActive()||player.attackType==AttackType::Energy;if(boss.blockTimer<=0&&boss.attack==StoryBossAttack::None){int gc=boss.phase==1?24:boss.phase==2?34:46;if(threat&&GetRandomValue(0,99)<gc){boss.blockTimer=boss.phase==3?.72f:.58f;boss.blocking=true;}else boss.blocking=false;}if(boss.blocking){boss.attackElapsed=0;boss.position.x+=std::clamp(player.position.x-boss.position.x,-45.f,45.f)*dt;if(boss.blockTimer<=0){boss.blocking=false;boss.attackTimer=.15f;}HandleBossHits();return;}boss.attackTimer-=dt;boss.attackElapsed+=dt;float dx=player.position.x-boss.position.x,dy=player.position.y-boss.position.y,ax=std::abs(dx);if(boss.attack==StoryBossAttack::None&&boss.attackTimer<=0){int pick=GetRandomValue(0,boss.phase==1?3:5);boss.attack=pick==0?StoryBossAttack::ChainSwing:pick==1?StoryBossAttack::GroundSmash:pick==2?StoryBossAttack::Charge:pick==3?StoryBossAttack::PowerWave:StoryBossAttack::Frenzy;boss.attackElapsed=0;boss.attackTimer=boss.phase==3?1.05f:boss.phase==2?1.35f:1.7f;}if(boss.attack==StoryBossAttack::None&&ax>190)boss.position.x+=(dx>0?1:-1)*(boss.phase==3?130.f:boss.phase==2?100.f:78.f)*dt;if(boss.attack==StoryBossAttack::None&&std::abs(dy)>30)boss.position.y+=(dy>0?1:-1)*65.f*dt;float tele=boss.attack==StoryBossAttack::Charge?.42f:boss.attack==StoryBossAttack::GroundSmash?.55f:boss.attack==StoryBossAttack::PowerWave?.48f:.30f;bool active=false;CombatBox hit{};if(boss.attack!=StoryBossAttack::None&&boss.attackElapsed>=tele){if(boss.attack==StoryBossAttack::ChainSwing){hit={boss.position.x-155,boss.position.y-115,310,110};active=boss.attackElapsed<=tele+.22f;}else if(boss.attack==StoryBossAttack::GroundSmash){hit={boss.position.x-290,boss.position.y-88,580,110};active=boss.attackElapsed<=tele+.20f;}else if(boss.attack==StoryBossAttack::Charge){boss.position.x+=(dx>0?1:-1)*560.f*dt;hit={boss.position.x-100,boss.position.y-110,200,120};active=boss.attackElapsed<=tele+.40f;}else if(boss.attack==StoryBossAttack::PowerWave){if(boss.attackElapsed<tele+.05f)SpawnBossPower();}else{hit={boss.position.x-190,boss.position.y-135,380,145};active=boss.attackElapsed<=tele+.30f;}if(active&&hit.Intersects(player.GetHurtbox())&&player.state!=PlayerState::Hit){int dmg=boss.phase==3?34:boss.phase==2?27:22;int before=player.hp;player.TakeDamage(dmg);damageTaken+=before-player.hp;combo=0;comboTimer=0;SpawnImpact(player.position,{255,70,50,255},true);hitstop.Trigger(.10f);shake=.20f;}}if(boss.attack!=StoryBossAttack::None&&boss.attackElapsed>(boss.attack==StoryBossAttack::Charge?.92f:boss.attack==StoryBossAttack::PowerWave?1.0f:.86f)){boss.attack=StoryBossAttack::None;boss.attackElapsed=0;}boss.position.x=std::clamp(boss.position.x,5050.f,5850.f);boss.position.y=std::clamp(boss.position.y,kLaneMin,kLaneMax);HandleBossHits();if(boss.hp<=0)DefeatFinalBoss();}
-void Stage1StoryGame::DefeatFinalBoss(){if(boss.defeated)return;boss.defeated=true;boss.blocking=false;boss.attack=StoryBossAttack::None;score+=6000;xp+=650;coins+=1200;gems+=8;level=1+xp/1000;stageComplete=true;stageTime=std::max(stageTime,.1f);bestScore=std::max(bestScore,CalculateScore());bestRank=std::max(bestRank,CalculateRank());SaveProgress();SpawnImpact(boss.position,{255,155,45,255},true);shake=.5f;flow=StoryFlow::StageClear;arenaLocked=false;}
-void Stage1StoryGame::UpdateParticles(float dt){for(auto&p:particles){p.life-=dt;p.position.x+=p.velocity.x*dt;p.position.y+=p.velocity.y*dt;p.velocity.x*=.92f;p.velocity.y*=.92f;}particles.erase(std::remove_if(particles.begin(),particles.end(),[](const StoryParticle&p){return p.life<=0;}),particles.end());}
-int Stage1StoryGame::CalculateRank()const{float v=std::max(0.f,360.f-stageTime)*.32f+maxCombo*11.f+player.hp*1.7f-damageTaken*1.7f+(scenario==4&&stageComplete?100.f:0.f);if(v>=520)return 7;if(v>=430)return 6;if(v>=350)return 5;if(v>=275)return 4;if(v>=210)return 3;if(v>=145)return 2;if(v>=80)return 1;return 0;}
-int Stage1StoryGame::CalculateScore()const{return score+player.hp*5+maxCombo*110;}
-const char* Stage1StoryGame::RankText()const{return RankName(CalculateRank());}
-void Stage1StoryGame::LoadSave(){std::string text;if(!platform::LoadTextFile(savePath,text))return;std::istringstream in(text);in>>xp>>coins>>gems>>level>>bestScore>>bestRank;int d=1;in>>d;difficulty=d==0?StoryDifficulty::Easy:d==2?StoryDifficulty::Hard:StoryDifficulty::Normal;saveLoaded=true;}
-void Stage1StoryGame::SaveProgress(){std::ostringstream out;out<<xp<<' '<<coins<<' '<<gems<<' '<<level<<' '<<bestScore<<' '<<bestRank<<' '<<(difficulty==StoryDifficulty::Easy?0:difficulty==StoryDifficulty::Hard?2:1)<<'\n';platform::SaveTextFile(savePath,out.str());}
-void Stage1StoryGame::Update(float dt){dt=std::min(dt,.033f);
-    if(flow==StoryFlow::Menu){
+
+const char* Stage1StoryGame::DifficultyText() const {
+    return difficulty == StoryDifficulty::Easy   ? "FACIL"
+           : difficulty == StoryDifficulty::Hard ? "DIFICIL"
+                                                 : "NORMAL";
+}
+
+void Stage1StoryGame::ApplyDifficulty() {
+    float hm = difficulty == StoryDifficulty::Easy   ? .82f
+               : difficulty == StoryDifficulty::Hard ? 1.20f
+                                                     : 1.f,
+          dm = difficulty == StoryDifficulty::Easy   ? .82f
+               : difficulty == StoryDifficulty::Hard ? 1.18f
+                                                     : 1.f;
+    for (auto& e : enemies) {
+        e.hp = std::max(1, (int)std::round(e.hp * hm));
+        e.maxHp = e.hp;
+        e.attackDamage = std::max(1, (int)std::round(e.attackDamage * dm));
+    }
+    boss.maxHp = difficulty == StoryDifficulty::Easy ? 650 : difficulty == StoryDifficulty::Hard ? 1050 : 820;
+    boss.hp = boss.maxHp;
+}
+
+void Stage1StoryGame::BuildScenario(int id) {
+    enemies.clear();
+    wave = 0;
+    scenarioBossSpawned = false;
+    arenaLocked = false;
+    for (const auto& s : kScenarioWaves[id - 1])
+        if (s.x > 0) {
+            StreetEnemy e;
+            e.Init({s.x, s.y, 0}, s.type);
+            e.active = false;
+            enemies.push_back(e);
+        }
+    ApplyDifficulty();
+    BuildWaves();
+}
+
+int Stage1StoryGame::CalculateRank() const {
+    float v = std::max(0.f, 360.f - stageTime) * .32f + maxCombo * 11.f + player.hp * 1.7f -
+              damageTaken * 1.7f + (scenario == 4 && stageComplete ? 100.f : 0.f);
+    if (v >= 520) return 7;
+    if (v >= 430) return 6;
+    if (v >= 350) return 5;
+    if (v >= 275) return 4;
+    if (v >= 210) return 3;
+    if (v >= 145) return 2;
+    if (v >= 80) return 1;
+    return 0;
+}
+
+int Stage1StoryGame::CalculateScore() const {
+    return score + player.hp * 5 + maxCombo * 110;
+}
+
+const char* Stage1StoryGame::RankText() const {
+    return RankName(CalculateRank());
+}
+
+void Stage1StoryGame::LoadSave() {
+    std::string text;
+    if (!platform::LoadTextFile(savePath, text)) return;
+    std::istringstream in(text);
+    in >> xp >> coins >> gems >> level >> bestScore >> bestRank;
+    int d = 1;
+    in >> d;
+    difficulty = d == 0 ? StoryDifficulty::Easy : d == 2 ? StoryDifficulty::Hard : StoryDifficulty::Normal;
+    saveLoaded = true;
+}
+
+void Stage1StoryGame::SaveProgress() {
+    std::ostringstream out;
+    out << xp << ' ' << coins << ' ' << gems << ' ' << level << ' ' << bestScore << ' ' << bestRank << ' '
+        << (difficulty == StoryDifficulty::Easy   ? 0
+            : difficulty == StoryDifficulty::Hard ? 2
+                                                  : 1)
+        << '\n';
+    platform::SaveTextFile(savePath, out.str());
+}
+
+void Stage1StoryGame::Update(float dt) {
+    dt = std::min(dt, .033f);
+    if (flow == StoryFlow::Menu) {
         // DF-013: navegacion real de 7 items (ui/MainMenu.h dibuja el
         // selector). Se conservan los atajos directos (V, C) para no romper
         // habitos de quien ya jugaba la version anterior.
-        constexpr int kMenuItemCount=7;
-        auto CycleDifficulty=[&](int dir){
-            const int order[3]={0,1,2};(void)order;
-            if(dir>0) difficulty=difficulty==StoryDifficulty::Easy?StoryDifficulty::Normal:difficulty==StoryDifficulty::Normal?StoryDifficulty::Hard:StoryDifficulty::Easy;
-            else difficulty=difficulty==StoryDifficulty::Hard?StoryDifficulty::Normal:difficulty==StoryDifficulty::Normal?StoryDifficulty::Easy:StoryDifficulty::Hard;
+        constexpr int kMenuItemCount = 7;
+        auto CycleDifficulty = [&](int dir) {
+            const int order[3] = {0, 1, 2};
+            (void)order;
+            if (dir > 0)
+                difficulty = difficulty == StoryDifficulty::Easy     ? StoryDifficulty::Normal
+                             : difficulty == StoryDifficulty::Normal ? StoryDifficulty::Hard
+                                                                     : StoryDifficulty::Easy;
+            else
+                difficulty = difficulty == StoryDifficulty::Hard     ? StoryDifficulty::Normal
+                             : difficulty == StoryDifficulty::Normal ? StoryDifficulty::Easy
+                                                                     : StoryDifficulty::Hard;
             SaveProgress();
         };
-        if(input::Pressed(KEY_UP)||input::Pressed(KEY_W)) menuCursor=(menuCursor+kMenuItemCount-1)%kMenuItemCount;
-        if(input::Pressed(KEY_DOWN)||input::Pressed(KEY_S)) menuCursor=(menuCursor+1)%kMenuItemCount;
-        if(menuCursor==2&&(input::Pressed(KEY_LEFT)||input::Pressed(KEY_RIGHT))) CycleDifficulty(input::Pressed(KEY_RIGHT)?1:-1);
-        if(input::Pressed(KEY_V)){vsRequested=true;return;}
-        if(input::Pressed(KEY_C)){flow=StoryFlow::Controls;return;}
-        if(input::Pressed(KEY_ENTER)||input::Pressed(KEY_J)){
-            switch(menuCursor){
-                case 0: ResetRun();newGameStarted=true;flow=StoryFlow::CharacterSelect;break;
-                case 1: vsRequested=true;break;
-                case 2: CycleDifficulty(1);break;
-                case 3: flow=StoryFlow::Controls;break;
-                case 4: flow=StoryFlow::Options;break;
-                case 5: flow=StoryFlow::Credits;break;
-                case 6: exitRequested=true;break;
-                default: break;
+        if (input::Pressed(KEY_UP) || input::Pressed(KEY_W))
+            menuCursor = (menuCursor + kMenuItemCount - 1) % kMenuItemCount;
+        if (input::Pressed(KEY_DOWN) || input::Pressed(KEY_S)) menuCursor = (menuCursor + 1) % kMenuItemCount;
+        if (menuCursor == 2 && (input::Pressed(KEY_LEFT) || input::Pressed(KEY_RIGHT)))
+            CycleDifficulty(input::Pressed(KEY_RIGHT) ? 1 : -1);
+        if (input::Pressed(KEY_V)) {
+            vsRequested = true;
+            return;
+        }
+        if (input::Pressed(KEY_C)) {
+            flow = StoryFlow::Controls;
+            return;
+        }
+        if (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J)) {
+            switch (menuCursor) {
+            case 0:
+                ResetRun();
+                newGameStarted = true;
+                flow = StoryFlow::CharacterSelect;
+                break;
+            case 1:
+                vsRequested = true;
+                break;
+            case 2:
+                CycleDifficulty(1);
+                break;
+            case 3:
+                flow = StoryFlow::Controls;
+                break;
+            case 4:
+                flow = StoryFlow::Options;
+                break;
+            case 5:
+                flow = StoryFlow::Credits;
+                break;
+            case 6:
+                exitRequested = true;
+                break;
+            default:
+                break;
             }
         }
         return;
     }
     // DF-014: eleccion de luchador al empezar la historia (Rayden o Rayder).
-    if(flow==StoryFlow::CharacterSelect){
-        constexpr int n=(int)(sizeof(kStoryCharacters)/sizeof(kStoryCharacters[0]));
-        if(input::Pressed(KEY_LEFT)||input::Pressed(KEY_A)){characterCursor=(characterCursor+n-1)%n;AudioSystem::Get().Play(Sfx::Ui);}
-        if(input::Pressed(KEY_RIGHT)||input::Pressed(KEY_D)){characterCursor=(characterCursor+1)%n;AudioSystem::Get().Play(Sfx::Ui);}
-        if(input::Pressed(KEY_ESCAPE)){flow=StoryFlow::Menu;return;}
-        if(input::Pressed(KEY_ENTER)||input::Pressed(KEY_J)){player.ApplyCharacter(kStoryCharacters[characterCursor]);ResetRun();flow=StoryFlow::Intro;bannerTimer=2.4f;}
+    if (flow == StoryFlow::CharacterSelect) {
+        constexpr int n = (int)(sizeof(kStoryCharacters) / sizeof(kStoryCharacters[0]));
+        if (input::Pressed(KEY_LEFT) || input::Pressed(KEY_A)) {
+            characterCursor = (characterCursor + n - 1) % n;
+            AudioSystem::Get().Play(Sfx::Ui);
+        }
+        if (input::Pressed(KEY_RIGHT) || input::Pressed(KEY_D)) {
+            characterCursor = (characterCursor + 1) % n;
+            AudioSystem::Get().Play(Sfx::Ui);
+        }
+        if (input::Pressed(KEY_ESCAPE)) {
+            flow = StoryFlow::Menu;
+            return;
+        }
+        if (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J)) {
+            player.ApplyCharacter(kStoryCharacters[characterCursor]);
+            ResetRun();
+            flow = StoryFlow::Intro;
+            bannerTimer = 2.4f;
+        }
         return;
     }
-    if(flow==StoryFlow::Options){if(input::Pressed(KEY_ENTER)||input::Pressed(KEY_J))AudioSystem::Get().SetMuted(!AudioSystem::Get().IsMuted());if(input::Pressed(KEY_ESCAPE))flow=StoryFlow::Menu;return;}
-    if(flow==StoryFlow::Credits){if(input::Pressed(KEY_ESCAPE)||input::Pressed(KEY_ENTER)||input::Pressed(KEY_J))flow=StoryFlow::Menu;return;}
-    if(flow==StoryFlow::Controls){if(input::Pressed(KEY_ESCAPE)||input::Pressed(KEY_C))flow=StoryFlow::Menu;return;}if(input::Pressed(KEY_ESCAPE)){if(flow==StoryFlow::Combat||flow==StoryFlow::Boss)flow=StoryFlow::Pause;else if(flow==StoryFlow::Pause)flow=finalBossSpawned?StoryFlow::Boss:StoryFlow::Combat;}if(flow==StoryFlow::Pause)return;if(flow==StoryFlow::GameOver){if(input::Pressed(KEY_R)){ResetRun();flow=StoryFlow::Intro;}if(input::Pressed(KEY_Q))flow=StoryFlow::Menu;return;}if(flow==StoryFlow::StageClear){if(input::Pressed(KEY_ENTER)||input::Pressed(KEY_J))advanceRequested=true;else if(input::Pressed(KEY_R))flow=StoryFlow::Menu;return;}if(flow==StoryFlow::ScenarioClear){transitionTimer-=dt;if(transitionTimer<=0){BuildScenario(scenario);player.position.x=ScenarioStartX()+90;camera.x=std::clamp(player.position.x,camera.minX,camera.maxX);cameraX=camera.x;flow=StoryFlow::Combat;bannerTimer=2.f;}return;}player.PumpInput(dt);if(hitstop.Consume(dt))return;shake=std::max(0.f,shake-dt);bannerTimer=std::max(0.f,bannerTimer-dt);UpdateParticles(dt);if(flow==StoryFlow::Intro){bannerTimer-=dt;if(bannerTimer<=0){flow=StoryFlow::Combat;}return;}if(flow==StoryFlow::SubBossIntro){bannerTimer-=dt;if(bannerTimer<=0)flow=StoryFlow::Combat;UpdateCombat(dt);return;}if(flow==StoryFlow::Combat){stageTime+=dt;UpdateCombat(dt);}if(flow==StoryFlow::BossIntro||flow==StoryFlow::Boss){stageTime+=dt;UpdateBossFight(dt);if(flow==StoryFlow::Boss&&player.state==PlayerState::Defeat)flow=StoryFlow::GameOver;}camera.Follow(player.position.x,dt,arena.Locked(),arena.LockX());cameraX=camera.x;}
-// DF-014: antes el jugador no se actualizaba durante la pelea con Brakk
-// (solo UpdateBoss), por lo que no podia moverse ni atacar y el nivel no
-// se podia terminar.
-void Stage1StoryGame::UpdateBossFight(float dt){
-    // Animacion del cuerpo de Brakk: 0 reposo, 1 caminar, 2 ataque, 3 golpe, 4 derrota.
-    if(StreetEnemy::PrepareAtlasAnimator(bossAnim,StreetEnemyType::Brute)){
-        const int mode=boss.defeated?4:boss.invulnerability>0.08f?3:boss.attack!=StoryBossAttack::None?2:std::abs(player.position.x-boss.position.x)>190.f?1:0;
-        if(mode!=bossAnimMode){bossAnimMode=mode;
-            if(mode==0)bossAnim.Play({0,3,.13f,true});else if(mode==1)bossAnim.Play({0,3,.09f,true});
-            else if(mode==2)bossAnim.Play({4,7,.10f,false});else if(mode==3)bossAnim.Play({8,9,.09f,false});else bossAnim.Play({10,11,.16f,false});}
-        bossAnim.Update(dt);
+    if (flow == StoryFlow::Options) {
+        if (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J))
+            AudioSystem::Get().SetMuted(!AudioSystem::Get().IsMuted());
+        if (input::Pressed(KEY_ESCAPE)) flow = StoryFlow::Menu;
+        return;
     }
-if(comboTimer>0)comboTimer-=dt;else combo=0;if(flow==StoryFlow::Boss){player.Update(dt);if(player.state==PlayerState::Attack&&player.attackType==AttackType::Energy&&player.energyReleased){SpawnEnergyProjectile();player.energyReleased=false;}UpdateProjectiles(dt);}UpdateBoss(dt);player.position.x=std::clamp(player.position.x,4960.f,5900.f);player.position.y=std::clamp(player.position.y,kLaneMin,kLaneMax);}
-// STAGE 1 — ARTE (19-09 bloqueado; 30-09 el usuario pidio usar sus fondos por
-// escenario: ver DrawScenarioArt y tools/build_backgrounds.py). Lo de abajo es
-// la nota historica.
-//
-// El Stage 1 conserva EXACTAMENTE el fondo con el que ya estaba: el arte
-// procedural por escenario mas la textura "bg_industrial"
-// (assets/backgrounds/old_steel_yard_clean.png, 1280x720).
-//
-// NO conectar aqui los fondos stage1_scenarioNN.png ni ningun pack nuevo.
-// Aunque lleguen fondos nuevos para los demas stages, este no se toca.
-// Cualquier cambio de arte en Stage 1 debe pedirlo el usuario de forma
-// explicita.
-void Stage1StoryGame::DrawScenarioArt()const{int s=scenario;
-    // DF-014 (pedido del usuario, 30-09): cada escenario usa su fondo pintado a
-    // opacidad completa (el 1 es la calle de Barrio Bajo entregada por el
-    // usuario, en HD). Se panea segun el avance dentro del escenario.
-    {const Texture2D bgS=AssetManager::Get().GetTexture(TextFormat("bg_s1_%d",std::clamp(s,1,4)));
-     if(bgS.id){const float span=std::max(1.f,(float)(ScenarioEndX()-ScenarioStartX())-460.f);DrawPannedBackdrop(bgS,cameraX,(cameraX-(float)ScenarioStartX()-460.f)/span);return;}}
-DrawRectangle((int)(cameraX-700),0,1400,720,{11,16,19,255});if(s==1){for(int x=(int)(cameraX-700);x<cameraX+700;x+=170){DrawRectangle(x,285,90,250,{25,29,32,255});DrawRectangle(x+20,330,50,8,{150,50,55,160});DrawRectangle(x+8,385,74,5,{70,80,82,180});}}else if(s==2){for(int x=(int)(cameraX-700);x<cameraX+700;x+=210){DrawRectangle(x,260,145,275,{34,31,29,255});DrawRectangle(x+12,310,38,42,{190,135,65,110});DrawRectangle(x+65,310,58,42,{65,110,120,120});DrawLine(x+145,260,x+145,520,{105,75,50,210});}DrawRectangle((int)(cameraX-700),515,1400,80,{30,55,55,170});}else if(s==3){for(int x=(int)(cameraX-700);x<cameraX+700;x+=240){DrawRectangle(x,235,20,350,{38,45,48,255});DrawRectangle(x-15,255,50,12,{110,125,130,170});DrawRectangle(x+35,285,110,9,{90,105,110,130});DrawLine(x+10,350,x+155,300,{85,95,100,150});}DrawRectangle((int)(cameraX-700),410,1400,20,{60,65,65,220});}else{for(int x=(int)(cameraX-700);x<cameraX+700;x+=190){DrawRectangle(x,210,18,370,{33,38,39,255});DrawLine(x+9,230,x+130,380,{105,105,100,190});DrawLine(x+9,285,x+155,430,{105,105,100,150});DrawCircle(x+145,390,14,{110,105,95,200});}DrawRectangle((int)(cameraX-700),285,1400,12,{120,110,90,170});}Texture2D bg=AssetManager::Get().GetTexture("bg_industrial");if(bg.id)DrawTexturePro(bg,{0,0,(float)bg.width,(float)bg.height},{cameraX-640,0,1280,720},{0,0},0,A(WHITE,s==1?.42f:s==2?.30f:s==3?.34f:.28f));}
-void Stage1StoryGame::DrawArenaLock()const{const bool waveLock=arena.Locked()&&!arenaLocked;if(!arenaLocked&&!waveLock)return;const int gate=waveLock?(int)(arena.LockX()+612.f):(int)ScenarioEndX()-8;(void)gate;/* DF-014: sin barrotes celestes (se leian como un bug); el limite lo marca la camara bloqueada y el aviso. */const char*t=waveLock?"ZONA BLOQUEADA - DERROTA A TODOS":"ARENA BLOQUEADA - DERROTA AL GUARDIAN";DrawText(t,(int)camera.x-MeasureText(t,18)/2,635,18,{130,225,255,220});}
-// DF-013.2 (19-09): Brakk pasa a usar los sprites de produccion entregados
-// (assets/bosses/brakk/, lienzo 256x256 con la linea de suelo en y=247). Se
-// respeta el diseno original: no se recorta, no se reescala por pose y no se
-// inventa ningun frame. Cada pose del set se enlaza con el estado real que ya
-// existia en UpdateBoss, sin tocar vida, fases ni ataques.
-//   hurt        <- invulnerabilidad tras recibir dano
-//   chain       <- ChainSwing        smash  <- GroundSmash
-//   charge      <- Charge            chain_throw <- PowerWave
-//   fury        <- Frenzy fase 2     explosive   <- Frenzy fase 3
-//   walk / run  <- persecucion (run en fase 3)   idle <- reposo y bloqueo
-// death/basic/heavy/grab quedan cargadas para el remate y futuros ataques.
-void Stage1StoryGame::DrawBoss()const{
-    if(!boss.position.x||boss.defeated)return;
-    const Vector2 p=boss.position.ToScreen();
-    const bool flip=player.position.x>boss.position.x;
-    const float dx=player.position.x-boss.position.x;
-    const char* pose="idle";
-    if(boss.invulnerability>0.08f)pose="hurt";
-    else if(boss.blocking)pose="idle";
-    else if(boss.attack==StoryBossAttack::ChainSwing)pose="chain";
-    else if(boss.attack==StoryBossAttack::GroundSmash)pose="smash";
-    else if(boss.attack==StoryBossAttack::Charge)pose="charge";
-    else if(boss.attack==StoryBossAttack::PowerWave)pose="chain_throw";
-    else if(boss.attack==StoryBossAttack::Frenzy)pose=boss.phase>=3?"explosive":"fury";
-    else if(std::abs(dx)>190.f)pose=boss.phase>=3?"run":"walk";
-    if(bossAnim.texture.id!=0&&!bossAnim.frames.empty()){
-        Color t=boss.invulnerability>0?Color{255,170,170,255}:boss.blocking?Color{185,215,255,255}:boss.phase>=3?Color{255,150,140,255}:Color{235,205,195,255};
-        DrawEllipse((int)p.x,(int)p.y,70,14,{0,0,0,150});
-        bossAnim.Draw(p,1.55f*DepthScaleFor(boss.position.y),!flip,t);
-        if(boss.blocking)DrawCircleLines((int)p.x,(int)(p.y-95),96,{120,190,255,170});
-        (void)pose;return;
+    if (flow == StoryFlow::Credits) {
+        if (input::Pressed(KEY_ESCAPE) || input::Pressed(KEY_ENTER) || input::Pressed(KEY_J))
+            flow = StoryFlow::Menu;
+        return;
     }
-    const Texture2D tex=AssetManager::Get().GetTexture(std::string("brakk_")+pose);
-    Color tint=WHITE;
-    if(boss.invulnerability>0)tint={255,190,190,255};
-    else if(boss.blocking)tint={185,215,255,255};
-    // Escala fija para todas las poses: el sprite mide 188px de alto util y
-    // Brakk debe leerse mas grande que Rayden (~115px) sin ser un titan.
-    const float scale=175.0f/188.0f;
-    DrawEllipse((int)p.x,(int)p.y,82,15,{0,0,0,150});
-    if(tex.id!=0)DrawSpriteUniform(tex,{p.x,p.y},scale,flip,tint,9.0f);
-    else{  // respaldo: la geometria original, si faltara el PNG
-        const float sc=boss.phase==3?1.18f:boss.phase==2?1.08f:1.f;
-        const Color body=boss.phase==3?Color{100,45,40,255}:Color{55,55,58,255};
-        DrawRectangle((int)(p.x-70*sc),(int)(p.y-125*sc),(int)(140*sc),(int)(105*sc),body);
-        DrawCircle((int)p.x,(int)(p.y-150*sc),(int)(38*sc),{28,30,31,255});
+    if (flow == StoryFlow::Controls) {
+        if (input::Pressed(KEY_ESCAPE) || input::Pressed(KEY_C)) flow = StoryFlow::Menu;
+        return;
     }
-    if(boss.blocking)DrawCircleLines((int)p.x,(int)(p.y-95),96,{120,190,255,170});
-}
-void Stage1StoryGame::DrawWorld()const{Camera2D c{};c.offset={640,360};c.target={cameraX,360};c.zoom=1;if(shake>0){c.target.x+=GetRandomValue(-100,100)*shake*7;c.target.y+=GetRandomValue(-100,100)*shake*4;}BeginMode2D(c);DrawScenarioArt();if(!AssetManager::Get().GetTexture(TextFormat("bg_s1_%d",std::clamp(scenario,1,4))).id){DrawRectangle(0,625,(int)kStageEnd,95,{9,12,14,255});for(int x=0;x<(int)kStageEnd;x+=150){DrawRectangle(x,617,110,10,{60,64,63,255});DrawRectangle(x+30,645,65,5,{90,75,50,210});}}DrawArenaLock();combatWorld.DrawGround();std::vector<std::pair<float,int>> order{{player.position.y,-1}};for(size_t i=0;i<enemies.size();++i)if(enemies[i].active)order.push_back({enemies[i].position.y,(int)i});std::sort(order.begin(),order.end(),[](auto&a,auto&b){return a.first<b.first;});for(auto&o:order){if(o.second<0)player.Draw();else enemies[(size_t)o.second].Draw();}DrawBoss();for(const auto&p:projectiles){Vector2 s=p.position.ToScreen();if(!p.fromBoss&&player.DrawEnergyProjectile(s,p.velocity<0,.9f-p.life))continue;DrawCircle((int)s.x,(int)s.y,20,A(p.fromBoss?Color{255,65,45,255}:Color{40,220,255,255},.28f));DrawCircle((int)s.x,(int)s.y,11,p.fromBoss?Color{255,100,65,255}:Color{100,240,255,255});}for(const auto&p:particles){Vector2 s=p.position.ToScreen();float a=p.life/p.maxLife;DrawCircle((int)s.x,(int)s.y,p.size*a,A(p.color,a));}combatWorld.DrawEffects();EndMode2D();}
-void Stage1StoryGame::DrawHUD()const{ui::PlayerVitals vitals{};vitals.hp=player.hp;vitals.maxHp=player.maxHp;vitals.shield=player.shield;vitals.maxShield=player.maxShield;vitals.sp=player.sp;vitals.maxSp=player.maxSp;vitals.rage=player.rage;vitals.maxRage=player.maxRage;vitals.isRageMode=player.isRageMode;vitals.combo=combo;vitals.title=player.skin==0?"RAYDEN CRUZ // DISTRICT FURY":TextFormat("%s // DISTRICT FURY",GetCharacterVisual(player.skin).name);vitals.x=14;vitals.y=12;vitals.width=555;vitals.panelHeight=132;ui::DrawPlayerVitals(vitals);DrawText(TextFormat("ESCENARIO %d/4",scenario),395,94,16,{255,205,80,255});if(player.IsBlocking())DrawText("BLOQUEANDO",395,116,15,{90,210,255,255});else if(player.state==PlayerState::Attack&&player.attackType==AttackType::Energy)DrawText("CARGANDO PODER",395,116,15,{90,210,255,255});DrawText(ScenarioName(),18,152,18,{210,225,230,235});DrawText(ScenarioObjective(),18,174,14,{170,190,195,220});DrawText(TextFormat("PUNTOS %d   TIEMPO %5.1fs   DIFICULTAD %s",CalculateScore(),stageTime,DifficultyText()),18,196,14,WHITE);if(flow==StoryFlow::Boss||flow==StoryFlow::BossIntro){DrawRectangle(285,18,710,56,{5,7,9,235});DrawText("BRAKK // LA CADENA",455,21,24,{255,205,95,255});DrawRectangle(350,53,580,13,{30,25,25,255});DrawRectangle(350,53,(int)(580.f*boss.hp/boss.maxHp),13,{220,65,55,255});DrawText(TextFormat("FASE %d",boss.phase),945,51,15,WHITE);}if(bannerTimer>0){const char*t=ScenarioName();DrawText(t,640-MeasureText(t,30)/2,225,30,{210,235,240,235});DrawText(storyMessage.c_str(),640-MeasureText(storyMessage.c_str(),16)/2,263,16,{175,200,205,225});}DrawGoArrow(arena.GoTimer());}
-void Stage1StoryGame::DrawMenu()const{DrawRectangle(0,0,1280,720,{4,7,11,255});Texture2D bg=AssetManager::Get().GetTexture("bg_industrial");if(bg.id)DrawTexturePro(bg,{0,0,(float)bg.width,(float)bg.height},{0,0,1280,720},{0,0},0,{255,255,255,45});DrawRectangle(0,0,1280,720,{3,7,12,175});DrawText("DISTRICT FURY",340,90,70,{220,230,240,255});DrawText("BEAT-EM-UP DE HISTORIA",430,165,20,{90,210,235,255});DrawText("CAPITULO 1 // LA RUTA DE LAS CADENAS",350,215,23,{255,195,75,255});const char*items[]={"NUEVA PARTIDA","CONTROLES","DIFICULTAD"};for(int i=0;i<3;++i){bool sel=(i==0);Color c=sel?Color{255,210,80,255}:Color{205,215,220,255};DrawText(items[i],480,305+i*55,25,c);}DrawText(TextFormat("DIFICULTAD ACTUAL: %s",DifficultyText()),455,490,18,{150,190,200,255});DrawText(TextFormat("MEJOR PUNTUACION: %d   MEJOR RANGO: %s",bestScore,RankName(bestRank)),365,535,16,{150,170,180,230});DrawText("ENTER/J: JUGAR   C: CONTROLES   ↑/↓: DIFICULTAD",365,620,15,{120,150,160,230});DrawText("60 FPS // MODO HISTORIA PC",500,660,13,{90,120,130,220});}
-void Stage1StoryGame::DrawControls()const{DrawRectangle(0,0,1280,720,{5,8,11,255});DrawText("CONTROLES",500,75,48,WHITE);DrawText("W A S D",380,165,24,{185,220,240,255});DrawText("Moverse y cambiar de carril",610,165,20,WHITE);DrawText("J",380,210,24,{255,205,80,255});DrawText("Golpe / combo",610,210,20,WHITE);DrawText("K",380,255,24,{255,205,80,255});DrawText("Patada fuerte",610,255,20,WHITE);DrawText("L",380,300,24,{80,220,255,255});DrawText("Poder de energia",610,300,20,WHITE);DrawText("B",380,345,24,{80,220,255,255});DrawText("Bloquear / reducir dano",610,345,20,WHITE);DrawText("SHIFT",380,390,24,{120,200,255,255});DrawText("Dash / invulnerabilidad breve",610,390,20,WHITE);DrawText("SPACE",380,435,24,{100,220,255,255});DrawText("Modo Furia",610,435,20,WHITE);DrawText("ESC",380,480,24,WHITE);DrawText("Pausa",610,480,20,WHITE);DrawText("S, S+D, D + J",380,525,22,{255,150,90,255});DrawText("Onda de energia (comando; cancela golpes)",610,525,20,WHITE);DrawText("D, S, S+D + K",380,560,22,{255,150,90,255});DrawText("Gancho ascendente (lanza al enemigo)",610,560,20,WHITE);DrawText("C / ESC — VOLVER",500,630,18,{180,195,200,220});}
-void Stage1StoryGame::DrawOptions()const{DrawRectangle(0,0,1280,720,{4,7,11,255});Texture2D art=AssetManager::Get().GetTexture("menu_main_art");if(art.id)DrawTexturePro(art,{0,0,(float)art.width,(float)art.height},{0,0,1280,720},{0,0},0,{255,255,255,60});DrawRectangle(0,0,1280,720,{3,7,12,190});DrawText("OPCIONES",520,110,48,WHITE);const bool muted=AudioSystem::Get().IsMuted();DrawText("SONIDO",470,270,26,{200,220,230,255});DrawText(muted?"DESACTIVADO":"ACTIVADO",700,270,26,muted?Color{255,110,100,255}:Color{110,240,160,255});DrawText("ENTER/J — ALTERNAR SONIDO",440,340,18,{150,190,200,230});DrawText(TextFormat("DIFICULTAD ACTUAL: %s",DifficultyText()),440,385,18,{150,190,200,230});DrawText("ESC — VOLVER",520,470,20,{180,195,200,220});}
-void Stage1StoryGame::DrawCredits()const{DrawRectangle(0,0,1280,720,{4,7,11,255});Texture2D art=AssetManager::Get().GetTexture("menu_main_art");if(art.id)DrawTexturePro(art,{0,0,(float)art.width,(float)art.height},{0,0,1280,720},{0,0},0,{255,255,255,45});DrawRectangle(0,0,1280,720,{3,7,12,200});DrawText("CREDITOS",520,110,48,WHITE);DrawText("DISTRICT FURY",520,215,26,{90,210,235,255});DrawText("Diseno, arte y programacion",470,265,18,{170,190,200,230});DrawText("Martin Reyes",550,295,20,{255,205,80,255});DrawText("\"La ciudad no perdona, pero aun quedan los que luchan\"",300,380,16,{150,175,185,220});DrawText("ESC / ENTER — VOLVER",480,470,18,{180,195,200,220});}
-void Stage1StoryGame::DrawPause()const{DrawRectangle(0,0,1280,720,{0,0,0,185});DrawRectangle(330,165,620,390,{7,12,18,245});DrawText("PAUSA",535,210,54,{220,230,240,255});DrawText("ESC — REANUDAR",480,300,22,WHITE);DrawText("R — REINICIAR",495,345,22,WHITE);DrawText("Q — VOLVER AL MENU",450,390,22,WHITE);DrawText("El combate se detiene completamente.",430,465,17,{140,175,190,230});}
-void Stage1StoryGame::DrawGameOver()const{DrawRectangle(0,0,1280,720,{0,0,0,210});DrawRectangle(300,145,680,430,{8,10,15,245});DrawText("HAS CAIDO",465,220,62,{235,60,65,255});DrawText("La ruta se perdio.",500,295,22,WHITE);DrawText("Tu mejor opcion es volver a intentarlo.",405,335,18,{170,190,200,240});DrawText("R — REINICIAR",470,405,22,{255,210,80,255});DrawText("Q — VOLVER AL MENU",435,450,22,WHITE);DrawText(TextFormat("PUNTUACION: %d",CalculateScore()),475,500,18,{150,175,185,230});}
-void Stage1StoryGame::DrawScenarioClear()const{DrawRectangle(0,0,1280,720,{4,8,10,235});DrawText("RUTA ASEGURADA",425,160,52,{90,220,150,255});DrawText(TextFormat("ESCENARIO %d SUPERADO",scenario-1),455,235,28,WHITE);DrawText(storyMessage.c_str(),220,310,18,{175,200,205,235});DrawText("La siguiente ruta ha sido desbloqueada.",400,380,19,{255,200,80,255});}
-void Stage1StoryGame::DrawStageClear()const{DrawRectangle(0,0,1280,720,{4,7,10,245});DrawText("ETAPA 1 COMPLETADA",360,95,58,{90,225,155,255});DrawText("LA RUTA DE LAS CADENAS",430,165,26,{255,200,80,255});DrawText(TextFormat("TIEMPO       %6.1fs",stageTime),400,245,22,WHITE);DrawText(TextFormat("ENEMIGOS     %6d",defeated),400,285,22,WHITE);DrawText(TextFormat("DANO RECIBIDO %6d",damageTaken),400,325,22,WHITE);DrawText(TextFormat("COMBO MAXIMO %6d",maxCombo),400,365,22,WHITE);DrawText(TextFormat("PUNTUACION   %6d",CalculateScore()),400,405,22,WHITE);DrawText(TextFormat("RANGO        %s",RankText()),400,455,38,{255,205,70,255});DrawText(TextFormat("XP %d   MONEDAS %d   GEMAS %d",xp,coins,gems),400,515,18,{175,200,205,255});DrawText("ENTER — STAGE 2: OLD STEEL YARD     R — MENU",455,625,18,WHITE);}
-void Stage1StoryGame::Draw()const{if(flow==StoryFlow::CharacterSelect){DrawCharacterSelect();return;}if(flow==StoryFlow::Menu){ui::DrawMainMenuArt(AssetManager::Get().GetTexture("menu_main_art"),menuCursor,DifficultyText());return;}if(flow==StoryFlow::Controls){DrawControls();return;}if(flow==StoryFlow::Options){DrawOptions();return;}if(flow==StoryFlow::Credits){DrawCredits();return;}DrawWorld();if(flow!=StoryFlow::StageClear)DrawHUD();if(flow==StoryFlow::Intro){DrawRectangle(0,0,1280,720,{4,8,11,145});DrawText("LA RUTA DE LAS CADENAS",410,280,48,{220,230,235,255});DrawText("ENTER / J — COMENZAR",460,350,22,WHITE);}if(flow==StoryFlow::Pause)DrawPause();if(flow==StoryFlow::GameOver)DrawGameOver();if(flow==StoryFlow::ScenarioClear)DrawScenarioClear();if(flow==StoryFlow::StageClear)DrawStageClear();}
-}
-
-namespace district_fury {
-// DF-014: pantalla de eleccion de luchador. Muestra el primer cuadro de cada
-// atlas del manifiesto (mismo recorte y pivote que en el juego).
-void Stage1StoryGame::DrawCharacterSelect()const{
-    DrawRectangle(0,0,1280,720,{6,9,14,255});
-    const char* title="ELIGE TU LUCHADOR";
-    DrawText(title,640-MeasureText(title,44)/2,70,44,{230,235,240,255});
-    constexpr int n=(int)(sizeof(kStoryCharacters)/sizeof(kStoryCharacters[0]));
-    for(int i=0;i<n;++i){
-        const int id=kStoryCharacters[i];
-        const CharacterVisual& cv=GetCharacterVisual(id);
-        const bool sel=i==characterCursor;
-        const int cx=640+(i-(n-1)*0.5f)*420;
-        const Rectangle box{(float)cx-170,170,340,400};
-        DrawRectangleRec(box,sel?Color{20,40,64,255}:Color{14,18,26,255});
-        DrawRectangleLinesEx(box,sel?4.f:2.f,sel?Color{90,200,255,255}:Color{60,70,85,255});
-        const char* atlas=cv.atlasId?cv.atlasId:"rayden";
-        const AtlasProfile* prof=SpriteManifest::Get().FindAtlas(atlas);
-        Texture2D tex=prof?AssetManager::Get().GetTextureByPath(prof->path):Texture2D{0};
-        if(prof&&tex.id){
-            const float scale=2.6f;
-            const Rectangle src{0,0,prof->cellW,prof->cellH};
-            const Rectangle dst{cx-prof->pivotX*scale,520-prof->pivotY*scale,prof->cellW*scale,prof->cellH*scale};
-            DrawTexturePro(tex,src,dst,{0,0},0,WHITE);
+    if (input::Pressed(KEY_ESCAPE)) {
+        if (flow == StoryFlow::Combat || flow == StoryFlow::Boss)
+            flow = StoryFlow::Pause;
+        else if (flow == StoryFlow::Pause)
+            flow = finalBossSpawned ? StoryFlow::Boss : StoryFlow::Combat;
+    }
+    if (flow == StoryFlow::Pause) return;
+    if (flow == StoryFlow::GameOver) {
+        if (input::Pressed(KEY_R)) {
+            ResetRun();
+            flow = StoryFlow::Intro;
         }
-        const char* name=id==0?"RAYDEN CRUZ":cv.name;
-        DrawText(name,cx-MeasureText(name,28)/2,530,28,sel?Color{255,214,72,255}:Color{200,205,210,255});
+        if (input::Pressed(KEY_Q)) flow = StoryFlow::Menu;
+        return;
     }
-    const char* hint="A / D  ELEGIR     ENTER  CONFIRMAR     ESC  VOLVER";
-    DrawText(hint,640-MeasureText(hint,18)/2,640,18,{150,170,185,255});
+    if (flow == StoryFlow::StageClear) {
+        if (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J))
+            advanceRequested = true;
+        else if (input::Pressed(KEY_R))
+            flow = StoryFlow::Menu;
+        return;
+    }
+    if (flow == StoryFlow::ScenarioClear) {
+        transitionTimer -= dt;
+        if (transitionTimer <= 0) {
+            BuildScenario(scenario);
+            player.position.x = ScenarioStartX() + 90;
+            camera.x = std::clamp(player.position.x, camera.minX, camera.maxX);
+            cameraX = camera.x;
+            flow = StoryFlow::Combat;
+            bannerTimer = 2.f;
+        }
+        return;
+    }
+    player.PumpInput(dt);
+    if (hitstop.Consume(dt)) return;
+    shake = std::max(0.f, shake - dt);
+    bannerTimer = std::max(0.f, bannerTimer - dt);
+    UpdateParticles(dt);
+    if (flow == StoryFlow::Intro) {
+        bannerTimer -= dt;
+        if (bannerTimer <= 0) {
+            flow = StoryFlow::Combat;
+        }
+        return;
+    }
+    if (flow == StoryFlow::SubBossIntro) {
+        bannerTimer -= dt;
+        if (bannerTimer <= 0) flow = StoryFlow::Combat;
+        UpdateCombat(dt);
+        return;
+    }
+    if (flow == StoryFlow::Combat) {
+        stageTime += dt;
+        UpdateCombat(dt);
+    }
+    if (flow == StoryFlow::BossIntro || flow == StoryFlow::Boss) {
+        stageTime += dt;
+        UpdateBossFight(dt);
+        if (flow == StoryFlow::Boss && player.state == PlayerState::Defeat) flow = StoryFlow::GameOver;
+    }
+    camera.Follow(player.position.x, dt, arena.Locked(), arena.LockX());
+    cameraX = camera.x;
 }
 
-}  // namespace district_fury
+} // namespace district_fury

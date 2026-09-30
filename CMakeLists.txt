@@ -50,10 +50,16 @@ add_library(district_fury_core
     src/game/Campaign.cpp
     src/game/CharacterVisual.cpp
     src/game/Player.cpp
+    src/game/player/PlayerCombat.cpp
+    src/game/player/PlayerDraw.cpp
     src/game/StreetEnemy.cpp
     src/game/stage/ArenaDirector.cpp
     src/game/lab/KfReference.cpp
     src/game/Stage1StoryGame.cpp
+    src/game/stage1/Stage1Waves.cpp
+    src/game/stage1/Stage1Combat.cpp
+    src/game/stage1/Stage1Boss.cpp
+    src/game/stage1/Stage1Draw.cpp
     src/game/Stage2Game.cpp
     src/game/Stage3Game.cpp
     src/game/Stage4Game.cpp
