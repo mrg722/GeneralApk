@@ -146,7 +146,8 @@ void AssetManager::LoadAll(){
         const std::string key=TextFormat("bg_s%d_%d",stage,sc);
         // 19-09: los fondos definitivos son arte pintado (no pixel art de rejilla):
         // se escalan a la altura de pantalla, asi que BILINEAR se ve mejor que POINT.
-        textures[key]=LoadRequiredTexture(key.c_str(),{"assets/backgrounds/"+file,"../assets/backgrounds/"+file,"../../assets/backgrounds/"+file},TEXTURE_FILTER_BILINEAR);
+        // DF-014: version HD (tools/build_backgrounds.py) si existe.
+        textures[key]=LoadRequiredTexture(key.c_str(),{"assets/backgrounds/hd/"+file,"../assets/backgrounds/hd/"+file,"../../assets/backgrounds/hd/"+file,"assets/backgrounds/"+file,"../assets/backgrounds/"+file,"../../assets/backgrounds/"+file},TEXTURE_FILTER_BILINEAR);
     }
     LoadBossPoseSet(textures,"brakk",{"idle","walk","run","hurt","death","basic","heavy","grab","chain","chain_throw","charge","smash","fury","explosive"});
     LoadBossPoseSet(textures,"grinder",{"idle","hurt","death","saw","slam","ram","overdrive"});
