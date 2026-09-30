@@ -2,6 +2,7 @@
 #include "rendering/AssetManager.h"
 #include <algorithm>
 #include <cstdio>
+#include <cstring>
 
 namespace district_fury {
 namespace ui {
@@ -21,10 +22,18 @@ void DrawPlayerVitals(const PlayerVitals& v) {
     const int portraitX = v.x + 10;
     const int portraitY = v.y + 10;
     const Texture2D portrait = AssetManager::Get().GetTexture("rayden_clean");
-    if (portrait.id) {
+    const bool isRayden = v.title && std::strncmp(v.title, "RAYDEN", 6) == 0;
+    if (portrait.id && isRayden) {
         DrawTexturePro(portrait, {0, 0, 96, 96},
                        {static_cast<float>(portraitX), static_cast<float>(portraitY), 70, 70},
                        {0, 0}, 0, WHITE);
+    }
+    if (!isRayden && v.title && v.title[0]) {
+        // Sin retrato propio: inicial del personaje en lugar del de Rayden.
+        DrawRectangle(portraitX, portraitY, 70, 70, {18, 28, 40, 255});
+        const char initial[2] = {v.title[0], 0};
+        DrawText(initial, portraitX + 35 - MeasureText(initial, 48) / 2, portraitY + 11, 48,
+                 {185, 220, 255, 255});
     }
     DrawRectangleLines(portraitX, portraitY, 70, 70, {70, 200, 235, 160});
 

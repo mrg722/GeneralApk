@@ -523,6 +523,7 @@ void Stage4Game::DrawWorld() const {
     DrawBoss();
     for (auto& p : projectiles) {
         Vector2 s = p.pos.ToScreen();
+        if (!p.fromBoss && player.DrawEnergyProjectile({s.x, s.y}, p.vx < 0, (float)GetTime())) continue;
         Color c = p.fromBoss ? Color{120, 255, 150, 255} : Color{50, 220, 255, 255};
         DrawCircle((int)s.x, (int)s.y, 20, Alpha(c, .35f));
         DrawCircle((int)s.x, (int)s.y, 12, c);

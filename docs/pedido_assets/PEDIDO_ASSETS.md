@@ -65,26 +65,12 @@ Rows: (1) jab 3 frames: anticipation, impact, recovery; (2) hook punch 3 frames 
 Consistent lighting and palette with the idle frame, crisp pixel edges, no anti-aliasing to white.
 ```
 
-## 2. Rayder — prioridad MEDIA (12 frames)
+## 2. Rayder — ✅ ENTREGADO (integrado)
 
-Ya tiene 50 poses. Le faltan:
-
-| Movimiento | Frames | Por qué |
-|---|---|---|
-| Caminar | 6 (ciclo) | Hoy camina con solo 2 poses (3 y 4) |
-| Bloqueo | 2 | Hoy usa la pose agachada 9 |
-| Girarse | 2 | Cambio de dirección |
-| Proyectil de energía | 2 más | Hoy solo existe la pose 40 (esfera) |
-
-**Prompt:**
-
-```
-Pixel art sprite sheet, same character as the provided "Rayder" sheet: spiky black hair with white streak,
-black leather jacket with blue emblems, white shirt, black cargo pants, blue lightning energy.
-Facing right, feet on the same baseline, ~190 px tall, TRANSPARENT BACKGROUND, no text or numbers,
-24 px spacing. Rows: (1) walk cycle 6 frames; (2) guard block 2 frames; (3) turn around 2 frames;
-(4) blue energy sphere projectile 3-frame loop (separate, ~120x90 px).
-```
+Las hojas `rayder_set_completo_v2.png`, `rayder_caminar_bloqueo_giro_v2.png` y
+`rayder_faltantes_v2.png` ya están en el juego (atlas `rayder_atlas.png`,
+frames 50-101). Caminar, bloqueo, giro, golpes, patadas, onda, proyectil, en el
+aire, levantarse y victoria usan ahora frames propios. No falta nada.
 
 ## 3. Enemigos — prioridad MEDIA (8 frames por enemigo)
 
@@ -98,6 +84,13 @@ animación de reposo y no tienen pose en el aire.
 | Lanzado por el aire | 2 |
 | Levantarse | 2 |
 
+**Sobre la hoja `rayder_y_enemigos_referencia.png` que enviaste:** los enemigos
+de esa imagen son otros diseños (otra ropa, otras caras y otros colores) que los
+8 enemigos que ya tiene el juego. Si los mezclo, el mismo enemigo cambiaría de
+aspecto a mitad de un movimiento, así que no los integré. La hoja quedó guardada
+en `assets/characters/rayder/source/`. Para cada enemigo adjunta su hoja actual
+(`assets/enemies/<nombre>_clean.png`) como referencia al generador.
+
 **Prompt (cambiar el nombre y describir al enemigo):**
 
 ```
@@ -105,6 +98,24 @@ Pixel art sprite sheet for the enemy "<NOMBRE>" matching the attached reference 
 (same outfit, colors and proportions). Facing right, feet on one baseline, ~190 px tall,
 TRANSPARENT BACKGROUND, no floor shadow, no text, 24 px spacing between frames.
 Rows: walk cycle 4 frames; launched into the air 2 frames; getting up 2 frames.
+```
+
+## 3b. Jefes con recortes incompletos — prioridad ALTA
+
+| Jefe | Problema | Qué pedir |
+|---|---|---|
+| **Brakk** (jefe Stage 1) | Sus PNG están recortados: en varios se ve solo medio cuerpo. Hoy el juego lo dibuja con el atlas del enemigo *brute*, teñido y agrandado. | Hoja completa: reposo 4, caminar 4, golpe 3, agarre 3, golpe al suelo 4, recibe golpe 2, derrota 3 |
+| **Titan-X** (Stage 4) | `punch1` y `punch2` tienen el brazo cortado en el borde de la imagen. | Los mismos 2 frames completos, con 24 px de aire alrededor |
+| **Grinder** | Sus poses miden solo 37×57 px y se ven borrosas al escalarlas. | Las 7 poses (idle, ram, saw, slam, hurt, overdrive, death) a ~190 px de alto |
+
+**Prompt Brakk (adjuntar `assets/bosses/brakk/idle.png` como referencia):**
+
+```
+Pixel art sprite sheet, 2D beat 'em up boss "Brakk": huge bald brawler, same outfit, colors and
+proportions as the attached reference image. FULL BODY in every frame (head to feet, never cropped),
+facing right, feet on the same baseline, about 240 px tall, TRANSPARENT BACKGROUND, no floor shadow,
+no text or numbers, 24 px empty space around every frame.
+Rows: idle 4, walk 4, heavy punch 3, grab 3, ground slam 4, hit 2, defeat 3.
 ```
 
 ## 4. Efectos de impacto — prioridad MEDIA

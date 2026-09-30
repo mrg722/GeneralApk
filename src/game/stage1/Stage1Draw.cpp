@@ -1,5 +1,6 @@
 // Stage 1: todo el dibujo (mundo, jefe, HUD, menus y pantallas).
 #include "game/stage1/Stage1Common.h"
+#include "ui/TouchControls.h"
 
 namespace district_fury {
 
@@ -425,7 +426,8 @@ void Stage1StoryGame::DrawCharacterSelect() const {
         DrawText(name, cx - MeasureText(name, 28) / 2, 530, 28,
                  sel ? Color{255, 214, 72, 255} : Color{200, 205, 210, 255});
     }
-    const char* hint = "A / D  ELEGIR     ENTER  CONFIRMAR     ESC  VOLVER";
+    const char* hint = touch::Enabled() ? "CRUCETA  ELEGIR     OK  CONFIRMAR     ATRAS  VOLVER"
+                                        : "A / D  ELEGIR     ENTER  CONFIRMAR     ESC  VOLVER";
     DrawText(hint, 640 - MeasureText(hint, 18) / 2, 640, 18, {150, 170, 185, 255});
 }
 

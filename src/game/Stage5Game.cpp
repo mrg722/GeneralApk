@@ -475,6 +475,7 @@ void Stage5Game::DrawWorld() const {
     }
     for (auto& p : projectiles) {
         Vector2 s = p.pos.ToScreen();
+        if (!p.fromBoss && player.DrawEnergyProjectile({s.x, s.y}, p.vx < 0, (float)GetTime())) continue;
         Color col = p.fromBoss ? Color{255, 60, 120, 255} : Color{50, 220, 255, 255};
         DrawCircle((int)s.x, (int)s.y, 20, Alpha(col, .32f));
         DrawCircle((int)s.x, (int)s.y, 12, col);

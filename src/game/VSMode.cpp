@@ -403,12 +403,13 @@ void VSMode::DrawFight() const {
     }
     if (playerDefeated) {
         DrawRectangle(0, 0, 1280, 720, {0, 0, 0, 160});
-        DrawText("RAYDEN DERROTADO", 438, 288, 46, {240, 80, 80, 255});
-        DrawText("ENTER/J REINICIAR   ESC CONFIGURACION", 430, 357, 18, WHITE);
+        const char* lost = TextFormat("%s DERROTADO", GetCharacterVisual(selectedCharacter).name);
+        DrawText(lost, 640 - MeasureText(lost, 46) / 2, 288, 46, {240, 80, 80, 255});
+        DrawText(touch::Enabled() ? "OK REINICIAR   ATRAS CONFIGURACION" : "ENTER/J REINICIAR   ESC CONFIGURACION", 430, 357, 18, WHITE);
     } else if (selectedBoss >= 0 && boss.IsDefeated()) {
         DrawRectangle(0, 0, 1280, 720, {0, 0, 0, 150});
         DrawText("BOSS DERROTADO", 470, 288, 42, {120, 240, 160, 255});
-        DrawText("ENTER/J REINICIAR   ESC CONFIGURACION", 430, 350, 18, WHITE);
+        DrawText(touch::Enabled() ? "OK REINICIAR   ATRAS CONFIGURACION" : "ENTER/J REINICIAR   ESC CONFIGURACION", 430, 350, 18, WHITE);
     }
 }
 void VSMode::Draw() const {
