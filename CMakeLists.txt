@@ -43,6 +43,7 @@ add_library(district_fury_core
     src/game/CharacterVisual.cpp
     src/game/Player.cpp
     src/game/StreetEnemy.cpp
+    src/game/stage/ArenaDirector.cpp
     src/game/Stage1StoryGame.cpp
     src/game/Stage2Game.cpp
     src/game/Stage3Game.cpp
@@ -75,6 +76,14 @@ if(BUILD_TESTING)
     add_executable(input_buffer_tests tests/InputBufferTests.cpp)
     target_link_libraries(input_buffer_tests PRIVATE district_fury_core)
     add_test(NAME input_buffer_tests COMMAND input_buffer_tests)
+
+    add_executable(stage1_playthrough_test tests/Stage1PlaythroughTest.cpp)
+    target_link_libraries(stage1_playthrough_test PRIVATE district_fury_core)
+    add_test(NAME stage1_playthrough_test COMMAND stage1_playthrough_test)
+
+    # Verificacion visual manual (necesita ventana; no se registra en ctest).
+    add_executable(stage1_visual_check tests/Stage1VisualCheck.cpp)
+    target_link_libraries(stage1_visual_check PRIVATE district_fury_core)
 
     add_executable(sprite_manifest_tests tests/SpriteManifestTests.cpp)
     target_link_libraries(sprite_manifest_tests PRIVATE district_fury_core)

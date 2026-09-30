@@ -2,6 +2,8 @@
 #include "game/Player.h"
 #include "game/StreetEnemy.h"
 #include "game/combat/CombatWorld.h"
+#include "game/combat/HitstopClock.h"
+#include "game/stage/ArenaDirector.h"
 #include <string>
 #include <vector>
 
@@ -42,6 +44,16 @@ public:
     bool ConsumeNewGame() { if (newGameStarted) { newGameStarted = false; return true; } return false; }
     bool ExitRequested() const { return exitRequested; }
 
+    // --- Automatizacion (tests de recorrido / bots) ---
+    void StartRunForTest(StoryDifficulty d) { difficulty = d; ResetRun(); flow = StoryFlow::Intro; bannerTimer = 0.05f; }
+    void SetSavePath(const std::string& path) { savePath = path; }
+    StoryFlow Flow() const { return flow; }
+    int Scenario() const { return scenario; }
+    const std::vector<StreetEnemy>& Enemies() const { return enemies; }
+    const StoryBoss& Boss() const { return boss; }
+    const ArenaDirector& Arena() const { return arena; }
+    float CameraX() const { return camera.x; }
+
 private:
     Player player; std::vector<StreetEnemy> enemies; std::vector<StoryProjectile> projectiles; std::vector<StoryParticle> particles;
     // DF-013.2: CombatWorld cableado para activar hazards/specials de enemigo
@@ -52,13 +64,15 @@ private:
     StoryFlow flow{StoryFlow::Menu}; StoryBoss boss;
     int scenario{1}, wave{0}, combo{0}, maxCombo{0}, defeated{0}, damageTaken{0}, score{0}, xp{0}, coins{0}, gems{0}, level{1};
     int bestScore{0}, bestRank{0};
-    float cameraX{640}, stageTime{0}, comboTimer{0}, hitstop{0}, shake{0}, bannerTimer{0}, transitionTimer{0}, storyTimer{0};
+    // Camara de scroll y oleadas por linea de activacion (DF-014).
+    StageCamera camera; ArenaDirector arena; HitstopClock hitstop;
+    float cameraX{640}, stageTime{0}, comboTimer{0}, shake{0}, bannerTimer{0}, transitionTimer{0}, storyTimer{0};
     bool advanceRequested{false};
     bool arenaLocked{false}, scenarioBossSpawned{false}, finalBossSpawned{false}, stageComplete{false}, saveLoaded{false};
     StoryDifficulty difficulty{StoryDifficulty::Normal}; std::string savePath{"district_fury_save.dat"}; std::string storyMessage;
     int menuCursor{0}; bool vsRequested{false}; bool newGameStarted{false}; bool exitRequested{false};
 
-    void ResetRun(); void BuildScenario(int id); void SpawnWave(int id); void SpawnScenarioBoss(); void EnterFinalBoss(); void DefeatFinalBoss();
+    void ResetRun(); void BuildScenario(int id); void SpawnWave(int id); void BuildWaves(); void UpdateArena(float dt); void UpdateBossFight(float dt); void ClampToArena(); void LockArenaBetween(float playerX, float farX); void SpawnScenarioBoss(); void EnterFinalBoss(); void DefeatFinalBoss();
     void ApplyDifficulty(); void UpdateCombat(float dt); void UpdateBoss(float dt); void UpdateProjectiles(float dt); void UpdateParticles(float dt);
     void HandlePlayerHits(); void HandleEnemyHits(); void HandleBossHits(); void SpawnEnergyProjectile(); void SpawnBossPower(); void SpawnImpact(Vector3D pos, Color color, bool heavy);
     void AdvanceScenario(); bool ScenarioWaveCleared() const; bool AllCurrentEnemiesDefeated() const;

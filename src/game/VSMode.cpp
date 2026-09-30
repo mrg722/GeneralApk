@@ -93,7 +93,7 @@ void VSMode::Update(float dt){
  if(IsKeyPressed(KEY_ESCAPE)){flow=VSFlow::Select;enemies.clear();return;}
  if(IsKeyPressed(KEY_R)){ResetFight();return;}
  if(playerDefeated||(selectedBoss>=0&&boss.IsDefeated())){if(IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_J))ResetFight();return;}
- if(hitstop>0){hitstop-=dt;return;}
+ player.PumpInput(dt);if(hitstop>0){hitstop-=dt;return;}
  player.Update(dt);player.position.x=std::clamp(player.position.x,kMinX,kMaxX);player.position.y=std::clamp(player.position.y,kMinY,kMaxY);
  if(selectedBoss>=0){
   // DF-013.2: pelea de boss en VS via la clase Boss compartida (primer

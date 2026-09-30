@@ -12,7 +12,8 @@ class CombatWorld;
 // conservan su orden para no romper codigo que ya los consultaba.
 enum class StreetEnemyState {
     Idle, Chase, Attack, Hit, Defeat,
-    Patrol, Position, Block, Stun, Retreat, Special
+    Patrol, Position, Block, Stun, Retreat, Special,
+    Airborne   // lanzado por un remate (launch > 0); al caer pasa a Hit
 };
 
 enum class StreetEnemyType { Punk, Brute, Charger, Enforcer, ChemicalSoldier, UrbanNinja, Mutant, ArmoredGuard };

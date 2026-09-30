@@ -86,8 +86,8 @@ void Stage3Game::Update(float dt){
  if(flow==Flow::Intro){
   if(scenario==1&&transitionTimer<=0){if(IsKeyPressed(KEY_ONE))difficulty=Difficulty::Easy;if(IsKeyPressed(KEY_TWO))difficulty=Difficulty::Normal;if(IsKeyPressed(KEY_THREE))difficulty=Difficulty::Hard;if(IsKeyPressed(KEY_ENTER)){flow=Flow::Combat;bannerTimer=1.8f;ApplyDifficulty();}}
   else if(transitionTimer>0){transitionTimer-=dt;if(transitionTimer<=0)flow=Flow::Combat;}
- }else if(flow==Flow::Combat||flow==Flow::Gatekeeper){stageTime+=dt;if(bannerTimer>0)bannerTimer-=dt;if(hitstop>0)hitstop-=dt;else UpdateCombat(dt);
- }else if(flow==Flow::BossIntro||flow==Flow::Boss){stageTime+=dt;if(hitstop>0)hitstop-=dt;else{player.Update(dt);UpdateBoss(dt);UpdateProjectiles(dt);}}
+ }else if(flow==Flow::Combat||flow==Flow::Gatekeeper){stageTime+=dt;if(bannerTimer>0)bannerTimer-=dt;player.PumpInput(dt);if(hitstop>0)hitstop-=dt;else UpdateCombat(dt);
+ }else if(flow==Flow::BossIntro||flow==Flow::Boss){stageTime+=dt;player.PumpInput(dt);if(hitstop>0)hitstop-=dt;else{player.Update(dt);UpdateBoss(dt);UpdateProjectiles(dt);}}
  else if(flow==Flow::Clear){if(IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_J))advanceRequested=true;}
  else if(flow==Flow::GameOver){if(IsKeyPressed(KEY_ENTER)){ResetRun();flow=Flow::Combat;}}
  if(comboTimer>0)comboTimer-=dt;else combo=0;UpdateParticles(dt);cameraX=std::clamp(player.position.x,640.f,5360.f);

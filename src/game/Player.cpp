@@ -163,7 +163,8 @@ void Player::SetState(PlayerState next) {
     hasHit = false;
     if (state != PlayerState::Attack) attackPhase = AttackPhase::None;
     if (state == PlayerState::Hit || state == PlayerState::GuardBreak ||
-        state == PlayerState::Knockdown || state == PlayerState::Defeat) {
+        state == PlayerState::Knockdown || state == PlayerState::Defeat ||
+        state == PlayerState::Airborne) {
         inputBuffer.Clear();   // un golpe recibido invalida lo que estaba en cola
     }
     const bool normalized = animator.normalizedAtlas;
@@ -194,8 +195,10 @@ void Player::SetState(PlayerState next) {
             blockTimer = 0;
             break;
         case PlayerState::Hit:
-            if (!named("hit_high")) animator.Play(normalized ? AnimationClip{13, 13, 0.08f, false}
-                                     : AnimationClip{0, 4, 0.08f, false});
+            if (!named(nextHitLow ? "hit_low" : "hit_high"))
+                animator.Play(normalized ? AnimationClip{13, 13, 0.08f, false}
+                                         : AnimationClip{0, 4, 0.08f, false});
+            nextHitLow = !nextHitLow;
             if (stateTimer <= 0.0f) stateTimer = 0.13f;
             break;
         case PlayerState::GuardBreak:
@@ -211,6 +214,10 @@ void Player::SetState(PlayerState next) {
             if (!named("defeat")) animator.Play(normalized ? AnimationClip{15, 15, 0.10f, false}
                                      : AnimationClip{14, 14, 0.10f, false});
             AudioSystem::Get().Play(Sfx::GameOver);
+            break;
+        case PlayerState::Airborne:
+            if (!named("airborne")) animator.Play(normalized ? AnimationClip{13, 13, 0.10f, false}
+                                                             : AnimationClip{14, 14, 0.10f, false});
             break;
         case PlayerState::Recovery:
             // Pose de guardia: primer cuadro de idle, sin ciclo.
@@ -322,10 +329,13 @@ void Player::UpdateRage(float dt) {
 bool Player::CanAct() const {
     return state != PlayerState::Defeat && state != PlayerState::GuardBreak &&
            state != PlayerState::Knockdown && state != PlayerState::Hit &&
-           state != PlayerState::Attack && state != PlayerState::Recovery;
+           state != PlayerState::Attack && state != PlayerState::Recovery &&
+           state != PlayerState::Airborne;
 }
 
-bool Player::IsKnockedDown() const { return state == PlayerState::Knockdown; }
+bool Player::IsKnockedDown() const {
+    return state == PlayerState::Knockdown || state == PlayerState::Airborne;
+}
 
 bool Player::IsInvulnerable() const {
     return debugInvulnerable || dashInvulnerability > 0.0f;
@@ -341,7 +351,8 @@ float Player::GetMoveSpeed() const {
 void Player::HandleInput(float dt) {
     if (!inputEnabled) return;
 
-    if (IsKeyDown(KEY_B)) {
+    const PlayerInput& in = frameInput;
+    if (in.block) {
         attackType = AttackType::None;
         currentAttack = AttackId::None;
         if (state != PlayerState::Block) SetState(PlayerState::Block);
@@ -350,11 +361,7 @@ void Player::HandleInput(float dt) {
     }
     if (state == PlayerState::Block) SetState(PlayerState::Idle);
 
-    Vector2 move = {0, 0};
-    if (IsKeyDown(KEY_W)) move.y -= 1;
-    if (IsKeyDown(KEY_S)) move.y += 1;
-    if (IsKeyDown(KEY_A)) move.x -= 1;
-    if (IsKeyDown(KEY_D)) move.x += 1;
+    Vector2 move = {in.moveX, in.moveY};
 
     const bool moving = move.x != 0 || move.y != 0;
     const float speed = GetMoveSpeed();
@@ -372,7 +379,7 @@ void Player::HandleInput(float dt) {
     // Los carriles se acotan aqui, no en cada stage. Stage2 no lo hacia (DF-013 D3).
     position.y = std::clamp(position.y, kLaneMinY, kLaneMaxY);
 
-    if (IsKeyPressed(KEY_LEFT_SHIFT) && dashCooldown <= 0.0f) {
+    if (in.dash && dashCooldown <= 0.0f) {
         dashTimer = 0.12f;
         dashInvulnerability = 0.20f;
         dashCooldown = 0.38f * upgrades.dashCooldownScale;
@@ -385,13 +392,13 @@ void Player::HandleInput(float dt) {
     // hasta 15 frames antes sigue siendo valido.
     if (TryStartBufferedAttack(false)) return;
 
-    if (IsKeyPressed(KEY_L) && sp >= GetAttack(AttackId::EnergyWave).spCost &&
+    if (in.energy && sp >= GetAttack(AttackId::EnergyWave).spCost &&
         attackCooldowns[static_cast<int>(AttackId::EnergyWave)] <= 0.0f) {
         BeginAttack(AttackId::EnergyWave);
         return;
     }
 
-    if (IsKeyPressed(KEY_SPACE)) {
+    if (in.rage) {
         if (rageState == RageState::Normal && rage >= maxRage) {
             rageState = RageState::Starting;
             rageStateTimer = kRageStartDuration;
@@ -414,8 +421,31 @@ void Player::PollAttackInput() {
     if (!inputEnabled) return;
     if (state == PlayerState::Defeat || state == PlayerState::Knockdown ||
         state == PlayerState::GuardBreak || state == PlayerState::Hit) return;
-    if (IsKeyPressed(KEY_J)) inputBuffer.Push(InputCommand::Punch);
-    if (IsKeyPressed(KEY_K)) inputBuffer.Push(InputCommand::Kick);
+    if (frameInput.punch) inputBuffer.Push(InputCommand::Punch);
+    if (frameInput.kick) inputBuffer.Push(InputCommand::Kick);
+}
+
+PlayerInput Player::ReadInput() const {
+    if (scriptedInput) return *scriptedInput;
+    PlayerInput in;
+    if (IsKeyDown(KEY_W)) in.moveY -= 1;
+    if (IsKeyDown(KEY_S)) in.moveY += 1;
+    if (IsKeyDown(KEY_A)) in.moveX -= 1;
+    if (IsKeyDown(KEY_D)) in.moveX += 1;
+    in.block = IsKeyDown(KEY_B);
+    in.dash = IsKeyPressed(KEY_LEFT_SHIFT);
+    in.punch = IsKeyPressed(KEY_J);
+    in.kick = IsKeyPressed(KEY_K);
+    in.energy = IsKeyPressed(KEY_L);
+    in.rage = IsKeyPressed(KEY_SPACE);
+    return in;
+}
+
+void Player::PumpInput(float dt) {
+    inputPumped = true;
+    frameInput = inputEnabled ? ReadInput() : PlayerInput{};
+    inputBuffer.Tick(dt);          // avanza frames y elimina comandos > 15 frames
+    PollAttackInput();
 }
 
 bool Player::InCancelWindow() const {
@@ -491,8 +521,8 @@ void Player::Update(float dt) {
 
     UpdateRage(dt);
 
-    inputBuffer.Tick(dt);          // avanza frames y elimina comandos > 15 frames
-    PollAttackInput();
+    if (!inputPumped) PumpInput(dt);
+    inputPumped = false;           // el proximo frame vuelve a leer
 
     if (shield < maxShield && !IsBlocking() && state != PlayerState::Hit &&
         state != PlayerState::GuardBreak && state != PlayerState::Knockdown) {
@@ -518,6 +548,14 @@ void Player::Update(float dt) {
 
     if (state == PlayerState::Defeat) return;
 
+    if (state == PlayerState::Airborne) {
+        position.x += velocity.x * dt;
+        velocity.x *= 0.94f;
+        position.x = std::clamp(position.x, kStageStartX, kStageEndX - 90.f);
+        if (position.z <= 0.0f && velocity.z == 0.0f) SetState(PlayerState::Knockdown);
+        return;
+    }
+
     if (state == PlayerState::Knockdown) {
         knockdownTimer -= dt;
         position.x += velocity.x * dt;
@@ -525,8 +563,10 @@ void Player::Update(float dt) {
         position.x = std::clamp(position.x, kStageStartX, kStageEndX - 90.f);
         position.y = std::clamp(position.y, kLaneMinY, kLaneMaxY);
         if (knockdownTimer <= 0 && position.z <= 0.0f) {
-            dashInvulnerability = std::max(dashInvulnerability, 0.45f);
-            SetState(PlayerState::Idle);
+            dashInvulnerability = std::max(dashInvulnerability, 0.55f);
+            SetState(PlayerState::Recovery);           // levantarse
+            animator.PlayNamed("getup");
+            recoveryTimer = 0.32f;
         }
         return;
     }
@@ -660,7 +700,7 @@ void Player::TakeDamage(int damage) {
     }
 
     if (state == PlayerState::Hit && stateTimer > 0) return;
-    if (state == PlayerState::Knockdown) return;
+    if (state == PlayerState::Knockdown || state == PlayerState::Airborne) return;
 
     hp = std::max(0, hp - damage);
     AddRage(15);
@@ -675,7 +715,7 @@ void Player::TakeDamage(int damage) {
         knockdownTimer = 0.85f;
         velocity.x = facing == Facing::Right ? -260.f : 260.f;
         velocity.z = 380.f;
-        SetState(PlayerState::Knockdown);
+        SetState(PlayerState::Airborne);
         AudioSystem::Get().Play(Sfx::HeavyHit);
         return;
     }

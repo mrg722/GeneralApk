@@ -8,7 +8,14 @@ namespace district_fury {
 
 // Recovery va al final para no alterar los valores historicos. PlayerState::Attack
 // se conserva (los stages lo consultan); el detalle vive en AttackPhase.
-enum class PlayerState { Idle, Walk, Dash, Attack, Block, Hit, GuardBreak, Knockdown, Defeat, Recovery };
+enum class PlayerState { Idle, Walk, Dash, Attack, Block, Hit, GuardBreak, Knockdown, Defeat, Recovery, Airborne };
+
+// Entrada de un frame. Por defecto se lee del teclado (WASD, Shift, B, J, K, L,
+// Espacio); tests, bots y repeticiones pueden inyectar una propia.
+struct PlayerInput {
+    float moveX = 0.0f, moveY = 0.0f;
+    bool block = false, dash = false, punch = false, kick = false, energy = false, rage = false;
+};
 
 // Sub-estado de la FSM mientras state == Attack.
 enum class AttackPhase { None, Punch1, Punch2, Punch3, Kick, Special };
@@ -44,6 +51,10 @@ public:
     // Buffer de entrada (15 frames) y recuperacion fisica posterior al ataque.
     InputBuffer inputBuffer;
     float recoveryTimer{0.0f};
+    // Si no es nullptr, reemplaza al teclado (bots/tests). No es dueno del puntero.
+    const PlayerInput* scriptedInput{nullptr};
+    PlayerInput frameInput;
+    bool nextHitLow{false};   // alterna hit_high / hit_low en impactos seguidos
 
     int hp; int maxHp; int sp; int maxSp; int rage; int maxRage; bool isRageMode;
     // DF-013.2 (19-09): personaje visual seleccionable. 0 = Rayden ORIGINAL
@@ -89,6 +100,10 @@ public:
     Player();
 
     void Update(float dt);
+    // Lee la entrada del frame y avanza el Input Buffer. Los stages la llaman
+    // ANTES de congelar por hitstop para no perder J/K pulsados en el impacto.
+    // Si nadie la llamo, Update la invoca solo.
+    void PumpInput(float dt);
     void Draw() const;
     void TakeDamage(int damage);
     void SetState(PlayerState newState);
@@ -127,6 +142,8 @@ public:
 private:
     void BeginAttack(AttackId id);
     void PollAttackInput();
+    PlayerInput ReadInput() const;
+    bool inputPumped{false};
     bool TryStartBufferedAttack(bool fromCancel);
     void EndAttack();
     void UpdateRage(float dt);

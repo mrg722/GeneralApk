@@ -26,6 +26,7 @@ const CharacterVisual& GetCharacterVisual(int id) {
 }
 
 const char* CharacterPose(int id, PlayerState state, AttackType attack, bool rage, double time) {
+    if (state == PlayerState::Airborne) state = PlayerState::Knockdown;
     const int idleCycle = static_cast<int>(time * (state == PlayerState::Walk ? 9.0 : 3.2)) % 4;
     switch (id) {
         case 1:  // Rayden clon

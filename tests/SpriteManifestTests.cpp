@@ -25,17 +25,24 @@ int main() {
     assert(clips && clips->count("punch1") && clips->count("hit_high") && clips->count("knockdown"));
 
     Animator anim;
-    assert(anim.ApplyProfile(*rayden, *clips, 512, 512));
-    assert(anim.frames.size() == 16);
+    assert(anim.ApplyProfile(*rayden, *clips, 512, 768));
+    // Con una hoja mas chica que la grilla declarada, los clips que apuntan a
+    // celdas inexistentes invalidan el perfil (cae al respaldo historico).
+    { Animator small; assert(!small.ApplyProfile(*rayden, *clips, 512, 512)); }
+    assert(anim.frames.size() == 24);
     for (const SpriteFrame& f : anim.frames) assert(f.pivotX == 64 && f.pivotY == 126 && f.width == 128);
 
-    // Duraciones asincronas por cuadro: kick = [0.11, 0.31].
-    assert(anim.PlayNamed("kick"));
-    assert(anim.currentFrame == 10);
-    anim.Update(0.10f); assert(anim.currentFrame == 10);
-    anim.Update(0.02f); assert(anim.currentFrame == 11);
-    anim.Update(0.25f); assert(anim.currentFrame == 11);
-    anim.Update(0.10f); assert(anim.isFinished);
+    // Duraciones asincronas por cuadro: punch1 = anticipo 16 (0.06) + golpe 8 (0.24).
+    assert(anim.PlayNamed("punch1"));
+    assert(anim.currentFrame == 16);
+    anim.Update(0.05f); assert(anim.currentFrame == 16);
+    anim.Update(0.02f); assert(anim.currentFrame == 8);
+    anim.Update(0.20f); assert(anim.currentFrame == 8 && !anim.isFinished);
+    anim.Update(0.05f); assert(anim.isFinished);
+    // Frames derivados presentes en los clips nuevos.
+    assert(anim.PlayNamed("hit_low") && anim.currentFrame == 17);
+    assert(anim.PlayNamed("airborne") && anim.currentFrame == 18);
+    assert(anim.PlayNamed("getup") && anim.currentFrame == 20);
     assert(!anim.PlayNamed("no_existe"));
 
     // Celda asimetrica y hoja de otro tamano, con clip de largo libre (20 frames).
@@ -53,7 +60,7 @@ int main() {
     assert(!bad.LoadFromString(R"({"atlases":{"a":{"cell":[64,64],"pivot":[64,70]}}})"));
     Animator strict;
     ClipMap oob; oob["x"] = ClipDef{{99}, {0.1f}, true};
-    assert(!strict.ApplyProfile(*rayden, oob, 512, 512));
+    assert(!strict.ApplyProfile(*rayden, oob, 512, 768));
 
     std::puts("sprite_manifest_tests OK");
     return 0;

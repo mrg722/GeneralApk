@@ -282,6 +282,7 @@ const char* StreetEnemy::GetStateName() const {
         case StreetEnemyState::Stun:     return "STUN";
         case StreetEnemyState::Retreat:  return "RETREAT";
         case StreetEnemyState::Special:  return "SPECIAL";
+        case StreetEnemyState::Airborne: return "AIRBORNE";
         default:                          return "DEAD";
     }
 }
@@ -451,6 +452,22 @@ void StreetEnemy::Update(float dt, const Player& player, CombatWorld* world) {
     if (state == StreetEnemyState::Stun) {
         stateTimer -= dt;
         if (stateTimer <= 0) { guardHealth = maxGuardHealth * 0.4f; EnterState(StreetEnemyState::Idle); }
+        return;
+    }
+
+    if (state == StreetEnemyState::Airborne) {
+        velocity.z -= 1500.0f * dt;
+        position.z += velocity.z * dt;
+        position.x += velocity.x * dt;
+        velocity.x *= 0.95f;
+        position.x = std::clamp(position.x, kStageStartX, kStageEndX - 90.f);
+        if (position.z <= 0.0f) {
+            position.z = 0.0f;
+            velocity = {velocity.x * 0.4f, 0.0f, 0.0f};
+            state = StreetEnemyState::Hit;     // derribado: tarda en reincorporarse
+            stateTimer = 0.45f;
+            hitstunTimer = std::max(hitstunTimer, 0.45f);
+        }
         return;
     }
 
@@ -625,7 +642,11 @@ void StreetEnemy::TakeDamage(int damage, Vector3D knockback) {
     }
 
     velocity = knockback;
-    state = StreetEnemyState::Hit;
+    // Remates con launch lanzan al enemigo por el aire (sin armadura activa).
+    // Golpeado en el aire (juggle): sigue en el aire con un pequeno rebote.
+    const bool airborne = knockback.z > 0.0f || position.z > 0.0f;
+    if (position.z > 0.0f) velocity.z = std::max(knockback.z, 160.0f);
+    state = airborne ? StreetEnemyState::Airborne : StreetEnemyState::Hit;
     stateTimer = 0.30f;
     telegraphing = false;
     pendingSpecial = EnemySpecial::None;
@@ -641,7 +662,8 @@ void StreetEnemy::Draw() const {
     const bool authored = animator.texture.id != 0 && !animator.frames.empty();
     const float visualScale = authored ? s.scale * ds : ds;
 
-    DrawEllipse((int)p.x, (int)p.y, 26 * s.scale * ds, 8.5f * ds, {0, 0, 0, 145});
+    // La sombra queda en el suelo aunque el enemigo este en el aire.
+    DrawEllipse((int)p.x, (int)position.y, 26 * s.scale * ds, 8.5f * ds, {0, 0, 0, 145});
 
     // Telegraph: el jugador debe poder leer el ataque antes de que salga.
     if (IsTelegraphing()) {
