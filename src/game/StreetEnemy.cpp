@@ -424,8 +424,45 @@ void StreetEnemy::Decide(float dt, const Player& player) {
     EnterState(StreetEnemyState::Patrol);
 }
 
+void StreetEnemy::UseReferenceSkin(const Animator& templ, float scale, const char* label) {
+    referenceSkin = true;
+    skinAnimator = templ;
+    skinScale = scale;
+    skinLabel = label;
+    skinClip.clear();
+    skinState = StreetEnemyState::Defeat;
+    if (state == StreetEnemyState::Defeat) skinState = StreetEnemyState::Idle;
+}
+
+namespace {
+const char* SkinClipFor(StreetEnemyState s, int attackVariant) {
+    static const char* kAttacks[] = {"atk1", "atk2", "atk3", "atk4"};
+    switch (s) {
+        case StreetEnemyState::Chase:
+        case StreetEnemyState::Position:
+        case StreetEnemyState::Retreat:  return "walk";
+        case StreetEnemyState::Attack:   return kAttacks[attackVariant % 4];
+        case StreetEnemyState::Special:  return "special";
+        case StreetEnemyState::Hit:
+        case StreetEnemyState::Stun:     return "hit";
+        case StreetEnemyState::Airborne: return "air";
+        case StreetEnemyState::Defeat:   return "defeat";
+        default:                         return "idle";
+    }
+}
+}  // namespace
+
 void StreetEnemy::Update(float dt, const Player& player, CombatWorld* world) {
     if (!active) return;
+    if (referenceSkin) {
+        if (state != skinState) {
+            if (state == StreetEnemyState::Attack) ++skinAttackVariant;
+            skinState = state;
+            const char* clip = SkinClipFor(state, skinAttackVariant);
+            if (skinClip != clip && skinAnimator.PlayNamed(clip)) skinClip = clip;
+        }
+        skinAnimator.Update(dt);
+    }
     EnsureAnimator(animator, type);
     animator.Update(dt);
 
@@ -681,7 +718,13 @@ void StreetEnemy::Draw() const {
                          {110, 190, 245, 225});
     }
 
-    if (authored) {
+    if (referenceSkin && skinAnimator.texture.id != 0) {
+        Color tint = WHITE;
+        if (state == StreetEnemyState::Hit) tint = {255, 225, 225, 255};
+        if (state == StreetEnemyState::Defeat) tint = {180, 180, 185, 255};
+        skinAnimator.Draw(p, skinScale * ds, facing == Facing::Left, tint);
+        if (skinLabel) DrawText(skinLabel, (int)p.x - MeasureText(skinLabel, 10) / 2, (int)p.y + 8, 10, {255, 200, 90, 220});
+    } else if (authored) {
         Color tint = WHITE;
         if (state == StreetEnemyState::Hit) tint = {255, 225, 225, 255};
         if (state == StreetEnemyState::Stun) tint = {215, 215, 160, 255};
@@ -700,7 +743,8 @@ void StreetEnemy::Draw() const {
         // La barra va por encima del sprite dibujado (antes usaba la altura de
         // la hurtbox y quedaba sobre la cabeza de los enemigos grandes).
         float spriteTop = p.y - s.bodyHeight * ds;
-        if (authored) {
+        if (referenceSkin) spriteTop = p.y - 78.f * skinScale * ds;
+        else if (authored) {
             const SpriteFrame& f = animator.frames[(std::size_t)std::clamp(animator.currentFrame, 0, (int)animator.frames.size() - 1)];
             spriteTop = std::min(spriteTop, p.y - (f.pivotY - f.visualBounds.y) * visualScale);
         }

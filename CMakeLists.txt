@@ -44,6 +44,7 @@ add_library(district_fury_core
     src/game/Player.cpp
     src/game/StreetEnemy.cpp
     src/game/stage/ArenaDirector.cpp
+    src/game/lab/KfReference.cpp
     src/game/Stage1StoryGame.cpp
     src/game/Stage2Game.cpp
     src/game/Stage3Game.cpp
@@ -84,6 +85,9 @@ if(BUILD_TESTING)
     # Verificacion visual manual (necesita ventana; no se registra en ctest).
     add_executable(stage1_visual_check tests/Stage1VisualCheck.cpp)
     target_link_libraries(stage1_visual_check PRIVATE district_fury_core)
+
+    add_executable(kf_bot_visual_check tests/KfBotVisualCheck.cpp)
+    target_link_libraries(kf_bot_visual_check PRIVATE district_fury_core)
 
     add_executable(sprite_manifest_tests tests/SpriteManifestTests.cpp)
     target_link_libraries(sprite_manifest_tests PRIVATE district_fury_core)

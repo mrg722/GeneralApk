@@ -18,6 +18,10 @@ public:
     void Draw() const;
     bool ShouldExit() const;
     void ClearExit();
+    // Automatizacion (tests visuales).
+    void StartLabForTest(bool kf, StreetEnemyType type) { kfBot = kf; enemyCount = 1; enemyTypes[0] = type; selectedBoss = -1; StartFight(); }
+    Player& PlayerRef() { return player; }
+    const std::vector<StreetEnemy>& Enemies() const { return enemies; }
 
 private:
     VSFlow flow{VSFlow::Select};
@@ -33,6 +37,9 @@ private:
     // (por defecto, intacto), 1 = Rayden clon. Ver Player::skin.
     int selectedCharacter{0};
     int cursor{0};
+    // Laboratorio: el enemigo 1 usa el visual de referencia KF (ver game/lab).
+    bool kfBot{false};
+    int kfDemoClip{-1};
     bool exitRequested{false};
     bool playerDefeated{false};
     Player player;

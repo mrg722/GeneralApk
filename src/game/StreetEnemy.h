@@ -3,6 +3,7 @@
 #include "game/Player.h"
 #include "game/enemies/EnemyBrain.h"
 #include "rendering/Animator.h"
+#include <string>
 
 namespace district_fury {
 
@@ -39,6 +40,17 @@ public:
     float attackCooldown;
     bool hasHit;
     Animator animator;
+
+    // Laboratorio: visual externo (bot de referencia). Solo cambia el dibujo;
+    // IA, hitboxes y dano siguen siendo los del tipo de enemigo.
+    bool referenceSkin{false};
+    Animator skinAnimator;
+    std::string skinClip;
+    float skinScale{1.8f};
+    int skinAttackVariant{0};
+    StreetEnemyState skinState{StreetEnemyState::Defeat};
+    const char* skinLabel{nullptr};
+    void UseReferenceSkin(const Animator& templ, float scale, const char* label);
 
     // --- DF-013: estado de IA ---
     float decisionTimer;
