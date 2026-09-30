@@ -34,6 +34,8 @@ add_library(district_fury_core
     src/audio/AudioSystem.cpp
     src/core/ApplicationState.cpp
     src/core/Json.cpp
+    src/core/Platform.cpp
+    src/core/InputMap.cpp
     src/game/combat/AttackData.cpp
     src/game/combat/Boss.cpp
     src/game/combat/BossDefinition.cpp
@@ -57,6 +59,7 @@ add_library(district_fury_core
     src/rendering/SpriteManifest.cpp
     src/ui/MainMenu.cpp
     src/ui/GameHUD.cpp
+    src/ui/TouchControls.cpp
 )
 target_include_directories(district_fury_core PUBLIC src)
 target_link_libraries(district_fury_core PUBLIC raylib)
@@ -77,6 +80,10 @@ if(BUILD_TESTING)
     add_executable(input_buffer_tests tests/InputBufferTests.cpp)
     target_link_libraries(input_buffer_tests PRIVATE district_fury_core)
     add_test(NAME input_buffer_tests COMMAND input_buffer_tests)
+
+    add_executable(touch_controls_tests tests/TouchControlsTests.cpp)
+    target_link_libraries(touch_controls_tests PRIVATE district_fury_core)
+    add_test(NAME touch_controls_tests COMMAND touch_controls_tests)
 
     add_executable(stage1_playthrough_test tests/Stage1PlaythroughTest.cpp)
     target_link_libraries(stage1_playthrough_test PRIVATE district_fury_core)

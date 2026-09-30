@@ -1,4 +1,5 @@
 #include "game/Stage1StoryGame.h"
+#include "core/InputMap.h"
 #include "rendering/AssetManager.h"
 #include "rendering/Backdrop.h"
 #include "rendering/SpriteManifest.h"
@@ -9,6 +10,8 @@
 #include "game/stage/ArenaDirector.h"
 #include "game/CharacterVisual.h"
 #include "raylib.h"
+#include "core/Platform.h"
+#include <sstream>
 #include <algorithm>
 #include <cmath>
 #include <fstream>
@@ -108,8 +111,8 @@ void Stage1StoryGame::UpdateParticles(float dt){for(auto&p:particles){p.life-=dt
 int Stage1StoryGame::CalculateRank()const{float v=std::max(0.f,360.f-stageTime)*.32f+maxCombo*11.f+player.hp*1.7f-damageTaken*1.7f+(scenario==4&&stageComplete?100.f:0.f);if(v>=520)return 7;if(v>=430)return 6;if(v>=350)return 5;if(v>=275)return 4;if(v>=210)return 3;if(v>=145)return 2;if(v>=80)return 1;return 0;}
 int Stage1StoryGame::CalculateScore()const{return score+player.hp*5+maxCombo*110;}
 const char* Stage1StoryGame::RankText()const{return RankName(CalculateRank());}
-void Stage1StoryGame::LoadSave(){std::ifstream in(savePath);if(!in)return;in>>xp>>coins>>gems>>level>>bestScore>>bestRank;int d=1;in>>d;difficulty=d==0?StoryDifficulty::Easy:d==2?StoryDifficulty::Hard:StoryDifficulty::Normal;saveLoaded=true;}
-void Stage1StoryGame::SaveProgress(){std::ofstream out(savePath,std::ios::trunc);if(!out)return;out<<xp<<' '<<coins<<' '<<gems<<' '<<level<<' '<<bestScore<<' '<<bestRank<<' '<<(difficulty==StoryDifficulty::Easy?0:difficulty==StoryDifficulty::Hard?2:1)<<'\n';}
+void Stage1StoryGame::LoadSave(){std::string text;if(!platform::LoadTextFile(savePath,text))return;std::istringstream in(text);in>>xp>>coins>>gems>>level>>bestScore>>bestRank;int d=1;in>>d;difficulty=d==0?StoryDifficulty::Easy:d==2?StoryDifficulty::Hard:StoryDifficulty::Normal;saveLoaded=true;}
+void Stage1StoryGame::SaveProgress(){std::ostringstream out;out<<xp<<' '<<coins<<' '<<gems<<' '<<level<<' '<<bestScore<<' '<<bestRank<<' '<<(difficulty==StoryDifficulty::Easy?0:difficulty==StoryDifficulty::Hard?2:1)<<'\n';platform::SaveTextFile(savePath,out.str());}
 void Stage1StoryGame::Update(float dt){dt=std::min(dt,.033f);
     if(flow==StoryFlow::Menu){
         // DF-013: navegacion real de 7 items (ui/MainMenu.h dibuja el
@@ -122,12 +125,12 @@ void Stage1StoryGame::Update(float dt){dt=std::min(dt,.033f);
             else difficulty=difficulty==StoryDifficulty::Hard?StoryDifficulty::Normal:difficulty==StoryDifficulty::Normal?StoryDifficulty::Easy:StoryDifficulty::Hard;
             SaveProgress();
         };
-        if(IsKeyPressed(KEY_UP)||IsKeyPressed(KEY_W)) menuCursor=(menuCursor+kMenuItemCount-1)%kMenuItemCount;
-        if(IsKeyPressed(KEY_DOWN)||IsKeyPressed(KEY_S)) menuCursor=(menuCursor+1)%kMenuItemCount;
-        if(menuCursor==2&&(IsKeyPressed(KEY_LEFT)||IsKeyPressed(KEY_RIGHT))) CycleDifficulty(IsKeyPressed(KEY_RIGHT)?1:-1);
-        if(IsKeyPressed(KEY_V)){vsRequested=true;return;}
-        if(IsKeyPressed(KEY_C)){flow=StoryFlow::Controls;return;}
-        if(IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_J)){
+        if(input::Pressed(KEY_UP)||input::Pressed(KEY_W)) menuCursor=(menuCursor+kMenuItemCount-1)%kMenuItemCount;
+        if(input::Pressed(KEY_DOWN)||input::Pressed(KEY_S)) menuCursor=(menuCursor+1)%kMenuItemCount;
+        if(menuCursor==2&&(input::Pressed(KEY_LEFT)||input::Pressed(KEY_RIGHT))) CycleDifficulty(input::Pressed(KEY_RIGHT)?1:-1);
+        if(input::Pressed(KEY_V)){vsRequested=true;return;}
+        if(input::Pressed(KEY_C)){flow=StoryFlow::Controls;return;}
+        if(input::Pressed(KEY_ENTER)||input::Pressed(KEY_J)){
             switch(menuCursor){
                 case 0: ResetRun();newGameStarted=true;flow=StoryFlow::CharacterSelect;break;
                 case 1: vsRequested=true;break;
@@ -144,15 +147,15 @@ void Stage1StoryGame::Update(float dt){dt=std::min(dt,.033f);
     // DF-014: eleccion de luchador al empezar la historia (Rayden o Rayder).
     if(flow==StoryFlow::CharacterSelect){
         constexpr int n=(int)(sizeof(kStoryCharacters)/sizeof(kStoryCharacters[0]));
-        if(IsKeyPressed(KEY_LEFT)||IsKeyPressed(KEY_A)){characterCursor=(characterCursor+n-1)%n;AudioSystem::Get().Play(Sfx::Ui);}
-        if(IsKeyPressed(KEY_RIGHT)||IsKeyPressed(KEY_D)){characterCursor=(characterCursor+1)%n;AudioSystem::Get().Play(Sfx::Ui);}
-        if(IsKeyPressed(KEY_ESCAPE)){flow=StoryFlow::Menu;return;}
-        if(IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_J)){player.ApplyCharacter(kStoryCharacters[characterCursor]);ResetRun();flow=StoryFlow::Intro;bannerTimer=2.4f;}
+        if(input::Pressed(KEY_LEFT)||input::Pressed(KEY_A)){characterCursor=(characterCursor+n-1)%n;AudioSystem::Get().Play(Sfx::Ui);}
+        if(input::Pressed(KEY_RIGHT)||input::Pressed(KEY_D)){characterCursor=(characterCursor+1)%n;AudioSystem::Get().Play(Sfx::Ui);}
+        if(input::Pressed(KEY_ESCAPE)){flow=StoryFlow::Menu;return;}
+        if(input::Pressed(KEY_ENTER)||input::Pressed(KEY_J)){player.ApplyCharacter(kStoryCharacters[characterCursor]);ResetRun();flow=StoryFlow::Intro;bannerTimer=2.4f;}
         return;
     }
-    if(flow==StoryFlow::Options){if(IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_J))AudioSystem::Get().SetMuted(!AudioSystem::Get().IsMuted());if(IsKeyPressed(KEY_ESCAPE))flow=StoryFlow::Menu;return;}
-    if(flow==StoryFlow::Credits){if(IsKeyPressed(KEY_ESCAPE)||IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_J))flow=StoryFlow::Menu;return;}
-    if(flow==StoryFlow::Controls){if(IsKeyPressed(KEY_ESCAPE)||IsKeyPressed(KEY_C))flow=StoryFlow::Menu;return;}if(IsKeyPressed(KEY_ESCAPE)){if(flow==StoryFlow::Combat||flow==StoryFlow::Boss)flow=StoryFlow::Pause;else if(flow==StoryFlow::Pause)flow=finalBossSpawned?StoryFlow::Boss:StoryFlow::Combat;}if(flow==StoryFlow::Pause)return;if(flow==StoryFlow::GameOver){if(IsKeyPressed(KEY_R)){ResetRun();flow=StoryFlow::Intro;}if(IsKeyPressed(KEY_Q))flow=StoryFlow::Menu;return;}if(flow==StoryFlow::StageClear){if(IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_J))advanceRequested=true;else if(IsKeyPressed(KEY_R))flow=StoryFlow::Menu;return;}if(flow==StoryFlow::ScenarioClear){transitionTimer-=dt;if(transitionTimer<=0){BuildScenario(scenario);player.position.x=ScenarioStartX()+90;camera.x=std::clamp(player.position.x,camera.minX,camera.maxX);cameraX=camera.x;flow=StoryFlow::Combat;bannerTimer=2.f;}return;}player.PumpInput(dt);if(hitstop.Consume(dt))return;shake=std::max(0.f,shake-dt);bannerTimer=std::max(0.f,bannerTimer-dt);UpdateParticles(dt);if(flow==StoryFlow::Intro){bannerTimer-=dt;if(bannerTimer<=0){flow=StoryFlow::Combat;}return;}if(flow==StoryFlow::SubBossIntro){bannerTimer-=dt;if(bannerTimer<=0)flow=StoryFlow::Combat;UpdateCombat(dt);return;}if(flow==StoryFlow::Combat){stageTime+=dt;UpdateCombat(dt);}if(flow==StoryFlow::BossIntro||flow==StoryFlow::Boss){stageTime+=dt;UpdateBossFight(dt);if(flow==StoryFlow::Boss&&player.state==PlayerState::Defeat)flow=StoryFlow::GameOver;}camera.Follow(player.position.x,dt,arena.Locked(),arena.LockX());cameraX=camera.x;}
+    if(flow==StoryFlow::Options){if(input::Pressed(KEY_ENTER)||input::Pressed(KEY_J))AudioSystem::Get().SetMuted(!AudioSystem::Get().IsMuted());if(input::Pressed(KEY_ESCAPE))flow=StoryFlow::Menu;return;}
+    if(flow==StoryFlow::Credits){if(input::Pressed(KEY_ESCAPE)||input::Pressed(KEY_ENTER)||input::Pressed(KEY_J))flow=StoryFlow::Menu;return;}
+    if(flow==StoryFlow::Controls){if(input::Pressed(KEY_ESCAPE)||input::Pressed(KEY_C))flow=StoryFlow::Menu;return;}if(input::Pressed(KEY_ESCAPE)){if(flow==StoryFlow::Combat||flow==StoryFlow::Boss)flow=StoryFlow::Pause;else if(flow==StoryFlow::Pause)flow=finalBossSpawned?StoryFlow::Boss:StoryFlow::Combat;}if(flow==StoryFlow::Pause)return;if(flow==StoryFlow::GameOver){if(input::Pressed(KEY_R)){ResetRun();flow=StoryFlow::Intro;}if(input::Pressed(KEY_Q))flow=StoryFlow::Menu;return;}if(flow==StoryFlow::StageClear){if(input::Pressed(KEY_ENTER)||input::Pressed(KEY_J))advanceRequested=true;else if(input::Pressed(KEY_R))flow=StoryFlow::Menu;return;}if(flow==StoryFlow::ScenarioClear){transitionTimer-=dt;if(transitionTimer<=0){BuildScenario(scenario);player.position.x=ScenarioStartX()+90;camera.x=std::clamp(player.position.x,camera.minX,camera.maxX);cameraX=camera.x;flow=StoryFlow::Combat;bannerTimer=2.f;}return;}player.PumpInput(dt);if(hitstop.Consume(dt))return;shake=std::max(0.f,shake-dt);bannerTimer=std::max(0.f,bannerTimer-dt);UpdateParticles(dt);if(flow==StoryFlow::Intro){bannerTimer-=dt;if(bannerTimer<=0){flow=StoryFlow::Combat;}return;}if(flow==StoryFlow::SubBossIntro){bannerTimer-=dt;if(bannerTimer<=0)flow=StoryFlow::Combat;UpdateCombat(dt);return;}if(flow==StoryFlow::Combat){stageTime+=dt;UpdateCombat(dt);}if(flow==StoryFlow::BossIntro||flow==StoryFlow::Boss){stageTime+=dt;UpdateBossFight(dt);if(flow==StoryFlow::Boss&&player.state==PlayerState::Defeat)flow=StoryFlow::GameOver;}camera.Follow(player.position.x,dt,arena.Locked(),arena.LockX());cameraX=camera.x;}
 // DF-014: antes el jugador no se actualizaba durante la pelea con Brakk
 // (solo UpdateBoss), por lo que no podia moverse ni atacar y el nivel no
 // se podia terminar.

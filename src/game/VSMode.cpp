@@ -1,4 +1,5 @@
 #include "game/VSMode.h"
+#include "core/InputMap.h"
 #include "game/lab/KfReference.h"
 #include "rendering/AssetManager.h"
 #include "ui/GameHUD.h"
@@ -79,11 +80,11 @@ void VSMode::StartFight(){flow=VSFlow::Fight;ResetFight();}
 void VSMode::Update(float dt){
  dt=std::min(dt,.033f);
  if(flow==VSFlow::Select){
-  if(IsKeyPressed(KEY_ESCAPE)){exitRequested=true;return;}
-  if(IsKeyPressed(KEY_UP))cursor=(cursor+kFieldCount-1)%kFieldCount;
-  if(IsKeyPressed(KEY_DOWN))cursor=(cursor+1)%kFieldCount;
-  if(IsKeyPressed(KEY_LEFT)||IsKeyPressed(KEY_RIGHT)){
-   int dir=IsKeyPressed(KEY_RIGHT)?1:-1;
+  if(input::Pressed(KEY_ESCAPE)){exitRequested=true;return;}
+  if(input::Pressed(KEY_UP))cursor=(cursor+kFieldCount-1)%kFieldCount;
+  if(input::Pressed(KEY_DOWN))cursor=(cursor+1)%kFieldCount;
+  if(input::Pressed(KEY_LEFT)||input::Pressed(KEY_RIGHT)){
+   int dir=input::Pressed(KEY_RIGHT)?1:-1;
    if(cursor==0){stage=(stage+dir+kStageCount)%kStageCount;scenario=std::clamp(scenario,0,ScenarioCount()-1);}
    else if(cursor==1)scenario=std::clamp(scenario+dir,0,ScenarioCount()-1);
    else if(cursor==2)enemyCount=std::clamp(enemyCount+dir,1,4);
@@ -92,14 +93,14 @@ void VSMode::Update(float dt){
    else if(cursor==9)kfRival=((kfRival+1+dir+KfRosterCount()+1)%(KfRosterCount()+1))-1;
    else{int slot=cursor-5;enemyTypes[(size_t)slot]=NextEnemyType(enemyTypes[(size_t)slot],dir);}
   }
-  if(IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_J))StartFight();
+  if(input::Pressed(KEY_ENTER)||input::Pressed(KEY_J))StartFight();
   return;
  }
- if(IsKeyPressed(KEY_ESCAPE)){flow=VSFlow::Select;enemies.clear();return;}
- if(IsKeyPressed(KEY_R)){ResetFight();return;}
+ if(input::Pressed(KEY_ESCAPE)){flow=VSFlow::Select;enemies.clear();return;}
+ if(input::Pressed(KEY_R)){ResetFight();return;}
  // N: reproduce una por una las acciones del bot de referencia para inspeccionarlas.
- if(IsKeyPressed(KEY_N)&&!enemies.empty()&&enemies[0].referenceSkin&&kfRival>=0){const KfReference& ref=GetKfCharacter(kfRival);if(!ref.clipNames.empty()){kfDemoClip=(kfDemoClip+1)%(int)ref.clipNames.size();enemies[0].skinAnimator.PlayNamed(ref.clipNames[(size_t)kfDemoClip]);enemies[0].skinClip=ref.clipNames[(size_t)kfDemoClip];}}
- if(playerDefeated||(selectedBoss>=0&&boss.IsDefeated())){if(IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_J))ResetFight();return;}
+ if(input::Pressed(KEY_N)&&!enemies.empty()&&enemies[0].referenceSkin&&kfRival>=0){const KfReference& ref=GetKfCharacter(kfRival);if(!ref.clipNames.empty()){kfDemoClip=(kfDemoClip+1)%(int)ref.clipNames.size();enemies[0].skinAnimator.PlayNamed(ref.clipNames[(size_t)kfDemoClip]);enemies[0].skinClip=ref.clipNames[(size_t)kfDemoClip];}}
+ if(playerDefeated||(selectedBoss>=0&&boss.IsDefeated())){if(input::Pressed(KEY_ENTER)||input::Pressed(KEY_J))ResetFight();return;}
  player.PumpInput(dt);if(hitstop>0){hitstop-=dt;return;}
  player.Update(dt);player.position.x=std::clamp(player.position.x,kMinX,kMaxX);player.position.y=std::clamp(player.position.y,kMinY,kMaxY);
  if(selectedBoss>=0){

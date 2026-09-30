@@ -1,4 +1,5 @@
 #include "game/lab/KfReference.h"
+#include "core/Platform.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
@@ -159,8 +160,7 @@ KfReference Load(const KfRosterEntry& who) {
     std::vector<unsigned char> data;
     for (const char* path : {"apk_reference/king_fighter_iii/bin/animation.bin", "../apk_reference/king_fighter_iii/bin/animation.bin",
                              "../../apk_reference/king_fighter_iii/bin/animation.bin"}) {
-        std::ifstream in(path, std::ios::binary);
-        if (in) { data.assign(std::istreambuf_iterator<char>(in), {}); break; }
+        if (platform::AssetExists(path) && platform::LoadBinaryFile(path, data)) break;
     }
     if (data.empty()) { out.error = "no se encontro apk_reference/.../animation.bin"; return out; }
     if (!IsWindowReady()) { out.error = "sin ventana"; return out; }

@@ -1,4 +1,5 @@
 #include "game/Player.h"
+#include "core/InputMap.h"
 #include "rendering/AssetManager.h"
 #include "rendering/BossSprite.h"
 #include "game/CharacterVisual.h"
@@ -442,6 +443,9 @@ void Player::PollAttackInput() {
     // Historial de direcciones para los comandos especiales.
     const int h = frameInput.moveX > 0.5f ? 1 : (frameInput.moveX < -0.5f ? -1 : 0);
     motion.Record(frameInput.moveY > 0.5f, h, inputBuffer.Frame());
+    const int facingDir = facing == Facing::Right ? 1 : -1;
+    if (frameInput.specialWave) inputBuffer.Push(InputCommand::SpecialWave, h != 0 ? h : facingDir);
+    if (frameInput.specialRise) inputBuffer.Push(InputCommand::SpecialRise, h != 0 ? h : facingDir);
     if (frameInput.punch) {
         const int dir = motion.QuarterCircle(inputBuffer.Frame());
         if (dir != 0) { inputBuffer.Push(InputCommand::SpecialWave, dir); motion.Clear(); }
@@ -457,16 +461,18 @@ void Player::PollAttackInput() {
 PlayerInput Player::ReadInput() const {
     if (scriptedInput) return *scriptedInput;
     PlayerInput in;
-    if (IsKeyDown(KEY_W)) in.moveY -= 1;
-    if (IsKeyDown(KEY_S)) in.moveY += 1;
-    if (IsKeyDown(KEY_A)) in.moveX -= 1;
-    if (IsKeyDown(KEY_D)) in.moveX += 1;
-    in.block = IsKeyDown(KEY_B);
-    in.dash = IsKeyPressed(KEY_LEFT_SHIFT);
-    in.punch = IsKeyPressed(KEY_J);
-    in.kick = IsKeyPressed(KEY_K);
-    in.energy = IsKeyPressed(KEY_L);
-    in.rage = IsKeyPressed(KEY_SPACE);
+    if (input::Down(KEY_W)) in.moveY -= 1;
+    if (input::Down(KEY_S)) in.moveY += 1;
+    if (input::Down(KEY_A)) in.moveX -= 1;
+    if (input::Down(KEY_D)) in.moveX += 1;
+    in.block = input::Down(KEY_B);
+    in.dash = input::Pressed(KEY_LEFT_SHIFT);
+    in.punch = input::Pressed(KEY_J);
+    in.kick = input::Pressed(KEY_K);
+    in.energy = input::Pressed(KEY_L);
+    in.rage = input::Pressed(KEY_SPACE);
+    in.specialWave = input::Pressed(input::kVirtualSpecialWave);
+    in.specialRise = input::Pressed(input::kVirtualSpecialRise);
     return in;
 }
 

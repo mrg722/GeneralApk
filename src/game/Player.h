@@ -15,6 +15,8 @@ enum class PlayerState { Idle, Walk, Dash, Attack, Block, Hit, GuardBreak, Knock
 struct PlayerInput {
     float moveX = 0.0f, moveY = 0.0f;
     bool block = false, dash = false, punch = false, kick = false, energy = false, rage = false;
+    // Botones tactiles de especial directo (sin tener que hacer el comando).
+    bool specialWave = false, specialRise = false;
 };
 
 // Sub-estado de la FSM mientras state == Attack.

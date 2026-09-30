@@ -1,5 +1,6 @@
 #include "rendering/SpriteManifest.h"
 #include "core/Json.h"
+#include "core/Platform.h"
 #include <algorithm>
 #include <fstream>
 #include <sstream>
@@ -59,11 +60,9 @@ const SpriteManifest& SpriteManifest::Get() {
 }
 
 bool SpriteManifest::LoadFromFile(const std::string& path) {
-    std::ifstream in(path, std::ios::binary);
-    if (!in) { error_ = "no se pudo abrir " + path; return false; }
-    std::stringstream ss;
-    ss << in.rdbuf();
-    return LoadFromString(ss.str());
+    std::string text;
+    if (!platform::LoadTextFile(path, text)) { error_ = "no se pudo abrir " + path; return false; }
+    return LoadFromString(text);
 }
 
 bool SpriteManifest::LoadFromString(const std::string& json) {

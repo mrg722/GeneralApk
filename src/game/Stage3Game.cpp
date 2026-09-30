@@ -1,4 +1,5 @@
 #include "game/Stage3Game.h"
+#include "core/InputMap.h"
 #include "ui/GameHUD.h"
 #include "rendering/AssetManager.h"
 #include "rendering/BossSprite.h"
@@ -81,15 +82,15 @@ void Stage3Game::UpdateBoss(float dt){
 }
 void Stage3Game::UpdateParticles(float dt){for(auto&p:particles){p.pos.x+=p.vel.x*dt;p.pos.y+=p.vel.y*dt;p.vel.y+=180*dt;p.life-=dt;}particles.erase(std::remove_if(particles.begin(),particles.end(),[](const Particle&p){return p.life<=0;}),particles.end());}
 void Stage3Game::Update(float dt){
- if(IsKeyPressed(KEY_P)||IsKeyPressed(KEY_ESCAPE))if(flow!=Flow::Clear&&flow!=Flow::GameOver&&flow!=Flow::BossIntro){flow=flow==Flow::Pause?Flow::Combat:Flow::Pause;}
- if(flow==Flow::Pause){if(IsKeyPressed(KEY_ENTER))flow=Flow::Combat;return;}
+ if(input::Pressed(KEY_P)||input::Pressed(KEY_ESCAPE))if(flow!=Flow::Clear&&flow!=Flow::GameOver&&flow!=Flow::BossIntro){flow=flow==Flow::Pause?Flow::Combat:Flow::Pause;}
+ if(flow==Flow::Pause){if(input::Pressed(KEY_ENTER))flow=Flow::Combat;return;}
  if(flow==Flow::Intro){
-  if(scenario==1&&transitionTimer<=0){if(IsKeyPressed(KEY_ONE))difficulty=Difficulty::Easy;if(IsKeyPressed(KEY_TWO))difficulty=Difficulty::Normal;if(IsKeyPressed(KEY_THREE))difficulty=Difficulty::Hard;if(IsKeyPressed(KEY_ENTER)){flow=Flow::Combat;bannerTimer=1.8f;ApplyDifficulty();}}
+  if(scenario==1&&transitionTimer<=0){if(input::Pressed(KEY_ONE))difficulty=Difficulty::Easy;if(input::Pressed(KEY_TWO))difficulty=Difficulty::Normal;if(input::Pressed(KEY_THREE))difficulty=Difficulty::Hard;if(input::Pressed(KEY_ENTER)){flow=Flow::Combat;bannerTimer=1.8f;ApplyDifficulty();}}
   else if(transitionTimer>0){transitionTimer-=dt;if(transitionTimer<=0)flow=Flow::Combat;}
  }else if(flow==Flow::Combat||flow==Flow::Gatekeeper){stageTime+=dt;if(bannerTimer>0)bannerTimer-=dt;player.PumpInput(dt);if(hitstop>0)hitstop-=dt;else UpdateCombat(dt);
  }else if(flow==Flow::BossIntro||flow==Flow::Boss){stageTime+=dt;player.PumpInput(dt);if(hitstop>0)hitstop-=dt;else{player.Update(dt);UpdateBoss(dt);UpdateProjectiles(dt);}}
- else if(flow==Flow::Clear){if(IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_J))advanceRequested=true;}
- else if(flow==Flow::GameOver){if(IsKeyPressed(KEY_ENTER)){ResetRun();flow=Flow::Combat;}}
+ else if(flow==Flow::Clear){if(input::Pressed(KEY_ENTER)||input::Pressed(KEY_J))advanceRequested=true;}
+ else if(flow==Flow::GameOver){if(input::Pressed(KEY_ENTER)){ResetRun();flow=Flow::Combat;}}
  if(comboTimer>0)comboTimer-=dt;else combo=0;UpdateParticles(dt);cameraX=std::clamp(player.position.x,640.f,5360.f);
 }
 void Stage3Game::DrawWorld()const{

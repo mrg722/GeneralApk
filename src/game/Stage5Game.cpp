@@ -1,4 +1,5 @@
 #include "game/Stage5Game.h"
+#include "core/InputMap.h"
 #include "rendering/AssetManager.h"
 #include "rendering/BossSprite.h"
 #include "rendering/Backdrop.h"
@@ -68,7 +69,7 @@ void Stage5Game::UpdateCombat(float dt){if(comboTimer>0)comboTimer-=dt;else comb
 // Energy Wave oscura via proyectil, dash y teletransporte) en vez de
 // inventar un moveset nuevo — asi el diseno narrativo ("el mismo poder,
 // sin humanidad") queda reflejado en el propio combate, no solo en texto.
-void Stage5Game::UpdateBoss(float dt){if(boss.invuln>0)boss.invuln-=dt;if(boss.teleportCooldown>0)boss.teleportCooldown-=dt;if(flow==Flow::BossIntro){bannerTimer-=dt;kessler.Update(dt);if(IsKeyPressed(KEY_ENTER))kessler.Skip();player.position.x=std::min(player.position.x,boss.pos.x-220);if(bannerTimer<=0&&kessler.IsDone())flow=Flow::Boss;return;}if(boss.defeated)return;float ratio=(float)boss.hp/boss.maxHp;int ph=ratio<=.3f?3:ratio<=.65f?2:1;if(ph!=boss.phase){boss.phase=ph;boss.attack=BossAttack::None;boss.elapsed=0;SpawnImpact(boss.pos,{255,60,90,255},true);shake=.28f;}
+void Stage5Game::UpdateBoss(float dt){if(boss.invuln>0)boss.invuln-=dt;if(boss.teleportCooldown>0)boss.teleportCooldown-=dt;if(flow==Flow::BossIntro){bannerTimer-=dt;kessler.Update(dt);if(input::Pressed(KEY_ENTER))kessler.Skip();player.position.x=std::min(player.position.x,boss.pos.x-220);if(bannerTimer<=0&&kessler.IsDone())flow=Flow::Boss;return;}if(boss.defeated)return;float ratio=(float)boss.hp/boss.maxHp;int ph=ratio<=.3f?3:ratio<=.65f?2:1;if(ph!=boss.phase){boss.phase=ph;boss.attack=BossAttack::None;boss.elapsed=0;SpawnImpact(boss.pos,{255,60,90,255},true);shake=.28f;}
  boss.facingRight=player.position.x>boss.pos.x;
  boss.attackTimer-=dt;boss.elapsed+=dt;float dx=player.position.x-boss.pos.x;
  if(boss.attack==BossAttack::None&&boss.teleportCooldown<=0&&std::abs(dx)<140&&GetRandomValue(0,99)<45){boss.attack=BossAttack::Teleport;boss.elapsed=0;boss.teleportCooldown=boss.phase>=3?2.2f:3.0f;}
@@ -88,7 +89,7 @@ void Stage5Game::UpdateBoss(float dt){if(boss.invuln>0)boss.invuln-=dt;if(boss.t
   if(boss.attack!=BossAttack::None&&boss.elapsed>(boss.attack==BossAttack::Dash?.95f:boss.attack==BossAttack::Finisher?1.05f:.85f)){boss.attack=BossAttack::None;boss.elapsed=0;}
  }
  boss.pos.x=std::clamp(boss.pos.x,200.f,1680.f);boss.pos.y=std::clamp(boss.pos.y,kLaneMinY,kLaneMaxY);HandleBossHits();if(boss.hp<=0)DefeatBoss();}
-void Stage5Game::Update(float dt){dt=std::min(dt,.033f);if(IsKeyPressed(KEY_ESCAPE)){if(flow==Flow::Combat||flow==Flow::Boss||flow==Flow::BossIntro)flow=Flow::Pause;else if(flow==Flow::Pause)flow=boss.defeated?Flow::Clear:Flow::Boss;}if(flow==Flow::Pause){if(IsKeyPressed(KEY_R))Init();return;}if(flow==Flow::GameOver){if(IsKeyPressed(KEY_R))Init();return;}if(flow==Flow::Clear){if(IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_J))advanceRequested=true;return;}player.PumpInput(dt);if(hitstop>0){hitstop-=dt;return;}shake=std::max(0.f,shake-dt);bannerTimer=std::max(0.f,bannerTimer-dt);UpdateParticles(dt);if(flow==Flow::Intro){if(IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_J)){flow=Flow::Combat;zone=1;zoneSpawned=false;bannerTimer=1.8f;}return;}stageTime+=dt;UpdateCombat(dt);if(flow==Flow::BossIntro||flow==Flow::Boss)UpdateBoss(dt);float target=zone>3?std::clamp((player.position.x+boss.pos.x)*0.5f,640.f,1240.f):std::clamp(player.position.x,640.f,1240.f);cameraX+=(target-cameraX)*(1-std::pow(.001f,dt));}
+void Stage5Game::Update(float dt){dt=std::min(dt,.033f);if(input::Pressed(KEY_ESCAPE)){if(flow==Flow::Combat||flow==Flow::Boss||flow==Flow::BossIntro)flow=Flow::Pause;else if(flow==Flow::Pause)flow=boss.defeated?Flow::Clear:Flow::Boss;}if(flow==Flow::Pause){if(input::Pressed(KEY_R))Init();return;}if(flow==Flow::GameOver){if(input::Pressed(KEY_R))Init();return;}if(flow==Flow::Clear){if(input::Pressed(KEY_ENTER)||input::Pressed(KEY_J))advanceRequested=true;return;}player.PumpInput(dt);if(hitstop>0){hitstop-=dt;return;}shake=std::max(0.f,shake-dt);bannerTimer=std::max(0.f,bannerTimer-dt);UpdateParticles(dt);if(flow==Flow::Intro){if(input::Pressed(KEY_ENTER)||input::Pressed(KEY_J)){flow=Flow::Combat;zone=1;zoneSpawned=false;bannerTimer=1.8f;}return;}stageTime+=dt;UpdateCombat(dt);if(flow==Flow::BossIntro||flow==Flow::Boss)UpdateBoss(dt);float target=zone>3?std::clamp((player.position.x+boss.pos.x)*0.5f,640.f,1240.f):std::clamp(player.position.x,640.f,1240.f);cameraX+=(target-cameraX)*(1-std::pow(.001f,dt));}
 // DF-013.2: silueta roja/negra corrupta del clon — mismas proporciones que
 // un personaje humano (no un boss gigante), con "grietas" de energia roja
 // en vez de piel, coherente con el diseno ("mismo poder, sin humanidad").

@@ -4,6 +4,8 @@
 //   ./build/stage1_visual_check [carpeta_salida] [id_personaje: 0 Rayden, 6 Rayder]
 #include "Stage1Bot.h"
 #include "rendering/AssetManager.h"
+#include "ui/TouchControls.h"
+#include <cstdlib>
 #include "raylib.h"
 #include <cstdio>
 #include <cstdlib>
@@ -19,6 +21,7 @@ int main(int argc, char** argv) {
     AssetManager::Get().LoadAll();
 
     const int skin = argc > 2 ? std::atoi(argv[2]) : 0;
+    touch::SetEnabled(std::getenv("DF_TOUCH") != nullptr);
     Stage1StoryGame game;
     game.SetSavePath(out + "/visual_check_save.dat");
     int shots = 0;
@@ -52,6 +55,7 @@ int main(int argc, char** argv) {
         BeginDrawing();
         ClearBackground(BLACK);
         game.Draw();
+        if (touch::Enabled()) touch::Draw(touch::Context::Combat, &game.PlayerRef());
         EndDrawing();
         const ArenaDirector& a = game.Arena();
         if (a.Locked() && !wasLocked && shots < 3) Shot("bloqueo_oleada");

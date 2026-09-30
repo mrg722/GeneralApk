@@ -7,6 +7,12 @@
 namespace district_fury {
 class Stage3Game {
 public:
+    // Pantalla actual para los controles tactiles: 0 combate, 1 menu, 2 fin.
+    int TouchContext() const {
+        if (flow == Flow::Combat || flow == Flow::Boss || flow == Flow::BossIntro || flow == Flow::Gatekeeper) return 0;
+        if (flow == Flow::GameOver || flow == Flow::Clear) return 2;
+        return 1;
+    }
     Stage3Game();
     void Init();
     void Update(float dt);

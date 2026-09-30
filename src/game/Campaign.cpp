@@ -1,4 +1,6 @@
 #include "game/Campaign.h"
+#include "core/Platform.h"
+#include <sstream>
 #include <fstream>
 
 namespace district_fury {
@@ -64,8 +66,9 @@ void Campaign::ResetRun() {
 }
 
 void Campaign::Load() {
-    std::ifstream in(path);
-    if (!in) return;
+    std::string text;
+    if (!platform::LoadTextFile(path, text)) return;
+    std::istringstream in(text);
     in >> stagesCompleted >> totalScore >> upgrades.bonusMaxHp >> upgrades.bonusMaxSp
        >> upgrades.bonusMaxShield >> upgrades.rageCapacityScale >> upgrades.attackDamageScale
        >> upgrades.energyDamageScale >> upgrades.moveSpeedScale >> upgrades.dashCooldownScale
@@ -73,13 +76,13 @@ void Campaign::Load() {
 }
 
 void Campaign::Save() const {
-    std::ofstream out(path, std::ios::trunc);
-    if (!out) return;
+    std::ostringstream out;
     out << stagesCompleted << ' ' << totalScore << ' ' << upgrades.bonusMaxHp << ' '
         << upgrades.bonusMaxSp << ' ' << upgrades.bonusMaxShield << ' '
         << upgrades.rageCapacityScale << ' ' << upgrades.attackDamageScale << ' '
         << upgrades.energyDamageScale << ' ' << upgrades.moveSpeedScale << ' '
         << upgrades.dashCooldownScale << ' ' << upgrades.comboWindowBonus << '\n';
+    platform::SaveTextFile(path, out.str());
 }
 
 }  // namespace district_fury

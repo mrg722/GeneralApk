@@ -1,4 +1,5 @@
 #include "rendering/AssetManager.h"
+#include "core/Platform.h"
 #include <algorithm>
 #include <queue>
 #include <string>
@@ -7,12 +8,12 @@
 namespace district_fury {
 namespace {
 std::string ResolveAssetPath(const std::vector<std::string>& candidates) {
-    for (const auto& path : candidates) if (FileExists(path.c_str())) return path;
+    for (const auto& path : candidates) if (platform::AssetExists(path)) return path;
     return candidates.empty()?std::string{}:candidates.front();
 }
 Texture2D LoadRequiredTexture(const char* key,const std::vector<std::string>& candidates,TextureFilter filter){
     const std::string path=ResolveAssetPath(candidates);
-    if(path.empty()||!FileExists(path.c_str())){TraceLog(LOG_WARNING,"District Fury asset missing: %s",key);return Texture2D{0};}
+    if(path.empty()||!platform::AssetExists(path)){TraceLog(LOG_WARNING,"District Fury asset missing: %s",key);return Texture2D{0};}
     Texture2D texture=LoadTexture(path.c_str());
     if(texture.id==0){TraceLog(LOG_WARNING,"District Fury asset failed to load: %s (%s)",key,path.c_str());return Texture2D{0};}
     SetTextureFilter(texture,filter);return texture;
@@ -79,7 +80,7 @@ bool HasWhiteMatte(const Image& image){
 
 Texture2D LoadEnemyTexture(const char* key,const std::vector<std::string>& candidates){
     const std::string path=ResolveAssetPath(candidates);
-    if(path.empty()||!FileExists(path.c_str())){TraceLog(LOG_WARNING,"District Fury enemy asset missing: %s",key);return Texture2D{0};}
+    if(path.empty()||!platform::AssetExists(path)){TraceLog(LOG_WARNING,"District Fury enemy asset missing: %s",key);return Texture2D{0};}
     Image image=LoadImage(path.c_str());
     if(image.data==nullptr){TraceLog(LOG_WARNING,"District Fury enemy asset failed to load: %s (%s)",key,path.c_str());return Texture2D{0};}
     ImageFormat(&image,PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);

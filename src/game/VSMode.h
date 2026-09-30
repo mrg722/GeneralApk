@@ -12,6 +12,11 @@ enum class VSFlow { Select, Fight };
 
 class VSMode {
 public:
+    // Pantalla actual para los controles tactiles: 0 combate, 1 menu, 2 fin.
+    int TouchContext() const {
+        if (flow == VSFlow::Select) return 1;
+        return (playerDefeated || (selectedBoss >= 0 && boss.IsDefeated())) ? 2 : 0;
+    }
     VSMode();
     void Init();
     void Update(float dt);

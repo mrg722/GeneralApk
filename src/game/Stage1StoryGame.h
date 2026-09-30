@@ -23,6 +23,12 @@ struct StoryBoss {
 
 class Stage1StoryGame {
 public:
+    // Pantalla actual para los controles tactiles: 0 combate, 1 menu, 2 fin.
+    int TouchContext() const {
+        if (flow == StoryFlow::Combat || flow == StoryFlow::SubBossIntro || flow == StoryFlow::Boss || flow == StoryFlow::BossIntro) return 0;
+        if (flow == StoryFlow::GameOver || flow == StoryFlow::StageClear) return 2;
+        return 1;
+    }
     Stage1StoryGame();
     void Init(); void Update(float dt); void Draw() const;
     // DF-013.2: acceso al jugador para aplicar las mejoras de campana.
