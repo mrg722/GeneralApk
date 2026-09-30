@@ -1,0 +1,728 @@
+{
+  "version": 4,
+  "render_target": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60
+  },
+  "atlases": {
+    "rayden": {
+      "path": "assets/characters/rayden_128.png",
+      "grid": [
+        4,
+        6
+      ],
+      "cell": [
+        128,
+        128
+      ],
+      "pivot": [
+        64,
+        126
+      ],
+      "clips": "rayden"
+    },
+    "rayder": {
+      "path": "assets/characters/rayder/rayder_atlas.png",
+      "grid": [
+        10,
+        11
+      ],
+      "cell": [
+        160,
+        128
+      ],
+      "pivot": [
+        80,
+        122
+      ],
+      "clips": "rayder"
+    },
+    "rayden_legacy_96": {
+      "path": "assets/characters/rayden_clean.png",
+      "grid": [
+        4,
+        4
+      ],
+      "cell": [
+        96,
+        96
+      ],
+      "pivot": [
+        48,
+        95
+      ],
+      "clips": "rayden"
+    },
+    "punk": {
+      "path": "assets/enemies/punk_clean.png",
+      "grid": [
+        4,
+        3
+      ],
+      "cell": [
+        128,
+        128
+      ],
+      "pivot": [
+        64,
+        126
+      ]
+    },
+    "charger": {
+      "path": "assets/enemies/charger_clean.png",
+      "grid": [
+        4,
+        3
+      ],
+      "cell": [
+        128,
+        128
+      ],
+      "pivot": [
+        64,
+        126
+      ]
+    },
+    "brute": {
+      "path": "assets/enemies/brute_clean.png",
+      "grid": [
+        4,
+        3
+      ],
+      "cell": [
+        128,
+        128
+      ],
+      "pivot": [
+        64,
+        126
+      ]
+    },
+    "enforcer": {
+      "path": "assets/enemies/enforcer_clean.png",
+      "grid": [
+        4,
+        3
+      ],
+      "cell": [
+        128,
+        128
+      ],
+      "pivot": [
+        64,
+        126
+      ]
+    },
+    "chemical_soldier": {
+      "path": "assets/enemies/chemical_soldier_clean.png",
+      "grid": [
+        4,
+        3
+      ],
+      "cell": [
+        128,
+        128
+      ],
+      "pivot": [
+        64,
+        126
+      ]
+    },
+    "urban_ninja": {
+      "path": "assets/enemies/urban_ninja_clean.png",
+      "grid": [
+        4,
+        3
+      ],
+      "cell": [
+        128,
+        128
+      ],
+      "pivot": [
+        64,
+        126
+      ]
+    },
+    "mutant": {
+      "path": "assets/enemies/mutant_clean.png",
+      "grid": [
+        4,
+        3
+      ],
+      "cell": [
+        128,
+        128
+      ],
+      "pivot": [
+        64,
+        126
+      ]
+    },
+    "armored_guard": {
+      "path": "assets/enemies/armored_guard_clean.png",
+      "grid": [
+        4,
+        3
+      ],
+      "cell": [
+        128,
+        128
+      ],
+      "pivot": [
+        64,
+        126
+      ]
+    },
+    "old_steel_yard": {
+      "path": "assets/backgrounds/old_steel_yard_clean.png",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    "old_steel_yard_deep": {
+      "path": "assets/backgrounds/old_steel_yard_deep_clean.png",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    "mercado_antiguo": {
+      "path": "assets/backgrounds/mercado_antiguo_clean.png",
+      "size": [
+        256,
+        144
+      ],
+      "scale_to": [
+        1280,
+        720
+      ],
+      "filter": "point"
+    },
+    "zona_quimica": {
+      "path": "assets/backgrounds/zona_quimica_clean.png",
+      "size": [
+        256,
+        144
+      ],
+      "scale_to": [
+        1280,
+        720
+      ],
+      "filter": "point"
+    }
+  },
+  "clips": {
+    "rayden": {
+      "idle": {
+        "frames": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "duration": 0.12,
+        "loop": true
+      },
+      "walk": {
+        "frames": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "duration": 0.105,
+        "loop": true
+      },
+      "punch1": {
+        "frames": [
+          16,
+          8
+        ],
+        "durations": [
+          0.06,
+          0.24
+        ],
+        "loop": false
+      },
+      "punch2": {
+        "frames": [
+          9
+        ],
+        "durations": [
+          0.3
+        ],
+        "loop": false
+      },
+      "punch3": {
+        "frames": [
+          16,
+          11
+        ],
+        "durations": [
+          0.07,
+          0.35
+        ],
+        "loop": false
+      },
+      "kick": {
+        "frames": [
+          16,
+          10
+        ],
+        "durations": [
+          0.05,
+          0.37
+        ],
+        "loop": false
+      },
+      "energy": {
+        "frames": [
+          12
+        ],
+        "durations": [
+          0.55
+        ],
+        "loop": false
+      },
+      "dash_attack": {
+        "frames": [
+          8,
+          9
+        ],
+        "durations": [
+          0.12,
+          0.26
+        ],
+        "loop": false
+      },
+      "rage_attack": {
+        "frames": [
+          10,
+          11
+        ],
+        "durations": [
+          0.14,
+          0.41
+        ],
+        "loop": false
+      },
+      "finisher": {
+        "frames": [
+          12,
+          11
+        ],
+        "durations": [
+          0.2,
+          0.46
+        ],
+        "loop": false
+      },
+      "dash": {
+        "frames": [
+          14
+        ],
+        "durations": [
+          0.08
+        ],
+        "loop": false
+      },
+      "block": {
+        "frames": [
+          21
+        ],
+        "durations": [
+          0.1
+        ],
+        "loop": true
+      },
+      "hit_high": {
+        "frames": [
+          13
+        ],
+        "durations": [
+          0.13
+        ],
+        "loop": false
+      },
+      "hit_low": {
+        "frames": [
+          17
+        ],
+        "durations": [
+          0.13
+        ],
+        "loop": false
+      },
+      "airborne": {
+        "frames": [
+          18,
+          19
+        ],
+        "durations": [
+          0.12,
+          0.3
+        ],
+        "loop": false
+      },
+      "knockdown": {
+        "frames": [
+          15
+        ],
+        "durations": [
+          0.1
+        ],
+        "loop": false
+      },
+      "getup": {
+        "frames": [
+          20,
+          1
+        ],
+        "durations": [
+          0.2,
+          0.12
+        ],
+        "loop": false
+      },
+      "defeat": {
+        "frames": [
+          19,
+          15
+        ],
+        "durations": [
+          0.12,
+          0.1
+        ],
+        "loop": false
+      },
+      "recovery": {
+        "frames": [
+          2
+        ],
+        "durations": [
+          0.1
+        ],
+        "loop": false
+      }
+    },
+    "rayder": {
+      "idle": {
+        "frames": [
+          0,
+          1,
+          9,
+          1
+        ],
+        "duration": 0.13,
+        "loop": true
+      },
+      "walk": {
+        "frames": [
+          92,
+          93,
+          94,
+          95,
+          96,
+          97
+        ],
+        "duration": 0.1,
+        "loop": true
+      },
+      "dash": {
+        "frames": [
+          4,
+          5
+        ],
+        "durations": [
+          0.04,
+          0.1
+        ],
+        "loop": false
+      },
+      "punch1": {
+        "frames": [
+          50,
+          51,
+          52
+        ],
+        "durations": [
+          0.05,
+          0.12,
+          0.13
+        ],
+        "loop": false
+      },
+      "punch2": {
+        "frames": [
+          53,
+          54,
+          55
+        ],
+        "durations": [
+          0.05,
+          0.13,
+          0.12
+        ],
+        "loop": false
+      },
+      "punch3": {
+        "frames": [
+          56,
+          57,
+          58,
+          59
+        ],
+        "durations": [
+          0.05,
+          0.06,
+          0.16,
+          0.15
+        ],
+        "loop": false
+      },
+      "kick": {
+        "frames": [
+          60,
+          61,
+          62
+        ],
+        "durations": [
+          0.08,
+          0.18,
+          0.16
+        ],
+        "loop": false
+      },
+      "energy": {
+        "frames": [
+          68,
+          69,
+          70,
+          71
+        ],
+        "durations": [
+          0.1,
+          0.1,
+          0.2,
+          0.15
+        ],
+        "loop": false
+      },
+      "dash_attack": {
+        "frames": [
+          30,
+          16
+        ],
+        "durations": [
+          0.12,
+          0.26
+        ],
+        "loop": false
+      },
+      "rage_attack": {
+        "frames": [
+          63,
+          64,
+          65,
+          66,
+          67
+        ],
+        "durations": [
+          0.06,
+          0.12,
+          0.1,
+          0.12,
+          0.15
+        ],
+        "loop": false
+      },
+      "finisher": {
+        "frames": [
+          40,
+          29
+        ],
+        "durations": [
+          0.2,
+          0.46
+        ],
+        "loop": false
+      },
+      "block": {
+        "frames": [
+          88,
+          89
+        ],
+        "durations": [
+          0.1,
+          0.1
+        ],
+        "loop": true
+      },
+      "hit_high": {
+        "frames": [
+          77,
+          78
+        ],
+        "durations": [
+          0.06,
+          0.07
+        ],
+        "loop": false
+      },
+      "hit_low": {
+        "frames": [
+          79,
+          80
+        ],
+        "durations": [
+          0.06,
+          0.07
+        ],
+        "loop": false
+      },
+      "airborne": {
+        "frames": [
+          81,
+          82,
+          83
+        ],
+        "durations": [
+          0.1,
+          0.1,
+          0.2
+        ],
+        "loop": false
+      },
+      "knockdown": {
+        "frames": [
+          84
+        ],
+        "durations": [
+          0.1
+        ],
+        "loop": false
+      },
+      "getup": {
+        "frames": [
+          85,
+          86,
+          87
+        ],
+        "durations": [
+          0.12,
+          0.12,
+          0.08
+        ],
+        "loop": false
+      },
+      "defeat": {
+        "frames": [
+          81,
+          84
+        ],
+        "durations": [
+          0.12,
+          0.1
+        ],
+        "loop": false
+      },
+      "recovery": {
+        "frames": [
+          55
+        ],
+        "durations": [
+          0.1
+        ],
+        "loop": false
+      },
+      "victory": {
+        "frames": [
+          90,
+          91
+        ],
+        "durations": [
+          0.25,
+          0.6
+        ],
+        "loop": false
+      },
+      "turn": {
+        "frames": [
+          98,
+          99
+        ],
+        "durations": [
+          0.06,
+          0.06
+        ],
+        "loop": false
+      },
+      "projectile": {
+        "frames": [
+          72,
+          73,
+          74,
+          75,
+          76
+        ],
+        "durations": [
+          0.06,
+          0.06,
+          0.06,
+          0.06,
+          0.06
+        ],
+        "loop": true
+      }
+    },
+    "enemy_default": {
+      "idle": {
+        "frames": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "fps": 7
+      },
+      "walk": {
+        "frames": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "fps": 10
+      },
+      "attack": {
+        "frames": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "fps": 11,
+        "loop": false
+      },
+      "hit": {
+        "frames": [
+          8,
+          9
+        ],
+        "fps": 10,
+        "loop": false
+      },
+      "defeat": {
+        "frames": [
+          10,
+          11
+        ],
+        "fps": 5,
+        "loop": false
+      }
+    }
+  },
+  "notes": "v4.3: Rayder 10x11 = 50 poses originales (0-49) + set v2 del usuario (50-101: jab, gancho, gancho ascendente, patadas, onda, proyectil, golpes, aire, suelo, levantarse, bloqueo, victoria, caminar, girarse). + Rayder (personaje jugable) desde la hoja de 50 poses del usuario (tools/build_rayder_sheet.py): celda 160x128, pivote [80,122], frame i = pose i+1. v4.1: Rayden 4x6 (22 frames usados). Frames 0-15 = arte original reempaquetado y limpio; 16-21 derivados de sus propios pixeles con tools/build_rayden_sheet.py (anticipo, golpe bajo, aire x2, levantarse, bloqueo). cell/pivot por atlas; clips por nombre con 'duration', 'fps' o 'durations'. Rayden usa celda 128x128 con pivote [64,126] (rayden_128.png, generado con tools/repack_sheet.py desde rayden_clean.png sin escalar); rayden_legacy_96 conserva el atlas 96x96. Los clips se indexan por nombre con 'frames' de largo libre y 'duration' (fija), 'fps' o 'durations' (una por cuadro). DF-012 agrega Mercado Antiguo y Zona Quimica como fondos de prueba 256x144 escalables exactamente 5x a 1280x720 con filtro punto. El codigo de runtime los carga como recursos visuales opcionales para no romper copias antiguas del proyecto."
+}

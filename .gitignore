@@ -1,0 +1,54 @@
+﻿# Build outputs
+/build/
+/build-*/
+/out/
+/cmake-build-*/
+/CMakeFiles/
+/CMakeCache.txt
+/CTestTestfile.cmake
+/Testing/
+/compile_commands.json
+
+# CMake and package-manager artifacts
+/_deps/
+/.cache/
+/.tooling/
+/.raylib-src/
+
+# IDEs and editors
+/.vs/
+/.vscode/
+*.user
+*.suo
+*.vcxproj*
+*.sln
+*.code-workspace
+
+# Compiler and debugger outputs
+*.obj
+*.pdb
+*.ilk
+*.exe
+*.dll
+*.lib
+*.a
+*.so
+*.dylib
+*.dSYM/
+
+# Local build/debug logs
+build.log
+build_exit.txt
+configure.log
+configure_exit.txt
+exe_path.txt
+configure_validate_cfg.txt
+configure_validate_meta.txt
+build_validate_cfg.txt
+build_validate_build.txt
+
+district_fury_save.dat
+# Python cache
+__pycache__/
+*.py[cod]
+/build-android/
