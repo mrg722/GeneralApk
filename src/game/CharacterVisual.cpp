@@ -7,7 +7,7 @@ namespace {
 
 // name, folder, uniformCanvas, scale, targetHeight, footInset,
 // facesRightByDefault, maxHp, damageMultiplier, speedMultiplier
-const std::array<CharacterVisual, 7> kCharacters{{
+const std::array<CharacterVisual, 18> kCharacters{{
     {"RAYDEN (ORIGINAL)", nullptr,           false, 1.00f,   0.0f, 0.0f, true,  100, 1.00f, 1.00f},
     {"RAYDEN CLON",       "rayder_clone",    false, 1.00f, 118.0f, 0.0f, true,  110, 1.05f, 1.05f},
     {"BRAKK",             "brakk",           true,  175.0f/188.0f, 0.0f, 9.0f, true, 150, 1.25f, 0.85f},
@@ -16,6 +16,18 @@ const std::array<CharacterVisual, 7> kCharacters{{
     {"TITAN-X MEJORADO",  "titanx_mejorado", false, 1.00f, 235.0f, 0.0f, false, 180, 1.40f, 0.75f},
     // DF-014: Rayder, hoja de 50 poses del usuario (tools/build_rayder_sheet.py).
     {"RAYDER",            nullptr,           false, 1.00f,   0.0f, 0.0f, true,  100, 1.00f, 1.00f, "rayder"},
+    // Laboratorio (temporales, solo Modo VS): personajes extraidos de la APK.
+    {"KF HEROE (PELO BLANCO)", nullptr, false, 1.50f, 0.0f, 0.0f, true, 110, 1.00f, 1.05f, nullptr, 0},
+    {"KF HEROINA (PELIRROJA)", nullptr, false, 1.50f, 0.0f, 0.0f, true, 100, 0.95f, 1.10f, nullptr, 1},
+    {"KF MATON",               nullptr, false, 1.50f, 0.0f, 0.0f, true,  90, 1.05f, 0.95f, nullptr, 2},
+    {"KF NAVAJERA",            nullptr, false, 1.50f, 0.0f, 0.0f, true,  80, 0.95f, 1.10f, nullptr, 3},
+    {"KF SOLDADO",             nullptr, false, 1.50f, 0.0f, 0.0f, true,  95, 1.00f, 1.00f, nullptr, 4},
+    {"KF RUBIA",               nullptr, false, 1.50f, 0.0f, 0.0f, true,  80, 0.95f, 1.10f, nullptr, 5},
+    {"KF GORRA",               nullptr, false, 1.50f, 0.0f, 0.0f, true,  85, 1.00f, 1.05f, nullptr, 6},
+    {"KF PELEADOR",            nullptr, false, 1.50f, 0.0f, 0.0f, true,  95, 1.05f, 1.00f, nullptr, 7},
+    {"KF CUCHILLERO",          nullptr, false, 1.50f, 0.0f, 0.0f, true,  85, 1.00f, 1.05f, nullptr, 8},
+    {"KF JEFE GARRA",          nullptr, false, 1.08f, 0.0f, 0.0f, true, 160, 1.25f, 0.85f, nullptr, 9},
+    {"KF BUFONA",              nullptr, false, 1.50f, 0.0f, 0.0f, true, 140, 1.15f, 1.00f, nullptr, 10},
 }};
 
 }  // namespace

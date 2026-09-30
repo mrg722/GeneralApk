@@ -111,16 +111,50 @@ void HueShift(Image& img, float degrees) {
     }
 }
 
-// Accion de la APK -> clip del bot (ver docs: clasificacion de acciones del sprite 0).
+// Accion de la APK -> nombre de clip. Plantillas identificadas en
+// docs/estudio_kf/FORMATO_Y_ACCIONES.md (heroe: sprite 0/2; enemigo: 6,10,...).
 struct ClipMap { const char* name; int action; bool loop; };
-constexpr ClipMap kClips[] = {
+constexpr ClipMap kHeroClips[] = {
     {"idle", 0, true}, {"walk", 1, true}, {"run", 2, true}, {"dash", 3, false},
     {"atk1", 6, false}, {"atk2", 7, false}, {"atk3", 8, false}, {"atk4", 9, false},
     {"special", 10, false}, {"hit", 11, false}, {"knockdown", 13, false}, {"air", 14, false},
     {"getup", 16, false}, {"defeat", 17, false}, {"super", 19, false},
+    {"punch1", 6, false}, {"punch2", 7, false}, {"punch3", 8, false}, {"kick", 9, false},
+    {"energy", 10, false}, {"dash_attack", 3, false}, {"rage_attack", 19, false}, {"finisher", 10, false},
+    {"block", 15, true}, {"hit_high", 11, false}, {"hit_low", 11, false}, {"airborne", 14, false},
+    {"recovery", 15, false},
+};
+constexpr ClipMap kEnemyClips[] = {
+    {"idle", 0, true}, {"walk", 1, true}, {"run", 2, true}, {"dash", 2, false},
+    {"atk1", 3, false}, {"atk2", 4, false}, {"atk3", 5, false}, {"atk4", 6, false},
+    {"special", 7, false}, {"hit", 8, false}, {"knockdown", 13, false}, {"air", 14, false},
+    {"getup", 20, false}, {"defeat", 11, false},
+    {"punch1", 3, false}, {"punch2", 4, false}, {"punch3", 5, false}, {"kick", 6, false},
+    {"energy", 7, false}, {"dash_attack", 2, false}, {"rage_attack", 6, false}, {"finisher", 7, false},
+    {"block", 0, true}, {"hit_high", 8, false}, {"hit_low", 12, false}, {"airborne", 14, false},
+    {"recovery", 0, false},
+};
+// Clips que el juego necesita siempre; si la accion no existe se usa "idle".
+constexpr const char* kRequired[] = {"idle", "walk", "dash", "atk1", "atk2", "atk3", "atk4", "special", "hit",
+    "knockdown", "air", "getup", "defeat", "punch1", "punch2", "punch3", "kick", "energy", "dash_attack",
+    "rage_attack", "finisher", "block", "hit_high", "hit_low", "airborne", "recovery"};
+
+constexpr KfRosterEntry kRoster[] = {
+    {0, "KF HEROE (PELO BLANCO)", true, 110, 1.8f},
+    {2, "KF HEROINA (PELIRROJA)", true, 100, 1.8f},
+    {6, "KF MATON", false, 90, 1.8f},
+    {10, "KF NAVAJERA", false, 80, 1.8f},
+    {11, "KF SOLDADO", false, 95, 1.8f},
+    {13, "KF RUBIA", false, 80, 1.8f},
+    {14, "KF GORRA", false, 85, 1.8f},
+    {16, "KF PELEADOR", false, 95, 1.8f},
+    {18, "KF CUCHILLERO", false, 85, 1.8f},
+    {12, "KF JEFE GARRA", false, 160, 1.3f},   // sprite de jefe: el doble de grande de origen
+    {15, "KF BUFONA", false, 140, 1.8f},
+    // El sprite 33 no es luchador (vendedor/puesto del escenario): excluido.
 };
 
-KfReference Load() {
+KfReference Load(const KfRosterEntry& who) {
     KfReference out;
     std::vector<unsigned char> data;
     for (const char* path : {"apk_reference/king_fighter_iii/bin/animation.bin", "../apk_reference/king_fighter_iii/bin/animation.bin",
@@ -135,8 +169,11 @@ KfReference Load() {
     const int ns = r.s16(), ni = r.s16();
     std::vector<int> offs(ns + 1); for (auto& v : offs) v = r.s32();
     const size_t base = r.p;
-    r.p = base + offs[0];
+    if (who.sprite < 0 || who.sprite >= ns) { out.error = "sprite fuera de rango"; return out; }
+    r.p = base + offs[(size_t)who.sprite];
     SpriteData sp = ParseSprite(r);
+    const ClipMap* clips = who.hero ? kHeroClips : kEnemyClips;
+    const size_t nclips = who.hero ? sizeof(kHeroClips) / sizeof(kHeroClips[0]) : sizeof(kEnemyClips) / sizeof(kEnemyClips[0]);
     r.p = base + offs[ns];
     std::vector<int> ioffs(ni + 1); for (auto& v : ioffs) v = r.s32();
     const size_t ibase = r.p;
@@ -162,7 +199,8 @@ KfReference Load() {
     // Frames usados por los clips.
     std::map<int, int> frameSlot;   // frame APK -> indice en el atlas
     std::vector<Image> composed; std::vector<Vector2> origin;
-    for (const ClipMap& c : kClips) {
+    for (size_t ci = 0; ci < nclips; ++ci) {
+        const ClipMap& c = clips[ci];
         if (c.action >= (int)sp.actions.size()) continue;
         for (const auto& st : sp.actions[(size_t)c.action]) {
             if (frameSlot.count(st.frame) || st.frame >= (int)sp.frames.size()) continue;
@@ -229,7 +267,8 @@ KfReference Load() {
 
     out.templ.Init(tex, 1, 1, true);
     out.templ.SetFrames(frames);
-    for (const ClipMap& c : kClips) {
+    for (size_t ci = 0; ci < nclips; ++ci) {
+        const ClipMap& c = clips[ci];
         if (c.action >= (int)sp.actions.size()) continue;
         AnimationClip clip{0, 0, kTickSeconds, c.loop};
         for (const auto& st : sp.actions[(size_t)c.action]) {
@@ -244,16 +283,32 @@ KfReference Load() {
         out.templ.namedClips[c.name] = clip;
         out.clipNames.push_back(c.name);
     }
+    out.scale = who.scale;
+    if (!out.templ.HasClip("idle")) { out.error = "sin clip idle"; return out; }
+    for (const char* req : kRequired)
+        if (!out.templ.HasClip(req)) { out.templ.namedClips[req] = out.templ.namedClips["idle"]; out.clipNames.push_back(req); }
     out.loaded = true;
     return out;
 }
 
 }  // namespace
 
-const KfReference& GetKfReference() {
-    static KfReference ref;
-    static bool tried = false;
-    if (!tried && IsWindowReady()) { tried = true; ref = Load(); if (!ref.loaded) TraceLog(LOG_WARNING, "KF referencia: %s", ref.error.c_str()); }
+int KfRosterCount() { return (int)(sizeof(kRoster) / sizeof(kRoster[0])); }
+
+const KfRosterEntry& KfRoster(int index) {
+    return kRoster[(size_t)std::clamp(index, 0, KfRosterCount() - 1)];
+}
+
+const KfReference& GetKfCharacter(int rosterIndex) {
+    static std::map<int, KfReference> cache;
+    const int idx = std::clamp(rosterIndex, 0, KfRosterCount() - 1);
+    auto it = cache.find(idx);
+    if (it != cache.end()) return it->second;
+    static KfReference empty;
+    if (!IsWindowReady()) return empty;
+    KfReference& ref = cache[idx];
+    ref = Load(kRoster[(size_t)idx]);
+    if (!ref.loaded) TraceLog(LOG_WARNING, "KF %s: %s", kRoster[(size_t)idx].name, ref.error.c_str());
     return ref;
 }
 

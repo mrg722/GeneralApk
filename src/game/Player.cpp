@@ -2,6 +2,7 @@
 #include "rendering/AssetManager.h"
 #include "rendering/BossSprite.h"
 #include "game/CharacterVisual.h"
+#include "game/lab/KfReference.h"
 #include <string>
 #include "audio/AudioSystem.h"
 #include <algorithm>
@@ -237,6 +238,10 @@ static void EnsurePlayerAnimator(Animator& animator, int skin) {
     if (animator.texture.id != 0) return;
     // Perfil dinamico (celda/pivote/clips desde data/sprite_manifest.json).
     const CharacterVisual& cv = GetCharacterVisual(skin);
+    if (cv.kfRoster >= 0) {                          // Laboratorio: personaje de la APK
+        const KfReference& kf = GetKfCharacter(cv.kfRoster);
+        if (kf.loaded) { animator = kf.templ; animator.PlayNamed("idle"); return; }
+    }
     if (cv.atlasId != nullptr) {
         const AtlasProfile* profile = SpriteManifest::Get().FindAtlas(cv.atlasId);
         if (profile && animator.InitFromManifest(cv.atlasId, AssetManager::Get().GetTextureByPath(profile->path))) {
@@ -826,7 +831,8 @@ void Player::DrawRageAura(Vector2 screen, float scale) const {
 void Player::Draw() const {
     Vector2 p = position.ToScreen();
     const float scale = DepthScaleFor(position.y);
-    const float spriteScale = animator.normalizedAtlas ? 1.20f * scale : 0.76f * scale;
+    const float kfScale = GetCharacterVisual(skin).kfRoster >= 0 ? GetCharacterVisual(skin).scale : 1.0f;
+    const float spriteScale = (animator.normalizedAtlas ? 1.20f * scale : 0.76f * scale) * kfScale;
 
     DrawEllipse(static_cast<int>(p.x), static_cast<int>(position.y), 30 * scale, 8 * scale,
                 {0, 0, 0, 145});

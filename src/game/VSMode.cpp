@@ -73,7 +73,7 @@ void VSMode::ResetFight(){
  for(int i=0;i<enemyCount;++i){StreetEnemy e;e.Init({xs[(size_t)i],ys[(size_t)i],0},enemyTypes[(size_t)i]);e.active=true;enemies.push_back(e);}
  // Laboratorio: bot de referencia KF (arte de la APK leido del respaldo y recoloreado en memoria).
  kfDemoClip=-1;
- if(kfBot&&!enemies.empty()){const KfReference& ref=GetKfReference();if(ref.loaded)enemies[0].UseReferenceSkin(ref.templ,ref.scale,"BOT REFERENCIA KF (ESTUDIO)");}
+ if(kfRival>=0&&!enemies.empty()){const KfReference& ref=GetKfCharacter(kfRival);if(ref.loaded)enemies[0].UseReferenceSkin(ref.templ,ref.scale,KfRoster(kfRival).name);}
 }
 void VSMode::StartFight(){flow=VSFlow::Fight;ResetFight();}
 void VSMode::Update(float dt){
@@ -89,7 +89,7 @@ void VSMode::Update(float dt){
    else if(cursor==2)enemyCount=std::clamp(enemyCount+dir,1,4);
    else if(cursor==3)selectedCharacter=(selectedCharacter+dir+CharacterCount())%CharacterCount();
    else if(cursor==4)selectedBoss=((selectedBoss+1+dir+kBossOptionCount)%kBossOptionCount)-1;
-   else if(cursor==9)kfBot=!kfBot;
+   else if(cursor==9)kfRival=((kfRival+1+dir+KfRosterCount()+1)%(KfRosterCount()+1))-1;
    else{int slot=cursor-5;enemyTypes[(size_t)slot]=NextEnemyType(enemyTypes[(size_t)slot],dir);}
   }
   if(IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_J))StartFight();
@@ -98,7 +98,7 @@ void VSMode::Update(float dt){
  if(IsKeyPressed(KEY_ESCAPE)){flow=VSFlow::Select;enemies.clear();return;}
  if(IsKeyPressed(KEY_R)){ResetFight();return;}
  // N: reproduce una por una las acciones del bot de referencia para inspeccionarlas.
- if(IsKeyPressed(KEY_N)&&!enemies.empty()&&enemies[0].referenceSkin){const KfReference& ref=GetKfReference();if(!ref.clipNames.empty()){kfDemoClip=(kfDemoClip+1)%(int)ref.clipNames.size();enemies[0].skinAnimator.PlayNamed(ref.clipNames[(size_t)kfDemoClip]);enemies[0].skinClip=ref.clipNames[(size_t)kfDemoClip];}}
+ if(IsKeyPressed(KEY_N)&&!enemies.empty()&&enemies[0].referenceSkin&&kfRival>=0){const KfReference& ref=GetKfCharacter(kfRival);if(!ref.clipNames.empty()){kfDemoClip=(kfDemoClip+1)%(int)ref.clipNames.size();enemies[0].skinAnimator.PlayNamed(ref.clipNames[(size_t)kfDemoClip]);enemies[0].skinClip=ref.clipNames[(size_t)kfDemoClip];}}
  if(playerDefeated||(selectedBoss>=0&&boss.IsDefeated())){if(IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_J))ResetFight();return;}
  player.PumpInput(dt);if(hitstop>0){hitstop-=dt;return;}
  player.Update(dt);player.position.x=std::clamp(player.position.x,kMinX,kMaxX);player.position.y=std::clamp(player.position.y,kMinY,kMaxY);
@@ -152,13 +152,13 @@ void VSMode::DrawSelection()const{
  DrawBackground();DrawRectangle(205,48,870,610,{3,7,11,242});DrawRectangleLines(205,48,870,610,{55,90,105,170});DrawRectangle(205,48,6,610,{60,205,240,230});DrawRectangle(1069,48,6,610,{255,205,75,210});
  DrawText("MODO VS // LABORATORIO",405,76,36,{225,235,240,255});DrawText("PRUEBA DIRECTA DE SPRITES, ESCENARIOS Y COMBATE",335,121,13,{120,185,205,240});
  const int y[]={140,176,212,248,284,320,356,392,428,464};const Color active={255,215,80,255};
- const char* labels[]={"STAGE","ESCENARIO","CANTIDAD","PERSONAJE","BOSS","ENEMIGO 1","ENEMIGO 2","ENEMIGO 3","ENEMIGO 4","BOT REFERENCIA KF"};
+ const char* labels[]={"STAGE","ESCENARIO","CANTIDAD","PERSONAJE","BOSS","ENEMIGO 1","ENEMIGO 2","ENEMIGO 3","ENEMIGO 4","RIVAL KF (LAB)"};
  for(int i=0;i<kFieldCount;++i){bool selected=cursor==i;DrawRectangle(335,y[i]-8,610,34,selected?Color{20,28,34,230}:Color{8,15,21,190});DrawRectangleLines(335,y[i]-8,610,34,selected?Color{255,205,75,210}:Color{70,95,105,90});DrawText(labels[i],360,y[i],14,selected?active:WHITE);}
  DrawText(StageName(),600,y[0],14,{190,220,230,255});DrawText(ScenarioText(),600,y[1],14,{190,220,230,255});DrawText(TextFormat("%d ENEMIGO%s",enemyCount,enemyCount==1?"":"S"),600,y[2],14,selectedBoss>=0?Color{85,95,100,130}:Color{190,220,230,255});
  DrawText(GetCharacterVisual(selectedCharacter).name,600,y[3],14,selectedCharacter==1?Color{255,160,170,255}:Color{190,220,230,255});
  DrawText(kBossNames[selectedBoss+1],600,y[4],14,selectedBoss>=0?Color{255,150,150,255}:Color{190,220,230,255});
  for(int i=0;i<4;++i){bool enabled=i<enemyCount&&selectedBoss<0;DrawText(EnemyTypeName(enemyTypes[(size_t)i]),600,y[5+i],14,enabled?Color{190,220,230,255}:Color{85,95,100,130});}
- {const KfReference& ref=GetKfReference();DrawText(kfBot?(ref.loaded?"SI (ENEMIGO 1, SOLO ESTUDIO)":"NO DISPONIBLE: falta apk_reference/"):"NO",600,y[9],14,kfBot?(ref.loaded?Color{255,200,90,255}:Color{255,110,100,255}):Color{190,220,230,255});}
+ if(kfRival<0)DrawText("NO",600,y[9],14,{190,220,230,255});else{const KfReference& ref=GetKfCharacter(kfRival);DrawText(ref.loaded?TextFormat("%s (ENEMIGO 1)",KfRoster(kfRival).name):"NO DISPONIBLE: falta apk_reference/",600,y[9],14,ref.loaded?Color{255,200,90,255}:Color{255,110,100,255});}
  if(selectedBoss>=0)DrawText("BOSS ACTIVO: los campos de enemigos se ignoran (1 vs 1).",335,y[9]+30,12,{255,180,120,220});
  DrawText("↑/↓ CAMPO    ←/→ CAMBIAR    ENTER/J INICIAR",391,540,14,{170,195,205,245});DrawText("ESC VOLVER AL MENU",485,568,13,{130,155,165,220});
 }

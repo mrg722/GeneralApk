@@ -8,6 +8,7 @@
 #include "raylib.h"
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <string>
 
 using namespace district_fury;
@@ -25,6 +26,20 @@ int main(int argc, char** argv) {
         std::printf("captura: %s/%s\n", out.c_str(), file.c_str());
     };
 
+    // Todos los personajes del roster: carga y hoja con su reposo.
+    BeginDrawing();
+    ClearBackground({40, 44, 54, 255});
+    for (int i = 0; i < KfRosterCount(); ++i) {
+        const KfReference& k = GetKfCharacter(i);
+        std::printf("roster %2d %-24s %s frames=%zu clips=%zu\n", i, KfRoster(i).name, k.loaded ? "OK" : k.error.c_str(), k.templ.frames.size(), k.clipNames.size());
+        if (!k.loaded) continue;
+        const float x = 70.f + (i % 6) * 200.f, y = 300.f + (i / 6) * 330.f;
+        Animator a = k.templ; a.PlayNamed("idle"); a.Draw({x, y}, 2.4f, false);
+        Animator b = k.templ; b.PlayNamed("atk2"); b.Update(0.25f); b.Draw({x + 100.f, y}, 2.4f, false);
+        DrawText(KfRoster(i).name, (int)x - 40, (int)y + 10, 12, {255, 220, 90, 255});
+    }
+    EndDrawing();
+    Capture("roster_kf");
     const KfReference& ref = GetKfReference();
     std::printf("referencia: %s, %zu clips, %zu frames\n", ref.loaded ? "cargada" : ref.error.c_str(), ref.clipNames.size(), ref.templ.frames.size());
     if (!ref.loaded) { CloseWindow(); return 1; }
@@ -49,7 +64,7 @@ int main(int argc, char** argv) {
     // (2) Pelea en el Laboratorio: Rayden (entrada inyectada) vs bot KF.
     VSMode vs;
     vs.Init();
-    vs.StartLabForTest(true, StreetEnemyType::UrbanNinja);
+    vs.StartLabForTest(true, StreetEnemyType::UrbanNinja, argc > 2 ? std::atoi(argv[2]) : 0, argc > 3 ? std::atoi(argv[3]) : 0);
     PlayerInput in;
     vs.PlayerRef().scriptedInput = &in;
     vs.PlayerRef().debugInvulnerable = false;

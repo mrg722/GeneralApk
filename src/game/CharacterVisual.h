@@ -33,6 +33,8 @@ struct CharacterVisual {
     // Atlas del manifiesto (data/sprite_manifest.json) para personajes con
     // hoja animada completa; nullptr = sets de poses sueltas (folder).
     const char* atlasId = nullptr;
+    // Laboratorio: personaje extraido de la APK (indice en KfRoster), -1 = no.
+    int kfRoster = -1;
 };
 
 int CharacterCount();
