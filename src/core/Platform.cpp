@@ -3,7 +3,7 @@
 #if defined(PLATFORM_ANDROID)
 #include <android/asset_manager.h>
 #include <android_native_app_glue.h>
-struct android_app* GetAndroidApp(void);
+extern "C" struct android_app* GetAndroidApp(void);   // definida por raylib
 #endif
 
 namespace district_fury {

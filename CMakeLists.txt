@@ -28,6 +28,12 @@ else()
     )
 endif()
 
+# Android (tools/android/build_apk.sh): raylib para NativeActivity + OpenGL ES2.
+if(ANDROID)
+    set(PLATFORM Android CACHE STRING "" FORCE)
+    set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+endif()
+
 FetchContent_MakeAvailable(raylib)
 
 add_library(district_fury_core
@@ -64,8 +70,18 @@ add_library(district_fury_core
 target_include_directories(district_fury_core PUBLIC src)
 target_link_libraries(district_fury_core PUBLIC raylib)
 
-add_executable(district_fury src/main.cpp)
-target_link_libraries(district_fury PRIVATE district_fury_core)
+if(ANDROID)
+    target_compile_definitions(district_fury_core PUBLIC PLATFORM_ANDROID)
+    target_include_directories(district_fury_core PUBLIC ${ANDROID_NDK}/sources/android/native_app_glue)
+    # NativeActivity carga "libmain.so"; raylib define android_main() y llama a main().
+    add_library(district_fury SHARED src/main.cpp)
+    set_target_properties(district_fury PROPERTIES OUTPUT_NAME main)
+    target_link_libraries(district_fury PRIVATE district_fury_core android log EGL GLESv2 OpenSLES m)
+    target_link_options(district_fury PRIVATE "-u" "ANativeActivity_onCreate")
+else()
+    add_executable(district_fury src/main.cpp)
+    target_link_libraries(district_fury PRIVATE district_fury_core)
+endif()
 
 include(CTest)
 if(BUILD_TESTING)

@@ -51,3 +51,4 @@ district_fury_save.dat
 # Python cache
 __pycache__/
 *.py[cod]
+/build-android/
