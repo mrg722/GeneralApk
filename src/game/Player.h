@@ -50,6 +50,7 @@ public:
 
     // Buffer de entrada (15 frames) y recuperacion fisica posterior al ataque.
     InputBuffer inputBuffer;
+    MotionHistory motion;       // comandos especiales estilo King Fighter
     float recoveryTimer{0.0f};
     // Si no es nullptr, reemplaza al teclado (bots/tests). No es dueno del puntero.
     const PlayerInput* scriptedInput{nullptr};

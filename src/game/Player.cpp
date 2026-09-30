@@ -45,6 +45,11 @@ AttackPhase PhaseFor(AttackId id) {
 // Cadena de cancelacion arcade: J/K sobre el golpe actual -> siguiente ataque.
 // Devuelve AttackId::None si ese comando no puede cancelar el ataque actual.
 AttackId ResolveCancel(AttackId current, InputCommand cmd) {
+    // Special cancel (King Fighter): cualquier normal se corta en un especial.
+    const bool normal = current == AttackId::Punch1 || current == AttackId::Punch2 ||
+                        current == AttackId::Punch3 || current == AttackId::Kick;
+    if (cmd == InputCommand::SpecialWave) return normal ? AttackId::EnergyWave : AttackId::None;
+    if (cmd == InputCommand::SpecialRise) return normal && current != AttackId::Punch3 ? AttackId::Punch3 : AttackId::None;
     const bool punch = cmd == InputCommand::Punch;
     switch (current) {
         case AttackId::Punch1: return punch ? AttackId::Punch2 : AttackId::Kick;
@@ -429,8 +434,19 @@ void Player::PollAttackInput() {
     if (!inputEnabled) return;
     if (state == PlayerState::Defeat || state == PlayerState::Knockdown ||
         state == PlayerState::GuardBreak || state == PlayerState::Hit) return;
-    if (frameInput.punch) inputBuffer.Push(InputCommand::Punch);
-    if (frameInput.kick) inputBuffer.Push(InputCommand::Kick);
+    // Historial de direcciones para los comandos especiales.
+    const int h = frameInput.moveX > 0.5f ? 1 : (frameInput.moveX < -0.5f ? -1 : 0);
+    motion.Record(frameInput.moveY > 0.5f, h, inputBuffer.Frame());
+    if (frameInput.punch) {
+        const int dir = motion.QuarterCircle(inputBuffer.Frame());
+        if (dir != 0) { inputBuffer.Push(InputCommand::SpecialWave, dir); motion.Clear(); }
+        else inputBuffer.Push(InputCommand::Punch);
+    }
+    if (frameInput.kick) {
+        const int dir = motion.DragonPunch(inputBuffer.Frame());
+        if (dir != 0) { inputBuffer.Push(InputCommand::SpecialRise, dir); motion.Clear(); }
+        else inputBuffer.Push(InputCommand::Kick);
+    }
 }
 
 PlayerInput Player::ReadInput() const {
@@ -471,10 +487,15 @@ bool Player::TryStartBufferedAttack(bool fromCancel) {
     const InputBuffer::Entry* front = inputBuffer.Peek();
     if (!front) return false;
     const InputCommand cmd = front->command;
+    const int dir = front->dir;
 
     AttackId next = AttackId::None;
     if (fromCancel) {
         next = ResolveCancel(currentAttack, cmd);
+    } else if (cmd == InputCommand::SpecialWave) {
+        next = AttackId::EnergyWave;
+    } else if (cmd == InputCommand::SpecialRise) {
+        next = AttackId::Punch3;
     } else if (cmd == InputCommand::Kick) {
         const bool finisher = isRageMode && comboCount >= 4 &&
             sp >= GetAttack(AttackId::Finisher).spCost &&
@@ -485,6 +506,12 @@ bool Player::TryStartBufferedAttack(bool fromCancel) {
     }
     if (next == AttackId::None) return false;
     if (attackCooldowns[static_cast<int>(next)] > 0.0f) return false;   // queda en cola
+    // Sin energia suficiente, el comando de onda sale como golpe normal.
+    if (next == AttackId::EnergyWave && sp < GetAttack(AttackId::EnergyWave).spCost) {
+        if (fromCancel) return false;
+        next = comboWindow > 0.0f ? NextPunchInChain(currentAttack) : AttackId::Punch1;
+    }
+    if (dir != 0) facing = dir > 0 ? Facing::Right : Facing::Left;
 
     InputCommand consumed;
     inputBuffer.Pop(consumed);

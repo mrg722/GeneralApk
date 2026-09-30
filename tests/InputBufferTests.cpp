@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstring>
+#include <initializer_list>
 
 using namespace district_fury;
 
@@ -83,6 +84,63 @@ void TestExpiredInputDoesNotFire() {
     assert(p.state == PlayerState::Idle);
 }
 
+void TestMotionHistory() {
+    MotionHistory m;
+    int f = 0;
+    m.Record(true, 0, f += 2);   // abajo
+    m.Record(true, 1, f += 2);   // abajo-adelante
+    m.Record(false, 1, f += 2);  // adelante
+    assert(m.QuarterCircle(f) == 1);
+    assert(m.DragonPunch(f) == 0);
+    assert(m.QuarterCircle(f + 30) == 0);            // fuera de ventana
+
+    MotionHistory dp;
+    f = 0;
+    dp.Record(false, -1, f += 2);  // adelante (izquierda)
+    dp.Record(true, 0, f += 2);    // abajo
+    dp.Record(true, -1, f += 2);   // abajo-adelante
+    assert(dp.DragonPunch(f) == -1);
+
+    MotionHistory walk;              // caminar adelante no es especial
+    walk.Record(false, 1, 1);
+    assert(walk.QuarterCircle(2) == 0 && walk.DragonPunch(2) == 0);
+}
+
+// Ejecuta una secuencia de entradas (una por frame) con entrada inyectada.
+void Feed(Player& p, PlayerInput& in, std::initializer_list<PlayerInput> frames) {
+    p.scriptedInput = &in;
+    for (const PlayerInput& f : frames) { in = f; p.Update(kFrame); }
+    in = PlayerInput{};
+}
+
+void TestSpecialCommands() {
+    PlayerInput in, down, downFwd, fwd, fwdPunch, fwdKick, downFwdKick;
+    down.moveY = 1; downFwd.moveY = 1; downFwd.moveX = 1; fwd.moveX = 1;
+    fwdPunch = fwd; fwdPunch.punch = true;
+    downFwdKick = downFwd; downFwdKick.kick = true;
+
+    Player p;   // abajo, abajo-adelante, adelante + J -> Onda de Energia
+    Feed(p, in, {down, down, downFwd, downFwd, fwdPunch});
+    assert(p.state == PlayerState::Attack && p.currentAttack == AttackId::EnergyWave);
+
+    Player q;   // adelante, abajo, abajo-adelante + K -> Punch3 (remate/uppercut)
+    Feed(q, in, {fwd, fwd, down, down, downFwdKick});
+    assert(q.state == PlayerState::Attack && q.currentAttack == AttackId::Punch3);
+
+    Player r;   // special cancel: Punch1 -> Onda de Energia en la ventana
+    r.QueueCommand(InputCommand::Punch);
+    r.Update(kFrame);
+    assert(r.currentAttack == AttackId::Punch1);
+    r.QueueCommand(InputCommand::SpecialWave);
+    for (int i = 0; i < 20 && r.currentAttack == AttackId::Punch1; ++i) r.Update(kFrame);
+    assert(r.currentAttack == AttackId::EnergyWave);
+
+    Player s;   // sin energia, el comando de onda sale como golpe normal
+    s.sp = 0;
+    Feed(s, in, {down, down, downFwd, downFwd, fwdPunch});
+    assert(s.currentAttack == AttackId::Punch1);
+}
+
 void TestHitClearsBuffer() {
     Player p;
     p.QueueCommand(InputCommand::Punch);
@@ -99,6 +157,8 @@ int main() {
     TestRecoveryBeforeIdle();
     TestExpiredInputDoesNotFire();
     TestHitClearsBuffer();
+    TestMotionHistory();
+    TestSpecialCommands();
     std::puts("input_buffer_tests OK");
     return 0;
 }
