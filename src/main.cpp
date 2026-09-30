@@ -79,10 +79,12 @@ int main(){
                     auto& campaign=district_fury::Campaign::Get();
                     campaign.ApplyReward(rewardStage,choice);
                     const int next=rewardStage+1; rewardStage=0; activeStage=next;
-                    if(next==2){stage2.PlayerRef().upgrades=campaign.upgrades;stage2.Init();}
-                    else if(next==3){stage3.PlayerRef().upgrades=campaign.upgrades;stage3.Init();}
-                    else if(next==4){stage4.PlayerRef().upgrades=campaign.upgrades;stage4.Init();}
-                    else{stage5.PlayerRef().upgrades=campaign.upgrades;stage5.Init();}
+                    // DF-014: el luchador elegido al empezar sigue en toda la campana.
+                    const int skin=stage1.PlayerRef().skin;
+                    if(next==2){stage2.PlayerRef().upgrades=campaign.upgrades;stage2.Init();stage2.PlayerRef().ApplyCharacter(skin);}
+                    else if(next==3){stage3.PlayerRef().upgrades=campaign.upgrades;stage3.Init();stage3.PlayerRef().ApplyCharacter(skin);}
+                    else if(next==4){stage4.PlayerRef().upgrades=campaign.upgrades;stage4.Init();stage4.PlayerRef().ApplyCharacter(skin);}
+                    else{stage5.PlayerRef().upgrades=campaign.upgrades;stage5.Init();stage5.PlayerRef().ApplyCharacter(skin);}
                 }
             }
             else if(!vsActive){

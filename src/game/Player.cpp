@@ -228,9 +228,17 @@ void Player::SetState(PlayerState next) {
     }
 }
 
-static void EnsurePlayerAnimator(Animator& animator) {
+static void EnsurePlayerAnimator(Animator& animator, int skin) {
     if (animator.texture.id != 0) return;
     // Perfil dinamico (celda/pivote/clips desde data/sprite_manifest.json).
+    const CharacterVisual& cv = GetCharacterVisual(skin);
+    if (cv.atlasId != nullptr) {
+        const AtlasProfile* profile = SpriteManifest::Get().FindAtlas(cv.atlasId);
+        if (profile && animator.InitFromManifest(cv.atlasId, AssetManager::Get().GetTextureByPath(profile->path))) {
+            animator.PlayNamed("idle");
+            return;
+        }
+    }
     if (animator.InitFromManifest("rayden", AssetManager::Get().GetTexture("rayden_128"))) {
         animator.PlayNamed("idle");
         return;
@@ -508,7 +516,7 @@ const char* Player::AttackPhaseName() const {
 }
 
 void Player::Update(float dt) {
-    EnsurePlayerAnimator(animator);
+    EnsurePlayerAnimator(animator, skin);
     animator.Update(dt);
 
     dashInvulnerability = std::max(0.0f, dashInvulnerability - dt);
@@ -822,7 +830,7 @@ void Player::Draw() const {
     // Rayden original (skin 0) conserva su atlas y su ruta de dibujo.
     const CharacterVisual& cv = GetCharacterVisual(skin);
     Texture2D altTex{};
-    if (skin != 0 && cv.folder != nullptr) {
+    if (skin != 0 && cv.folder != nullptr && cv.atlasId == nullptr) {
         const char* pose = CharacterPose(skin, state, attackType, isRageMode, GetTime());
         altTex = AssetManager::Get().GetTexture(std::string(cv.folder) + "_" + pose);
         if (altTex.id == 0) altTex = AssetManager::Get().GetTexture(std::string(cv.folder) + (cv.uniformCanvas ? "_idle" : "_idle1"));
@@ -868,9 +876,11 @@ void Player::Draw() const {
 
 void Player::ApplyCharacter(int id) {
     skin = id;
+    animator = Animator{};                     // se reinicia con el atlas del personaje
     if (id == 0) return;                       // Rayden original: intacto
     const CharacterVisual& cv = GetCharacterVisual(id);
-    maxHp = cv.maxHp;
+    // Los personajes con hoja completa (Rayder) conservan las mejoras de campana.
+    maxHp = cv.maxHp + (cv.atlasId != nullptr ? upgrades.bonusMaxHp : 0);
     hp = maxHp;
 }
 

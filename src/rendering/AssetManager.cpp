@@ -158,4 +158,14 @@ void AssetManager::LoadAll(){
 }
 void AssetManager::UnloadAll(){for(auto&pair:textures)if(pair.second.id!=0)UnloadTexture(pair.second);textures.clear();}
 Texture2D AssetManager::GetTexture(const std::string&name){const auto it=textures.find(name);return it!=textures.end()?it->second:Texture2D{0};}
+
+Texture2D AssetManager::GetTextureByPath(const std::string& relativePath){
+    if(relativePath.empty()||!IsWindowReady())return Texture2D{0};
+    const std::string key="path:"+relativePath;
+    const auto it=textures.find(key);
+    if(it!=textures.end())return it->second;
+    textures[key]=LoadRequiredTexture(relativePath.c_str(),{relativePath,"../"+relativePath,"../../"+relativePath},TEXTURE_FILTER_POINT);
+    return textures[key];
+}
+
 }

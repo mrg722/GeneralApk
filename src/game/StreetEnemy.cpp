@@ -697,7 +697,14 @@ void StreetEnemy::Draw() const {
     if (state != StreetEnemyState::Defeat) {
         const int width = s.scale >= 1.08f ? 82 : 68;
         const int x = (int)(p.x - width * .5f);
-        const int y = (int)(p.y - s.bodyHeight * ds - 11);
+        // La barra va por encima del sprite dibujado (antes usaba la altura de
+        // la hurtbox y quedaba sobre la cabeza de los enemigos grandes).
+        float spriteTop = p.y - s.bodyHeight * ds;
+        if (authored) {
+            const SpriteFrame& f = animator.frames[(std::size_t)std::clamp(animator.currentFrame, 0, (int)animator.frames.size() - 1)];
+            spriteTop = std::min(spriteTop, p.y - (f.pivotY - f.visualBounds.y) * visualScale);
+        }
+        const int y = (int)(spriteTop - 12);
         DrawRectangle(x, y, width, 6, {8, 9, 11, 210});
         DrawRectangle(x, y, (int)(width * ((float)hp / maxHp)), 6, ThreatColor(type));
         if (maxGuardHealth > 0.0f && guardHealth < maxGuardHealth) {

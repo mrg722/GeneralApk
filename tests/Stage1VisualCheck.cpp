@@ -1,7 +1,7 @@
 // Herramienta (no es parte de ctest): juega el Nivel 1 con el bot en una
 // ventana real y guarda capturas en los eventos clave. Ejecutar desde la raiz
 // del repositorio para que encuentre assets/:
-//   ./build/stage1_visual_check [carpeta_salida]
+//   ./build/stage1_visual_check [carpeta_salida] [id_personaje: 0 Rayden, 6 Rayder]
 #include "Stage1Bot.h"
 #include "rendering/AssetManager.h"
 #include "raylib.h"
@@ -18,8 +18,21 @@ int main(int argc, char** argv) {
     SetTargetFPS(0);
     AssetManager::Get().LoadAll();
 
+    const int skin = argc > 2 ? std::atoi(argv[2]) : 0;
     Stage1StoryGame game;
     game.SetSavePath(out + "/visual_check_save.dat");
+    int shots = 0;
+    auto Capture = [&](const std::string& file) {
+        TakeScreenshot(file.c_str());
+        const std::string path = out + "/" + file;
+        if (out != "." && std::rename(file.c_str(), path.c_str()) != 0) std::printf("no se pudo mover %s\n", file.c_str());
+        std::printf("captura: %s\n", path.c_str());
+    };
+    // Pantalla de eleccion de luchador con el cursor en el personaje pedido.
+    game.OpenCharacterSelectForTest(skin == 0 ? 0 : 1);
+    for (int i = 0; i < 3; ++i) { BeginDrawing(); ClearBackground(BLACK); game.Draw(); EndDrawing(); }
+    Capture(std::to_string(++shots) + "_eleccion_luchador.png");
+    game.PlayerRef().ApplyCharacter(skin);
     game.StartRunForTest(StoryDifficulty::Normal);
     PlayerInput in;
     game.PlayerRef().scriptedInput = &in;
@@ -27,16 +40,11 @@ int main(int argc, char** argv) {
     Stage1Bot bot;
     bot.invulnerable = true;
 
-    int shots = 0, goShots = 0;
+    int goShots = 0;
     bool wasLocked = false, sawBoss = false, sawSubBoss = false, sawAir = false;
     auto Shot = [&](const char* name) {
-        // raylib guarda la captura en el directorio de trabajo con el nombre de
-        // archivo; luego se mueve a la carpeta pedida.
-        const std::string file = std::to_string(++shots) + "_" + name + ".png";
-        TakeScreenshot(file.c_str());
-        const std::string path = out + "/" + file;
-        if (out != "." && std::rename(file.c_str(), path.c_str()) != 0) std::printf("no se pudo mover %s\n", file.c_str());
-        std::printf("captura: %s\n", path.c_str());
+        // raylib guarda la captura en el directorio de trabajo; luego se mueve.
+        Capture(std::to_string(++shots) + "_" + name + ".png");
     };
     for (int frame = 0; frame < 60 * 600 && !WindowShouldClose(); ++frame) {
         const bool running = bot.Think(game, in);

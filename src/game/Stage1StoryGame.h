@@ -9,7 +9,7 @@
 
 namespace district_fury {
 
-enum class StoryFlow { Menu, Controls, Intro, Combat, SubBossIntro, ScenarioClear, BossIntro, Boss, StageClear, GameOver, Pause, Options, Credits };
+enum class StoryFlow { Menu, Controls, Intro, Combat, SubBossIntro, ScenarioClear, BossIntro, Boss, StageClear, GameOver, Pause, Options, Credits, CharacterSelect };
 enum class StoryDifficulty { Easy, Normal, Hard };
 enum class StoryBossAttack { None, ChainSwing, GroundSmash, Charge, PowerWave, Frenzy };
 
@@ -47,6 +47,7 @@ public:
     // --- Automatizacion (tests de recorrido / bots) ---
     void StartRunForTest(StoryDifficulty d) { difficulty = d; ResetRun(); flow = StoryFlow::Intro; bannerTimer = 0.05f; }
     void SetSavePath(const std::string& path) { savePath = path; }
+    void OpenCharacterSelectForTest(int cursor) { flow = StoryFlow::CharacterSelect; characterCursor = cursor; }
     StoryFlow Flow() const { return flow; }
     int Scenario() const { return scenario; }
     const std::vector<StreetEnemy>& Enemies() const { return enemies; }
@@ -70,7 +71,7 @@ private:
     bool advanceRequested{false};
     bool arenaLocked{false}, scenarioBossSpawned{false}, finalBossSpawned{false}, stageComplete{false}, saveLoaded{false};
     StoryDifficulty difficulty{StoryDifficulty::Normal}; std::string savePath{"district_fury_save.dat"}; std::string storyMessage;
-    int menuCursor{0}; bool vsRequested{false}; bool newGameStarted{false}; bool exitRequested{false};
+    int menuCursor{0}; int characterCursor{0}; bool vsRequested{false}; bool newGameStarted{false}; bool exitRequested{false};
 
     void ResetRun(); void BuildScenario(int id); void SpawnWave(int id); void BuildWaves(); void UpdateArena(float dt); void UpdateBossFight(float dt); void ClampToArena(); void LockArenaBetween(float playerX, float farX); void SpawnScenarioBoss(); void EnterFinalBoss(); void DefeatFinalBoss();
     void ApplyDifficulty(); void UpdateCombat(float dt); void UpdateBoss(float dt); void UpdateProjectiles(float dt); void UpdateParticles(float dt);
@@ -81,7 +82,7 @@ private:
     void LoadSave(); void SaveProgress();
     void DrawWorld() const; void DrawHUD() const; void DrawMenu() const; void DrawControls() const; void DrawPause() const; void DrawGameOver() const;
     void DrawScenarioClear() const; void DrawBoss() const; void DrawStageClear() const; void DrawArenaLock() const; void DrawScenarioArt() const;
-    void DrawOptions() const; void DrawCredits() const;
+    void DrawOptions() const; void DrawCredits() const; void DrawCharacterSelect() const;
 };
 
 }

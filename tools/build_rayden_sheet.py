@@ -13,6 +13,7 @@ que NO se modifica. Pasos:
        19 aire caida : impacto (13) rotado 60 grados hacia atras
        20 levantarse : guardia (1) agachada (22 px de flexion)
        21 bloqueo    : guardia (3) 2 px atras con piernas algo flexionadas
+Despues ejecutar tools/clean_sprite_cutouts.py (quita astillas de celda).
 Uso: python3 tools/build_rayden_sheet.py
 """
 from pathlib import Path

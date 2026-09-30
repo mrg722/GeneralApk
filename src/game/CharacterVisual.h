@@ -30,9 +30,14 @@ struct CharacterVisual {
     int maxHp;
     float damageMultiplier;
     float speedMultiplier;
+    // Atlas del manifiesto (data/sprite_manifest.json) para personajes con
+    // hoja animada completa; nullptr = sets de poses sueltas (folder).
+    const char* atlasId = nullptr;
 };
 
 int CharacterCount();
+// Personajes elegibles en la historia (Rayden y Rayder).
+constexpr int kStoryCharacters[] = {0, 6};
 const CharacterVisual& GetCharacterVisual(int id);
 // Devuelve la pose del set para el estado actual del jugador.
 const char* CharacterPose(int id, PlayerState state, AttackType attack, bool rage, double time);

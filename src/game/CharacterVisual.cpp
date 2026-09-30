@@ -7,13 +7,15 @@ namespace {
 
 // name, folder, uniformCanvas, scale, targetHeight, footInset,
 // facesRightByDefault, maxHp, damageMultiplier, speedMultiplier
-const std::array<CharacterVisual, 6> kCharacters{{
+const std::array<CharacterVisual, 7> kCharacters{{
     {"RAYDEN (ORIGINAL)", nullptr,           false, 1.00f,   0.0f, 0.0f, true,  100, 1.00f, 1.00f},
     {"RAYDEN CLON",       "rayder_clone",    false, 1.00f, 118.0f, 0.0f, true,  110, 1.05f, 1.05f},
     {"BRAKK",             "brakk",           true,  175.0f/188.0f, 0.0f, 9.0f, true, 150, 1.25f, 0.85f},
     {"GRINDER",           "grinder",         true,  3.00f,   0.0f, 0.0f, true,  160, 1.30f, 0.80f},
     {"TITAN-X",           "titanx",          false, 1.00f, 170.0f, 0.0f, false, 140, 1.20f, 0.90f},
     {"TITAN-X MEJORADO",  "titanx_mejorado", false, 1.00f, 235.0f, 0.0f, false, 180, 1.40f, 0.75f},
+    // DF-014: Rayder, hoja de 50 poses del usuario (tools/build_rayder_sheet.py).
+    {"RAYDER",            nullptr,           false, 1.00f,   0.0f, 0.0f, true,  100, 1.00f, 1.00f, "rayder"},
 }};
 
 }  // namespace
