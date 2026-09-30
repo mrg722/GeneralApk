@@ -67,6 +67,9 @@ private:
     int bestScore{0}, bestRank{0};
     // Camara de scroll y oleadas por linea de activacion (DF-014).
     StageCamera camera; ArenaDirector arena; HitstopClock hitstop;
+    // Cuerpo provisional de Brakk: atlas completo del Brute (los PNG de
+    // assets/bosses/brakk vienen recortados sin piernas). -1 = sin iniciar.
+    Animator bossAnim; int bossAnimMode{-1};
     float cameraX{640}, stageTime{0}, comboTimer{0}, shake{0}, bannerTimer{0}, transitionTimer{0}, storyTimer{0};
     bool advanceRequested{false};
     bool arenaLocked{false}, scenarioBossSpawned{false}, finalBossSpawned{false}, stageComplete{false}, saveLoaded{false};

@@ -424,6 +424,11 @@ void StreetEnemy::Decide(float dt, const Player& player) {
     EnterState(StreetEnemyState::Patrol);
 }
 
+bool StreetEnemy::PrepareAtlasAnimator(Animator& animator, StreetEnemyType type) {
+    EnsureAnimator(animator, type);
+    return animator.texture.id != 0 && !animator.frames.empty();
+}
+
 void StreetEnemy::UseReferenceSkin(const Animator& templ, float scale, const char* label) {
     referenceSkin = true;
     skinAnimator = templ;

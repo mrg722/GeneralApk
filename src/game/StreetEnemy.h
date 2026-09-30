@@ -51,6 +51,9 @@ public:
     StreetEnemyState skinState{StreetEnemyState::Defeat};
     const char* skinLabel{nullptr};
     void UseReferenceSkin(const Animator& templ, float scale, const char* label);
+    // Prepara un animador con el atlas medido de un tipo de enemigo (lo usa el
+    // jefe de Stage 1 como cuerpo provisional). Devuelve false si no hay textura.
+    static bool PrepareAtlasAnimator(Animator& animator, StreetEnemyType type);
 
     // --- DF-013: estado de IA ---
     float decisionTimer;
