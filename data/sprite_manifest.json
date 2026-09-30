@@ -1,0 +1,388 @@
+{
+  "version": 4,
+  "render_target": {
+    "width": 1280,
+    "height": 720,
+    "fps": 60
+  },
+  "atlases": {
+    "rayden": {
+      "path": "assets/characters/rayden_128.png",
+      "grid": [
+        4,
+        4
+      ],
+      "cell": [
+        128,
+        128
+      ],
+      "pivot": [
+        64,
+        126
+      ],
+      "clips": "rayden"
+    },
+    "rayden_legacy_96": {
+      "path": "assets/characters/rayden_clean.png",
+      "grid": [
+        4,
+        4
+      ],
+      "cell": [
+        96,
+        96
+      ],
+      "pivot": [
+        48,
+        95
+      ],
+      "clips": "rayden"
+    },
+    "punk": {
+      "path": "assets/enemies/punk_clean.png",
+      "grid": [
+        4,
+        3
+      ],
+      "cell": [
+        128,
+        128
+      ],
+      "pivot": [
+        64,
+        126
+      ]
+    },
+    "charger": {
+      "path": "assets/enemies/charger_clean.png",
+      "grid": [
+        4,
+        3
+      ],
+      "cell": [
+        128,
+        128
+      ],
+      "pivot": [
+        64,
+        126
+      ]
+    },
+    "brute": {
+      "path": "assets/enemies/brute_clean.png",
+      "grid": [
+        4,
+        3
+      ],
+      "cell": [
+        128,
+        128
+      ],
+      "pivot": [
+        64,
+        126
+      ]
+    },
+    "enforcer": {
+      "path": "assets/enemies/enforcer_clean.png",
+      "grid": [
+        4,
+        3
+      ],
+      "cell": [
+        128,
+        128
+      ],
+      "pivot": [
+        64,
+        126
+      ]
+    },
+    "chemical_soldier": {
+      "path": "assets/enemies/chemical_soldier_clean.png",
+      "grid": [
+        4,
+        3
+      ],
+      "cell": [
+        128,
+        128
+      ],
+      "pivot": [
+        64,
+        126
+      ]
+    },
+    "urban_ninja": {
+      "path": "assets/enemies/urban_ninja_clean.png",
+      "grid": [
+        4,
+        3
+      ],
+      "cell": [
+        128,
+        128
+      ],
+      "pivot": [
+        64,
+        126
+      ]
+    },
+    "mutant": {
+      "path": "assets/enemies/mutant_clean.png",
+      "grid": [
+        4,
+        3
+      ],
+      "cell": [
+        128,
+        128
+      ],
+      "pivot": [
+        64,
+        126
+      ]
+    },
+    "armored_guard": {
+      "path": "assets/enemies/armored_guard_clean.png",
+      "grid": [
+        4,
+        3
+      ],
+      "cell": [
+        128,
+        128
+      ],
+      "pivot": [
+        64,
+        126
+      ]
+    },
+    "old_steel_yard": {
+      "path": "assets/backgrounds/old_steel_yard_clean.png",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    "old_steel_yard_deep": {
+      "path": "assets/backgrounds/old_steel_yard_deep_clean.png",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    "mercado_antiguo": {
+      "path": "assets/backgrounds/mercado_antiguo_clean.png",
+      "size": [
+        256,
+        144
+      ],
+      "scale_to": [
+        1280,
+        720
+      ],
+      "filter": "point"
+    },
+    "zona_quimica": {
+      "path": "assets/backgrounds/zona_quimica_clean.png",
+      "size": [
+        256,
+        144
+      ],
+      "scale_to": [
+        1280,
+        720
+      ],
+      "filter": "point"
+    }
+  },
+  "clips": {
+    "rayden": {
+      "idle": {
+        "frames": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "duration": 0.12,
+        "loop": true
+      },
+      "walk": {
+        "frames": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "duration": 0.105,
+        "loop": true
+      },
+      "punch1": {
+        "frames": [
+          8,
+          9
+        ],
+        "duration": 0.15,
+        "loop": false
+      },
+      "punch2": {
+        "frames": [
+          8,
+          9
+        ],
+        "duration": 0.135,
+        "loop": false
+      },
+      "punch3": {
+        "frames": [
+          10,
+          11
+        ],
+        "durations": [
+          0.11,
+          0.31
+        ],
+        "loop": false
+      },
+      "kick": {
+        "frames": [
+          10,
+          11
+        ],
+        "durations": [
+          0.11,
+          0.31
+        ],
+        "loop": false
+      },
+      "energy": {
+        "frames": [
+          12
+        ],
+        "duration": 0.55,
+        "loop": false
+      },
+      "dash_attack": {
+        "frames": [
+          8,
+          9
+        ],
+        "duration": 0.12,
+        "loop": false
+      },
+      "rage_attack": {
+        "frames": [
+          10,
+          11
+        ],
+        "duration": 0.14,
+        "loop": false
+      },
+      "finisher": {
+        "frames": [
+          12
+        ],
+        "duration": 0.66,
+        "loop": false
+      },
+      "dash": {
+        "frames": [
+          14
+        ],
+        "duration": 0.08,
+        "loop": false
+      },
+      "block": {
+        "frames": [
+          3
+        ],
+        "duration": 0.1,
+        "loop": true
+      },
+      "hit_high": {
+        "frames": [
+          13
+        ],
+        "duration": 0.08,
+        "loop": false
+      },
+      "hit_low": {
+        "frames": [
+          13
+        ],
+        "duration": 0.08,
+        "loop": false
+      },
+      "knockdown": {
+        "frames": [
+          15
+        ],
+        "duration": 0.1,
+        "loop": false
+      },
+      "defeat": {
+        "frames": [
+          15
+        ],
+        "duration": 0.1,
+        "loop": false
+      },
+      "recovery": {
+        "frames": [
+          0
+        ],
+        "duration": 0.1,
+        "loop": false
+      }
+    },
+    "enemy_default": {
+      "idle": {
+        "frames": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "fps": 7
+      },
+      "walk": {
+        "frames": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "fps": 10
+      },
+      "attack": {
+        "frames": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "fps": 11,
+        "loop": false
+      },
+      "hit": {
+        "frames": [
+          8,
+          9
+        ],
+        "fps": 10,
+        "loop": false
+      },
+      "defeat": {
+        "frames": [
+          10,
+          11
+        ],
+        "fps": 5,
+        "loop": false
+      }
+    }
+  },
+  "notes": "v4: cell/pivot por atlas (sin tamano global). Rayden usa celda 128x128 con pivote [64,126] (rayden_128.png, generado con tools/repack_sheet.py desde rayden_clean.png sin escalar); rayden_legacy_96 conserva el atlas 96x96. Los clips se indexan por nombre con 'frames' de largo libre y 'duration' (fija), 'fps' o 'durations' (una por cuadro). DF-012 agrega Mercado Antiguo y Zona Quimica como fondos de prueba 256x144 escalables exactamente 5x a 1280x720 con filtro punto. El codigo de runtime los carga como recursos visuales opcionales para no romper copias antiguas del proyecto."
+}

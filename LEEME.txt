@@ -1,0 +1,14 @@
+PASO 3 — DISTRICT FURY
+
+Este paquete contiene el Master Prompt del proyecto.
+
+Archivo principal:
+MASTER_PROMPT.md
+
+Siguiente acción:
+1. Extrae MASTER_PROMPT.md.
+2. Súbelo al repositorio GitHub mrg722/mrg-gmes.
+3. Haz commit en main con:
+   docs: add District Fury master prompt
+
+Después vuelve aquí y te guío con el PASO 4: conectar GitHub con Codex y crear el primer agente DF-CORE.
