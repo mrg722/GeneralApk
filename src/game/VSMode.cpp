@@ -14,7 +14,7 @@
 namespace district_fury {
 namespace {
 constexpr float kMinX = 180.0f, kMaxX = 1120.0f, kMinY = 505.0f, kMaxY = 625.0f;
-constexpr int kFieldCount = 10;
+constexpr int kFieldCount = 11;
 // DF-013.2: opcion BOSS del selector VS. NONE deja el flujo de enemigos de
 // calle intacto; los demas usan la clase Boss compartida (BossDefinition).
 
@@ -104,6 +104,17 @@ void VSMode::ResetFight() {
         boss.Reset(static_cast<BossId>(selectedBoss), {900, 585, 0});
         return;
     }
+    if (RivalActive()) {
+        rival = Player{};
+        rival.Reset();
+        rival.ApplyCharacter(rivalCharacter_);
+        rival.position = {920, 585, 0};
+        rival.facing = Facing::Left;
+        rivalInput = PlayerInput{};
+        rival.scriptedInput = &rivalInput;
+        rivalAI.Reset();
+        return;
+    }
     const std::array<float, 4> xs{700, 835, 970, 1105};
     const std::array<float, 4> ys{575, 535, 610, 555};
     for (int i = 0; i < enemyCount; ++i) {
@@ -147,6 +158,8 @@ void VSMode::Update(float dt) {
                 selectedBoss = ((selectedBoss + 1 + dir + kBossOptionCount) % kBossOptionCount) - 1;
             else if (cursor == 9)
                 kfRival = ((kfRival + 1 + dir + KfRosterCount() + 1) % (KfRosterCount() + 1)) - 1;
+            else if (cursor == 10)
+                rivalCharacter_ = ((rivalCharacter_ + 1 + dir + CharacterCount() + 1) % (CharacterCount() + 1)) - 1;
             else {
                 int slot = cursor - 5;
                 enemyTypes[(size_t)slot] = NextEnemyType(enemyTypes[(size_t)slot], dir);
@@ -173,7 +186,7 @@ void VSMode::Update(float dt) {
             enemies[0].skinClip = ref.clipNames[(size_t)kfDemoClip];
         }
     }
-    if (playerDefeated || (selectedBoss >= 0 && boss.IsDefeated())) {
+    if (playerDefeated || (selectedBoss >= 0 && boss.IsDefeated()) || RivalDefeated()) {
         if (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J)) ResetFight();
         return;
     }
@@ -218,6 +231,9 @@ void VSMode::Update(float dt) {
         bossProjectiles.erase(std::remove_if(bossProjectiles.begin(), bossProjectiles.end(),
                                              [](const BossProjectile& p) { return !p.active; }),
                               bossProjectiles.end());
+    } else if (RivalActive()) {
+        UpdateRival(dt);
+        combatWorld.Update(dt);
     } else {
         for (auto& e : enemies)
             if (e.active && !e.IsDefeated()) {
@@ -250,6 +266,28 @@ void VSMode::Update(float dt) {
                 }
     }
     playerDefeated = player.state == PlayerState::Defeat;
+}
+void VSMode::UpdateRival(float dt) {
+    rivalInput = rivalAI.Think(rival, player, dt);
+    if (rival.state != PlayerState::Attack)
+        rival.facing = player.position.x > rival.position.x ? Facing::Right : Facing::Left;
+    rival.PumpInput(dt);
+    rival.Update(dt);
+    rival.position.x = std::clamp(rival.position.x, kMinX, kMaxX);
+    rival.position.y = std::clamp(rival.position.y, kMinY, kMaxY);
+    // Golpes de ida y vuelta: las mismas cajas y danos que contra enemigos.
+    if (player.AttackIsActive() && !player.hasHit && player.attackType != AttackType::Energy &&
+        rival.state != PlayerState::Defeat && player.GetAttackHitbox().Intersects(rival.GetHurtbox())) {
+        rival.TakeDamage(player.GetAttackDamage() + (player.isRageMode ? 5 : 0));
+        player.hasHit = true;
+        shake = .08f;
+    }
+    if (rival.AttackIsActive() && !rival.hasHit && player.state != PlayerState::Defeat &&
+        rival.GetAttackHitbox().Intersects(player.GetHurtbox())) {
+        player.TakeDamage(rival.GetAttackDamage() + (rival.isRageMode ? 5 : 0));
+        rival.hasHit = true;
+        shake = .08f;
+    }
 }
 void VSMode::DrawBackground() const {
     DrawRectangle(0, 0, 1280, 720, {5, 8, 12, 255});
@@ -302,6 +340,12 @@ void VSMode::DrawHud() const {
         DrawRectangle(840, 72, (int)(400.f * std::max(0, boss.GetHp()) / std::max(1, boss.GetMaxHp())), 12,
                       {225, 60, 90, 255});
         DrawText(TextFormat("%d / %d HP", boss.GetHp(), boss.GetMaxHp()), 840, 92, 12, {200, 210, 215, 230});
+    } else if (RivalActive()) {
+        DrawText(TextFormat("RIVAL: %s", GetCharacterVisual(rivalCharacter_).name), 840, 25, 16, {255, 200, 90, 255});
+        DrawText(rival.IsTransformed() ? "TRANSFORMADO" : "IA", 840, 52, 13, WHITE);
+        DrawRectangle(840, 72, 400, 12, {28, 18, 20, 255});
+        DrawRectangle(840, 72, (int)(400.f * std::max(0, rival.hp) / std::max(1, rival.maxHp)), 12, {225, 60, 90, 255});
+        DrawText(TextFormat("%d / %d VIDA", rival.hp, rival.maxHp), 840, 92, 12, {200, 210, 215, 230});
     } else {
         DrawText(StageName(), 840, 25, 18, {255, 205, 75, 255});
         DrawText(TextFormat("ENEMIGOS %d/4", enemyCount), 840, 52, 13, WHITE);
@@ -320,10 +364,11 @@ void VSMode::DrawSelection() const {
     DrawRectangle(1069, 48, 6, 610, {255, 205, 75, 210});
     DrawText("MODO VS // LABORATORIO", 405, 76, 36, {225, 235, 240, 255});
     DrawText("PRUEBA DIRECTA DE SPRITES, ESCENARIOS Y COMBATE", 335, 121, 13, {120, 185, 205, 240});
-    const int y[] = {140, 176, 212, 248, 284, 320, 356, 392, 428, 464};
+    const int y[] = {140, 176, 212, 248, 284, 320, 356, 392, 428, 464, 500};
     const Color active = {255, 215, 80, 255};
     const char* labels[] = {"STAGE",     "ESCENARIO", "CANTIDAD",  "PERSONAJE", "BOSS",
-                            "ENEMIGO 1", "ENEMIGO 2", "ENEMIGO 3", "ENEMIGO 4", "RIVAL KF (LAB)"};
+                            "ENEMIGO 1", "ENEMIGO 2", "ENEMIGO 3", "ENEMIGO 4", "RIVAL KF (LAB)",
+                            "RIVAL (IA)"};
     for (int i = 0; i < kFieldCount; ++i) {
         bool selected = cursor == i;
         DrawRectangle(335, y[i] - 8, 610, 34, selected ? Color{20, 28, 34, 230} : Color{8, 15, 21, 190});
@@ -353,11 +398,20 @@ void VSMode::DrawSelection() const {
                             : "NO DISPONIBLE: falta apk_reference/",
                  600, y[9], 14, ref.loaded ? Color{255, 200, 90, 255} : Color{255, 110, 100, 255});
     }
+    // Rival (IA): cualquier personaje con todos sus movimientos y habilidades.
+    if (rivalCharacter_ < 0)
+        DrawText("NO (PELEA CONTRA ENEMIGOS)", 600, y[10], 14, {190, 220, 230, 255});
+    else
+        DrawText(TextFormat("%s   %d/%d", GetCharacterVisual(rivalCharacter_).name, rivalCharacter_ + 1, CharacterCount()),
+                 600, y[10], 14, {255, 200, 90, 255});
     if (selectedBoss >= 0)
-        DrawText("BOSS ACTIVO: los campos de enemigos se ignoran (1 vs 1).", 335, y[9] + 30, 12,
+        DrawText("BOSS ACTIVO: los campos de enemigos y el rival se ignoran (1 vs 1).", 335, 529, 12,
                  {255, 180, 120, 220});
-    DrawText("↑/↓ CAMPO    ←/→ CAMBIAR    ENTER/J INICIAR", 391, 540, 14, {170, 195, 205, 245});
-    DrawText("ESC VOLVER AL MENU", 485, 568, 13, {130, 155, 165, 220});
+    else if (rivalCharacter_ >= 0)
+        DrawText("RIVAL ACTIVO: 1 vs 1 contra la maquina (los enemigos se ignoran).", 335, 529, 12,
+                 {255, 200, 120, 220});
+    DrawText("↑/↓ CAMPO    ←/→ CAMBIAR    ENTER/J INICIAR", 391, 556, 14, {170, 195, 205, 245});
+    DrawText("ESC VOLVER AL MENU", 485, 584, 13, {130, 155, 165, 220});
 }
 void VSMode::DrawFight() const {
     DrawBackground();
@@ -376,6 +430,9 @@ void VSMode::DrawFight() const {
             DrawCircle((int)s.x, (int)s.y - 70, 20, {255, 80, 120, 90});
             DrawCircle((int)s.x, (int)s.y - 70, 12, {255, 80, 120, 255});
         }
+    } else if (RivalActive()) {
+        if (player.position.y < rival.position.y) { player.Draw(); rival.Draw(); }
+        else { rival.Draw(); player.Draw(); }
     } else {
         std::array<std::pair<float, int>, 5> order{};
         int n = 0;
@@ -417,6 +474,11 @@ void VSMode::DrawFight() const {
     } else if (selectedBoss >= 0 && boss.IsDefeated()) {
         DrawRectangle(0, 0, 1280, 720, {0, 0, 0, 150});
         DrawText("BOSS DERROTADO", 470, 288, 42, {120, 240, 160, 255});
+        DrawText(touch::Enabled() ? "OK REINICIAR   ATRAS CONFIGURACION" : "ENTER/J REINICIAR   ESC CONFIGURACION", 430, 350, 18, WHITE);
+    } else if (RivalDefeated()) {
+        DrawRectangle(0, 0, 1280, 720, {0, 0, 0, 150});
+        const char* won = TextFormat("%s DERROTADO", GetCharacterVisual(rivalCharacter_).name);
+        DrawText(won, 640 - MeasureText(won, 38) / 2, 288, 38, {120, 240, 160, 255});
         DrawText(touch::Enabled() ? "OK REINICIAR   ATRAS CONFIGURACION" : "ENTER/J REINICIAR   ESC CONFIGURACION", 430, 350, 18, WHITE);
     }
 }

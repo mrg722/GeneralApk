@@ -3,6 +3,7 @@
 #include "game/StreetEnemy.h"
 #include "game/combat/CombatWorld.h"
 #include "game/combat/Boss.h"
+#include "game/RivalAI.h"
 #include <array>
 #include <vector>
 
@@ -15,7 +16,7 @@ public:
     // Pantalla actual para los controles tactiles: 0 combate, 1 menu, 2 fin.
     int TouchContext() const {
         if (flow == VSFlow::Select) return 1;
-        return (playerDefeated || (selectedBoss >= 0 && boss.IsDefeated())) ? 2 : 0;
+        return (playerDefeated || (selectedBoss >= 0 && boss.IsDefeated()) || RivalDefeated()) ? 2 : 0;
     }
     VSMode();
     void Init();
@@ -27,7 +28,9 @@ public:
     void StartBossForTest(int bossIndex, int character = 0) { kfRival = -1; selectedCharacter = character; selectedBoss = bossIndex; StartFight(); }
     const Boss& BossRef() const { return boss; }
     void StartLabForTest(bool kf, StreetEnemyType type, int rival = 0, int character = 0) { kfRival = kf ? rival : -1; selectedCharacter = character; enemyCount = 1; enemyTypes[0] = type; selectedBoss = -1; StartFight(); }
+    void StartRivalForTest(int rivalCharacter, int character = 0) { kfRival = -1; selectedBoss = -1; rivalCharacter_ = rivalCharacter; selectedCharacter = character; StartFight(); }
     Player& PlayerRef() { return player; }
+    const Player& RivalRef() const { return rival; }
     const std::vector<StreetEnemy>& Enemies() const { return enemies; }
 
 private:
@@ -50,6 +53,15 @@ private:
     bool exitRequested{false};
     bool playerDefeated{false};
     Player player;
+    // Rival (IA): cualquier personaje del juego, KF incluidos, con todos sus
+    // movimientos y habilidades, manejado por RivalAI. -1 = sin rival.
+    int rivalCharacter_{-1};
+    Player rival;
+    RivalAI rivalAI;
+    PlayerInput rivalInput;
+    bool RivalActive() const { return rivalCharacter_ >= 0 && selectedBoss < 0; }
+    bool RivalDefeated() const { return RivalActive() && rival.state == PlayerState::Defeat; }
+    void UpdateRival(float dt);
     std::array<StreetEnemyType, 4> enemyTypes{
         StreetEnemyType::Punk,
         StreetEnemyType::Brute,

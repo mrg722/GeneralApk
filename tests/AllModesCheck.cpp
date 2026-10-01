@@ -100,6 +100,38 @@ int main(int argc, char** argv) {
         p.scriptedInput = nullptr;
         Press(vs, KEY_ESCAPE);   // vuelve a la seleccion (cursor queda en PERSONAJE)
     }
+    // Rival (IA): personajes principales KF y otros, peleando contra Rayder.
+    for (int rc : {7, 8, 18, 19, 6, 21, 2}) {
+        VSMode duel;
+        duel.Init();
+        duel.StartRivalForTest(rc, 6);
+        Player& me = duel.PlayerRef();   // sin invulnerabilidad: el rival debe poder golpear
+        PlayerInput pin;
+        me.scriptedInput = &pin;
+        int skillsUsed = 0, transformed = 0, prevSkill = -1;
+        bool hurtMe = false;
+        const int startHp = duel.RivalRef().hp;
+        for (int f = 0; f < 60 * 25; ++f) {
+            pin = PlayerInput{};
+            pin.punch = (f % 50) == 0;
+            pin.moveX = (f / 200) % 2 ? 0.3f : -0.3f;
+            duel.Update(1.0f / 60.0f);
+            const Player& r = duel.RivalRef();
+            if (r.activeSkill >= 0 && r.activeSkill != prevSkill) ++skillsUsed;
+            prevSkill = r.activeSkill;
+            if (r.IsTransformed()) transformed = 1;
+            if (me.hp < me.maxHp || me.shield < me.maxShield) hurtMe = true;
+            if (f % 300 == 150) { Frame(duel); Shot("rival_" + std::to_string(rc) + "_" + std::to_string(f / 300)); }
+        }
+        const Player& r = duel.RivalRef();
+        const bool ok = skillsUsed > 0 && hurtMe && r.hp < startHp;
+        std::printf("rival IA %-26s habilidades=%d transformo=%d golpes al jugador=%s golpes al rival=%s %s\n",
+                    GetCharacterVisual(rc).name, skillsUsed, transformed,
+                    hurtMe ? "si" : "no", r.hp < startHp ? "si" : "no",
+                    ok ? "ok" : "REVISAR");
+        if (!ok) ++problems;
+        me.scriptedInput = nullptr;
+    }
     // Rivales KF del laboratorio (campo RIVAL KF): cada uno contra Rayder.
     for (int r = 0; r < KfRosterCount(); ++r) {
         const KfReference& ref = GetKfCharacter(r);

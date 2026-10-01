@@ -64,12 +64,20 @@ Corregido en esta auditoria:
 - Rayden Cruz volvio a avanzar al golpear; tests con assert activos en Release.
 - "RAYDEN CLON" (clon viejo con chaqueta) renombrado "CLON ANTIGUO (CHAQUETA)"; el VS muestra n/22.
 
-## Escenarios (v0.24)
+## Escenarios (v0.25) — regla acordada
 
-- Vuelven los 20 escenarios originales (assets/backgrounds/stageN_scenarioMM.png) en Historia y en VS.
-  En v0.16 las copias BETA de assets/backgrounds/hd/ los tapaban; ahora estan en
-  assets/backgrounds/beta/ (no se usan ni van en el APK). HD real: stage1_scenario01,
-  stage2_scenario01 y stage2_scenario02.
-- Stages 4 y 5 ya no dibujan postes y franjas de respaldo encima del fondo.
-- Modo VS: STAGE + ESCENARIO eligen uno de los 20 escenarios (antes siempre la calle BETA);
-  la calle BETA queda solo si falta un escenario.
+- Los escenarios de buena calidad no se tocan: stage1_scenario01 (Barrio Bajo), stage2_scenario01
+  (tuberias) y stage2_scenario02 (fundicion), con su arte HD en assets/backgrounds/hd/.
+- Los escenarios pixelados, rotos, faltantes, incompletos o danados usan el fondo BETA con su
+  codigo en neon (E<stage>.S<escenario>) en assets/backgrounds/hd/ (tools/build_beta_backgrounds.py).
+  Cuando llegue el arte definitivo basta con reemplazar ese archivo.
+- Stages 4 y 5 ya no dibujan postes y franjas de respaldo encima del fondo; Stage 3 tenia la camara al reves.
+- Modo VS: STAGE + ESCENARIO eligen uno de los 20 escenarios (con el mismo criterio de arriba).
+
+## Rival (IA) en el Modo VS (v0.25)
+
+- Campo nuevo "RIVAL (IA)": cualquiera de los 22 personajes (KF heroe y heroina, sus formas
+  transformadas, Rayder, Rayder clon, Brakk...) como oponente 1 vs 1 manejado por la maquina
+  (src/game/RivalAI.cpp). Es un Player completo: mismos movimientos, habilidades por paginas,
+  transformacion, bloqueo y dash que cuando lo controla el jugador.
+- Verificado con all_modes_check: cada rival usa habilidades, golpea y recibe golpes.
