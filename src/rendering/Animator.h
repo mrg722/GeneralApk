@@ -66,6 +66,14 @@ public:
     bool HasClip(const std::string& name) const { return namedClips.count(name) != 0; }
     // Reproduce un clip por nombre. False si no existe (el llamador decide el respaldo).
     bool PlayNamed(const std::string& name);
+    void ScaleCurrentClipToDuration(float targetSeconds) {
+        targetSeconds=std::max(0.016f,targetSeconds); float current=0.0f;
+        if(!currentClip.durations.empty()) for(float d:currentClip.durations) current+=std::max(0.016f,d);
+        else {const std::size_t n=currentClip.frames.empty()?static_cast<std::size_t>(std::max(1,currentClip.endFrame-currentClip.startFrame+1)):currentClip.frames.size();current=static_cast<float>(n)*std::max(0.016f,currentClip.frameDuration);}
+        if(current<=0.0f)return; const float s=targetSeconds/current; currentClip.frameDuration=std::max(0.016f,currentClip.frameDuration*s); for(float& d:currentClip.durations)d=std::max(0.016f,d*s); timer*=s;
+    }
+    std::size_t CurrentClipFrameIndex() const{return clipFrameIndex;}
+    std::size_t CurrentClipFrameCount() const{return currentClip.frames.empty()?static_cast<std::size_t>(std::max(1,currentClip.endFrame-currentClip.startFrame+1)):currentClip.frames.size();}
 
     void SetFrames(std::vector<SpriteFrame> metadata) {
         frames = std::move(metadata);

@@ -274,10 +274,7 @@ float Player::GetMoveSpeed() const {
 }
 
 void Player::Update(float dt) {
-    EnsurePlayerAnimator(animator, skin);
-    UpdateTransformForm();
-    animator.Update(dt);
-    UpdateMotionFeel(dt);
+    EnsurePlayerAnimator(animator, skin); UpdateTransformForm(); if(IsKeyPressed(KEY_F3)) animationDebug=!animationDebug; animator.Update(dt); UpdateMotionFeel(dt);
 
     dashInvulnerability = std::max(0.0f, dashInvulnerability - dt);
     dashCooldown = std::max(0.0f, dashCooldown - dt);
@@ -377,8 +374,8 @@ void Player::Update(float dt) {
     }
 
     if (state == PlayerState::Attack) {
-        attackElapsed += dt;
-        stateTimer -= dt;
+        const float previousAttackElapsed=attackElapsed; attackElapsed+=dt; stateTimer-=dt;
+        if(!attackImpactTriggered&&previousAttackElapsed<GetAttack(currentAttack).startup&&attackElapsed>=GetAttack(currentAttack).startup)attackImpactTriggered=true;
         const AttackDef& def = GetAttack(currentAttack);
         if (def.spawnsProjectile && !energyReleased && attackElapsed >= def.startup) {
             energyReleased = true;

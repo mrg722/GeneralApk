@@ -98,8 +98,7 @@ void Player::BeginAttack(AttackId id) {
     attackPhase = PhaseFor(id);
     recoveryTimer = 0.0f;
     state = PlayerState::Attack;
-    attackElapsed = 0;
-    attackDuration = AttackTotalDuration(def);
+    attackElapsed=0; attackDuration=AttackTotalDuration(def); attackImpactTriggered=false; attackRootMotionApplied=0.0f;
     stateTimer = attackDuration;
     hasHit = false;
     energyReleased = false;
@@ -107,7 +106,7 @@ void Player::BeginAttack(AttackId id) {
     if (def.spCost > 0) sp = std::max(0, sp - def.spCost);
 
     if (animator.PlayNamed(ClipNameFor(id))) {
-        // Clip dinamico: el manifiesto manda la duracion por cuadro.
+        if(!IsKfCharacter()&&UsesAttackAnimationProfile(skin)){const auto& profile=GetAttackAnimationProfile(skin,id);if(animator.HasClip(profile.clip))animator.ScaleCurrentClipToDuration(attackDuration);}
     } else {
     const ClipRange clip = ClipFor(id);
     const int start = animator.normalizedAtlas ? clip.cleanStart : clip.legacyStart;

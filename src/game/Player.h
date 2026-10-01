@@ -3,6 +3,7 @@
 #include "game/InputBuffer.h"
 #include "game/combat/AttackData.h"
 #include "rendering/Animator.h"
+#include "game/combat/AttackAnimation.h"
 #include <vector>
 
 namespace district_fury {
@@ -101,7 +102,10 @@ public:
     static constexpr float kTransformDuration = 12.0f;
     float skillCooldown[kSkillCount] = {};
     int activeSkill{-1};          // habilidad en curso (-1 = ataque normal)
-    bool clipDriven{false};       // la animacion manda duracion y golpes (KF y habilidades)
+    bool clipDriven{false};
+    bool attackImpactTriggered{false};
+    float attackRootMotionApplied{0.0f};
+    bool animationDebug{false};
     float multiHitTimer{0.0f};    // golpes repetidos durante una animacion larga
     float transformTimer{0.0f};   // transformacion activa (dano y velocidad extra)
 
@@ -180,6 +184,8 @@ public:
     bool InCancelWindow() const;
 
     bool AttackIsActive() const;
+    bool AttackIsImpactFrame() const;
+    const AttackAnimationProfile& CurrentAttackAnimationProfile() const;
     bool IsBlocking() const;
     bool IsGuardBroken() const;
     bool IsKnockedDown() const;
@@ -211,6 +217,7 @@ private:
     void DrawRageAura(Vector2 screen, float scale) const;
     void UpdateMotionFeel(float dt);
     void UpdateTransformForm();
+    void DrawAnimationDebug(Vector2 screen) const;
 };
 
 }  // namespace district_fury

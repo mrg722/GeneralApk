@@ -98,6 +98,9 @@ if(BUILD_TESTING)
 
     add_executable(combat_smoke_tests tests/CombatSmokeTests.cpp)
     target_link_libraries(combat_smoke_tests PRIVATE district_fury_core)
+    add_executable(attack_animation_timing_tests tests/AttackAnimationTimingTests.cpp)
+    target_link_libraries(attack_animation_timing_tests PRIVATE district_fury_core)
+    add_test(NAME attack_animation_timing_tests COMMAND attack_animation_timing_tests)
     add_test(NAME combat_smoke_tests COMMAND combat_smoke_tests)
 
     add_executable(input_buffer_tests tests/InputBufferTests.cpp)
