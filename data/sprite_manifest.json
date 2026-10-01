@@ -211,6 +211,21 @@
         720
       ],
       "filter": "point"
+    },
+    "rayder_kf": {
+      "path": "assets/characters/rayder/rayder_kf_atlas.png",
+      "grid": [
+        12,
+        18
+      ],
+      "cell": [
+        224,
+        144
+      ],
+      "pivot": [
+        112,
+        138
+      ]
     }
   },
   "clips": {
@@ -720,6 +735,361 @@
           11
         ],
         "fps": 5,
+        "loop": false
+      }
+    },
+    "rayder_kf": {
+      "idle": {
+        "frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "durations": [
+          0.11,
+          0.11,
+          0.11,
+          0.11,
+          0.11,
+          0.11
+        ],
+        "loop": true
+      },
+      "walk": {
+        "frames": [
+          6,
+          7,
+          8,
+          9,
+          8,
+          7
+        ],
+        "durations": [
+          0.085,
+          0.085,
+          0.085,
+          0.085,
+          0.085,
+          0.085
+        ],
+        "loop": true
+      },
+      "run": {
+        "frames": [
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20
+        ],
+        "durations": [
+          0.05,
+          0.05,
+          0.05,
+          0.05,
+          0.05,
+          0.05,
+          0.05
+        ],
+        "loop": true
+      },
+      "dash": {
+        "frames": [
+          14,
+          15,
+          16
+        ],
+        "durations": [
+          0.04,
+          0.04,
+          0.06
+        ],
+        "loop": false
+      },
+      "punch1": {
+        "frames": [
+          43,
+          44,
+          45,
+          46
+        ],
+        "durations": [
+          0.04,
+          0.06,
+          0.08,
+          0.12
+        ],
+        "loop": false
+      },
+      "punch2": {
+        "frames": [
+          47,
+          48,
+          49,
+          50
+        ],
+        "durations": [
+          0.04,
+          0.05,
+          0.09,
+          0.12
+        ],
+        "loop": false
+      },
+      "punch3": {
+        "frames": [
+          160,
+          161,
+          162,
+          163
+        ],
+        "durations": [
+          0.05,
+          0.06,
+          0.16,
+          0.15
+        ],
+        "loop": false
+      },
+      "kick": {
+        "frames": [
+          51,
+          52,
+          53,
+          54,
+          55
+        ],
+        "durations": [
+          0.05,
+          0.06,
+          0.1,
+          0.11,
+          0.1
+        ],
+        "loop": false
+      },
+      "energy": {
+        "frames": [
+          172,
+          173,
+          174,
+          175
+        ],
+        "durations": [
+          0.1,
+          0.1,
+          0.2,
+          0.15
+        ],
+        "loop": false
+      },
+      "projectile": {
+        "frames": [
+          176,
+          177,
+          178,
+          179,
+          180
+        ],
+        "durations": [
+          0.06,
+          0.06,
+          0.06,
+          0.06,
+          0.06
+        ],
+        "loop": true
+      },
+      "dash_attack": {
+        "frames": [
+          152,
+          150
+        ],
+        "durations": [
+          0.12,
+          0.26
+        ],
+        "loop": false
+      },
+      "rage_attack": {
+        "frames": [
+          167,
+          168,
+          169,
+          170,
+          171
+        ],
+        "durations": [
+          0.06,
+          0.12,
+          0.1,
+          0.12,
+          0.15
+        ],
+        "loop": false
+      },
+      "finisher": {
+        "frames": [
+          153,
+          151
+        ],
+        "durations": [
+          0.2,
+          0.46
+        ],
+        "loop": false
+      },
+      "block": {
+        "frames": [
+          88,
+          89
+        ],
+        "durations": [
+          0.1,
+          0.1
+        ],
+        "loop": true
+      },
+      "hit_high": {
+        "frames": [
+          92,
+          93,
+          94
+        ],
+        "durations": [
+          0.04,
+          0.05,
+          0.06
+        ],
+        "loop": false
+      },
+      "hit_low": {
+        "frames": [
+          95,
+          96,
+          97
+        ],
+        "durations": [
+          0.04,
+          0.05,
+          0.06
+        ],
+        "loop": false
+      },
+      "airborne": {
+        "frames": [
+          102,
+          103
+        ],
+        "durations": [
+          0.12,
+          0.25
+        ],
+        "loop": false
+      },
+      "knockdown": {
+        "frames": [
+          104
+        ],
+        "durations": [
+          0.1
+        ],
+        "loop": false
+      },
+      "getup": {
+        "frames": [
+          189,
+          190,
+          191
+        ],
+        "durations": [
+          0.12,
+          0.12,
+          0.08
+        ],
+        "loop": false
+      },
+      "defeat": {
+        "frames": [
+          102,
+          103,
+          104
+        ],
+        "durations": [
+          0.1,
+          0.12,
+          0.1
+        ],
+        "loop": false
+      },
+      "recovery": {
+        "frames": [
+          46
+        ],
+        "durations": [
+          0.1
+        ],
+        "loop": false
+      },
+      "victory": {
+        "frames": [
+          194,
+          195
+        ],
+        "durations": [
+          0.25,
+          0.6
+        ],
+        "loop": false
+      },
+      "turn": {
+        "frames": [
+          202,
+          203
+        ],
+        "durations": [
+          0.06,
+          0.06
+        ],
+        "loop": false
+      },
+      "transform": {
+        "frames": [
+          140,
+          141,
+          142,
+          143,
+          144,
+          145
+        ],
+        "durations": [
+          0.1,
+          0.1,
+          0.12,
+          0.12,
+          0.14,
+          0.2
+        ],
+        "loop": false
+      },
+      "landing": {
+        "frames": [
+          39,
+          40,
+          41,
+          42
+        ],
+        "durations": [
+          0.05,
+          0.05,
+          0.05,
+          0.05
+        ],
         "loop": false
       }
     }

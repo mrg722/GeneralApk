@@ -15,8 +15,9 @@ const std::array<CharacterVisual, 18> kCharacters{{
     {"TITAN-X",           "titanx",          false, 1.00f, 170.0f, 0.0f, false, 140, 1.20f, 0.90f},
     {"TITAN-X MEJORADO",  "titanx_mejorado", false, 1.00f, 235.0f, 0.0f, false, 180, 1.40f, 0.75f},
     // DF-014: Rayder, hoja de 50 poses del usuario (tools/build_rayder_sheet.py).
-    // Escala 0.93 y ancho 0.84: misma complexion y estatura que Rayden Cruz.
-    {"RAYDER",            nullptr,           false, 0.93f,   0.0f, 0.0f, true,  100, 1.00f, 1.00f, "rayder", -1, 0.84f},
+    // Hoja de movimientos estilo KF (tools/build_rayder_kf_sheet.py): ya trae la
+    // complexion de Rayden Cruz. El atlas anterior ("rayder") sigue en el manifiesto.
+    {"RAYDER",            nullptr,           false, 1.00f,   0.0f, 0.0f, true,  100, 1.00f, 1.00f, "rayder_kf", -1, 1.00f},
     // Laboratorio (temporales, solo Modo VS): personajes extraidos de la APK.
     {"KF HEROE (PELO BLANCO)", nullptr, false, 1.50f, 0.0f, 0.0f, true, 110, 1.00f, 1.05f, nullptr, 0},
     {"KF HEROINA (PELIRROJA)", nullptr, false, 1.50f, 0.0f, 0.0f, true, 100, 0.95f, 1.10f, nullptr, 1},
