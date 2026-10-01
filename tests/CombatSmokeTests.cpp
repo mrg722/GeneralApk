@@ -1,5 +1,6 @@
 #include "game/Player.h"
 #include "game/StreetEnemy.h"
+#include "game/combat/Boss.h"
 #include <cassert>
 
 using namespace district_fury;
@@ -58,6 +59,22 @@ int main() {
     player.stateTimer = 1.0f;
     for (int i = 0; i < 5; ++i) player.Update(0.02f);
     assert(player.position.x > startX + 1.0f);
+
+    // Jefe del Modo VS: vida llena = fase 1; baja a 2 y 3 al cruzar los umbrales.
+    {
+        Boss b;
+        std::vector<BossProjectile> projs;
+        Player target;
+        b.Reset(BossId::Brakk, {900, 585, 0});
+        b.Update(0.01f, target, nullptr, projs, nullptr, nullptr);
+        assert(b.GetPhase() == 1);
+        b.ApplyDamage(static_cast<int>(b.GetMaxHp() * 0.40f));
+        b.Update(0.2f, target, nullptr, projs, nullptr, nullptr);
+        assert(b.GetPhase() == 2);
+        b.ApplyDamage(static_cast<int>(b.GetMaxHp() * 0.40f));
+        b.Update(0.2f, target, nullptr, projs, nullptr, nullptr);
+        assert(b.GetPhase() == 3);
+    }
 
     StreetEnemy enemy;
     enemy.Init({100, 575, 0}, StreetEnemyType::Brute);

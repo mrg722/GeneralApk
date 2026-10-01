@@ -126,6 +126,9 @@ if(BUILD_TESTING)
     add_executable(skills_visual_check tests/SkillsVisualCheck.cpp)
     target_link_libraries(skills_visual_check PRIVATE district_fury_core)
 
+    add_executable(vs_boss_visual_check tests/VsBossVisualCheck.cpp)
+    target_link_libraries(vs_boss_visual_check PRIVATE district_fury_core)
+
     add_executable(sprite_manifest_tests tests/SpriteManifestTests.cpp)
     target_link_libraries(sprite_manifest_tests PRIVATE district_fury_core)
     add_test(NAME sprite_manifest_tests COMMAND sprite_manifest_tests

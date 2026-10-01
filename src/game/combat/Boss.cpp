@@ -1,6 +1,7 @@
 #include "game/combat/Boss.h"
 #include "rendering/AssetManager.h"
 #include "rendering/BossSprite.h"
+#include "rendering/SpriteManifest.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
@@ -92,6 +93,8 @@ void Boss::Reset(BossId bossId, Vector3D startPos) {
     hp = def->maxHp;
     maxHp = def->maxHp;
     phase = 1;
+    animTried = false;
+    animV2 = false;
     attackTimer = 1.0f;
     elapsed = 0.0f;
     invuln = 0.0f;
@@ -100,16 +103,21 @@ void Boss::Reset(BossId bossId, Vector3D startPos) {
     defeated = false;
 }
 
-const BossPhaseDef& Boss::ActivePhase() const {
-    // phases[] esta ordenado de mayor a menor hpRatioThreshold, con un
-    // ultimo elemento "base" de threshold 0. El indice de fase activa es
-    // 1 + cuantos umbrales (salvo el base) ya se cruzaron.
+int Boss::PhaseNumber() const {
+    // phases[] va de mayor a menor hpRatioThreshold y termina en la fase base
+    // (threshold 0). Fase = 1 + umbrales ya cruzados (vida llena = fase 1).
     const float ratio = maxHp > 0 ? static_cast<float>(hp) / static_cast<float>(maxHp) : 1.0f;
-    std::size_t activeIndex = def->phases.size() - 1;  // por defecto, la fase base
-    for (std::size_t i = 0; i + 1 < def->phases.size(); ++i) {
-        if (ratio <= def->phases[i].hpRatioThreshold) { activeIndex = i; break; }
-    }
-    return def->phases[activeIndex];
+    int crossed = 0;
+    for (std::size_t i = 0; i + 1 < def->phases.size(); ++i)
+        if (ratio <= def->phases[i].hpRatioThreshold) ++crossed;
+    return 1 + crossed;
+}
+
+const BossPhaseDef& Boss::ActivePhase() const {
+    // Sin umbral cruzado: la fase base (la ultima). Si no, el umbral mas bajo cruzado.
+    const int crossed = PhaseNumber() - 1;
+    const std::size_t idx = crossed == 0 ? def->phases.size() - 1 : static_cast<std::size_t>(crossed - 1);
+    return def->phases[idx];
 }
 
 void Boss::PickAttack() {
@@ -129,9 +137,7 @@ void Boss::Update(float dt, Player& player, CombatWorld* world, std::vector<Boss
     if (!def || defeated) return;
     if (invuln > 0.0f) invuln -= dt;
 
-    const int newPhase = static_cast<int>(std::distance(
-        def->phases.begin(),
-        std::find_if(def->phases.begin(), def->phases.end(), [&](const BossPhaseDef& p) { return &p == &ActivePhase(); }))) + 1;
+    const int newPhase = PhaseNumber();
     if (newPhase != phase) {
         phase = newPhase;
         if (world) world->DoShake(0.2f);
@@ -177,6 +183,32 @@ void Boss::Update(float dt, Player& player, CombatWorld* world, std::vector<Boss
 
     pos.x = std::clamp(pos.x, 150.0f, 1130.0f);
     if (hp <= 0) defeated = true;
+    UpdateAnimation(dt, dx);
+}
+
+// Mismo criterio que Stage1StoryGame::UpdateBossFight (pelea de Brakk del Nivel 1).
+void Boss::UpdateAnimation(float dt, float dx) {
+    if (id != BossId::Brakk || !IsWindowReady()) return;
+    if (!animTried) {
+        animTried = true;
+        const AtlasProfile* prof = SpriteManifest::Get().FindAtlas("brakk_v2");
+        animV2 = prof && anim.InitFromManifest("brakk_v2", AssetManager::Get().GetTextureByPath(prof->path));
+    }
+    if (!animV2) return;
+    const char* atk = currentAttack >= 0 ? def->attacks[static_cast<std::size_t>(currentAttack)].name : nullptr;
+    auto eq = [&](const char* s) { return atk && std::strcmp(atk, s) == 0; };
+    const char* clip = defeated                ? "defeat"
+                       : invuln > 0.05f        ? "hit"
+                       : eq("ChainSwing")      ? "chain"
+                       : eq("GroundSmash")     ? "smash"
+                       : eq("Charge")          ? "charge"
+                       : eq("PowerWave")       ? "chain_throw"
+                       : eq("Frenzy")          ? (phase >= 3 ? "explosive" : "fury")
+                       : atk                   ? "chain"
+                       : std::abs(dx) > 190.0f ? (phase >= 3 ? "run" : "walk")
+                                               : "idle";
+    if (anim.currentClipName != clip) anim.PlayNamed(clip);
+    anim.Update(dt);
 }
 
 void Boss::ApplyDamage(int dmg) {
@@ -194,6 +226,13 @@ CombatBox Boss::GetHurtbox() const {
 void Boss::Draw(float playerX) const {
     if (!def || defeated) return;
     const bool facingRight = playerX > pos.x;
+    if (animV2 && anim.texture.id != 0 && !anim.frames.empty()) {
+        // Hoja mejorada: mira a la derecha; ~175 px de alto como en el Nivel 1.
+        DrawEllipse(static_cast<int>(pos.x), static_cast<int>(pos.y), 70, 14, {0, 0, 0, 150});
+        const Color tv = invuln > 0.0f ? Color{255, 180, 180, 255} : WHITE;
+        anim.Draw({pos.x, pos.y}, 1.45f, !facingRight, tv);
+        return;
+    }
     const char* folder = SpriteFolder(id);
     if (folder) {
         const char* pose = UsesUniformCanvas(id) ? "idle" : "idle1";

@@ -24,6 +24,8 @@ public:
     bool ShouldExit() const;
     void ClearExit();
     // Automatizacion (tests visuales).
+    void StartBossForTest(int bossIndex, int character = 0) { kfRival = -1; selectedCharacter = character; selectedBoss = bossIndex; StartFight(); }
+    const Boss& BossRef() const { return boss; }
     void StartLabForTest(bool kf, StreetEnemyType type, int rival = 0, int character = 0) { kfRival = kf ? rival : -1; selectedCharacter = character; enemyCount = 1; enemyTypes[0] = type; selectedBoss = -1; StartFight(); }
     Player& PlayerRef() { return player; }
     const std::vector<StreetEnemy>& Enemies() const { return enemies; }

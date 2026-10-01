@@ -2,6 +2,7 @@
 #include "game/combat/BossDefinition.h"
 #include "game/Player.h"
 #include "game/combat/CombatWorld.h"
+#include "rendering/Animator.h"
 #include <vector>
 
 // DF-013.2 — clase Boss unica que interpreta un BossDefinition (fase 2 de
@@ -55,8 +56,15 @@ private:
     int currentAttack{-1};
     bool attackResolved{false};
     bool defeated{false};
+    // Brakk: hoja mejorada (atlas "brakk_v2"), la misma del Nivel 1 y del Brakk
+    // jugable. Si no carga, se usan las poses sueltas de assets/bosses/brakk.
+    Animator anim;
+    bool animTried{false};
+    bool animV2{false};
 
     const BossPhaseDef& ActivePhase() const;
+    int PhaseNumber() const;
+    void UpdateAnimation(float dt, float dx);
     void PickAttack();
 };
 
