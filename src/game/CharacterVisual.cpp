@@ -33,10 +33,10 @@ const std::array<CharacterVisual, 21> kCharacters{{
     {"KF BUFONA",              nullptr, false, 1.50f, 0.0f, 0.0f, true, 140, 1.15f, 1.00f, nullptr, 10},
     {"KF HEROE TRANSFORMADO",        nullptr, false, 1.50f, 0.0f, 0.0f, true, 120, 1.05f, 1.05f, nullptr, 11},
     {"KF HEROINA TRANSFORMADA",             nullptr, false, 1.50f, 0.0f, 0.0f, true, 100, 1.00f, 1.10f, nullptr, 12},
-    // PRUEBA: Rayder clon BETA (morado electrico) montado sobre una copia de los
-    // movimientos del heroe KF (tools/build_rayder_clone_beta.py). El heroe KF no se toca.
-    {"RAYDER CLON BETA",       nullptr, false, 1.33f, 0.0f, 0.0f, true, 115, 1.05f, 1.05f, "rayder_clon_beta", -1, 1.0f,
-     nullptr, -1, true},
+    // PRUEBA: Rayder clon BETA = copia del heroe KF (todas sus piezas, cuadros,
+    // habilidades y transformacion) vestida como el Rayder clon (morado electrico).
+    // Escala 0.75: sus cuadros vienen ampliados x2 (Scale2x) para mas calidad.
+    {"RAYDER CLON BETA",       nullptr, false, 0.75f, 0.0f, 0.0f, true, 115, 1.05f, 1.05f, nullptr, 13, 1.0f, nullptr, 14},
 }};
 
 }  // namespace
