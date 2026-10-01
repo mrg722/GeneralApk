@@ -10,6 +10,42 @@ bool Player::IsKfCharacter() const {
 
 float Player::ClipSeconds(const char* clip) const { return animator.ClipSeconds(clip); }
 
+namespace {
+const KfReference* CurrentKf(const Player& p) {
+    const CharacterVisual& cv = GetCharacterVisual(p.skin);
+    const int roster = (p.usingAlt && cv.transformKfRoster >= 0) ? cv.transformKfRoster : cv.kfRoster;
+    if (roster < 0) return nullptr;
+    const KfReference& k = GetKfCharacter(roster);
+    return k.loaded ? &k : nullptr;
+}
+}  // namespace
+
+int Player::AbilityCount() const {
+    const KfReference* k = CurrentKf(*this);
+    return k ? static_cast<int>(k->abilityClips.size()) : 0;
+}
+
+int Player::SkillPageCount() const {
+    const int n = AbilityCount();
+    return n > 0 ? (n + 4) / 5 : 1;
+}
+
+int Player::AbilityForSlot(int i) const {
+    if (i < 0 || i >= kSkillCount - 1) return -1;
+    const int n = AbilityCount();
+    if (n <= 0) return -1;
+    const int idx = (skillPage % SkillPageCount()) * 5 + i;
+    return idx < n ? idx : -1;
+}
+
+float Player::SkillCooldownLeft(int i) const {
+    if (i < 0 || i >= kSkillCount) return 1.0f;
+    if (i == kSkillCount - 1 || !IsKfCharacter()) return skillCooldown[i];
+    const int a = AbilityForSlot(i);
+    if (a < 0) return 1.0f;                                   // boton sin habilidad en esta pagina
+    return a < static_cast<int>(abilityCooldown.size()) ? abilityCooldown[static_cast<size_t>(a)] : 0.0f;
+}
+
 const char* Player::SkillName(int i) const {
     // Nombres generales por ahora: todos los personajes tienen 6 habilidades.
     static const char* kOurs[kSkillCount] = {"ONDA", "GANCHO", "TORBELLINO", "EMBESTIDA", "REMATE", "TRANSFORMAR"};
@@ -17,6 +53,12 @@ const char* Player::SkillName(int i) const {
     static const char* kKfOther[kSkillCount] = {"TECNICA 1", "TECNICA 2", "TECNICA 3", "TECNICA 4", "TECNICA 5", "TRANSFORMAR"};
     if (i < 0 || i >= kSkillCount) return "";
     if (!IsKfCharacter()) return kOurs[i];
+    if (i < kSkillCount - 1) {
+        const KfReference* k = CurrentKf(*this);
+        const int a = AbilityForSlot(i);
+        if (k && a >= 0 && a < static_cast<int>(k->abilityNames.size())) return k->abilityNames[static_cast<size_t>(a)].c_str();
+        if (k && a < 0) return "-";
+    }
     if (GetCharacterVisual(skin).kfMoves) return kKfHero[i];   // copia del heroe KF
     const int sprite = KfRoster(GetCharacterVisual(skin).kfRoster).sprite;
     return (sprite == 0 || sprite == 2) ? kKfHero[i] : kKfOther[i];   // los dos heroes traen 5 habilidades propias
@@ -43,7 +85,7 @@ void Player::BeginClipAttack(const char* clip, int skillIndex) {
 }
 
 bool Player::TryStartSkill(int i) {
-    if (!inputEnabled || i < 0 || i >= kSkillCount || skillCooldown[i] > 0.0f) return false;
+    if (!inputEnabled || i < 0 || i >= kSkillCount || !SkillReady(i)) return false;
     switch (state) {
         case PlayerState::Idle: case PlayerState::Walk: case PlayerState::Recovery:
         case PlayerState::Block: case PlayerState::Dash: break;
@@ -53,7 +95,13 @@ bool Player::TryStartSkill(int i) {
             break;
         default: return false;
     }
-    skillCooldown[i] = kSkillCooldown;
+    const int ability = IsKfCharacter() ? AbilityForSlot(i) : -1;
+    if (ability >= 0) {
+        if (abilityCooldown.size() < static_cast<size_t>(AbilityCount())) abilityCooldown.resize(static_cast<size_t>(AbilityCount()), 0.0f);
+        abilityCooldown[static_cast<size_t>(ability)] = kSkillCooldown;
+    } else {
+        skillCooldown[i] = kSkillCooldown;
+    }
     inputBuffer.Clear();
     if (i == kSkillCount - 1) {   // transformacion: aura dorada, mas dano y velocidad
         transformTimer = kTransformDuration;
@@ -66,8 +114,9 @@ bool Player::TryStartSkill(int i) {
         return true;
     }
     if (IsKfCharacter()) {
+        const KfReference* k = CurrentKf(*this);
         static const char* kClips[] = {"skill1", "skill2", "skill3", "skill4", "skill5"};
-        BeginClipAttack(kClips[i], i);
+        BeginClipAttack(k && ability >= 0 ? k->abilityClips[static_cast<size_t>(ability)].c_str() : kClips[i], i);
         return true;
     }
     // Nuestros personajes: sus propios movimientos, sin gastar energia.
@@ -220,6 +269,7 @@ void Player::PollAttackInput() {
     const int facingDir = facing == Facing::Right ? 1 : -1;
     if (frameInput.specialWave) inputBuffer.Push(InputCommand::SpecialWave, h != 0 ? h : facingDir);
     if (frameInput.specialRise) inputBuffer.Push(InputCommand::SpecialRise, h != 0 ? h : facingDir);
+    if (frameInput.skillPage) skillPage = (skillPage + 1) % std::max(1, SkillPageCount());
     if (frameInput.skill >= 0 && TryStartSkill(frameInput.skill)) return;
     if (frameInput.punch) {
         const int dir = motion.QuarterCircle(inputBuffer.Frame());
@@ -248,6 +298,7 @@ PlayerInput Player::ReadInput() const {
     in.rage = input::Pressed(KEY_SPACE);
     in.specialWave = input::Pressed(input::kVirtualSpecialWave);
     in.specialRise = input::Pressed(input::kVirtualSpecialRise);
+    in.skillPage = input::Pressed(KEY_TAB) || input::Pressed(input::kVirtualSkillPage);
     for (int i = 0; i < kSkillCount; ++i)
         if (input::Pressed(KEY_ONE + i) || input::Pressed(input::kVirtualSkill0 + i)) in.skill = i;
     return in;

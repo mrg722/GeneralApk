@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iterator>
 #include <map>
+#include <cstdio>
 #include <unordered_map>
 #include <cstdlib>
 #include <string>
@@ -176,6 +177,52 @@ Image Scale2x(const Image& src) {
     return dst;
 }
 
+// Poderes del Rayder clon (tint 3): todo color saturado pasa a rojo carmesi.
+void RedFx(Image& img) {
+    ImageFormat(&img, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    Color* px = (Color*)img.data;
+    for (int i = 0; i < img.width * img.height; ++i) {
+        if (px[i].a == 0) continue;
+        const Vector3 hsv = ColorToHSV(px[i]);
+        if (hsv.y < 0.28f) continue;   // blancos, grises y sombras quedan
+        const unsigned char a = px[i].a;
+        px[i] = ColorFromHSV(352.0f, std::min(1.0f, hsv.y * 1.05f), hsv.z);
+        px[i].a = a;
+    }
+}
+
+// Despiece del Rayder clon (tools/build_kf_clone_rig_canva.py): una pieza por
+// cada pieza del cuerpo del heroe KF, a RES veces su resolucion.
+struct Rig { bool ok = false; int res = 1, pad = 0; Image img{}; std::vector<Rectangle> rects; };
+Rig LoadRig() {
+    Rig r;
+    std::string text;
+    std::vector<unsigned char> bytes;
+    const std::string base = "assets/characters/rayder/kf_clone/rig_rojo";
+    for (const std::string& pre : {std::string(""), std::string("../"), std::string("../../")}) {
+        if (!platform::LoadTextFile(pre + base + ".txt", text)) continue;
+        if (!platform::LoadBinaryFile(pre + base + ".png", bytes)) continue;
+        break;
+    }
+    if (text.empty() || bytes.empty()) return r;
+    const char* c = text.c_str();
+    char* end = nullptr;
+    r.res = (int)std::strtol(c, &end, 10); c = end;
+    r.pad = (int)std::strtol(c, &end, 10); c = end;
+    while (true) {
+        const long a = std::strtol(c, &end, 10); if (end == c) break; c = end;
+        const long b = std::strtol(c, &end, 10); c = end;
+        const long w = std::strtol(c, &end, 10); c = end;
+        const long h = std::strtol(c, &end, 10); c = end;
+        r.rects.push_back({(float)a, (float)b, (float)w, (float)h});
+    }
+    r.img = LoadImageFromMemory(".png", bytes.data(), (int)bytes.size());
+    if (!r.img.data || r.res < 1) return r;
+    ImageFormat(&r.img, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    r.ok = true;
+    return r;
+}
+
 void RayderTint(Image& img) {
     ImageFormat(&img, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
     Color* px = (Color*)img.data;
@@ -239,6 +286,10 @@ constexpr KfRosterEntry kRoster[] = {
     // mismas piezas, cuadros, tiempos y habilidades; el heroe original no se toca.
     {0, "RAYDER CLON BETA", true, 115, 0.9f, 2},
     {1, "RAYDER CLON BETA TRANSFORMADO", true, 125, 0.9f, 2},
+    // Rayder clon (rojo): todos los cuadros y habilidades del heroe KF armados con
+    // su propio despiece (hojas de Canva), a 3x; poderes en rojo.
+    {0, "RAYDER CLON", true, 120, 0.6f, 3},
+    {1, "RAYDER CLON TRANSFORMADO", true, 130, 0.6f, 3},
     // El sprite 33 no es luchador (vendedor/puesto del escenario): excluido.
 };
 
@@ -279,6 +330,45 @@ KfReference Load(const KfRosterEntry& who) {
     }
     for (size_t k = 0; k < skillActs.size() && k < 5; ++k) clipList.push_back({kSkillNames[k], skillActs[k], false});
     if (who.hero && usable(31)) clipList.push_back({"transform", 31, false});
+    // Todas las habilidades y tecnicas (no solo 5): especiales con fuego, super,
+    // despertar y acrobacias. Nombres en espanol por accion del heroe.
+    struct Ab { int act; const char* name; };
+    static const Ab kHeroAbilities[] = {
+        {20, "SOMBRAS"}, {21, "ESTALLIDO"}, {22, "PILAR"}, {23, "LLAMARADA"}, {24, "FENIX"}, {25, "TORNADO"},
+        {27, "BARRIDA"}, {30, "CIRCULO FUEGO"}, {46, "ERUPCION"}, {47, "MEDIA LUNA"}, {50, "TAJO"}, {51, "INFIERNO"},
+        {19, "SUPER"}, {42, "DESPERTAR"}, {36, "VOLTERETA"}, {37, "GIRO"}, {38, "RODADA"}, {39, "PATADA AEREA"},
+        {40, "CAIDA"}, {41, "TORBELLINO"}, {45, "MORTAL"}, {55, "CONTRA"}, {57, "SALTO TIGRE"},
+        // formas transformadas y otras variantes: sus ataques largos
+        {8, "COMBO 3"}, {9, "VOLTERETA"}, {10, "ESPECIAL"}, {34, "TECNICA"}, {35, "TECNICA"}};
+    std::vector<int> abActs;
+    for (const Ab& ab : kHeroAbilities) {
+        if (!usable(ab.act)) continue;
+        if (!who.hero && ab.act < 19) continue;
+        if (ab.act < 19 && abActs.size() >= 10) continue;   // golpes normales: solo si faltan habilidades
+        bool dup = false;
+        for (int a : abActs) dup |= a == ab.act;
+        if (dup) continue;
+        abActs.push_back(ab.act);
+        out.abilityNames.push_back(ab.name);
+    }
+    if (!who.hero) {   // enemigos/jefes: todos sus ataques largos
+        for (int a : skillActs) {
+            bool dup = false;
+            for (int b : abActs) dup |= a == b;
+            if (dup) continue;
+            abActs.push_back(a);
+            out.abilityNames.push_back("TECNICA");
+        }
+    }
+    static const char* kAbClip[] = {"ab0", "ab1", "ab2", "ab3", "ab4", "ab5", "ab6", "ab7", "ab8", "ab9", "ab10", "ab11",
+                                    "ab12", "ab13", "ab14", "ab15", "ab16", "ab17", "ab18", "ab19", "ab20", "ab21",
+                                    "ab22", "ab23", "ab24", "ab25", "ab26", "ab27", "ab28", "ab29"};
+    const size_t nAb = std::min(abActs.size(), sizeof(kAbClip) / sizeof(kAbClip[0]));
+    out.abilityNames.resize(nAb);
+    for (size_t k = 0; k < nAb; ++k) {
+        out.abilityClips.push_back(kAbClip[k]);
+        clipList.push_back({kAbClip[k], abActs[k], false});
+    }
     const ClipMap* clips = clipList.data();
     const size_t nclips = clipList.size();
     r.p = base + offs[ns];
@@ -325,6 +415,9 @@ KfReference Load(const KfRosterEntry& who) {
     };
     (void)sheet;
 
+    Rig rig;
+    if (who.tint == 3) rig = LoadRig();
+    const int R = rig.ok ? rig.res : 1;
     // Frames usados por los clips.
     std::map<int, int> frameSlot;   // frame APK -> indice en el atlas
     std::vector<Image> composed; std::vector<Vector2> origin;
@@ -351,6 +444,20 @@ KfReference Load(const KfRosterEntry& who) {
                 const Rectangle src = clips.empty() ? Rectangle{0, 0, (float)sh->width, (float)sh->height}
                                                     : (clip < (int)clips.size() ? clips[(size_t)clip] : Rectangle{0, 0, 0, 0});
                 if (src.width <= 0 || src.height <= 0) continue;
+                if (rig.ok) {
+                    // Rayder clon: piezas del cuerpo del despiece propio; el resto
+                    // (efectos y poderes) ampliado y en rojo. Posiciones x RES.
+                    if (imgId == 1 && clip < (int)rig.rects.size()) {
+                        parts.push_back({TransformPiece(ImageFromImage(rig.img, rig.rects[(size_t)clip]), kMidp[tr]),
+                                         x * R - rig.pad, y * R - rig.pad});
+                    } else {
+                        Image pc = ImageFromImage(*sh, src);
+                        ImageResizeNN(&pc, pc.width * R, pc.height * R);
+                        RedFx(pc);
+                        parts.push_back({TransformPiece(pc, kMidp[tr]), x * R, y * R});
+                    }
+                    continue;
+                }
                 parts.push_back({TransformPiece(ImageFromImage(*sh, src), kMidp[tr]), x, y});
             }
             if (parts.empty()) continue;
@@ -364,6 +471,13 @@ KfReference Load(const KfRosterEntry& who) {
             }
             if (who.tint == 1) RayderTint(canvas);
             float upscale = 1.0f;
+            if (rig.ok) {   // recorte al dibujo (el atlas a 3x no debe crecer de mas)
+                const Rectangle bb = GetImageAlphaBorder(canvas, 0.02f);
+                if (bb.width > 0 && bb.height > 0) {
+                    ImageCrop(&canvas, bb);
+                    x0 += (int)bb.x; y0 += (int)bb.y;
+                }
+            }
             if (who.tint == 2) {
                 Image big = Scale2x(canvas);
                 UnloadImage(canvas);
@@ -376,22 +490,36 @@ KfReference Load(const KfRosterEntry& who) {
         }
     }
     for (auto& kv : sheets) UnloadImage(kv.second);
+    if (rig.ok) UnloadImage(rig.img);
     if (composed.empty()) { out.error = "sin frames"; return out; }
 
     // Empaquetado por estantes en un atlas de 2048 de ancho.
-    const int atlasW = who.tint == 2 ? 4096 : 2048; int x = 0, y = 0, rowH = 0;   // x2: atlas mas ancho (<= 4096)
+    const int atlasW = who.tint >= 2 ? 4096 : 2048; int x = 0, y = 0, rowH = 0;   // x2/x3: atlas mas ancho (<= 4096)
     std::vector<Rectangle> place;
-    for (auto& img : composed) {
-        if (x + img.width > atlasW) { x = 0; y += rowH + 2; rowH = 0; }
-        place.push_back({(float)x, (float)y, (float)img.width, (float)img.height});
-        x += img.width + 2; rowH = std::max(rowH, img.height);
+    // Medidas logicas de cada cuadro (las que usa el dibujo); si el atlas no cabe
+    // en 4096 px de alto se reducen las imagenes, no el tamano en pantalla.
+    std::vector<Vector2> logical;
+    for (auto& img : composed) logical.push_back({(float)img.width, (float)img.height});
+    for (float shrink = 1.0f; shrink > 0.3f; shrink *= 0.85f) {
+        place.clear(); x = 0; y = 0; rowH = 0;
+        for (auto& lg : logical) {
+            const int w = std::max(1, (int)(lg.x * shrink)), h = std::max(1, (int)(lg.y * shrink));
+            if (x + w > atlasW) { x = 0; y += rowH + 2; rowH = 0; }
+            place.push_back({(float)x, (float)y, (float)w, (float)h});
+            x += w + 2; rowH = std::max(rowH, h);
+        }
+        if (y + rowH <= 4096) {
+            if (shrink < 1.0f)
+                for (size_t i = 0; i < composed.size(); ++i) ImageResize(&composed[i], (int)place[i].width, (int)place[i].height);
+            break;
+        }
     }
     Image atlas = GenImageColor(atlasW, y + rowH, BLANK);
     std::vector<SpriteFrame> frames;
     for (size_t i = 0; i < composed.size(); ++i) {
         ImageDraw(&atlas, composed[i], {0, 0, place[i].width, place[i].height}, place[i], WHITE);
         SpriteFrame f;
-        f.source = place[i]; f.width = place[i].width; f.height = place[i].height;
+        f.source = place[i]; f.width = logical[i].x; f.height = logical[i].y;
         f.pivotX = origin[i].x; f.pivotY = origin[i].y;
         f.visualBounds = {0, 0, f.width, f.height};
         frames.push_back(f);

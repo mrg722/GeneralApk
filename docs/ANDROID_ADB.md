@@ -1,6 +1,6 @@
 # Probar District Fury en el celular (Samsung A57) con adb
 
-El APK ya compilado está en `dist/district_fury-0.19-lab.apk` (arm64-v8a, Android 7.0 o superior).
+El APK ya compilado está en `dist/district_fury-0.20-lab.apk` (arm64-v8a, Android 7.0 o superior).
 
 ## 1. Preparar el celular (una sola vez)
 
@@ -27,7 +27,7 @@ Debe aparecer una línea con el número de serie y la palabra `device`. Si dice 
 Desde la raíz del repositorio (`GeneralApk`, rama `ccr-077ad675-rlrg28`):
 
 ```bash
-adb install -r dist/district_fury-0.19-lab.apk
+adb install -r dist/district_fury-0.20-lab.apk
 adb shell am start -n com.mrg722.districtfury/android.app.NativeActivity
 ```
 
