@@ -41,6 +41,9 @@ struct CharacterVisual {
     // laboratorio, otro personaje KF (el mismo luchador transformado).
     const char* transformAtlasId = nullptr;
     int transformKfRoster = -1;
+    // Juega como un personaje KF (habilidades skill1-5, super, ataques guiados
+    // por la animacion) con un atlas propio: el Rayder clon BETA.
+    bool kfMoves = false;
 };
 
 int CharacterCount();

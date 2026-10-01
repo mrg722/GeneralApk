@@ -7,11 +7,9 @@ namespace {
 
 // name, folder, uniformCanvas, scale, targetHeight, footInset,
 // facesRightByDefault, maxHp, damageMultiplier, speedMultiplier
-const std::array<CharacterVisual, 20> kCharacters{{
+const std::array<CharacterVisual, 21> kCharacters{{
     {"RAYDEN (ORIGINAL)", nullptr,           false, 1.00f,   0.0f, 0.0f, true,  100, 1.00f, 1.00f},
-    // Rayder clon: copia del heroe KF (todos sus movimientos y habilidades) con
-    // los colores de Rayder; se transforma en la copia del heroe transformado.
-    {"RAYDER CLON",       nullptr,           false, 1.50f,   0.0f, 0.0f, true,  115, 1.05f, 1.05f, nullptr, 13, 1.0f, nullptr, 14},
+    {"RAYDEN CLON",       "rayder_clone",    false, 1.00f, 118.0f, 0.0f, true,  110, 1.05f, 1.05f},
     // Brakk jugable con la hoja mejorada (atlas brakk_v2); las poses sueltas siguen en assets/bosses/brakk.
     {"BRAKK",             "brakk",           true,  175.0f/188.0f, 0.0f, 9.0f, true, 150, 1.25f, 0.85f, "brakk_v2"},
     {"GRINDER",           "grinder",         true,  3.00f,   0.0f, 0.0f, true,  160, 1.30f, 0.80f},
@@ -35,6 +33,10 @@ const std::array<CharacterVisual, 20> kCharacters{{
     {"KF BUFONA",              nullptr, false, 1.50f, 0.0f, 0.0f, true, 140, 1.15f, 1.00f, nullptr, 10},
     {"KF HEROE TRANSFORMADO",        nullptr, false, 1.50f, 0.0f, 0.0f, true, 120, 1.05f, 1.05f, nullptr, 11},
     {"KF HEROINA TRANSFORMADA",             nullptr, false, 1.50f, 0.0f, 0.0f, true, 100, 1.00f, 1.10f, nullptr, 12},
+    // PRUEBA: Rayder clon BETA (morado electrico) montado sobre una copia de los
+    // movimientos del heroe KF (tools/build_rayder_clone_beta.py). El heroe KF no se toca.
+    {"RAYDER CLON BETA",       nullptr, false, 1.33f, 0.0f, 0.0f, true, 115, 1.05f, 1.05f, "rayder_clon_beta", -1, 1.0f,
+     nullptr, -1, true},
 }};
 
 }  // namespace
