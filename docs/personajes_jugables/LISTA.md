@@ -3,7 +3,7 @@
 | # | Personaje | Clips | Hoja |
 |---|---|---|---|
 | 0 | RAYDEN (ORIGINAL) | airborne, block, dash, dash_attack, defeat, energy, finisher, getup, hit_high, hit_low, idle, kick, knockdown, punch1, punch2, punch3, rage_attack, recovery, walk | [0_RAYDEN__ORIGINAL_.png](0_RAYDEN__ORIGINAL_.png) |
-| 1 | RAYDER CLON | air, airborne, atk1, atk2, atk3, atk4, block, dash, dash_attack, defeat, energy, finisher, getup, hit, hit_high, hit_low, idle, kick, knockdown, punch1, punch2, punch3, rage_attack, recovery, run, skill1, skill2, skill3, skill4, skill5, special, super, transform, walk | [1_RAYDER_CLON.png](1_RAYDER_CLON.png) |
+| 1 | RAYDEN CLON | poses sueltas (assets/bosses/rayder_clone) | - |
 | 2 | BRAKK | airborne, block, chain, chain_throw, charge, dash, dash_attack, defeat, energy, explosive, finisher, fury, getup, hit, hit_high, hit_low, idle, kick, knockdown, punch1, punch2, punch3, rage_attack, recovery, run, smash, transform, victory, walk | [2_BRAKK.png](2_BRAKK.png) |
 | 3 | GRINDER | poses sueltas (assets/bosses/grinder) | - |
 | 4 | TITAN-X | poses sueltas (assets/bosses/titanx) | - |
@@ -22,3 +22,4 @@
 | 17 | KF BUFONA | air, airborne, atk1, atk2, atk3, atk4, block, dash, dash_attack, defeat, energy, finisher, getup, hit, hit_high, hit_low, idle, kick, knockdown, punch1, punch2, punch3, rage_attack, recovery, run, skill1, skill2, skill3, skill4, skill5, special, walk | [17_KF_BUFONA.png](17_KF_BUFONA.png) |
 | 18 | KF HEROE TRANSFORMADO | air, airborne, atk1, atk2, atk3, atk4, block, dash, dash_attack, defeat, energy, finisher, getup, hit, hit_high, hit_low, idle, kick, knockdown, punch1, punch2, punch3, rage_attack, recovery, run, skill1, skill2, skill3, skill4, skill5, special, transform, walk | [18_KF_HEROE_TRANSFORMADO.png](18_KF_HEROE_TRANSFORMADO.png) |
 | 19 | KF HEROINA TRANSFORMADA | air, airborne, atk1, atk2, atk3, atk4, block, dash, dash_attack, defeat, energy, finisher, getup, hit, hit_high, hit_low, idle, kick, knockdown, punch1, punch2, punch3, rage_attack, recovery, run, skill1, skill2, skill3, skill4, skill5, special, super, walk | [19_KF_HEROINA_TRANSFORMADA.png](19_KF_HEROINA_TRANSFORMADA.png) |
+| 20 | RAYDER CLON BETA | air, airborne, atk1, atk2, atk3, atk4, block, dash, dash_attack, defeat, energy, finisher, getup, hit, hit_high, hit_low, idle, kick, knockdown, punch1, punch2, punch3, rage_attack, recovery, run, skill1, skill2, skill3, skill4, skill5, special, super, transform, victory, walk | [20_RAYDER_CLON_BETA.png](20_RAYDER_CLON_BETA.png) |

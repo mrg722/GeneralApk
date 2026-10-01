@@ -161,10 +161,6 @@ constexpr KfRosterEntry kRoster[] = {
     {15, "KF BUFONA", false, 140, 1.8f},
     {1, "KF HEROE TRANSFORMADO", true, 120, 1.8f},     // el heroe transformado (llamas rojas, otros golpes)
     {3, "KF HEROINA TRANSFORMADA", true, 100, 1.8f},   // la heroina transformada (lanza y rayos)
-    // Copias del heroe (normal y transformado) con los colores de Rayder: el
-    // "Rayder clon" juega con todos sus movimientos sin tocar al heroe original.
-    {0, "RAYDER CLON (BASE KF)", true, 115, 1.8f, 1},
-    {1, "RAYDER CLON TRANSFORMADO", true, 125, 1.8f, 1},
     // El sprite 33 no es luchador (vendedor/puesto del escenario): excluido.
 };
 

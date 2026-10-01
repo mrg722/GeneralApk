@@ -3,7 +3,10 @@
 
 namespace district_fury {
 
-bool Player::IsKfCharacter() const { return GetCharacterVisual(skin).kfRoster >= 0; }
+bool Player::IsKfCharacter() const {
+    const CharacterVisual& cv = GetCharacterVisual(skin);
+    return cv.kfRoster >= 0 || cv.kfMoves;
+}
 
 float Player::ClipSeconds(const char* clip) const { return animator.ClipSeconds(clip); }
 
@@ -14,6 +17,7 @@ const char* Player::SkillName(int i) const {
     static const char* kKfOther[kSkillCount] = {"TECNICA 1", "TECNICA 2", "TECNICA 3", "TECNICA 4", "TECNICA 5", "TRANSFORMAR"};
     if (i < 0 || i >= kSkillCount) return "";
     if (!IsKfCharacter()) return kOurs[i];
+    if (GetCharacterVisual(skin).kfMoves) return kKfHero[i];   // copia del heroe KF
     const int sprite = KfRoster(GetCharacterVisual(skin).kfRoster).sprite;
     return (sprite == 0 || sprite == 2) ? kKfHero[i] : kKfOther[i];   // los dos heroes traen 5 habilidades propias
 }

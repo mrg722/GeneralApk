@@ -1,4 +1,4 @@
-# District Fury: estado del proyecto (v0.16-lab)
+# District Fury: estado del proyecto (v0.17-lab)
 
 ## Lo que llevamos ✅
 
@@ -8,7 +8,8 @@
 | **Habilidades** | 6 por personaje, con 15 s de espera y un reloj en el botón. La 6 es TRANSFORMAR (12 s con más daño y velocidad y cambio de forma). |
 | **Rayden Cruz** | Jugable, 22 frames, con fluidez añadida (respiración, balanceo, avance al golpear y estelas). |
 | **Rayder** | Usa todas las hojas recibidas: estilo KF, combate 50, avanzada 36, carga de transformación 12 y forma de pelo blanco completa. Aparece de espaldas en la elección. |
-| **Rayder clon** | Copia del héroe KF con todos sus movimientos y poderes, en colores de Rayder, y se transforma. El héroe KF original no se toca. |
+| **Rayden clon (rojo)** | Igual que antes (poses del jefe). |
+| **Rayder clon BETA (prueba, morado)** | Se recortaron las 23 animaciones de tu hoja del clon (idle, caminar, correr, dash, saltar, golpes, combos, patada, onda oscura, rage, teletransporte, clones, ataque aéreo, finisher, daño y muerte) y se pintaron de morado claro eléctrico, con la piel intacta. Luego se montaron cuadro a cuadro sobre una copia de los pasos y tiempos del héroe KF: hereda su cadencia, sus 5 habilidades, el súper y la transformación. El héroe KF original no se toca. Herramienta: `tools/build_rayder_clone_beta.py`. |
 | **Laboratorio KF** | 13 personajes con sus colores originales. El héroe y la heroína se transforman en sus formas reales (sprites 1 y 3). |
 | **Brakk** | Hoja mejorada en el Nivel 1 y jugable en VS. |
 | **Nivel 1** | Completable: 4 escenarios, oleadas, "GO >>", guardianes y Brakk. |
