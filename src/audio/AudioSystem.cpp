@@ -1,6 +1,9 @@
 #include "audio/AudioSystem.h"
 #include <algorithm>
 #include <cmath>
+#include "core/Platform.h"
+#include <string>
+#include <vector>
 
 namespace district_fury {
 namespace {
@@ -38,7 +41,67 @@ void AudioSystem::Init() {
     BuildSound(Sfx::Ui, 620.0f, 0.06f, 0.16f);
     BuildSound(Sfx::StageClear, 520.0f, 0.35f, 0.24f);
     BuildSound(Sfx::GameOver, 105.0f, 0.42f, 0.26f);
+    BuildSound(Sfx::Block, 400.0f, 0.06f, 0.2f, true);
+    BuildSound(Sfx::Whoosh, 900.0f, 0.06f, 0.08f);
+    BuildSound(Sfx::Land, 70.0f, 0.08f, 0.2f, true);
+    BuildSound(Sfx::Jump, 300.0f, 0.08f, 0.12f);
+    BuildSound(Sfx::FuryCharge, 220.0f, 0.4f, 0.25f);
+    BuildSound(Sfx::UiConfirm, 760.0f, 0.07f, 0.16f);
+    BuildSound(Sfx::UiCancel, 380.0f, 0.07f, 0.16f);
+    BuildSound(Sfx::UiPause, 500.0f, 0.08f, 0.16f);
+
+    // Paquete del usuario: si el WAV existe, reemplaza al sonido sintetizado.
+    struct File { Sfx sfx; const char* name; float volume; };
+    const File files[] = {
+        {Sfx::Punch, "combat_punch_light", 0.8f}, {Sfx::Kick, "combat_kick", 0.85f},
+        {Sfx::Hit, "combat_damage", 0.8f}, {Sfx::HeavyHit, "combat_impact_heavy", 0.9f},
+        {Sfx::EnergyCharge, "fury_charge", 0.7f}, {Sfx::EnergyShot, "fury_electric", 0.75f},
+        {Sfx::EnergyImpact, "fury_power_impact", 0.85f}, {Sfx::EnemyDeath, "combat_ko", 0.8f},
+        {Sfx::BossAttack, "combat_punch_heavy", 0.9f}, {Sfx::BossPhase, "world_metal_clang", 0.8f},
+        {Sfx::Dash, "move_dash", 0.7f}, {Sfx::Rage, "fury_release", 0.85f}, {Sfx::Ui, "ui_navigate", 0.6f},
+        {Sfx::StageClear, "energy_pickup", 0.8f}, {Sfx::GameOver, "combat_ko", 0.9f},
+        {Sfx::Block, "combat_block", 0.8f}, {Sfx::Whoosh, "move_whoosh", 0.5f}, {Sfx::Land, "move_land", 0.6f},
+        {Sfx::Jump, "move_jump", 0.6f}, {Sfx::FuryCharge, "fury_charge", 0.8f},
+        {Sfx::UiConfirm, "ui_confirm", 0.6f}, {Sfx::UiCancel, "ui_cancel", 0.6f}, {Sfx::UiPause, "ui_pause", 0.6f},
+    };
+    for (const File& f : files) {
+        std::vector<unsigned char> bytes;
+        const std::string path = std::string("assets/audio/sfx/") + f.name + ".wav";
+        bool ok = false;
+        for (const std::string& p : {path, "../" + path, "../../" + path})
+            if (platform::AssetExists(p) && platform::LoadBinaryFile(p, bytes)) { ok = true; break; }
+        if (!ok || bytes.empty()) continue;
+        Wave w = LoadWaveFromMemory(".wav", bytes.data(), static_cast<int>(bytes.size()));
+        if (w.frameCount == 0) continue;
+        Sound snd = LoadSoundFromWave(w);
+        UnloadWave(w);
+        if (snd.frameCount == 0) continue;
+        SetSoundVolume(snd, f.volume);
+        Sound& slot = sounds[Index(f.sfx)];
+        if (slot.frameCount > 0) UnloadSound(slot);
+        slot = snd;
+    }
+    // Ambiente: lluvia en bucle, bajo.
+    for (const std::string& p : {std::string("assets/audio/sfx/world_rain_loop.wav"), std::string("../assets/audio/sfx/world_rain_loop.wav"),
+                                 std::string("../../assets/audio/sfx/world_rain_loop.wav")}) {
+        if (!platform::AssetExists(p)) continue;
+        ambient = LoadMusicStream(p.c_str());
+        if (ambient.frameCount > 0) {
+            ambient.looping = true;
+            SetMusicVolume(ambient, 0.22f);
+            PlayMusicStream(ambient);
+            ambientReady = true;
+        }
+        break;
+    }
     ready = true;
+}
+
+void AudioSystem::UpdateAmbient() {
+    if (!ambientReady) return;
+    if (muted) { if (IsMusicStreamPlaying(ambient)) PauseMusicStream(ambient); return; }
+    if (!IsMusicStreamPlaying(ambient)) ResumeMusicStream(ambient);
+    UpdateMusicStream(ambient);
 }
 
 void AudioSystem::BuildSound(Sfx sfx, float frequency, float duration, float volume, bool noise) {
@@ -77,6 +140,7 @@ void AudioSystem::Shutdown() {
     for (Sound& sound : sounds) {
         if (sound.frameCount > 0) UnloadSound(sound);
     }
+    if (ambientReady) { UnloadMusicStream(ambient); ambientReady = false; }
     ready = false;
     if (deviceOwned && IsAudioDeviceReady()) CloseAudioDevice();
     deviceOwned = false;

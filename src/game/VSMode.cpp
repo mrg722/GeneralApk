@@ -254,6 +254,13 @@ void VSMode::Update(float dt) {
 }
 void VSMode::DrawBackground() const {
     DrawRectangle(0, 0, 1280, 720, {5, 8, 12, 255});
+    // Escenario del Modo VS: calle "BETA" del usuario (centro del fondo de 1600 px).
+    const Texture2D beta = AssetManager::Get().GetTextureByPath("assets/backgrounds/hd/vs_beta.png");
+    if (beta.id) {
+        const float sx = beta.width * 160.0f / 1600.0f;
+        DrawTexturePro(beta, {sx, 0, beta.width - 2 * sx, (float)beta.height}, {0, 0, 1280, 720}, {0, 0}, 0, WHITE);
+        return;
+    }
     const Texture2D bg = AssetManager::Get().GetTexture(BackgroundKey());
     if (bg.id)
         DrawTexturePro(bg, {0, 0, (float)bg.width, (float)bg.height}, {0, 0, 1280, 720}, {0, 0}, 0, WHITE);

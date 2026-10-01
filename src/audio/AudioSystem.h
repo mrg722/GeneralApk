@@ -19,7 +19,17 @@ enum class Sfx {
     Rage,
     Ui,
     StageClear,
-    GameOver
+    GameOver,
+    // Paquete de audio del usuario (assets/audio/sfx/)
+    Block,
+    Whoosh,
+    Land,
+    Jump,
+    FuryCharge,
+    UiConfirm,
+    UiCancel,
+    UiPause,
+    Count
 };
 
 class AudioSystem {
@@ -33,6 +43,8 @@ public:
     // DF-013: usado por la pantalla de OPCIONES del menu principal.
     void SetMuted(bool value) { muted = value; }
     bool IsMuted() const { return muted; }
+    // Ambiente de lluvia en bucle (se llama cada frame desde main).
+    void UpdateAmbient();
 
 private:
     AudioSystem() = default;
@@ -40,7 +52,9 @@ private:
     AudioSystem(const AudioSystem&) = delete;
     AudioSystem& operator=(const AudioSystem&) = delete;
 
-    std::array<Sound, 15> sounds{};
+    std::array<Sound, static_cast<std::size_t>(Sfx::Count)> sounds{};
+    Music ambient{};
+    bool ambientReady = false;
     bool ready = false;
     bool deviceOwned = false;
     bool muted = false;

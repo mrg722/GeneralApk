@@ -84,6 +84,11 @@ void Player::UpdateMotionFeel(float dt) {
     // Efectos: chispa de impacto en cuanto un golpe conecta.
     for (Fx& e : effects) e.t += dt;
     effects.erase(std::remove_if(effects.begin(), effects.end(), [](const Fx& e) { return e.t >= e.dur; }), effects.end());
+    if (hasHit && !prevHasHit && state == PlayerState::Attack) {   // impacto: sonido segun el golpe
+        const bool heavyHit = GetAttack(currentAttack).heavy || activeSkill >= 0;
+        AudioSystem::Get().Play(activeSkill >= 0 ? Sfx::EnergyImpact : heavyHit ? Sfx::HeavyHit
+                                : attackPhase == AttackPhase::Kick ? Sfx::Kick : Sfx::Punch);
+    }
     if (hasHit && !prevHasHit && state == PlayerState::Attack && !IsKfCharacter()) {
         const CombatBox b = GetAttackHitbox();
         const float dir = facing == Facing::Right ? 1.0f : -1.0f;
@@ -97,7 +102,7 @@ void Player::UpdateMotionFeel(float dt) {
     turnTimer = std::max(0.0f, turnTimer - dt);
     const bool wasDown = lastState == PlayerState::Airborne || lastState == PlayerState::Knockdown;
     const bool isDown = state == PlayerState::Airborne || state == PlayerState::Knockdown;
-    if (wasDown && !isDown) landTimer = 0.14f;
+    if (wasDown && !isDown) { landTimer = 0.14f; AudioSystem::Get().Play(Sfx::Land); }
     if (lastState == PlayerState::Dash && state != PlayerState::Dash) landTimer = std::max(landTimer, 0.08f);
     if (state == PlayerState::Dash && lastState != PlayerState::Dash && !IsKfCharacter())   // estela de esquiva (efectos 49-56)
         SpawnFx(42, 4, {position.x - (facing == Facing::Right ? 40.0f : -40.0f), position.y - 55.0f}, 0.28f, 1.2f);

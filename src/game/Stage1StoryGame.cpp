@@ -236,10 +236,12 @@ void Stage1StoryGame::Update(float dt) {
             AudioSystem::Get().Play(Sfx::Ui);
         }
         if (input::Pressed(KEY_ESCAPE)) {
+            AudioSystem::Get().Play(Sfx::UiCancel);
             flow = StoryFlow::Menu;
             return;
         }
         if (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J)) {
+            AudioSystem::Get().Play(Sfx::UiConfirm);
             player.ApplyCharacter(kStoryCharacters[characterCursor]);
             ResetRun();
             flow = StoryFlow::Intro;
@@ -272,6 +274,7 @@ void Stage1StoryGame::Update(float dt) {
         return;
     }
     if (input::Pressed(KEY_ESCAPE)) {
+        AudioSystem::Get().Play(Sfx::UiPause);
         if (flow == StoryFlow::Combat || flow == StoryFlow::Boss)
             flow = StoryFlow::Pause;
         else if (flow == StoryFlow::Pause)

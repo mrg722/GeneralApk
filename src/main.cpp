@@ -128,6 +128,7 @@ int main() {
         touch::SetScreenTransform(screenScaleX, screenScale, offX, offY);
         const touch::Context ctx = touchContext();
         touch::Update(ctx);
+        district_fury::AudioSystem::Get().UpdateAmbient();
         if (WindowShouldClose()) {
             state = district_fury::core::ApplicationState::ExitRequested;
             continue;
