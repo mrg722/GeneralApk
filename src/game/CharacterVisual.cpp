@@ -1,6 +1,7 @@
 #include "game/CharacterVisual.h"
 #include "game/Player.h"
 #include <array>
+#include <cmath>
 
 namespace district_fury {
 namespace {
