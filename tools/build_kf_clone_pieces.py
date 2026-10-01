@@ -161,7 +161,7 @@ def main():
         # luz y sombra del KF (relativa) + su contorno oscuro
         lum = px[..., :3].astype(float).mean(-1)
         rel = np.clip((lum + 20) / (np.median(lum[mask]) + 20), 0.55, 1.45)[..., None]
-        col = np.clip(col * (0.6 + 0.4 * rel), 0, 255)
+        col = np.clip(col * (0.25 + 0.75 * rel), 0, 255)
         outline = lum < 28
         res = px.copy()
         sel = mask & ~outline
@@ -177,7 +177,16 @@ def main():
         base = base_of(px)
         mix = 0.6 if cls in ("head", "torso_head") else 0.45   # parte del clon / material limpio
         col = col * mix + base * (1 - mix)
+        # contraste: volumen como el KF (luces mas claras, sombras mas oscuras)
+        m_ = col[sel].mean() if sel.any() else 0
+        col = np.clip((col - m_) * 1.45 + m_ * 1.05, 0, 255)
+        # limpieza: sin puntos sueltos y con pocos colores, como el pixel art del KF
+        for ch in range(3): col[..., ch] = ndimage.median_filter(col[..., ch], size=3)
         res[sel, :3] = col[sel].astype(np.uint8)
+        if sel.sum() > 12:
+            q = Image.fromarray(res[..., :3]).quantize(colors=7 if cls in ("head", "torso", "torso_head") else 5,
+                                                         method=Image.Quantize.MEDIANCUT).convert("RGB")
+            res[sel, :3] = np.array(q)[sel]
         out[y:y + h, x:x + w] = res
     OUT.parent.mkdir(parents=True, exist_ok=True)
     Image.fromarray(out, "RGBA").save(OUT)

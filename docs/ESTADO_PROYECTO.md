@@ -1,4 +1,4 @@
-# District Fury: estado del proyecto (v0.19-lab)
+# District Fury: estado del proyecto (v0.20-lab)
 
 ## Lo que llevamos ✅
 
