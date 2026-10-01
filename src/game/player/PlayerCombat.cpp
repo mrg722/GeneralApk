@@ -366,7 +366,9 @@ bool Player::AttackIsImpactFrame() const {
 const AttackAnimationProfile& Player::CurrentAttackAnimationProfile() const {
     static const AttackAnimationProfile kNone{"idle",0.0f,0,1.0f,1.0f,1.0f};
     if(!UsesAttackAnimationProfile(skin)) return kNone;
-    return GetAttackAnimationProfile(skin,currentAttack);
+    static AttackAnimationProfile profile;
+    profile=GetAttackAnimationProfile(skin,currentAttack);
+    return profile;
 }
 
 float Player::GetAttackRange() const { return GetAttack(currentAttack).range; }
