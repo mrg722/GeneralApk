@@ -118,6 +118,8 @@ if(BUILD_TESTING)
 
     add_executable(kf_bot_visual_check tests/KfBotVisualCheck.cpp)
     target_link_libraries(kf_bot_visual_check PRIVATE district_fury_core)
+    add_executable(roster_sheets tests/RosterSheets.cpp)
+    target_link_libraries(roster_sheets PRIVATE district_fury_core)
     add_executable(skills_visual_check tests/SkillsVisualCheck.cpp)
     target_link_libraries(skills_visual_check PRIVATE district_fury_core)
 

@@ -153,6 +153,8 @@ constexpr KfRosterEntry kRoster[] = {
     {18, "KF CUCHILLERO", false, 85, 1.8f},
     {12, "KF JEFE GARRA", false, 160, 1.3f},   // sprite de jefe: el doble de grande de origen
     {15, "KF BUFONA", false, 140, 1.8f},
+    {1, "KF HEROE TRANSFORMADO", true, 120, 1.8f},     // el heroe transformado (llamas rojas, otros golpes)
+    {3, "KF HEROINA TRANSFORMADA", true, 100, 1.8f},   // la heroina transformada (lanza y rayos)
     // El sprite 33 no es luchador (vendedor/puesto del escenario): excluido.
 };
 
@@ -180,16 +182,19 @@ KfReference Load(const KfRosterEntry& who) {
     // Enemigos/jefes: sus ataques completos (A3..A7 y extras largos).
     static const char* kSkillNames[] = {"skill1", "skill2", "skill3", "skill4", "skill5"};
     std::vector<int> skillActs;
+    auto usable = [&](int a) { return a < (int)sp.actions.size() && sp.actions[(size_t)a].size() >= 4; };
     if (who.hero) {
-        skillActs = {20, 21, 22, 23, 24};
+        // Heroes: sus 5 habilidades (A20..A24). Las variantes que no las traen
+        // completas usan sus ataques largos (A8, A9, A10, A3, A5...).
+        for (int a : {20, 21, 22, 23, 24}) if (usable(a)) skillActs.push_back(a);
+        for (int a : {9, 8, 10, 3, 5, 7, 6}) if (skillActs.size() < 5 && usable(a)) skillActs.push_back(a);
     } else {
-        auto usable = [&](int a) { return a < (int)sp.actions.size() && sp.actions[(size_t)a].size() >= 4; };
         for (int a : {3, 4, 5, 6, 7}) if (usable(a)) skillActs.push_back(a);
         for (int a = 21; a < (int)sp.actions.size() && skillActs.size() < 5; ++a) if (usable(a)) skillActs.push_back(a);
         for (size_t k = 0; !skillActs.empty() && skillActs.size() < 5; ++k) skillActs.push_back(skillActs[k]);
     }
     for (size_t k = 0; k < skillActs.size() && k < 5; ++k) clipList.push_back({kSkillNames[k], skillActs[k], false});
-    if (who.hero) clipList.push_back({"transform", 31, false});
+    if (who.hero && usable(31)) clipList.push_back({"transform", 31, false});
     const ClipMap* clips = clipList.data();
     const size_t nclips = clipList.size();
     r.p = base + offs[ns];

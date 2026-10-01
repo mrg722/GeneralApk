@@ -3,6 +3,7 @@
 #include "game/InputBuffer.h"
 #include "game/combat/AttackData.h"
 #include "rendering/Animator.h"
+#include <vector>
 
 namespace district_fury {
 
@@ -131,8 +132,21 @@ public:
     Facing lastFacing{Facing::Right};
     PlayerState lastState{PlayerState::Idle};
 
+    // Efectos de poder (assets/fx/efectos_azules.png, rejilla 8x5): chispa al
+    // conectar, estallido al transformarse. Solo nuestros personajes (los KF
+    // traen sus efectos dentro de su animacion).
+    struct Fx { int first, count; Vector2 pos; float t, dur, scale; };
+    std::vector<Fx> effects;
+    bool prevHasHit{false};
+    void SpawnFx(int first, int count, Vector2 pos, float dur, float scale);
+
     PlayerUpgrades upgrades;
     Animator animator;
+    // Forma transformada: se intercambia con `animator` mientras dura la
+    // transformacion (Rayder de pelo blanco, heroe/heroina KF transformados).
+    Animator altAnimator;
+    bool usingAlt{false};
+    bool altTried{false};
 
     // Permite que el tutorial o una cinematica corten la entrada sin tocar el loop.
     bool inputEnabled;
@@ -196,6 +210,7 @@ private:
     void HandleInput(float dt);
     void DrawRageAura(Vector2 screen, float scale) const;
     void UpdateMotionFeel(float dt);
+    void UpdateTransformForm();
 };
 
 }  // namespace district_fury

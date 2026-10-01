@@ -65,14 +65,42 @@ void Player::DrawRageAura(Vector2 screen, float scale) const {
                      {255, 205, 110, rimAlpha});
 }
 
+namespace {
+Texture2D FxTexture() { return AssetManager::Get().GetTextureByPath("assets/fx/efectos_azules.png"); }
+// Cuadro i de la rejilla 8x5 (celdas 128x96), centrado en `c`.
+void DrawFx(const Texture2D& t, int i, Vector2 c, float scale, bool flip, Color tint = WHITE) {
+    const Rectangle src{(float)(i % 8) * 128.0f, (float)(i / 8) * 96.0f, flip ? -128.0f : 128.0f, 96.0f};
+    DrawTexturePro(t, src, {c.x - 64.0f * scale, c.y - 48.0f * scale, 128.0f * scale, 96.0f * scale}, {0, 0}, 0, tint);
+}
+}  // namespace
+
+void Player::SpawnFx(int first, int count, Vector2 pos, float dur, float scale) {
+    if (effects.size() > 12) effects.erase(effects.begin());
+    effects.push_back({first, count, pos, 0.0f, dur, scale});
+}
+
 void Player::UpdateMotionFeel(float dt) {
     animClock += dt;
+    // Efectos: chispa de impacto en cuanto un golpe conecta.
+    for (Fx& e : effects) e.t += dt;
+    effects.erase(std::remove_if(effects.begin(), effects.end(), [](const Fx& e) { return e.t >= e.dur; }), effects.end());
+    if (hasHit && !prevHasHit && state == PlayerState::Attack && !IsKfCharacter()) {
+        const CombatBox b = GetAttackHitbox();
+        const float dir = facing == Facing::Right ? 1.0f : -1.0f;
+        const Vector2 at = b.width > 0 ? Vector2{position.x + dir * std::min(b.width, 90.0f), position.y - 70.0f}
+                                   : Vector2{position.x + dir * 60.0f, position.y - 70.0f};
+        const bool heavy = GetAttack(currentAttack).heavy || activeSkill >= 0;
+        SpawnFx(heavy ? 10 : 8, heavy ? 4 : 3, at, heavy ? 0.30f : 0.20f, heavy ? 1.1f : 0.8f);
+    }
+    prevHasHit = hasHit;
     if (facing != lastFacing) { turnTimer = 0.10f; lastFacing = facing; }
     turnTimer = std::max(0.0f, turnTimer - dt);
     const bool wasDown = lastState == PlayerState::Airborne || lastState == PlayerState::Knockdown;
     const bool isDown = state == PlayerState::Airborne || state == PlayerState::Knockdown;
     if (wasDown && !isDown) landTimer = 0.14f;
     if (lastState == PlayerState::Dash && state != PlayerState::Dash) landTimer = std::max(landTimer, 0.08f);
+    if (state == PlayerState::Dash && lastState != PlayerState::Dash && !IsKfCharacter())   // estela de esquiva (efectos 49-56)
+        SpawnFx(42, 4, {position.x - (facing == Facing::Right ? 40.0f : -40.0f), position.y - 55.0f}, 0.28f, 1.2f);
     landTimer = std::max(0.0f, landTimer - dt);
     if (state == PlayerState::Walk) walkPhase += dt * GetMoveSpeed() / 34.0f;
     lastState = state;
@@ -147,7 +175,9 @@ void Player::Draw() const {
         }
     }
 
-    if (IsBlocking() || shield < maxShield) {
+    const Texture2D fxTex = FxTexture();
+    const bool domeShield = fxTex.id != 0 && IsBlocking() && !IsKfCharacter();
+    if (!domeShield && (IsBlocking() || shield < maxShield)) {
         const float ratio = std::clamp(static_cast<float>(shield) / maxShield, 0.f, 1.f);
         const float pulse = (1.f - ratio) * 3.f +
             std::sin(static_cast<float>(GetTime()) * 10.f) * (ratio < 0.3f ? 2.f : 0.5f);
@@ -251,6 +281,25 @@ void Player::Draw() const {
                       static_cast<int>(36 * scale), static_cast<int>(68 * scale), tint);
     }
 
+    if (domeShield) {
+        // Escudo en domo (efectos azules 17-19), mas tenue si el escudo esta bajo.
+        const float ratio = std::clamp(static_cast<float>(shield) / maxShield, 0.f, 1.f);
+        const unsigned char a = static_cast<unsigned char>(110 + 120 * ratio);
+        const int f = 16 + (static_cast<int>(GetTime() * 10.0f) % 3);
+        BeginBlendMode(BLEND_ADDITIVE);
+        DrawFx(fxTex, f, {p.x, p.y - 62.0f * scale}, 1.35f * scale, false,
+               ratio < 0.3f ? Color{255, 120, 120, a} : Color{255, 255, 255, a});
+        EndBlendMode();
+    }
+    if (fxTex.id != 0 && !effects.empty()) {
+        BeginBlendMode(BLEND_ADDITIVE);
+        for (const Fx& e : effects) {
+            const int k = std::min(e.count - 1, static_cast<int>(e.t / e.dur * e.count));
+            const Vector2 sp = Vector3D{e.pos.x, e.pos.y, 0}.ToScreen();
+            DrawFx(fxTex, e.first + k, sp, e.scale * scale, false);
+        }
+        EndBlendMode();
+    }
     if (IsBlocking()) {
         const char* label = shield == 0 ? "ESCUDO ROTO" : "BLOQUEO";
         DrawText(label, static_cast<int>(p.x) - MeasureText(label, 12) / 2,
@@ -302,6 +351,15 @@ void Player::DrawPortrait(Rectangle box) const {
 }
 
 bool Player::DrawEnergyProjectile(Vector2 center, bool movingLeft, float time) const {
+    // Proyectil azul animado (efectos 5-8) para nuestros personajes.
+    const Texture2D fxTex = FxTexture();
+    if (fxTex.id != 0 && !IsKfCharacter()) {
+        const int f = 4 + static_cast<int>(time / 0.07f) % 4;
+        BeginBlendMode(BLEND_ADDITIVE);
+        DrawFx(fxTex, f, center, 1.5f * DepthScaleFor(position.y), movingLeft);
+        EndBlendMode();
+        return true;
+    }
     const auto it = animator.namedClips.find("projectile");
     if (it == animator.namedClips.end() || it->second.frames.empty()) return false;
     const auto& frames = it->second.frames;

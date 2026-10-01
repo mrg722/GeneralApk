@@ -50,6 +50,7 @@ void Player::Reset() {
     inputEnabled = true;
     debugInvulnerable = false;
     animator = Animator{};
+    altAnimator = Animator{}; usingAlt = false; altTried = false;
 }
 
 void Player::ApplyUpgrades(const PlayerUpgrades& newUpgrades) {
@@ -171,6 +172,41 @@ static void EnsurePlayerAnimator(Animator& animator, int skin) {
     if (legacy.id != 0) { animator.Init(legacy, 5, 3, false); animator.Play({0, 4, 0.12f, true}); }
 }
 
+void Player::UpdateTransformForm() {
+    const CharacterVisual& cv = GetCharacterVisual(skin);
+    if (cv.transformAtlasId == nullptr && cv.transformKfRoster < 0) return;
+    // Cambia de forma al terminar la animacion de transformar y vuelve al acabar
+    // los 12 s; nunca a mitad de un ataque.
+    const bool want = IsTransformed() && !(state == PlayerState::Attack && activeSkill == kSkillCount - 1);
+    if (want == usingAlt || state == PlayerState::Attack) return;
+    if (!altTried) {
+        altTried = true;
+        if (cv.transformAtlasId) {
+            const AtlasProfile* prof = SpriteManifest::Get().FindAtlas(cv.transformAtlasId);
+            if (prof) altAnimator.InitFromManifest(cv.transformAtlasId, AssetManager::Get().GetTextureByPath(prof->path));
+        } else {
+            const KfReference& k = GetKfCharacter(cv.transformKfRoster);
+            if (k.loaded) altAnimator = k.templ;
+        }
+    }
+    if (altAnimator.texture.id == 0) return;
+    std::swap(animator, altAnimator);
+    usingAlt = want;
+    const char* clip = "idle";
+    switch (state) {
+        case PlayerState::Walk: clip = "walk"; break;
+        case PlayerState::Dash: clip = "dash"; break;
+        case PlayerState::Block: clip = "block"; break;
+        case PlayerState::Recovery: clip = "recovery"; break;
+        case PlayerState::Hit: case PlayerState::GuardBreak: clip = "hit_high"; break;
+        case PlayerState::Knockdown: clip = "knockdown"; break;
+        case PlayerState::Airborne: clip = "airborne"; break;
+        case PlayerState::Defeat: clip = "defeat"; break;
+        default: break;
+    }
+    if (!animator.PlayNamed(clip)) animator.PlayNamed("idle");
+}
+
 void Player::UpdateRage(float dt) {
     rageAuraPhase += dt;
 
@@ -238,6 +274,7 @@ float Player::GetMoveSpeed() const {
 
 void Player::Update(float dt) {
     EnsurePlayerAnimator(animator, skin);
+    UpdateTransformForm();
     animator.Update(dt);
     UpdateMotionFeel(dt);
 
@@ -437,6 +474,7 @@ void Player::TakeDamage(int damage) {
 void Player::ApplyCharacter(int id) {
     skin = id;
     animator = Animator{};                     // se reinicia con el atlas del personaje
+    altAnimator = Animator{}; usingAlt = false; altTried = false;
     if (id == 0) return;                       // Rayden original: intacto
     const CharacterVisual& cv = GetCharacterVisual(id);
     // Los personajes con hoja completa (Rayder) conservan las mejoras de campana.

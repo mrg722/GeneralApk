@@ -11,10 +11,11 @@ const char* Player::SkillName(int i) const {
     // Nombres generales por ahora: todos los personajes tienen 6 habilidades.
     static const char* kOurs[kSkillCount] = {"ONDA", "GANCHO", "TORBELLINO", "EMBESTIDA", "REMATE", "TRANSFORMAR"};
     static const char* kKfHero[kSkillCount] = {"SOMBRAS", "ESTALLIDO", "PILAR", "LLAMARADA", "FENIX", "TRANSFORMAR"};
-    static const char* kKfOther[kSkillCount] = {"TECNICA 1", "TECNICA 2", "TECNICA 3", "TECNICA 4", "TECNICA 5", "FURIA"};
+    static const char* kKfOther[kSkillCount] = {"TECNICA 1", "TECNICA 2", "TECNICA 3", "TECNICA 4", "TECNICA 5", "TRANSFORMAR"};
     if (i < 0 || i >= kSkillCount) return "";
     if (!IsKfCharacter()) return kOurs[i];
-    return KfRoster(GetCharacterVisual(skin).kfRoster).hero ? kKfHero[i] : kKfOther[i];
+    const int sprite = KfRoster(GetCharacterVisual(skin).kfRoster).sprite;
+    return (sprite == 0 || sprite == 2) ? kKfHero[i] : kKfOther[i];   // los dos heroes traen 5 habilidades propias
 }
 
 // Ataque cuya duracion y golpes los marca la animacion (habilidades y
@@ -52,6 +53,10 @@ bool Player::TryStartSkill(int i) {
     inputBuffer.Clear();
     if (i == kSkillCount - 1) {   // transformacion: aura dorada, mas dano y velocidad
         transformTimer = kTransformDuration;
+        if (!IsKfCharacter()) {   // estallido azul y onda en el suelo
+            SpawnFx(24, 8, {position.x, position.y - 60.0f}, 0.9f, 1.6f);
+            SpawnFx(23, 1, {position.x, position.y - 4.0f}, 0.5f, 1.4f);
+        }
         BeginClipAttack(animator.HasClip("transform") ? "transform" : animator.HasClip("victory") ? "victory" : "energy", i);
         if (!animator.HasClip("transform")) { attackDuration = std::min(attackDuration, 0.8f); stateTimer = attackDuration; }
         return true;

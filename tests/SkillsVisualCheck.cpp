@@ -79,7 +79,15 @@ int main(int argc, char** argv) {
         // Reiniciar la vida del rival para la siguiente prueba.
         for (int f = 0; f < 40; ++f) { in = PlayerInput{}; vs.Update(1.0f / 60.0f); }
     }
-    std::printf("transformado: %s\n", p.IsTransformed() ? "si" : "no");
+    std::printf("transformado: %s, forma alternativa: %s\n", p.IsTransformed() ? "si" : "no", p.usingAlt ? "si" : "no");
+    // Forma transformada: reposo y un golpe.
+    for (int f = 0; f < 30; ++f) { in = PlayerInput{}; vs.Update(1.0f / 60.0f); }
+    BeginDrawing(); ClearBackground(BLACK); vs.Draw(); EndDrawing();
+    Capture("transformado_reposo");
+    in = PlayerInput{}; in.punch = true; vs.Update(1.0f / 60.0f); in = PlayerInput{};
+    for (int f = 0; f < 12; ++f) vs.Update(1.0f / 60.0f);
+    BeginDrawing(); ClearBackground(BLACK); vs.Draw(); EndDrawing();
+    Capture("transformado_golpe");
     CloseWindow();
     return failures;
 }

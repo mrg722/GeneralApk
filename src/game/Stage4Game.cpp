@@ -474,8 +474,8 @@ void Stage4Game::DrawWorld() const {
     c.target = {cameraX, 360};
     c.zoom = 1;
     if (shake > 0) {
-        c.target.x += GetRandomValue(-100, 100) * shake * 8;
-        c.target.y += GetRandomValue(-100, 100) * shake * 5;
+        c.target.x += GetRandomValue(-100, 100) * std::min(shake, 0.2f) * (8 * 0.15f);   // sacudida suave (antes x8)
+        c.target.y += GetRandomValue(-100, 100) * std::min(shake, 0.2f) * (5 * 0.15f);   // sacudida suave (antes x5)
     }
     BeginMode2D(c); // DF-013.2: 4 escenarios propios (uno por oleada; el 4o es el nucleo del boss).
     const int sc = std::clamp(flow == Flow::Boss || flow == Flow::BossIntro ? 4

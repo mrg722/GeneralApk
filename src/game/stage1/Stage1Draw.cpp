@@ -121,7 +121,15 @@ void Stage1StoryGame::DrawBoss() const {
                   : boss.phase >= 3        ? Color{255, 150, 140, 255}
                                            : Color{235, 205, 195, 255};
         DrawEllipse((int)p.x, (int)p.y, 70, 14, {0, 0, 0, 150});
-        bossAnim.Draw(p, 1.55f * DepthScaleFor(boss.position.y), !flip, t);
+        if (brakkV2) {
+            // Hoja mejorada: mira a la derecha como las poses sueltas; ~175 px de alto.
+            const Color tv = boss.invulnerability > 0 ? Color{255, 180, 180, 255}
+                             : boss.blocking          ? Color{200, 220, 255, 255}
+                                                      : WHITE;
+            bossAnim.Draw(p, 1.45f * DepthScaleFor(boss.position.y), flip, tv);
+        } else {
+            bossAnim.Draw(p, 1.55f * DepthScaleFor(boss.position.y), !flip, t);
+        }
         if (boss.blocking) DrawCircleLines((int)p.x, (int)(p.y - 95), 96, {120, 190, 255, 170});
         (void)pose;
         return;
@@ -153,8 +161,8 @@ void Stage1StoryGame::DrawWorld() const {
     c.target = {cameraX, 360};
     c.zoom = 1;
     if (shake > 0) {
-        c.target.x += GetRandomValue(-100, 100) * shake * 7;
-        c.target.y += GetRandomValue(-100, 100) * shake * 4;
+        c.target.x += GetRandomValue(-100, 100) * std::min(shake, 0.2f) * (7 * 0.15f);   // sacudida suave (antes x7)
+        c.target.y += GetRandomValue(-100, 100) * std::min(shake, 0.2f) * (4 * 0.15f);   // sacudida suave (antes x4)
     }
     BeginMode2D(c);
     DrawScenarioArt();
@@ -427,7 +435,16 @@ void Stage1StoryGame::DrawCharacterSelect() const {
         const char* atlas = cv.atlasId ? cv.atlasId : "rayden";
         const AtlasProfile* prof = SpriteManifest::Get().FindAtlas(atlas);
         Texture2D tex = prof ? AssetManager::Get().GetTextureByPath(prof->path) : Texture2D{0};
-        if (prof && tex.id) {
+        const Texture2D back = id == 6 ? AssetManager::Get().GetTextureByPath("assets/characters/rayder/rayder_espalda.png")
+                                       : Texture2D{0};
+        if (back.id) {
+            // Rayder de espaldas (como en la caratula), con la estatura de Rayden.
+            // 2.6x como Rayden (pixel art sin suavizar).
+            SetTextureFilter(back, TEXTURE_FILTER_POINT);
+            const float h = back.height * 2.6f, w = back.width * 2.6f;
+            DrawTexturePro(back, {0, 0, (float)back.width, (float)back.height}, {cx - w / 2, 520 - h, w, h}, {0, 0}, 0,
+                           WHITE);
+        } else if (prof && tex.id) {
             // Misma escala y ancho que en combate (Rayder: complexion de Rayden).
             const float scale = 2.6f * (cv.atlasId ? cv.scale : 1.0f);
             const float scaleX = scale * cv.widthScale;
