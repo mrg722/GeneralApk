@@ -45,6 +45,7 @@ add_library(district_fury_core
     src/core/DisplaySettings.cpp
     src/game/combat/AttackData.cpp
     src/game/combat/Boss.cpp
+    src/game/combat/RayderCloneVisual.cpp
     src/game/combat/BossDefinition.cpp
     src/game/combat/CombatWorld.cpp
     src/game/enemies/EnemyBrain.cpp
@@ -125,6 +126,9 @@ if(BUILD_TESTING)
     target_link_libraries(roster_sheets PRIVATE district_fury_core)
     add_executable(skills_visual_check tests/SkillsVisualCheck.cpp)
     target_link_libraries(skills_visual_check PRIVATE district_fury_core)
+
+    add_executable(all_modes_check tests/AllModesCheck.cpp)
+    target_link_libraries(all_modes_check PRIVATE district_fury_core)
 
     add_executable(vs_boss_visual_check tests/VsBossVisualCheck.cpp)
     target_link_libraries(vs_boss_visual_check PRIVATE district_fury_core)

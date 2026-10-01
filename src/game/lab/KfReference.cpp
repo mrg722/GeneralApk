@@ -527,6 +527,9 @@ KfReference Load(const KfRosterEntry& who) {
     }
     Texture2D tex = LoadTextureFromImage(atlas);
     UnloadImage(atlas);
+    // Si la GPU no acepta el atlas (celulares con limite de textura), se informa
+    // en vez de dejar el personaje invisible.
+    if (tex.id == 0) { out.error = "la GPU no cargo la textura del personaje"; return out; }
     SetTextureFilter(tex, TEXTURE_FILTER_POINT);
 
     out.templ.Init(tex, 1, 1, true);

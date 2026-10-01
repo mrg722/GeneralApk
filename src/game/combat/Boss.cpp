@@ -95,6 +95,7 @@ void Boss::Reset(BossId bossId, Vector3D startPos) {
     phase = 1;
     animTried = false;
     animV2 = false;
+    cloneVisual = RayderCloneVisual{};
     attackTimer = 1.0f;
     elapsed = 0.0f;
     invuln = 0.0f;
@@ -188,7 +189,13 @@ void Boss::Update(float dt, Player& player, CombatWorld* world, std::vector<Boss
 
 // Mismo criterio que Stage1StoryGame::UpdateBossFight (pelea de Brakk del Nivel 1).
 void Boss::UpdateAnimation(float dt, float dx) {
-    if (id != BossId::Brakk || !IsWindowReady()) return;
+    if (!IsWindowReady()) return;
+    if (id == BossId::RayderClone) {
+        const char* atk = currentAttack >= 0 ? def->attacks[static_cast<std::size_t>(currentAttack)].name : nullptr;
+        cloneVisual.Update(dt, atk, elapsed, std::abs(dx) > 190.0f, invuln > 0.05f, defeated);
+        return;
+    }
+    if (id != BossId::Brakk) return;
     if (!animTried) {
         animTried = true;
         const AtlasProfile* prof = SpriteManifest::Get().FindAtlas("brakk_v2");
@@ -226,6 +233,11 @@ CombatBox Boss::GetHurtbox() const {
 void Boss::Draw(float playerX) const {
     if (!def || defeated) return;
     const bool facingRight = playerX > pos.x;
+    if (id == BossId::RayderClone && cloneVisual.IsReady()) {
+        DrawEllipse(static_cast<int>(pos.x), static_cast<int>(pos.y), 34, 9, {0, 0, 0, 150});
+        cloneVisual.Draw({pos.x, pos.y}, facingRight, invuln > 0.0f ? Color{255, 190, 190, 255} : WHITE);
+        return;
+    }
     if (animV2 && anim.texture.id != 0 && !anim.frames.empty()) {
         // Hoja mejorada: mira a la derecha; ~175 px de alto como en el Nivel 1.
         DrawEllipse(static_cast<int>(pos.x), static_cast<int>(pos.y), 70, 14, {0, 0, 0, 150});

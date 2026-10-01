@@ -1,4 +1,5 @@
 #include "game/Stage2Game.h"
+#include "game/CharacterVisual.h"
 #include "core/InputMap.h"
 #include "rendering/AssetManager.h"
 #include "rendering/BossSprite.h"
@@ -458,21 +459,25 @@ void Stage2Game::DrawWorld() const {
     BeginMode2D(c); // DF-013.2: fondo propio por sector (4 escenarios del Stage 2).
     const int sc = std::clamp(wave <= 1 ? 1 : wave >= 4 ? 4 : wave, 1, 4);
     const Texture2D scenarioBg = AssetManager::Get().GetTexture(TextFormat("bg_s2_%d", sc));
-    DrawScenarioBackdrop(scenarioBg, cameraX, 0.35f);
-    Texture2D bg = scenarioBg.id ? Texture2D{0} : AssetManager::Get().GetTexture("bg_steel_deep");
-    if (bg.id)
-        DrawTexturePro(bg, {0, 0, (float)bg.width, (float)bg.height}, {cameraX - 640, 0, 1280, 720}, {0, 0},
-                       0, WHITE);
-    else
-        DrawRectangle((int)(cameraX - 640), 0, 1280, 720, {18, 25, 28, 255});
-    DrawRectangle(0, 635, (int)kStageEnd, 100, {11, 14, 16, 255});
-    for (int x = 0; x < (int)kStageEnd; x += 160) {
-        DrawRectangle(x, 620, 110, 12, {55, 60, 60, 255});
-        DrawRectangle(x + 20, 648, 70, 5, {80, 70, 45, 255});
-    }
-    for (int x = 180; x < (int)kStageEnd; x += 520) {
-        DrawRectangle(x, 310, 16, 260, {24, 31, 34, 220});
-        DrawRectangle(x - 12, 320, 40, 8, {80, 220, 120, 90});
+    // Con fondo del escenario se dibuja solo ese (antes un rectangulo oscuro lo tapaba).
+    if (scenarioBg.id) {
+        DrawScenarioBackdrop(scenarioBg, cameraX, 0.35f);
+    } else {
+        Texture2D bg = AssetManager::Get().GetTexture("bg_steel_deep");
+        if (bg.id)
+            DrawTexturePro(bg, {0, 0, (float)bg.width, (float)bg.height}, {cameraX - 640, 0, 1280, 720}, {0, 0},
+                           0, WHITE);
+        else
+            DrawRectangle((int)(cameraX - 640), 0, 1280, 720, {18, 25, 28, 255});
+        DrawRectangle(0, 635, (int)kStageEnd, 100, {11, 14, 16, 255});
+        for (int x = 0; x < (int)kStageEnd; x += 160) {
+            DrawRectangle(x, 620, 110, 12, {55, 60, 60, 255});
+            DrawRectangle(x + 20, 648, 70, 5, {80, 70, 45, 255});
+        }
+        for (int x = 180; x < (int)kStageEnd; x += 520) {
+            DrawRectangle(x, 310, 16, 260, {24, 31, 34, 220});
+            DrawRectangle(x - 12, 320, 40, 8, {80, 220, 120, 90});
+        }
     }
     DrawArenaLock();
     combatWorld.DrawGround();
@@ -518,7 +523,7 @@ void Stage2Game::DrawHUD() const {
     vitals.maxRage = player.maxRage;
     vitals.isRageMode = player.isRageMode;
     vitals.combo = combo;
-    vitals.title = "RAYDEN CRUZ // VIEJO ASTILLERO";
+    vitals.title = TextFormat("%s // VIEJO ASTILLERO", GetCharacterVisual(player.skin).name);
     vitals.x = 16;
     vitals.y = 14;
     vitals.width = 500;
@@ -526,11 +531,11 @@ void Stage2Game::DrawHUD() const {
     ui::DrawPlayerVitals(vitals);
     DrawText(TextFormat("OLEADA %d/5", wave), 1040, 24, 18, WHITE);
     if (flow == Flow::Boss || flow == Flow::BossIntro) {
-        DrawRectangle(300, 18, 680, 48, {8, 8, 10, 230});
-        DrawText("GRINDER // EL SEGADOR", 450, 21, 22, {190, 255, 210, 255});
-        DrawRectangle(350, 50, 580, 12, {25, 45, 32, 255});
-        DrawRectangle(350, 50, (int)(580.f * boss.hp / boss.maxHp), 12, {70, 205, 115, 255});
-        DrawText(TextFormat("FASE %d", boss.phase), 940, 49, 15, WHITE);
+        DrawRectangle(300, 158, 680, 48, {8, 8, 10, 230});
+        DrawText("GRINDER // EL SEGADOR", 450, 161, 22, {190, 255, 210, 255});
+        DrawRectangle(350, 190, 580, 12, {25, 45, 32, 255});
+        DrawRectangle(350, 190, (int)(580.f * boss.hp / boss.maxHp), 12, {70, 205, 115, 255});
+        DrawText(TextFormat("FASE %d", boss.phase), 940, 189, 15, WHITE);
     }
     if (bannerTimer > 0) {
         const char* t = TextFormat("VIEJO ASTILLERO // OLEADA %d", wave);

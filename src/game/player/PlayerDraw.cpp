@@ -415,7 +415,7 @@ void Player::DrawAnimationDebug(Vector2 screen) const {
     DrawText(TextFormat("PHASE %s HITBOX %s",AttackPhaseLabel(attackElapsed,def),AttackIsActive()?"ON":"OFF"),bx+10,by+47,12,AttackIsActive()?GREEN:LIGHTGRAY);
     const int x=bx+10,y=by+70,w=338;DrawRectangle(x,y,w,10,{35,35,42,255});const int sx=x+(int)(w*def.startup/total),ax=x+(int)(w*ae/total);
     DrawRectangle(x,y,std::max(1,sx-x),10,{90,90,110,255});DrawRectangle(sx,y,std::max(1,ax-sx),10,{230,120,70,255});DrawRectangle(ax,y,std::max(1,x+w-ax),10,{90,130,170,255});DrawLine(sx,y-6,sx,y+16,YELLOW);
-    DrawText(TextFormat("ROOT %.1fpx | IMPACT %s | F3",attackRootMotionApplied,attackImpactTriggered?"TRIGGERED":"WAITING"),bx+10,by+104,12,WHITE);
+    DrawText(TextFormat("ROOT %.1fpx | IMPACT %s | F9",attackRootMotionApplied,attackImpactTriggered?"TRIGGERED":"WAITING"),bx+10,by+104,12,WHITE);
 }
 
 }  // namespace district_fury

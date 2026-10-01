@@ -47,7 +47,7 @@ La segunda fase añade un perfil de timing reutilizable para los atlas propios d
 - El frame de impacto se expone mediante AttackIsImpactFrame() y el cambio startup -> active se registra con attackImpactTriggered.
 - Rayder Clone (skin 1) conserva sus poses sueltas, pero sus transiciones ahora usan AttackData.startup y AttackData.active en vez de tiempos visuales independientes.
 - KF/Rayder Cruz siguen fuera del perfil: IsKfCharacter() evita retime, root motion nuevo y squash/stretch de esta fase.
-- Se añadió F3 como overlay de depuración de Rayder/Brakk: ataque, tiempo total, frame actual, frame de impacto, fase, hitbox y root motion. Es solo diagnóstico y no altera el combate.
+- Se añadió F9 (antes F3, que en Historia cambiaba al Stage 3) como overlay de depuración de Rayder/Brakk: ataque, tiempo total, frame actual, frame de impacto, fase, hitbox y root motion. Es solo diagnóstico y no altera el combate.
 - Se añadió tests/AttackAnimationTimingTests.cpp para comprobar perfiles, fases y root-motion.
 
 ### Ataques cubiertos

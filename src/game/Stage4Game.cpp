@@ -1,4 +1,5 @@
 #include "game/Stage4Game.h"
+#include "game/CharacterVisual.h"
 #include "core/InputMap.h"
 #include "rendering/AssetManager.h"
 #include "rendering/BossSprite.h"
@@ -549,7 +550,7 @@ void Stage4Game::DrawHUD() const {
     vitals.maxRage = player.maxRage;
     vitals.isRageMode = player.isRageMode;
     vitals.combo = combo;
-    vitals.title = "RAYDEN CRUZ // KESSLER TOWER";
+    vitals.title = TextFormat("%s // KESSLER TOWER", GetCharacterVisual(player.skin).name);
     vitals.x = 16;
     vitals.y = 14;
     vitals.width = 500;
@@ -557,11 +558,11 @@ void Stage4Game::DrawHUD() const {
     ui::DrawPlayerVitals(vitals);
     DrawText(TextFormat("OLEADA %d/4", wave), 1040, 24, 18, WHITE);
     if (flow == Flow::Boss || flow == Flow::BossIntro) {
-        DrawRectangle(280, 18, 720, 48, {8, 10, 8, 230});
-        DrawText("TITAN-X MEJORADO // NUCLEO KESSLER", 395, 21, 20, {150, 255, 180, 255});
-        DrawRectangle(350, 50, 580, 12, {22, 32, 25, 255});
-        DrawRectangle(350, 50, (int)(580.f * boss.hp / boss.maxHp), 12, {100, 235, 140, 255});
-        DrawText(TextFormat("FASE %d/4", boss.phase), 940, 49, 15, WHITE);
+        DrawRectangle(280, 158, 720, 48, {8, 10, 8, 230});
+        DrawText("TITAN-X MEJORADO // NUCLEO KESSLER", 395, 161, 20, {150, 255, 180, 255});
+        DrawRectangle(350, 190, 580, 12, {22, 32, 25, 255});
+        DrawRectangle(350, 190, (int)(580.f * boss.hp / boss.maxHp), 12, {100, 235, 140, 255});
+        DrawText(TextFormat("FASE %d/4", boss.phase), 940, 189, 15, WHITE);
     }
     if (bannerTimer > 0) {
         const char* t = TextFormat("KESSLER TOWER // OLEADA %d", wave);

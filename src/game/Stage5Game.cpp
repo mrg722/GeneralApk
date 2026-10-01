@@ -1,4 +1,5 @@
 #include "game/Stage5Game.h"
+#include "game/CharacterVisual.h"
 #include "core/InputMap.h"
 #include "rendering/AssetManager.h"
 #include "rendering/BossSprite.h"
@@ -262,6 +263,16 @@ void Stage5Game::UpdateCombat(float dt) {
 // inventar un moveset nuevo — asi el diseno narrativo ("el mismo poder,
 // sin humanidad") queda reflejado en el propio combate, no solo en texto.
 void Stage5Game::UpdateBoss(float dt) {
+    {
+        const char* atk = boss.attack == BossAttack::MirrorCombo ? "MirrorCombo"
+                          : boss.attack == BossAttack::DarkWave  ? "DarkWave"
+                          : boss.attack == BossAttack::Teleport  ? "Teleport"
+                          : boss.attack == BossAttack::Dash      ? "Dash"
+                          : boss.attack == BossAttack::Finisher  ? "Finisher"
+                                                                 : nullptr;
+        const bool moving = !atk && std::abs(player.position.x - boss.pos.x) > 200.0f;
+        cloneVisual.Update(dt, atk, boss.elapsed, moving, boss.invuln > 0.05f, boss.defeated);
+    }
     if (boss.invuln > 0) boss.invuln -= dt;
     if (boss.teleportCooldown > 0) boss.teleportCooldown -= dt;
     if (flow == Flow::BossIntro) {
@@ -468,12 +479,17 @@ void Stage5Game::DrawBoss() const {
         const int cycle = static_cast<int>(boss.elapsed * 3.2f) % 4;
         pose = cycle == 0 ? "idle1" : cycle == 1 ? "idle2" : cycle == 2 ? "idle3" : "idle4";
     }
-    Texture2D tex = AssetManager::Get().GetTexture(std::string("rayder_clone_") + pose);
     Color tint = tp ? Color{255, 255, 255, 90} : (boss.phase >= 3 ? Color{255, 190, 195, 255} : WHITE);
-    // Rayder Clone es un espejo del jugador: debe verse igual de humano,
-    // no un monstruo (a diferencia de los Titan-X). Altura objetivo similar
-    // a la de Rayden en pantalla.
-    DrawBossPose(tex, {p.x, p.y}, 130.f, flip, tint);
+    if (cloneVisual.IsReady()) {
+        // Diseno final del clon (rojo, sin mangas) con sus animaciones KF.
+        cloneVisual.Draw({p.x, p.y}, boss.facingRight, tint);
+    } else {
+        Texture2D tex = AssetManager::Get().GetTexture(std::string("rayder_clone_") + pose);
+        // Rayder Clone es un espejo del jugador: debe verse igual de humano,
+        // no un monstruo (a diferencia de los Titan-X). Altura objetivo similar
+        // a la de Rayden en pantalla.
+        DrawBossPose(tex, {p.x, p.y}, 130.f, flip, tint);
+    }
     DrawCircleLines((int)p.x, (int)(p.y - 70), 56 + std::sin((float)GetTime() * 10) * 6,
                     Alpha({255, 60, 90, 255}, boss.phase >= 3 ? .6f : .3f));
     if (boss.attack == BossAttack::Finisher)
@@ -550,7 +566,7 @@ void Stage5Game::DrawHUD() const {
     vitals.maxRage = player.maxRage;
     vitals.isRageMode = player.isRageMode;
     vitals.combo = combo;
-    vitals.title = "RAYDEN CRUZ // CAMARA DEL CLON";
+    vitals.title = TextFormat("%s // CAMARA DEL CLON", GetCharacterVisual(player.skin).name);
     vitals.x = 16;
     vitals.y = 14;
     vitals.width = 500;
@@ -564,11 +580,11 @@ void Stage5Game::DrawHUD() const {
         DrawText(z, 640 - MeasureText(z, 30) / 2, 190, 30, {255, 150, 165, 230});
     }
     if (flow == Flow::Boss || flow == Flow::BossIntro) {
-        DrawRectangle(280, 18, 720, 48, {9, 6, 8, 230});
-        DrawText("RAYDER CLONE // ESPEJO OSCURO", 420, 21, 20, {255, 110, 130, 255});
-        DrawRectangle(350, 50, 580, 12, {28, 18, 20, 255});
-        DrawRectangle(350, 50, (int)(580.f * boss.hp / boss.maxHp), 12, {225, 60, 90, 255});
-        DrawText(TextFormat("FASE %d/3", boss.phase), 940, 49, 15, WHITE);
+        DrawRectangle(280, 158, 720, 48, {9, 6, 8, 230});
+        DrawText("RAYDER CLONE // ESPEJO OSCURO", 420, 161, 20, {255, 110, 130, 255});
+        DrawRectangle(350, 190, 580, 12, {28, 18, 20, 255});
+        DrawRectangle(350, 190, (int)(580.f * boss.hp / boss.maxHp), 12, {225, 60, 90, 255});
+        DrawText(TextFormat("FASE %d/3", boss.phase), 940, 189, 15, WHITE);
     }
     if (bannerTimer > 0 && flow == Flow::BossIntro) {
         const char* t = "RAYDER CLONE // EL ESPEJO OSCURO";

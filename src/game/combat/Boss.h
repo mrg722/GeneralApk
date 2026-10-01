@@ -3,6 +3,7 @@
 #include "game/Player.h"
 #include "game/combat/CombatWorld.h"
 #include "rendering/Animator.h"
+#include "game/combat/RayderCloneVisual.h"
 #include <vector>
 
 // DF-013.2 — clase Boss unica que interpreta un BossDefinition (fase 2 de
@@ -61,6 +62,8 @@ private:
     Animator anim;
     bool animTried{false};
     bool animV2{false};
+    // Rayder clon: diseno final (rojo, sin mangas) con sus animaciones KF.
+    RayderCloneVisual cloneVisual;
 
     const BossPhaseDef& ActivePhase() const;
     int PhaseNumber() const;

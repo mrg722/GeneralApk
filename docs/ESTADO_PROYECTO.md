@@ -44,3 +44,22 @@ Para cambiar uno, pon el fondo definitivo en `assets/backgrounds/hd/stageN_scena
 | 10 | Quitar el laboratorio KF cuando ya no sirva de referencia | Equipo (código), ver `ESTRUCTURA_CODIGO.md` |
 
 Formato del arte: PNG con transparencia, una fila por movimiento, figuras separadas, sin números tocando el dibujo, mirando a la derecha y con los pies alineados.
+
+## Auditoria 1x1 (v0.23)
+
+Herramientas nuevas (no son parte de ctest, se corren a mano):
+- `build/all_modes_check [carpeta]`: Modo VS como un jugador (22 personajes, pelea con cada uno),
+  los 17 rivales KF del laboratorio y los 5 stages de Historia con Rayden y Rayder. Capturas de cada uno.
+- `build/vs_boss_visual_check [carpeta] [personaje]`: los 5 jefes del Modo VS.
+
+Corregido en esta auditoria:
+- Jefe Brakk del Modo VS con la hoja mejorada (antes poses viejas pixeladas).
+- Fases de los jefes del VS invertidas (vida llena = FASE 3).
+- Jefe Rayder clon (VS y Stage 5) con el diseno final rojo sin mangas; logica de ataques de GPT intacta.
+- Stage 2 y Stage 3: un relleno tapaba el fondo HD; Stage 3 tenia la camara al reves (al avanzar,
+  jugador y fondo salian de la pantalla).
+- Stages 2-5 decian "RAYDEN CRUZ" con cualquier personaje.
+- Barra del jefe tapaba el panel del jugador en los 5 stages.
+- F3 (depuracion de GPT) cambiaba al Stage 3 en Historia: ahora es F9.
+- Rayden Cruz volvio a avanzar al golpear; tests con assert activos en Release.
+- "RAYDEN CLON" (clon viejo con chaqueta) renombrado "CLON ANTIGUO (CHAQUETA)"; el VS muestra n/22.

@@ -233,11 +233,11 @@ void Stage1StoryGame::DrawHUD() const {
                         DifficultyText()),
              18, 196, 14, WHITE);
     if (flow == StoryFlow::Boss || flow == StoryFlow::BossIntro) {
-        DrawRectangle(285, 18, 710, 56, {5, 7, 9, 235});
-        DrawText("BRAKK // LA CADENA", 455, 21, 24, {255, 205, 95, 255});
-        DrawRectangle(350, 53, 580, 13, {30, 25, 25, 255});
-        DrawRectangle(350, 53, (int)(580.f * boss.hp / boss.maxHp), 13, {220, 65, 55, 255});
-        DrawText(TextFormat("FASE %d", boss.phase), 945, 51, 15, WHITE);
+        DrawRectangle(285, 230, 710, 56, {5, 7, 9, 235});
+        DrawText("BRAKK // LA CADENA", 455, 233, 24, {255, 205, 95, 255});
+        DrawRectangle(350, 265, 580, 13, {30, 25, 25, 255});
+        DrawRectangle(350, 265, (int)(580.f * boss.hp / boss.maxHp), 13, {220, 65, 55, 255});
+        DrawText(TextFormat("FASE %d", boss.phase), 945, 263, 15, WHITE);
     }
     if (bannerTimer > 0) {
         const char* t = ScenarioName();

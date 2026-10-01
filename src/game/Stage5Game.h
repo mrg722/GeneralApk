@@ -1,4 +1,5 @@
 #pragma once
+#include "game/combat/RayderCloneVisual.h"
 #include "game/Player.h"
 #include "game/StreetEnemy.h"
 #include "game/combat/CombatWorld.h"
@@ -58,6 +59,8 @@ private:
     std::vector<Particle> particles;
     Flow flow{Flow::Intro};
     RayderClone boss;
+    // Dibujo del clon con su diseno final (rojo, sin mangas); si no carga, poses sueltas.
+    RayderCloneVisual cloneVisual;
     float cameraX{640}; float stageTime{0}; float hitstop{0}; float shake{0}; float comboTimer{0};
     int combo{0}; int maxCombo{0}; int damageTaken{0};
     float bannerTimer{0};

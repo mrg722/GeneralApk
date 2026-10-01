@@ -336,8 +336,9 @@ void VSMode::DrawSelection() const {
     DrawText(ScenarioText(), 600, y[1], 14, {190, 220, 230, 255});
     DrawText(TextFormat("%d ENEMIGO%s", enemyCount, enemyCount == 1 ? "" : "S"), 600, y[2], 14,
              selectedBoss >= 0 ? Color{85, 95, 100, 130} : Color{190, 220, 230, 255});
-    DrawText(GetCharacterVisual(selectedCharacter).name, 600, y[3], 14,
-             selectedCharacter == 1 ? Color{255, 160, 170, 255} : Color{190, 220, 230, 255});
+    // Numero de personaje: deja claro que hay mas (KF incluidos) con < y >.
+    DrawText(TextFormat("%s   %d/%d", GetCharacterVisual(selectedCharacter).name, selectedCharacter + 1, CharacterCount()),
+             600, y[3], 14, selectedCharacter == 1 ? Color{255, 160, 170, 255} : Color{190, 220, 230, 255});
     DrawText(kBossNames[selectedBoss + 1], 600, y[4], 14,
              selectedBoss >= 0 ? Color{255, 150, 150, 255} : Color{190, 220, 230, 255});
     for (int i = 0; i < 4; ++i) {

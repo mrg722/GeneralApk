@@ -275,7 +275,7 @@ float Player::GetMoveSpeed() const {
 }
 
 void Player::Update(float dt) {
-    EnsurePlayerAnimator(animator, skin); UpdateTransformForm(); if(IsKeyPressed(KEY_F3)) animationDebug=!animationDebug; animator.Update(dt); UpdateMotionFeel(dt);
+    EnsurePlayerAnimator(animator, skin); UpdateTransformForm(); if(IsKeyPressed(KEY_F9)) animationDebug=!animationDebug; /* F9: F1-F5 cambian de stage */ animator.Update(dt); UpdateMotionFeel(dt);
 
     dashInvulnerability = std::max(0.0f, dashInvulnerability - dt);
     dashCooldown = std::max(0.0f, dashCooldown - dt);

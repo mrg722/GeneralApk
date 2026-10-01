@@ -1,4 +1,5 @@
 #include "game/Stage3Game.h"
+#include "game/CharacterVisual.h"
 #include "ui/TouchControls.h"
 #include "core/InputMap.h"
 #include "ui/GameHUD.h"
@@ -507,30 +508,36 @@ void Stage3Game::Update(float dt) {
     cameraX = std::clamp(player.position.x, 640.f, 5360.f);
 }
 void Stage3Game::DrawWorld() const {
-    Camera2D cam{{cameraX, 360}, {640, 360}, 0, 1};
+    // Camera2D es {offset, target, ...}: antes iban al reves y la camara se movia al reves
+    // (al avanzar, jugador y fondo salian de la pantalla).
+    Camera2D cam{{640, 360}, {cameraX, 360}, 0, 1};
     BeginMode2D(cam);
-    DrawRectangle(-200, 0, 6400, 720, {6, 8, 18, 255});
-    // DF-013.2: fondo real por escenario; el 4o es la sala del boss.
-    DrawScenarioBackdrop(
-        AssetManager::Get().GetTexture(TextFormat("bg_s3_%d", bossSpawned ? 4 : std::clamp(scenario, 1, 3))),
-        cameraX, 0.35f);
-    DrawRectangle(-200, 160, 6400, 300, {11, 18, 38, 255});
-    for (int x = 0; x < 6200; x += 320) {
-        DrawRectangle(x, 170, 270, 180, {15, 25, 48, 255});
-        DrawRectangle(x + 18, 195, 96, 72, {25, 70, 105, 255});
-        DrawRectangle(x + 138, 195, 96, 72, {105, 42, 104, 255});
-        DrawLine(x, 350, x + 270, 350, {70, 95, 130, 180});
-    }
-    for (int x = 0; x < 6200; x += 160) {
-        DrawLineEx({(float)x, 365}, {(float)x + 80, 430}, 4, {35, 55, 85, 220});
-        DrawLineEx({(float)x + 80, 430}, {(float)x + 160, 365}, 4, {35, 55, 85, 220});
-    }
-    DrawRectangle(-200, 430, 6400, 220, {9, 12, 22, 255});
-    DrawRectangle(-200, 645, 6400, 75, {3, 5, 10, 255});
-    for (int x = 0; x < 6200; x += 240) {
-        DrawRectangle(x, 455, 12, 170, {45, 55, 80, 255});
-        DrawRectangle(x + 55, 470, 170, 9, {100, 40, 115, 220});
-        DrawCircle(x + 30, 445, 5, {70, 220, 255, 220});
+    // DF-013.2: fondo real por escenario; el 4o es la sala del boss. La
+    // escenografia de bloques solo se dibuja si falta el fondo (antes lo tapaba).
+    const Texture2D scenarioBg =
+        AssetManager::Get().GetTexture(TextFormat("bg_s3_%d", bossSpawned ? 4 : std::clamp(scenario, 1, 3)));
+    if (scenarioBg.id) {
+        DrawScenarioBackdrop(scenarioBg, cameraX, 0.35f);
+    } else {
+        DrawRectangle(-200, 0, 6400, 720, {6, 8, 18, 255});
+        DrawRectangle(-200, 160, 6400, 300, {11, 18, 38, 255});
+        for (int x = 0; x < 6200; x += 320) {
+            DrawRectangle(x, 170, 270, 180, {15, 25, 48, 255});
+            DrawRectangle(x + 18, 195, 96, 72, {25, 70, 105, 255});
+            DrawRectangle(x + 138, 195, 96, 72, {105, 42, 104, 255});
+            DrawLine(x, 350, x + 270, 350, {70, 95, 130, 180});
+        }
+        for (int x = 0; x < 6200; x += 160) {
+            DrawLineEx({(float)x, 365}, {(float)x + 80, 430}, 4, {35, 55, 85, 220});
+            DrawLineEx({(float)x + 80, 430}, {(float)x + 160, 365}, 4, {35, 55, 85, 220});
+        }
+        DrawRectangle(-200, 430, 6400, 220, {9, 12, 22, 255});
+        DrawRectangle(-200, 645, 6400, 75, {3, 5, 10, 255});
+        for (int x = 0; x < 6200; x += 240) {
+            DrawRectangle(x, 455, 12, 170, {45, 55, 80, 255});
+            DrawRectangle(x + 55, 470, 170, 9, {100, 40, 115, 220});
+            DrawCircle(x + 30, 445, 5, {70, 220, 255, 220});
+        }
     }
     combatWorld.DrawGround();
     for (const auto& p : particles)
@@ -600,7 +607,7 @@ void Stage3Game::DrawHUD() const {
         vitals.maxRage = player.maxRage;
         vitals.isRageMode = player.isRageMode;
         vitals.combo = 0;
-        vitals.title = "RAYDEN CRUZ // ASTRA TOWER";
+        vitals.title = TextFormat("%s // ASTRA TOWER", GetCharacterVisual(player.skin).name);
         vitals.x = 18;
         vitals.y = 110;
         vitals.width = 430;
