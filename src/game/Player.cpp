@@ -192,6 +192,7 @@ void Player::UpdateTransformForm() {
     if (altAnimator.texture.id == 0) return;
     std::swap(animator, altAnimator);
     usingAlt = want;
+    if (want) AudioSystem::Get().Play(Sfx::Rage);   // cambio de forma
     const char* clip = "idle";
     switch (state) {
         case PlayerState::Walk: clip = "walk"; break;
@@ -438,7 +439,7 @@ void Player::TakeDamage(int damage) {
         AddRage(12);
         velocity.x += facing == Facing::Right ? -55.f : 55.f;
         dashInvulnerability = 0.12f;
-        AudioSystem::Get().Play(Sfx::Hit);
+        AudioSystem::Get().Play(Sfx::Block);
         if (hp == 0) SetState(PlayerState::Defeat);
         else if (shield == 0) { SetState(PlayerState::GuardBreak); AudioSystem::Get().Play(Sfx::HeavyHit); }
         return;

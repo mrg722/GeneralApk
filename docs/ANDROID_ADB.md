@@ -1,6 +1,6 @@
 # Probar District Fury en el celular (Samsung A57) con adb
 
-El APK ya compilado está en `dist/district_fury-0.15-lab.apk` (arm64-v8a, Android 7.0 o superior).
+El APK ya compilado está en `dist/district_fury-0.16-lab.apk` (arm64-v8a, Android 7.0 o superior).
 
 ## 1. Preparar el celular (una sola vez)
 
@@ -27,7 +27,7 @@ Debe aparecer una línea con el número de serie y la palabra `device`. Si dice 
 Desde la raíz del repositorio (`GeneralApk`, rama `ccr-077ad675-rlrg28`):
 
 ```bash
-adb install -r dist/district_fury-0.15-lab.apk
+adb install -r dist/district_fury-0.16-lab.apk
 adb shell am start -n com.mrg722.districtfury/android.app.NativeActivity
 ```
 
@@ -69,6 +69,8 @@ El script descarga raylib automáticamente la primera vez. Para usar una copia l
 | Recompensa entre stages | **1** · **2** · **3** |
 
 Habilidades de Rayden y Rayder: 1 ONDA, 2 GANCHO, 3 TORBELLINO, 4 EMBESTIDA, 5 REMATE, 6 TRANSFORMAR (12 s con más daño y velocidad). Los personajes KF usan sus propias animaciones de poder. Mientras una habilidad espera, su botón se oscurece y muestra los segundos que faltan.
+
+**Sonido:** el juego trae los sonidos de tu paquete y lluvia de ambiente. Se apagan en OPCIONES → SONIDO.
 
 **Pantalla muy alargada:** en **OPCIONES → ANCHO DE PANTALLA** (70 % a 100 %) se reduce solo el ancho del juego; la altura no cambia.
 

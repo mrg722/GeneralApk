@@ -30,7 +30,7 @@ cmake --build "$OUT/cmake" -j"$(nproc)" --target district_fury
 STAGE="$OUT/stage"
 rm -rf "$STAGE"; mkdir -p "$STAGE/assets" "$STAGE/lib/arm64-v8a"
 cp -r "$ROOT/assets" "$ROOT/data" "$STAGE/assets/"
-rm -rf "$STAGE/assets/assets/backgrounds/source" "$STAGE/assets/assets/characters/rayder/source"
+find "$STAGE/assets" -type d -name source -prune -exec rm -rf {} +   # hojas originales: solo para las herramientas
 # Laboratorio (temporal): datos de la APK para los personajes de prueba del Modo VS.
 if [ -f "$ROOT/apk_reference/king_fighter_iii/bin/animation.bin" ]; then
   mkdir -p "$STAGE/assets/apk_reference/king_fighter_iii/bin"

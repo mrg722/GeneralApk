@@ -30,9 +30,9 @@ for k, sl in enumerate(ndimage.find_objects(inner), 1):
 ys, xs = np.nonzero(fg)
 rgba = np.dstack([crop.astype(np.uint8), (fg * 255).astype(np.uint8)])[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
 im = Image.fromarray(rgba, "RGBA")
-# Mismo estilo que Rayden Cruz: pixel art de ~92 px de alto, ampliado sin suavizar.
-small = im.resize((round(im.width * 92 / im.height), 92), Image.LANCZOS)
-small.putalpha(small.getchannel("A").point(lambda v: 0 if v < 110 else 255))
-small.save(OUT)
-rgba = np.array(small)
+# Calidad completa (466 px de alto); el juego lo escala con filtro suave a la
+# estatura de Rayden Cruz en la eleccion de luchador.
+# 351 px = 1.5x lo que mide en pantalla (el lienzo 1280x720 se amplia ~1.5x en el A57).
+im = im.resize((round(im.width * 351 / im.height), 351), Image.LANCZOS)
+im.save(OUT)
 print(OUT.relative_to(ROOT), rgba.shape[1], "x", rgba.shape[0])

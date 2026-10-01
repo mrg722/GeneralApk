@@ -1,0 +1,23 @@
+DISTRICT FURY — AUDIO STARTER PACK
+====================================
+
+Pack básico original para prototipo del beat'em up District Fury.
+
+Incluye:
+- Combate: golpes, patada, impacto fuerte, bloqueo, daño, KO
+- Movimiento: whoosh, dash, salto, aterrizaje
+- Rayder/Fury: carga, energía, impacto eléctrico
+- UI: navegar, confirmar, cancelar, abrir, pausa
+- Ambiente: lluvia, ciudad/industrial, metal
+
+Todos los WAV de este pack fueron sintetizados/originalmente generados para este proyecto.
+No se incluyen muestras tomadas de otros juegos.
+
+Formato: WAV PCM 16-bit, 44.1 kHz, mono.
+Pensado como starter pack; posteriormente podemos sustituir o complementar cada sonido
+con librerías profesionales/CC0 seleccionadas.
+
+REFERENCIAS DE INVESTIGACIÓN:
+- OpenGameArt: colecciones CC0 de impactos, golpes y UI.
+- Itch.io: packs gratuitos de UI/cyberpunk y SFX.
+Estas páginas se usaron como referencia de categorías, no como fuente de los WAV incluidos.

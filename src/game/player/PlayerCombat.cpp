@@ -35,7 +35,7 @@ void Player::BeginClipAttack(const char* clip, int skillIndex) {
     if (!animator.PlayNamed(clip) && !animator.PlayNamed("special")) animator.PlayNamed("idle");
     attackDuration = std::max(0.45f, animator.ClipSeconds(animator.currentClipName));
     stateTimer = attackDuration;
-    AudioSystem::Get().Play(skillIndex == kSkillCount - 1 ? Sfx::Rage : Sfx::EnergyCharge);
+    AudioSystem::Get().Play(skillIndex == kSkillCount - 1 ? Sfx::FuryCharge : Sfx::EnergyShot);
 }
 
 bool Player::TryStartSkill(int i) {
@@ -119,12 +119,12 @@ void Player::BeginAttack(AttackId id) {
         stateTimer = attackDuration;
     }
 
+    // Al lanzar: silbido del golpe (el impacto suena al conectar, ver PlayerDraw).
     switch (id) {
         case AttackId::EnergyWave: AudioSystem::Get().Play(Sfx::EnergyCharge); break;
-        case AttackId::Kick:
-        case AttackId::Finisher:   AudioSystem::Get().Play(Sfx::Kick); break;
         case AttackId::RageAttack: AudioSystem::Get().Play(Sfx::Rage); break;
-        default:                   AudioSystem::Get().Play(Sfx::Punch); break;
+        case AttackId::Finisher:   AudioSystem::Get().Play(Sfx::FuryCharge); break;
+        default:                   AudioSystem::Get().Play(Sfx::Whoosh); break;
     }
 }
 

@@ -17,6 +17,7 @@ struct KfRosterEntry {
     bool hero;           // plantilla de acciones de heroe (61) o de enemigo (~30)
     int maxHp;
     float scale;         // escala de dibujo (los sprites de la APK miden ~65 px)
+    int tint = 0;        // 0 = colores originales; 1 = copia con los colores de Rayder
 };
 int KfRosterCount();
 const KfRosterEntry& KfRoster(int index);
