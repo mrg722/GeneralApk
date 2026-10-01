@@ -18,6 +18,7 @@ enum class AttackId {
     DashAttack,
     RageAttack,
     Finisher,
+    Skill,        // habilidad con espera de 15 s: duracion y golpes los marca su animacion
     Count
 };
 

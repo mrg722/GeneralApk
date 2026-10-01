@@ -3,7 +3,86 @@
 
 namespace district_fury {
 
+bool Player::IsKfCharacter() const { return GetCharacterVisual(skin).kfRoster >= 0; }
+
+float Player::ClipSeconds(const char* clip) const { return animator.ClipSeconds(clip); }
+
+const char* Player::SkillName(int i) const {
+    // Nombres generales por ahora: todos los personajes tienen 6 habilidades.
+    static const char* kOurs[kSkillCount] = {"ONDA", "GANCHO", "TORBELLINO", "EMBESTIDA", "REMATE", "TRANSFORMAR"};
+    static const char* kKfHero[kSkillCount] = {"SOMBRAS", "ESTALLIDO", "PILAR", "LLAMARADA", "FENIX", "TRANSFORMAR"};
+    static const char* kKfOther[kSkillCount] = {"TECNICA 1", "TECNICA 2", "TECNICA 3", "TECNICA 4", "TECNICA 5", "FURIA"};
+    if (i < 0 || i >= kSkillCount) return "";
+    if (!IsKfCharacter()) return kOurs[i];
+    return KfRoster(GetCharacterVisual(skin).kfRoster).hero ? kKfHero[i] : kKfOther[i];
+}
+
+// Ataque cuya duracion y golpes los marca la animacion (habilidades y
+// personajes KF): se reproduce completa, con el fuego/estela de su propio arte.
+void Player::BeginClipAttack(const char* clip, int skillIndex) {
+    currentAttack = AttackId::Skill;
+    attackType = AttackType::None;
+    attackPhase = AttackPhase::Special;
+    recoveryTimer = 0.0f;
+    state = PlayerState::Attack;
+    attackElapsed = 0;
+    hasHit = false;
+    energyReleased = false;
+    activeSkill = skillIndex;
+    clipDriven = true;
+    multiHitTimer = 0.0f;
+    if (!animator.PlayNamed(clip) && !animator.PlayNamed("special")) animator.PlayNamed("idle");
+    attackDuration = std::max(0.45f, animator.ClipSeconds(animator.currentClipName));
+    stateTimer = attackDuration;
+    AudioSystem::Get().Play(skillIndex == kSkillCount - 1 ? Sfx::Rage : Sfx::EnergyCharge);
+}
+
+bool Player::TryStartSkill(int i) {
+    if (!inputEnabled || i < 0 || i >= kSkillCount || skillCooldown[i] > 0.0f) return false;
+    switch (state) {
+        case PlayerState::Idle: case PlayerState::Walk: case PlayerState::Recovery:
+        case PlayerState::Block: case PlayerState::Dash: break;
+        case PlayerState::Attack:
+            // Como en King Fighter, una habilidad corta un golpe normal (no otra habilidad).
+            if (activeSkill >= 0 || currentAttack == AttackId::Skill) return false;
+            break;
+        default: return false;
+    }
+    skillCooldown[i] = kSkillCooldown;
+    inputBuffer.Clear();
+    if (i == kSkillCount - 1) {   // transformacion: aura dorada, mas dano y velocidad
+        transformTimer = kTransformDuration;
+        BeginClipAttack(animator.HasClip("transform") ? "transform" : animator.HasClip("victory") ? "victory" : "energy", i);
+        if (!animator.HasClip("transform")) { attackDuration = std::min(attackDuration, 0.8f); stateTimer = attackDuration; }
+        return true;
+    }
+    if (IsKfCharacter()) {
+        static const char* kClips[] = {"skill1", "skill2", "skill3", "skill4", "skill5"};
+        BeginClipAttack(kClips[i], i);
+        return true;
+    }
+    // Nuestros personajes: sus propios movimientos, sin gastar energia.
+    static const AttackId kOurSkills[] = {AttackId::EnergyWave, AttackId::Punch3, AttackId::RageAttack,
+                                          AttackId::DashAttack, AttackId::Finisher};
+    const int spBefore = sp;
+    BeginAttack(kOurSkills[i]);
+    sp = spBefore;
+    attackCooldowns[static_cast<int>(kOurSkills[i])] = 0.0f;
+    activeSkill = i;
+    return true;
+}
+
 void Player::BeginAttack(AttackId id) {
+    if (IsKfCharacter() && (id == AttackId::EnergyWave || id == AttackId::RageAttack || id == AttackId::Finisher)) {
+        // Un personaje KF lanza SU especial/super (fuego propio), no nuestra onda azul.
+        const AttackDef& orig = GetAttack(id);
+        if (orig.cooldown > 0.0f) attackCooldowns[static_cast<int>(id)] = orig.cooldown;
+        if (orig.spCost > 0) sp = std::max(0, sp - orig.spCost);
+        BeginClipAttack(id == AttackId::RageAttack ? "super" : "special", -1);
+        return;
+    }
+    activeSkill = -1;
+    clipDriven = false;
     const AttackDef& def = GetAttack(id);
     currentAttack = id;
     attackType = LegacyType(id);
@@ -25,6 +104,14 @@ void Player::BeginAttack(AttackId id) {
     const int start = animator.normalizedAtlas ? clip.cleanStart : clip.legacyStart;
     const int end = animator.normalizedAtlas ? clip.cleanEnd : clip.legacyEnd;
     animator.Play({start, end, clip.frameTime, false});
+    }
+    if (IsKfCharacter()) {
+        // KF: la animacion completa (estela y pasos incluidos) manda; los golpes
+        // se repiten mientras dura y un nuevo J/K la puede cortar.
+        clipDriven = true;
+        multiHitTimer = 0.0f;
+        attackDuration = std::max(attackDuration, animator.ClipSeconds(ClipNameFor(id)) * 0.92f);
+        stateTimer = attackDuration;
     }
 
     switch (id) {
@@ -125,6 +212,7 @@ void Player::PollAttackInput() {
     const int facingDir = facing == Facing::Right ? 1 : -1;
     if (frameInput.specialWave) inputBuffer.Push(InputCommand::SpecialWave, h != 0 ? h : facingDir);
     if (frameInput.specialRise) inputBuffer.Push(InputCommand::SpecialRise, h != 0 ? h : facingDir);
+    if (frameInput.skill >= 0 && TryStartSkill(frameInput.skill)) return;
     if (frameInput.punch) {
         const int dir = motion.QuarterCircle(inputBuffer.Frame());
         if (dir != 0) { inputBuffer.Push(InputCommand::SpecialWave, dir); motion.Clear(); }
@@ -152,6 +240,8 @@ PlayerInput Player::ReadInput() const {
     in.rage = input::Pressed(KEY_SPACE);
     in.specialWave = input::Pressed(input::kVirtualSpecialWave);
     in.specialRise = input::Pressed(input::kVirtualSpecialRise);
+    for (int i = 0; i < kSkillCount; ++i)
+        if (input::Pressed(KEY_ONE + i) || input::Pressed(input::kVirtualSkill0 + i)) in.skill = i;
     return in;
 }
 
@@ -166,6 +256,7 @@ bool Player::InCancelWindow() const {
     if (state != PlayerState::Attack) return false;
     if (attackPhase == AttackPhase::None || attackPhase == AttackPhase::Special) return false;
     const AttackDef& def = GetAttack(currentAttack);
+    if (clipDriven) return attackElapsed >= std::max(def.startup + def.active, attackDuration * 0.38f);
     return attackElapsed >= def.startup + def.active;   // hitbox ya termino: winddown
 }
 
@@ -216,6 +307,8 @@ bool Player::TryStartBufferedAttack(bool fromCancel) {
 void Player::EndAttack() {
     const bool heavy = GetAttack(currentAttack).heavy;
     attackType = AttackType::None;
+    activeSkill = -1;
+    clipDriven = false;
     if (inputEnabled && TryStartBufferedAttack(false)) return;
     SetState(PlayerState::Recovery);
     recoveryTimer = heavy ? kRecoveryHeavy : kRecoveryLight;
@@ -234,6 +327,11 @@ const char* Player::AttackPhaseName() const {
 
 bool Player::AttackIsActive() const {
     if (state != PlayerState::Attack) return false;
+    if (clipDriven) {
+        if (activeSkill == kSkillCount - 1) return false;   // transformacion: sin dano
+        const float t = attackElapsed / std::max(0.01f, attackDuration);
+        return t >= 0.12f && t <= 0.92f;
+    }
     const AttackDef& def = GetAttack(currentAttack);
     return attackElapsed >= def.startup && attackElapsed <= def.startup + def.active;
 }
@@ -242,6 +340,8 @@ int Player::GetAttackDamage() const {
     const AttackDef& def = GetAttack(currentAttack);
     float damage = static_cast<float>(def.damage);
     damage *= def.spawnsProjectile ? upgrades.energyDamageScale : upgrades.attackDamageScale;
+    if (clipDriven && currentAttack != AttackId::Skill) damage *= 0.6f;   // KF: varios golpes por animacion
+    if (IsTransformed()) damage *= 1.4f;
     if (isRageMode) damage *= 1.35f;
     if (damageBuffTimer > 0.0f) damage *= 1.25f;
     return std::max(1, static_cast<int>(std::round(damage)));
@@ -257,6 +357,17 @@ CombatBox Player::GetAttackHitbox() const {
     if (!AttackIsActive()) return {};
     const AttackDef& def = GetAttack(currentAttack);
     const float direction = facing == Facing::Right ? 1.f : -1.f;
+    const SpriteFrame* f = clipDriven ? animator.CurrentFrameData() : nullptr;
+    if (f && f->width > 0.0f) {
+        // La caja la marca el dibujo: llega hasta donde llegan el puno, la
+        // patada o el fuego de la habilidad en este frame.
+        const float sc = SpriteScale();
+        const float front = std::max(60.0f, (f->width - f->pivotX) * sc);
+        const float back = std::min(f->pivotX * sc, currentAttack == AttackId::Skill ? 400.0f : 30.0f);
+        const float top = std::clamp(f->pivotY * sc, 80.0f, 260.0f);
+        const float x0 = direction > 0 ? position.x - back : position.x - front;
+        return {x0, position.y - top, front + back, top + 10.0f};
+    }
     const float centerX = position.x + direction * def.boxForward;
     const float centerY = position.y + def.boxCenterOffsetY;
     return {centerX - def.boxWidth * 0.5f, centerY - def.boxHeight * 0.5f,

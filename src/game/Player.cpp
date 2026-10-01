@@ -45,6 +45,8 @@ void Player::Reset() {
     for (int i = 0; i < static_cast<int>(AttackId::Count); ++i) attackCooldowns[i] = 0.0f;
 
     comboCount = 0; comboStep = 0; hasHit = false; energyReleased = false;
+    for (float& cd : skillCooldown) cd = 0.0f;
+    activeSkill = -1; clipDriven = false; multiHitTimer = 0.0f; transformTimer = 0.0f;
     inputEnabled = true;
     debugInvulnerable = false;
     animator = Animator{};
@@ -77,7 +79,7 @@ void Player::SetState(PlayerState next) {
     if (state == next && next != PlayerState::Attack) return;
     state = next;
     hasHit = false;
-    if (state != PlayerState::Attack) attackPhase = AttackPhase::None;
+    if (state != PlayerState::Attack) { attackPhase = AttackPhase::None; activeSkill = -1; clipDriven = false; }
     if (state == PlayerState::Hit || state == PlayerState::GuardBreak ||
         state == PlayerState::Knockdown || state == PlayerState::Defeat ||
         state == PlayerState::Airborne) {
@@ -230,6 +232,7 @@ float Player::GetMoveSpeed() const {
     float speed = 245.0f * upgrades.moveSpeedScale;
     if (isRageMode) speed *= 1.16f;
     if (speedBuffTimer > 0.0f) speed *= 1.22f;
+    if (transformTimer > 0.0f) speed *= 1.15f;
     return speed;
 }
 
@@ -244,6 +247,8 @@ void Player::Update(float dt) {
     for (int i = 0; i < static_cast<int>(AttackId::Count); ++i) {
         attackCooldowns[i] = std::max(0.0f, attackCooldowns[i] - dt);
     }
+    for (float& cd : skillCooldown) cd = std::max(0.0f, cd - dt);
+    transformTimer = std::max(0.0f, transformTimer - dt);
 
     UpdateRage(dt);
 
@@ -338,6 +343,10 @@ void Player::Update(float dt) {
         const AttackDef& def = GetAttack(currentAttack);
         if (def.spawnsProjectile && !energyReleased && attackElapsed >= def.startup) {
             energyReleased = true;
+        }
+        if (clipDriven && (multiHitTimer -= dt) <= 0.0f) {
+            hasHit = false;   // la animacion larga vuelve a golpear
+            multiHitTimer = currentAttack == AttackId::Skill ? 0.26f : 0.30f;
         }
         // Animation cancel: con un comando valido en el buffer y el ataque en su
         // ventana final, se corta el winddown y se encadena el siguiente golpe.

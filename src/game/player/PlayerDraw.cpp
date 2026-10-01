@@ -65,16 +65,38 @@ void Player::DrawRageAura(Vector2 screen, float scale) const {
                      {255, 205, 110, rimAlpha});
 }
 
+float Player::SpriteScale() const {
+    const float scale = DepthScaleFor(position.y);
+    const float kfScale = GetCharacterVisual(skin).kfRoster >= 0 ? GetCharacterVisual(skin).scale : 1.0f;
+    return (animator.normalizedAtlas ? 1.20f * scale : 0.76f * scale) * kfScale;
+}
+
 void Player::Draw() const {
     Vector2 p = position.ToScreen();
     const float scale = DepthScaleFor(position.y);
-    const float kfScale = GetCharacterVisual(skin).kfRoster >= 0 ? GetCharacterVisual(skin).scale : 1.0f;
-    const float spriteScale = (animator.normalizedAtlas ? 1.20f * scale : 0.76f * scale) * kfScale;
+    const float spriteScale = SpriteScale();
 
     DrawEllipse(static_cast<int>(p.x), static_cast<int>(position.y), 30 * scale, 8 * scale,
                 {0, 0, 0, 145});
 
     DrawRageAura(p, scale);
+    if (IsTransformed()) {
+        // Transformacion: aura dorada que late (se apaga en los ultimos 2 s).
+        const float t = static_cast<float>(GetTime());
+        const float fade = std::clamp(transformTimer / 2.0f, 0.0f, 1.0f);
+        const float pulse = 0.5f + 0.5f * std::sin(t * 7.0f);
+        for (int layer = 0; layer < 3; ++layer) {
+            const float grow = 1.0f + layer * 0.22f + pulse * 0.08f;
+            DrawEllipse(static_cast<int>(p.x), static_cast<int>(p.y - 62 * scale), 42 * scale * grow, 82 * scale * grow,
+                        {255, 210, 80, static_cast<unsigned char>((46 - layer * 13) * fade)});
+        }
+        for (int i = 0; i < 8; ++i) {
+            const float ph = std::fmod(t * 1.6f + i * 0.37f, 1.0f);
+            const float x = p.x + std::sin(i * 2.1f + t * 3.0f) * 34 * scale;
+            DrawCircle(static_cast<int>(x), static_cast<int>(p.y - ph * 140 * scale), (4.0f - ph * 3.0f) * scale,
+                       {255, 236, 140, static_cast<unsigned char>(220 * (1.0f - ph) * fade)});
+        }
+    }
 
     if (IsBlocking() || shield < maxShield) {
         const float ratio = std::clamp(static_cast<float>(shield) / maxShield, 0.f, 1.f);
@@ -95,6 +117,7 @@ void Player::Draw() const {
     else if (state == PlayerState::Block) spriteTint = {175, 220, 255, 255};
     else if (isRageMode) spriteTint = {255, 214, 188, 255};
     else if (damageBuffTimer > 0.0f) spriteTint = {255, 226, 190, 255};
+    if (IsTransformed() && state != PlayerState::Hit) spriteTint = {255, 238, 170, 255};
 
     // DF-013.2: personajes adicionales (clon y bosses jugables en VS). El
     // Rayden original (skin 0) conserva su atlas y su ruta de dibujo.

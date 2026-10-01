@@ -117,6 +117,8 @@ if(BUILD_TESTING)
 
     add_executable(kf_bot_visual_check tests/KfBotVisualCheck.cpp)
     target_link_libraries(kf_bot_visual_check PRIVATE district_fury_core)
+    add_executable(skills_visual_check tests/SkillsVisualCheck.cpp)
+    target_link_libraries(skills_visual_check PRIVATE district_fury_core)
 
     add_executable(sprite_manifest_tests tests/SpriteManifestTests.cpp)
     target_link_libraries(sprite_manifest_tests PRIVATE district_fury_core)

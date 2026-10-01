@@ -17,6 +17,7 @@ struct PlayerInput {
     bool block = false, dash = false, punch = false, kick = false, energy = false, rage = false;
     // Botones tactiles de especial directo (sin tener que hacer el comando).
     bool specialWave = false, specialRise = false;
+    int skill = -1;   // habilidad pulsada este frame (0..5), -1 = ninguna
 };
 
 // Sub-estado de la FSM mientras state == Attack.
@@ -93,6 +94,27 @@ public:
 
     int comboCount; int comboStep; bool hasHit; bool energyReleased;
 
+    // Habilidades (botones 1-6, estilo King Fighter): cada una con 15 s de espera.
+    static constexpr int kSkillCount = 6;
+    static constexpr float kSkillCooldown = 15.0f;
+    static constexpr float kTransformDuration = 12.0f;
+    float skillCooldown[kSkillCount] = {};
+    int activeSkill{-1};          // habilidad en curso (-1 = ataque normal)
+    bool clipDriven{false};       // la animacion manda duracion y golpes (KF y habilidades)
+    float multiHitTimer{0.0f};    // golpes repetidos durante una animacion larga
+    float transformTimer{0.0f};   // transformacion activa (dano y velocidad extra)
+
+    // Nombre en pantalla de la habilidad i (segun el personaje).
+    const char* SkillName(int i) const;
+    bool SkillReady(int i) const { return i >= 0 && i < kSkillCount && skillCooldown[i] <= 0.0f; }
+    bool IsTransformed() const { return transformTimer > 0.0f; }
+    // Personaje extraido de la APK (sus clips traen su propio arte de poderes).
+    bool IsKfCharacter() const;
+    // Intenta lanzar la habilidad i ahora; false si esta en espera o no puede actuar.
+    bool TryStartSkill(int i);
+    // Escala de dibujo del sprite (la usa tambien la caja de golpe de las habilidades).
+    float SpriteScale() const;
+
     PlayerUpgrades upgrades;
     Animator animator;
 
@@ -147,6 +169,8 @@ public:
 
 private:
     void BeginAttack(AttackId id);
+    void BeginClipAttack(const char* clip, int skillIndex);
+    float ClipSeconds(const char* clip) const;
     void PollAttackInput();
     PlayerInput ReadInput() const;
     bool inputPumped{false};
