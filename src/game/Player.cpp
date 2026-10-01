@@ -46,6 +46,7 @@ void Player::Reset() {
 
     comboCount = 0; comboStep = 0; hasHit = false; energyReleased = false;
     for (float& cd : skillCooldown) cd = 0.0f;
+    abilityCooldown.clear(); skillPage = 0;
     activeSkill = -1; clipDriven = false; multiHitTimer = 0.0f; transformTimer = 0.0f;
     inputEnabled = true;
     debugInvulnerable = false;
@@ -287,6 +288,7 @@ void Player::Update(float dt) {
         attackCooldowns[i] = std::max(0.0f, attackCooldowns[i] - dt);
     }
     for (float& cd : skillCooldown) cd = std::max(0.0f, cd - dt);
+    for (float& cd : abilityCooldown) cd = std::max(0.0f, cd - dt);
     transformTimer = std::max(0.0f, transformTimer - dt);
 
     UpdateRage(dt);

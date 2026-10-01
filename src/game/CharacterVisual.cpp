@@ -7,7 +7,7 @@ namespace {
 
 // name, folder, uniformCanvas, scale, targetHeight, footInset,
 // facesRightByDefault, maxHp, damageMultiplier, speedMultiplier
-const std::array<CharacterVisual, 21> kCharacters{{
+const std::array<CharacterVisual, 22> kCharacters{{
     {"RAYDEN (ORIGINAL)", nullptr,           false, 1.00f,   0.0f, 0.0f, true,  100, 1.00f, 1.00f},
     {"RAYDEN CLON",       "rayder_clone",    false, 1.00f, 118.0f, 0.0f, true,  110, 1.05f, 1.05f},
     // Brakk jugable con la hoja mejorada (atlas brakk_v2); las poses sueltas siguen en assets/bosses/brakk.
@@ -37,6 +37,8 @@ const std::array<CharacterVisual, 21> kCharacters{{
     // habilidades y transformacion) vestida como el Rayder clon (morado electrico).
     // Escala 0.75: sus cuadros vienen ampliados x2 (Scale2x) para mas calidad.
     {"RAYDER CLON BETA",       nullptr, false, 0.75f, 0.0f, 0.0f, true, 115, 1.05f, 1.05f, nullptr, 13, 1.0f, nullptr, 14},
+    // Rayder clon (rojo): formula del heroe KF + despiece propio a 3x (escala 1.5/3).
+    {"RAYDER CLON",            nullptr, false, 0.50f, 0.0f, 0.0f, true, 120, 1.10f, 1.05f, nullptr, 15, 1.0f, nullptr, 16},
 }};
 
 }  // namespace
