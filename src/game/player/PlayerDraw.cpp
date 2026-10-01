@@ -112,25 +112,11 @@ void Player::UpdateMotionFeel(float dt) {
 
     // Avance real durante el golpe (root motion): en King Fighter cada golpe
     // da un paso; aqui el personaje se desliza mientras arranca y pega.
-    if (!IsKfCharacter() && state == PlayerState::Attack && !clipDriven) {
-        float dist = 0.0f;
-        switch (currentAttack) {
-            case AttackId::Punch1: dist = 14.0f; break;
-            case AttackId::Punch2: dist = 18.0f; break;
-            case AttackId::Punch3: dist = 26.0f; break;
-            case AttackId::Kick: dist = 22.0f; break;
-            case AttackId::DashAttack: dist = 46.0f; break;
-            case AttackId::Finisher: dist = 30.0f; break;
-            case AttackId::RageAttack: dist = 20.0f; break;
-            default: break;
-        }
-        const AttackDef& def = GetAttack(currentAttack);
-        const float window = std::max(0.05f, def.startup + def.active);
-        if (dist > 0.0f && attackElapsed <= window) {
-            position.x += (facing == Facing::Right ? 1.0f : -1.0f) * dist / window * dt;
-            position.x = std::clamp(position.x, kStageStartX, kStageEndX - 90.f);
-        }
-    }
+    if(!IsKfCharacter()&&state==PlayerState::Attack&&!clipDriven&&UsesAttackAnimationProfile(skin)){
+        const auto& def=GetAttack(currentAttack); const auto& profile=GetAttackAnimationProfile(skin,currentAttack);
+        const float target=profile.rootMotion*AttackRootMotionProgress(attackElapsed,def); const float delta=target-attackRootMotionApplied;
+        if(std::fabs(delta)>0.0001f){position.x+=(facing==Facing::Right?1.0f:-1.0f)*delta;position.x=std::clamp(position.x,kStageStartX,kStageEndX-90.0f);attackRootMotionApplied+=delta;}
+    }else if(state!=PlayerState::Attack)attackRootMotionApplied=0.0f;
 
     // Estelas (afterimages) en dash, golpes fuertes, habilidades y transformacion.
     for (Ghost& g : ghosts) g.life = std::max(0.0f, g.life - dt);
@@ -209,6 +195,21 @@ void Player::Draw() const {
     Texture2D altTex{};
     if (skin != 0 && cv.folder != nullptr && cv.atlasId == nullptr) {
         const char* pose = CharacterPose(skin, state, attackType, isRageMode, GetTime());
+        // Rayden clon jugable: refuerza anticipacion/impacto/recuperacion usando
+        // exclusivamente sus poses reales. No modifica KF ni Rayder Cruz.
+        if (skin == 1 && state == PlayerState::Attack) {
+            // El clon usa poses sueltas, pero sus transiciones ahora respetan el
+            // mismo startup/active/recovery de AttackData que el atlas de Rayder.
+            const AttackDef& ad=GetAttack(currentAttack);
+            const float startup=ad.startup, activeEnd=ad.startup+ad.active;
+            if (attackType == AttackType::Energy) {
+                pose = attackElapsed < startup ? "ready" : attackElapsed < activeEnd ? "release_orb" : "idle2";
+            } else if (attackType == AttackType::Kick) {
+                pose = attackElapsed < startup ? "ready" : attackElapsed < activeEnd ? "kick" : "idle3";
+            } else {
+                pose = attackElapsed < startup ? "ready" : attackElapsed < activeEnd ? "punch" : "idle1";
+            }
+        }
         altTex = AssetManager::Get().GetTexture(std::string(cv.folder) + "_" + pose);
         if (altTex.id == 0) altTex = AssetManager::Get().GetTexture(std::string(cv.folder) + (cv.uniformCanvas ? "_idle" : "_idle1"));
     }
@@ -235,29 +236,38 @@ void Player::Draw() const {
             Vector2 at = p;
             switch (state) {
                 case PlayerState::Idle:
-                case PlayerState::Recovery: {   // respiracion
+                case PlayerState::Recovery: {
                     const float b = std::sin(animClock * 3.4f);
                     sy = 1.0f + 0.016f * b;
                     sx = 1.0f - 0.008f * b;
+                    if (skin == 6) sy += 0.008f * std::sin(animClock * 6.8f);
                     break;
                 }
-                case PlayerState::Walk: {       // balanceo y peso hacia adelante
+                case PlayerState::Walk: {
                     const float st = std::sin(walkPhase);
                     at.y -= std::fabs(st) * 3.0f * scale;
                     sy = 1.0f + 0.012f * std::fabs(st);
                     angle = 3.5f * dir;
+                    if (skin == 6) {
+                        at.x += dir * 2.0f * std::sin(walkPhase);
+                        angle = 4.5f * dir * std::sin(walkPhase);
+                        sy += 0.008f * std::fabs(std::sin(walkPhase * 0.5f));
+                    }
                     break;
                 }
                 case PlayerState::Dash:
                     angle = 9.0f * dir; sx = 1.06f; sy = 0.96f;
+                    if (skin == 6) { sx = 1.10f; sy = 0.93f; angle = 11.0f * dir; }
                     break;
-                case PlayerState::Attack: {     // se estira hacia el golpe y vuelve
-                    const AttackDef& ad = GetAttack(currentAttack);
-                    const float t = std::clamp(attackElapsed / std::max(0.01f, ad.startup + ad.active), 0.0f, 1.0f);
-                    const float impact = std::sin(t * 3.14159f);
-                    angle = 5.0f * dir * impact;
-                    sx = 1.0f + 0.05f * impact;
-                    sy = 1.0f - 0.025f * impact;
+                case PlayerState::Attack: {
+                    const AttackDef& ad=GetAttack(currentAttack); const float activeStart=ad.startup,activeEnd=ad.startup+ad.active;
+                    const float t=std::clamp(attackElapsed/std::max(.01f,activeEnd),0.0f,1.0f); const float impact=std::sin(t*3.14159f);
+                    angle=5.0f*dir*impact;sx=1.0f+.05f*impact;sy=1.0f-.025f*impact;
+                    if(UsesAttackAnimationProfile(skin)){const auto& pr=GetAttackAnimationProfile(skin,currentAttack);
+                        if(attackElapsed<activeStart){const float q=std::clamp(attackElapsed/std::max(.01f,activeStart),0.0f,1.0f);sx=1-.035f*pr.anticipationScale*(1-q);sy=1+.020f*pr.anticipationScale*(1-q);angle=-3*dir*(1-q);}
+                        else if(attackElapsed<activeEnd){const float q=std::sin(std::clamp((attackElapsed-activeStart)/std::max(.01f,ad.active),0.0f,1.0f)*3.14159f);sx=1+.060f*pr.impactStretch*q;sy=1-.032f*pr.impactStretch*q;angle=5.5f*dir*q;at.x+=dir*2*q;}
+                        else{const float q=std::clamp((attackElapsed-activeEnd)/std::max(.01f,ad.recovery),0.0f,1.0f);sx=1+.025f*(1-q)*pr.recoveryRecoil;sy=1-.015f*(1-q);angle=2*dir*(1-q)*pr.recoveryRecoil;}
+                    }
                     break;
                 }
                 case PlayerState::Hit:
@@ -305,6 +315,7 @@ void Player::Draw() const {
         }
         EndBlendMode();
     }
+    if(animationDebug&&state==PlayerState::Attack&&UsesAttackAnimationProfile(skin))DrawAnimationDebug(p);
     if (IsBlocking()) {
         const char* label = shield == 0 ? "ESCUDO ROTO" : "BLOQUEO";
         DrawText(label, static_cast<int>(p.x) - MeasureText(label, 12) / 2,
@@ -373,6 +384,18 @@ bool Player::DrawEnergyProjectile(Vector2 center, bool movingLeft, float time) c
     const float scale = 1.20f * DepthScaleFor(position.y);
     animator.DrawFrame(idx, {center.x, center.y + 40.0f * scale}, scale, movingLeft);
     return true;
+}
+
+void Player::DrawAnimationDebug(Vector2 screen) const {
+    if(state!=PlayerState::Attack||!UsesAttackAnimationProfile(skin))return;
+    const auto& def=GetAttack(currentAttack);const auto& pr=GetAttackAnimationProfile(skin,currentAttack);const float total=AttackTotalDuration(def),ae=def.startup+def.active;
+    const int bx=14,by=470,bw=360;DrawRectangle(bx,by,bw,174,{5,5,9,224});DrawRectangleLines(bx,by,bw,174,{255,205,110,220});
+    DrawText(TextFormat("ANIM DEBUG %s / %s",GetCharacterVisual(skin).name,pr.clip),bx+10,by+8,14,WHITE);
+    DrawText(TextFormat("TIME %.3f/%.3f FRAME %d/%d IMPACT %d",attackElapsed,total,animator.currentFrame,(int)animator.CurrentClipFrameCount(),pr.impactFrameIndex),bx+10,by+29,12,WHITE);
+    DrawText(TextFormat("PHASE %s HITBOX %s",AttackPhaseLabel(attackElapsed,def),AttackIsActive()?"ON":"OFF"),bx+10,by+47,12,AttackIsActive()?GREEN:LIGHTGRAY);
+    const int x=bx+10,y=by+70,w=338;DrawRectangle(x,y,w,10,{35,35,42,255});const int sx=x+(int)(w*def.startup/total),ax=x+(int)(w*ae/total);
+    DrawRectangle(x,y,std::max(1,sx-x),10,{90,90,110,255});DrawRectangle(sx,y,std::max(1,ax-sx),10,{230,120,70,255});DrawRectangle(ax,y,std::max(1,x+w-ax),10,{90,130,170,255});DrawLine(sx,y-6,sx,y+16,YELLOW);
+    DrawText(TextFormat("ROOT %.1fpx | IMPACT %s | F3",attackRootMotionApplied,attackImpactTriggered?"TRIGGERED":"WAITING"),bx+10,by+104,12,WHITE);
 }
 
 }  // namespace district_fury

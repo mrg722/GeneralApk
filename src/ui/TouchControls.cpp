@@ -43,6 +43,7 @@ const Button kCombat[] = {
     {{1088.0f, 422.0f}, 30.0f, input::kVirtualSkill0 + 4, "5", {255, 70, 120, 255}, "calavera_verde"},
     {{1152.0f, 406.0f}, 30.0f, input::kVirtualSkill0 + 5, "6", {255, 205, 70, 255}, "estallido_verde"},
     {{1245.0f, 485.0f}, 28.0f, input::kVirtualSpecialWave, "ESPECIAL", {60, 170, 255, 255}, "puno_verde"},
+    {{1222.0f, 405.0f}, 22.0f, input::kVirtualSkillPage, "PAG", {200, 200, 210, 255}},
     {{860.0f, 668.0f}, 36.0f, KEY_B, "BLOQ", {90, 200, 230, 255}, "bloq", true},
     {{865.0f, 578.0f}, 32.0f, KEY_LEFT_SHIFT, "DASH", {200, 200, 210, 255}, "dash", true},
     {{1240.0f, 330.0f}, 30.0f, KEY_SPACE, "FURIA", {255, 190, 60, 255}, "mano_roja"},
@@ -179,6 +180,7 @@ void Draw(Context context, const Player* player) {
     const Button* buttons = ButtonsFor(context, n);
     for (size_t i = 0; i < n; ++i) {
         const Button& b = buttons[i];
+        if (b.key == input::kVirtualSkillPage && (!player || player->SkillPageCount() <= 1)) continue;
         const bool held = input::Down(b.key);
         bool dim = false, glow = false;
         if (player && b.key == input::kVirtualSpecialWave) dim = player->sp < GetAttack(AttackId::EnergyWave).spCost;
@@ -198,9 +200,9 @@ void Draw(Context context, const Player* player) {
         if (skill >= 0 && skill < input::kSkillKeys) {
             // Habilidad: nombre del personaje y espera de 15 s como reloj que se vacia.
             if (player && !player->SkillReady(skill)) {
-                const float left = player->skillCooldown[skill] / Player::kSkillCooldown;
+                const float left = std::min(1.0f, player->SkillCooldownLeft(skill) / Player::kSkillCooldown);
                 DrawCircleSector(b.center, b.radius - 2.0f, -90.0f, -90.0f + 360.0f * left, 32, {0, 0, 0, 170});
-                const char* secs = TextFormat("%d", (int)std::ceil(player->skillCooldown[skill]));
+                const char* secs = player->SkillCooldownLeft(skill) > Player::kSkillCooldown ? "-" : TextFormat("%d", (int)std::ceil(player->SkillCooldownLeft(skill)));
                 DrawText(secs, (int)(b.center.x - MeasureText(secs, 20) / 2.0f), (int)(b.center.y - 10), 20, {235, 235, 240, 230});
             } else if (player) {
                 DrawCircleLinesV(b.center, b.radius + 3.0f + 2.0f * std::sin((float)GetTime() * 6.0f + skill), {b.ring.r, b.ring.g, b.ring.b, 160});
@@ -228,6 +230,14 @@ void Draw(Context context, const Player* player) {
             continue;
         }
         if (art && b.artHasText) continue;   // GOLPE / DASH / BLOQ: el arte ya lo dice
+        if (b.key == input::kVirtualSkillPage) {   // pagina de habilidades: "1/5"
+            const int pages = player ? player->SkillPageCount() : 1;
+            if (pages <= 1) continue;   // sin paginas: no se muestra (no hay boton inutil)
+            const char* t = TextFormat("%d/%d", player ? player->skillPage % pages + 1 : 1, pages);
+            DrawText("PAG", (int)(b.center.x - MeasureText("PAG", 10) / 2.0f), (int)(b.center.y - 11), 10, {245, 240, 235, a});
+            DrawText(t, (int)(b.center.x - MeasureText(t, 10) / 2.0f), (int)(b.center.y + 1), 10, {255, 214, 72, a});
+            continue;
+        }
         const int fs = b.radius >= 55.0f ? 20 : (b.radius >= 40.0f ? 14 : 11);
         const int w = MeasureText(b.label, fs);
         if (art) {   // icono: etiqueta en espanol debajo

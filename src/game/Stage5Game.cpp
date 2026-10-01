@@ -292,7 +292,26 @@ void Stage5Game::UpdateBoss(float dt) {
         boss.elapsed = 0;
         boss.teleportCooldown = boss.phase >= 3 ? 2.2f : 3.0f;
     } else if (boss.attack == BossAttack::None && boss.attackTimer <= 0) {
-        int pick = GetRandomValue(0, boss.phase >= 3 ? 3 : 2);
+        // Seleccion contextual: mantiene exactamente el mismo moveset, pero evita
+        // ataques poco legibles a distancia o finishers sin alcance real.
+        const float distance = std::abs(dx);
+        const bool close = distance < 190.0f;
+        const bool far = distance > 360.0f;
+        int pick = 0;
+        if (far) {
+            // A distancia: proyectil o dash para cerrar espacio.
+            pick = GetRandomValue(0, 1) == 0 ? 1 : 2;
+        } else if (close) {
+            // Cerca: combo cuerpo a cuerpo o finisher; el finisher conserva su
+            // cooldown y ventana existentes.
+            if (boss.phase >= 2 && GetRandomValue(0, 99) < 28) pick = 3;
+            else pick = 0;
+        } else {
+            // Distancia media: alterna presion y aproximacion.
+            pick = GetRandomValue(0, boss.phase >= 3 ? 2 : 1);
+            if (pick == 0) pick = 2;
+        }
+        if (pick == 3 && !close) pick = 2;
         boss.attack = pick == 0   ? BossAttack::MirrorCombo
                       : pick == 1 ? BossAttack::DarkWave
                       : pick == 2 ? BossAttack::Dash
@@ -424,18 +443,29 @@ void Stage5Game::DrawBoss() const {
     const bool tp = boss.attack == BossAttack::Teleport && boss.elapsed < .28f;
     const bool flip = !boss.facingRight;
     const char* pose = "idle1";
-    if (boss.attack == BossAttack::MirrorCombo)
-        pose = "punch";
-    else if (boss.attack == BossAttack::DarkWave)
-        pose = "release_orb";
-    else if (boss.attack == BossAttack::Dash)
-        pose = "dash";
-    else if (boss.attack == BossAttack::Finisher)
-        pose = "kick";
-    else if (boss.attack == BossAttack::Teleport)
-        pose = "ready";
-    else {
-        const int cycle = ((int)(boss.elapsed * 1.5f)) % 4;
+    // Secuenciacion del clon: solo reutiliza poses que existen en el atlas.
+    if (boss.attack == BossAttack::MirrorCombo) {
+        pose = boss.elapsed < 0.10f ? "ready"
+             : boss.elapsed < 0.34f ? "punch"
+             : boss.elapsed < 0.58f ? "idle2"
+             : "idle1";
+    } else if (boss.attack == BossAttack::DarkWave) {
+        pose = boss.elapsed < 0.18f ? "ready"
+             : boss.elapsed < 0.58f ? "release_orb"
+             : "idle3";
+    } else if (boss.attack == BossAttack::Dash) {
+        pose = boss.elapsed < 0.12f ? "ready"
+             : boss.elapsed < 0.56f ? "dash"
+             : "idle1";
+    } else if (boss.attack == BossAttack::Finisher) {
+        pose = boss.elapsed < 0.18f ? "ready"
+             : boss.elapsed < 0.72f ? "kick"
+             : boss.elapsed < 0.94f ? "punch"
+             : "idle2";
+    } else if (boss.attack == BossAttack::Teleport) {
+        pose = boss.elapsed < 0.16f ? "ready" : "idle3";
+    } else {
+        const int cycle = static_cast<int>(boss.elapsed * 3.2f) % 4;
         pose = cycle == 0 ? "idle1" : cycle == 1 ? "idle2" : cycle == 2 ? "idle3" : "idle4";
     }
     Texture2D tex = AssetManager::Get().GetTexture(std::string("rayder_clone_") + pose);

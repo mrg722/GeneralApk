@@ -1,13 +1,14 @@
 #include "game/CharacterVisual.h"
 #include "game/Player.h"
 #include <array>
+#include <cmath>
 
 namespace district_fury {
 namespace {
 
 // name, folder, uniformCanvas, scale, targetHeight, footInset,
 // facesRightByDefault, maxHp, damageMultiplier, speedMultiplier
-const std::array<CharacterVisual, 21> kCharacters{{
+const std::array<CharacterVisual, 22> kCharacters{{
     {"RAYDEN (ORIGINAL)", nullptr,           false, 1.00f,   0.0f, 0.0f, true,  100, 1.00f, 1.00f},
     {"RAYDEN CLON",       "rayder_clone",    false, 1.00f, 118.0f, 0.0f, true,  110, 1.05f, 1.05f},
     // Brakk jugable con la hoja mejorada (atlas brakk_v2); las poses sueltas siguen en assets/bosses/brakk.
@@ -37,6 +38,8 @@ const std::array<CharacterVisual, 21> kCharacters{{
     // habilidades y transformacion) vestida como el Rayder clon (morado electrico).
     // Escala 0.75: sus cuadros vienen ampliados x2 (Scale2x) para mas calidad.
     {"RAYDER CLON BETA",       nullptr, false, 0.75f, 0.0f, 0.0f, true, 115, 1.05f, 1.05f, nullptr, 13, 1.0f, nullptr, 14},
+    // Rayder clon (rojo): formula del heroe KF + despiece propio a 3x (escala 1.5/3).
+    {"RAYDER CLON",            nullptr, false, 0.50f, 0.0f, 0.0f, true, 120, 1.10f, 1.05f, nullptr, 15, 1.0f, nullptr, 16},
 }};
 
 }  // namespace
@@ -52,13 +55,26 @@ const char* CharacterPose(int id, PlayerState state, AttackType attack, bool rag
     if (state == PlayerState::Airborne) state = PlayerState::Knockdown;
     const int idleCycle = static_cast<int>(time * (state == PlayerState::Walk ? 9.0 : 3.2)) % 4;
     switch (id) {
-        case 1:  // Rayden clon
+        case 1:  // Rayden clon — usa SOLO poses existentes del atlas del clon.
+            // La mejora es de secuenciacion/timing, no crea arte nuevo.
             if (state == PlayerState::Defeat) return "death";
             if (state == PlayerState::Hit || state == PlayerState::Knockdown || state == PlayerState::GuardBreak) return "hurt";
             if (state == PlayerState::Block) return "ready";
             if (state == PlayerState::Dash) return "dash";
-            if (state == PlayerState::Attack)
-                return attack == AttackType::Energy ? "release_orb" : attack == AttackType::Kick ? "kick" : "punch";
+            if (state == PlayerState::Attack) {
+                const float phase = std::fmod(static_cast<float>(time), 0.56f);
+                if (attack == AttackType::Energy) {
+                    return phase < 0.16f ? "ready" : phase < 0.40f ? "release_orb" : "idle2";
+                }
+                if (attack == AttackType::Kick) {
+                    return phase < 0.10f ? "ready" : phase < 0.32f ? "kick" : "idle3";
+                }
+                return phase < 0.09f ? "ready" : phase < 0.28f ? "punch" : phase < 0.44f ? "idle2" : "idle1";
+            }
+            if (state == PlayerState::Walk) {
+                const int walkCycle = static_cast<int>(time * 9.0) % 4;
+                return walkCycle == 0 ? "idle1" : walkCycle == 1 ? "idle2" : walkCycle == 2 ? "idle3" : "idle4";
+            }
             return idleCycle == 0 ? "idle1" : idleCycle == 1 ? "idle2" : idleCycle == 2 ? "idle3" : "idle4";
         case 2:  // Brakk
             if (state == PlayerState::Defeat) return "death";

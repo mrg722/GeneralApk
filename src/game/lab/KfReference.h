@@ -27,6 +27,10 @@ struct KfReference {
     std::string error;
     Animator templ;                    // frames + clips por nombre (sin textura propia)
     std::vector<std::string> clipNames;
+    // TODAS las habilidades del personaje (clip "abN" -> nombre en pantalla), en
+    // el orden en que se reparten por paginas en los botones 1-5.
+    std::vector<std::string> abilityClips;
+    std::vector<std::string> abilityNames;
     float scale = 1.8f;                // el luchador mide ~65 px en la APK
 };
 

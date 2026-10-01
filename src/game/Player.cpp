@@ -46,6 +46,7 @@ void Player::Reset() {
 
     comboCount = 0; comboStep = 0; hasHit = false; energyReleased = false;
     for (float& cd : skillCooldown) cd = 0.0f;
+    abilityCooldown.clear(); skillPage = 0;
     activeSkill = -1; clipDriven = false; multiHitTimer = 0.0f; transformTimer = 0.0f;
     inputEnabled = true;
     debugInvulnerable = false;
@@ -274,10 +275,7 @@ float Player::GetMoveSpeed() const {
 }
 
 void Player::Update(float dt) {
-    EnsurePlayerAnimator(animator, skin);
-    UpdateTransformForm();
-    animator.Update(dt);
-    UpdateMotionFeel(dt);
+    EnsurePlayerAnimator(animator, skin); UpdateTransformForm(); if(IsKeyPressed(KEY_F3)) animationDebug=!animationDebug; animator.Update(dt); UpdateMotionFeel(dt);
 
     dashInvulnerability = std::max(0.0f, dashInvulnerability - dt);
     dashCooldown = std::max(0.0f, dashCooldown - dt);
@@ -287,6 +285,7 @@ void Player::Update(float dt) {
         attackCooldowns[i] = std::max(0.0f, attackCooldowns[i] - dt);
     }
     for (float& cd : skillCooldown) cd = std::max(0.0f, cd - dt);
+    for (float& cd : abilityCooldown) cd = std::max(0.0f, cd - dt);
     transformTimer = std::max(0.0f, transformTimer - dt);
 
     UpdateRage(dt);
@@ -377,8 +376,8 @@ void Player::Update(float dt) {
     }
 
     if (state == PlayerState::Attack) {
-        attackElapsed += dt;
-        stateTimer -= dt;
+        const float previousAttackElapsed=attackElapsed; attackElapsed+=dt; stateTimer-=dt;
+        if(!attackImpactTriggered&&previousAttackElapsed<GetAttack(currentAttack).startup&&attackElapsed>=GetAttack(currentAttack).startup)attackImpactTriggered=true;
         const AttackDef& def = GetAttack(currentAttack);
         if (def.spawnsProjectile && !energyReleased && attackElapsed >= def.startup) {
             energyReleased = true;

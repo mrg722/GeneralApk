@@ -10,6 +10,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <string>
+#include <vector>
 
 using namespace district_fury;
 
@@ -35,7 +36,19 @@ int main(int argc, char** argv) {
     p.scriptedInput = &in;
     std::printf("personaje: %s\n", GetCharacterVisual(character).name);
     int failures = 0;
-    for (int skill = 0; skill < Player::kSkillCount; ++skill) {
+    // Todas las habilidades: cada pagina (botones 1-5) y al final TRANSFORMAR.
+    struct Job { int page, skill; };
+    std::vector<Job> jobs;
+    p.Update(0.0f);
+    for (int pg = 0; pg < p.SkillPageCount(); ++pg)
+        for (int k = 0; k < Player::kSkillCount - 1; ++k) jobs.push_back({pg, k});
+    jobs.push_back({0, Player::kSkillCount - 1});
+    int shotIndex = 0;
+    for (const Job& job : jobs) {
+        const int skill = job.skill;
+        p.skillPage = job.page;
+        if (skill < Player::kSkillCount - 1 && p.AbilityForSlot(skill) < 0) continue;
+        p.abilityCooldown.assign(p.abilityCooldown.size(), 0.0f);
         // Acercarse al rival y mirarlo.
         for (int f = 0; f < 240; ++f) {
             in = PlayerInput{};
@@ -68,12 +81,12 @@ int main(int argc, char** argv) {
             vs.Update(1.0f / 60.0f);
             ++frames;
             BeginDrawing(); ClearBackground(BLACK); vs.Draw(); EndDrawing();
-            if (!shot && p.attackElapsed >= dur * 0.45f) { Capture("habilidad_" + std::to_string(skill + 1)); shot = true; }
+            if (!shot && p.attackElapsed >= dur * 0.45f) { Capture("habilidad_" + std::to_string(++shotIndex)); shot = true; }
         }
         const int hpAfter = vs.Enemies().empty() ? 0 : vs.Enemies()[0].hp;
-        std::printf("habilidad %d %-12s clip=%-10s inicio=%s duracion=%.2fs dano=%d espera=%.1fs\n", skill + 1,
-                    p.SkillName(skill), clip.c_str(), started ? "si" : "NO", dur, hpBefore - hpAfter,
-                    p.skillCooldown[skill]);
+        std::printf("pag %d boton %d %-14s clip=%-10s inicio=%s duracion=%.2fs dano=%d espera=%.1fs\n", job.page + 1,
+                    skill + 1, p.SkillName(skill), clip.c_str(), started ? "si" : "NO", dur, hpBefore - hpAfter,
+                    p.SkillCooldownLeft(skill));
         if (!started) ++failures;
         if (skill < 5 && hpBefore - hpAfter <= 0) std::printf("  AVISO: no golpeo\n");
         // Reiniciar la vida del rival para la siguiente prueba.

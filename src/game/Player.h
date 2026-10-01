@@ -3,6 +3,7 @@
 #include "game/InputBuffer.h"
 #include "game/combat/AttackData.h"
 #include "rendering/Animator.h"
+#include "game/combat/AttackAnimation.h"
 #include <vector>
 
 namespace district_fury {
@@ -19,6 +20,7 @@ struct PlayerInput {
     // Botones tactiles de especial directo (sin tener que hacer el comando).
     bool specialWave = false, specialRise = false;
     int skill = -1;   // habilidad pulsada este frame (0..5), -1 = ninguna
+    bool skillPage = false;   // pasar a la siguiente pagina de habilidades
 };
 
 // Sub-estado de la FSM mientras state == Attack.
@@ -101,13 +103,25 @@ public:
     static constexpr float kTransformDuration = 12.0f;
     float skillCooldown[kSkillCount] = {};
     int activeSkill{-1};          // habilidad en curso (-1 = ataque normal)
-    bool clipDriven{false};       // la animacion manda duracion y golpes (KF y habilidades)
+    bool clipDriven{false};
+    bool attackImpactTriggered{false};
+    float attackRootMotionApplied{0.0f};
+    bool animationDebug{false};
     float multiHitTimer{0.0f};    // golpes repetidos durante una animacion larga
     float transformTimer{0.0f};   // transformacion activa (dano y velocidad extra)
 
     // Nombre en pantalla de la habilidad i (segun el personaje).
     const char* SkillName(int i) const;
-    bool SkillReady(int i) const { return i >= 0 && i < kSkillCount && skillCooldown[i] <= 0.0f; }
+    bool SkillReady(int i) const { return SkillCooldownLeft(i) <= 0.0f; }
+    // Espera restante del boton i (segun la pagina actual en personajes KF).
+    float SkillCooldownLeft(int i) const;
+    // Personajes KF: TODAS sus habilidades se reparten de 5 en 5 en los botones
+    // 1-5; el boton PAG (o TAB) pasa a la siguiente pagina. El 6 es TRANSFORMAR.
+    int skillPage{0};
+    std::vector<float> abilityCooldown;
+    int AbilityCount() const;
+    int SkillPageCount() const;
+    int AbilityForSlot(int i) const;   // -1 si el boton no tiene habilidad
     bool IsTransformed() const { return transformTimer > 0.0f; }
     // Personaje extraido de la APK (sus clips traen su propio arte de poderes).
     bool IsKfCharacter() const;
@@ -180,6 +194,8 @@ public:
     bool InCancelWindow() const;
 
     bool AttackIsActive() const;
+    bool AttackIsImpactFrame() const;
+    const AttackAnimationProfile& CurrentAttackAnimationProfile() const;
     bool IsBlocking() const;
     bool IsGuardBroken() const;
     bool IsKnockedDown() const;
@@ -211,6 +227,7 @@ private:
     void DrawRageAura(Vector2 screen, float scale) const;
     void UpdateMotionFeel(float dt);
     void UpdateTransformForm();
+    void DrawAnimationDebug(Vector2 screen) const;
 };
 
 }  // namespace district_fury
