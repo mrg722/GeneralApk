@@ -116,6 +116,26 @@ void Player::UpdateMotionFeel(float dt) {
         const auto& def=GetAttack(currentAttack); const auto& profile=GetAttackAnimationProfile(skin,currentAttack);
         const float target=profile.rootMotion*AttackRootMotionProgress(attackElapsed,def); const float delta=target-attackRootMotionApplied;
         if(std::fabs(delta)>0.0001f){position.x+=(facing==Facing::Right?1.0f:-1.0f)*delta;position.x=std::clamp(position.x,kStageStartX,kStageEndX-90.0f);attackRootMotionApplied+=delta;}
+    }else if(!IsKfCharacter()&&state==PlayerState::Attack&&!clipDriven){
+        // Personajes sin perfil (Rayden Cruz y el resto): el paso de siempre
+        // durante arranque y golpe, repartido en esa ventana.
+        float dist = 0.0f;
+        switch (currentAttack) {
+            case AttackId::Punch1: dist = 14.0f; break;
+            case AttackId::Punch2: dist = 18.0f; break;
+            case AttackId::Punch3: dist = 26.0f; break;
+            case AttackId::Kick: dist = 22.0f; break;
+            case AttackId::DashAttack: dist = 46.0f; break;
+            case AttackId::Finisher: dist = 30.0f; break;
+            case AttackId::RageAttack: dist = 20.0f; break;
+            default: break;
+        }
+        const AttackDef& def = GetAttack(currentAttack);
+        const float window = std::max(0.05f, def.startup + def.active);
+        if (dist > 0.0f && attackElapsed <= window) {
+            position.x += (facing == Facing::Right ? 1.0f : -1.0f) * dist / window * dt;
+            position.x = std::clamp(position.x, kStageStartX, kStageEndX - 90.f);
+        }
     }else if(state!=PlayerState::Attack)attackRootMotionApplied=0.0f;
 
     // Estelas (afterimages) en dash, golpes fuertes, habilidades y transformacion.

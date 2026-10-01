@@ -130,4 +130,11 @@ if(BUILD_TESTING)
     target_link_libraries(sprite_manifest_tests PRIVATE district_fury_core)
     add_test(NAME sprite_manifest_tests COMMAND sprite_manifest_tests
              WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+    # Los tests usan assert(): en Release (CI) NDEBUG los apagaba y no
+    # comprobaban nada. Se vuelven a encender solo en los tests.
+    foreach(t application_state_tests combat_smoke_tests attack_animation_timing_tests input_buffer_tests
+              touch_controls_tests stage1_playthrough_test sprite_manifest_tests)
+        target_compile_options(${t} PRIVATE -UNDEBUG)
+    endforeach()
 endif()

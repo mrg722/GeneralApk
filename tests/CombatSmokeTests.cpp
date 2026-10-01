@@ -46,6 +46,19 @@ int main() {
     player.attackElapsed = 0.15f;
     assert(player.AttackIsActive());
 
+    // Rayden Cruz (sin perfil de animacion) avanza al golpear, como Rayder/Brakk.
+    player.Reset();
+    player.skin = 0;
+    player.facing = Facing::Right;
+    const float startX = player.position.x;
+    player.SetState(PlayerState::Attack);
+    player.currentAttack = AttackId::Punch3;
+    player.attackType = AttackType::Punch;
+    player.attackElapsed = 0.0f;
+    player.stateTimer = 1.0f;
+    for (int i = 0; i < 5; ++i) player.Update(0.02f);
+    assert(player.position.x > startX + 1.0f);
+
     StreetEnemy enemy;
     enemy.Init({100, 575, 0}, StreetEnemyType::Brute);
     enemy.active = true;
