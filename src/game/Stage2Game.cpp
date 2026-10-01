@@ -523,7 +523,7 @@ void Stage2Game::DrawHUD() const {
     vitals.maxRage = player.maxRage;
     vitals.isRageMode = player.isRageMode;
     vitals.combo = combo;
-    vitals.title = TextFormat("%s // VIEJO ASTILLERO", GetCharacterVisual(player.skin).name);
+    vitals.title = TextFormat("%s // VIEJO ASTILLERO", ShortCharacterName(player.skin).c_str());
     vitals.x = 16;
     vitals.y = 14;
     vitals.width = 500;

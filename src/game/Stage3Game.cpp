@@ -607,7 +607,7 @@ void Stage3Game::DrawHUD() const {
         vitals.maxRage = player.maxRage;
         vitals.isRageMode = player.isRageMode;
         vitals.combo = 0;
-        vitals.title = TextFormat("%s // ASTRA TOWER", GetCharacterVisual(player.skin).name);
+        vitals.title = TextFormat("%s // ASTRA TOWER", ShortCharacterName(player.skin).c_str());
         vitals.x = 18;
         vitals.y = 110;
         vitals.width = 430;

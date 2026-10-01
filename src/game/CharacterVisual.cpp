@@ -44,6 +44,12 @@ const std::array<CharacterVisual, 22> kCharacters{{
 
 }  // namespace
 
+std::string ShortCharacterName(int id) {
+    std::string n = GetCharacterVisual(id).name;
+    const auto cut = n.find(" (");
+    return cut == std::string::npos ? n : n.substr(0, cut);
+}
+
 int CharacterCount() { return static_cast<int>(kCharacters.size()); }
 
 const CharacterVisual& GetCharacterVisual(int id) {

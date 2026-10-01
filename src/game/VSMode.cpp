@@ -24,18 +24,19 @@ constexpr int kBossOptionCount = 6; // NINGUNO + 5 bosses
 const char* kStageNames[] = {"STAGE 1 // SLUM DISTRICT", "STAGE 2 // OLD STEEL YARD",
                              "STAGE 3 // ASTRA TOWER", "STAGE 4 // KESSLER TOWER",
                              "STAGE 5 // CAMARA DEL CLON"};
-const int kScenarioCounts[] = {4, 5, 3, 2, 1};
+// Los 20 escenarios del juego (4 por stage, assets/backgrounds/stageN_scenarioMM.png).
+const int kScenarioCounts[] = {4, 4, 4, 4, 4};
 constexpr int kStageCount = 5;
 const char* kStage1Scenarios[] = {"BARRIO BAJO // BLOQUE 17", "MERCADO ANTIGUO // LINEA DEL CANAL",
                                   "PUERTA DE ACERO // RUTA DE CARGA",
                                   "ASTILLERO DE CADENAS // TERRITORIO DE BRAKK"};
-const char* kStage2Scenarios[] = {"DEEP LINE // ENTRADA", "OLD STEEL YARD // FUNDICION",
-                                  "ZONA QUIMICA // PROCESAMIENTO", "OLD STEEL YARD // DEPOSITOS",
-                                  "CAMARA DE GRINDER"};
-const char* kStage3Scenarios[] = {"PUBLIC ATRIUM", "RESEARCH FLOOR", "EXECUTIVE CORE"};
-// DF-013.2: Stage4/Stage5 agregados al VS (antes solo 3 stages).
-const char* kStage4Scenarios[] = {"KESSLER TOWER // SEGURIDAD", "NUCLEO EJECUTIVO // TITAN-X MEJORADO"};
-const char* kStage5Scenarios[] = {"CAMARA DEL CLON"};
+const char* kStage2Scenarios[] = {"DEEP LINE // TUBERIAS", "OLD STEEL YARD // FUNDICION",
+                                  "ZONA QUIMICA // PROCESAMIENTO", "CAMARA DE GRINDER"};
+const char* kStage3Scenarios[] = {"PUBLIC ATRIUM", "LABORATORIO DE CAPSULAS", "RESEARCH FLOOR", "EXECUTIVE CORE"};
+const char* kStage4Scenarios[] = {"KESSLER TOWER // SEGURIDAD", "GALERIA DE PROTOTIPOS", "SALA DE SERVIDORES",
+                                  "NUCLEO EJECUTIVO // TITAN-X MEJORADO"};
+const char* kStage5Scenarios[] = {"CAMARA DEL CLON // PASILLO", "SALA DE CONTROL", "CAPSULAS DEL CLON",
+                                  "CAMARA DEL CLON // ARENA FINAL"};
 const char* kEnemyNames[] = {"PUNK",        "BRUTE",  "CHARGER",      "ENFORCER", "CHEMICAL SOLDIER",
                              "URBAN NINJA", "MUTANT", "ARMORED GUARD"};
 StreetEnemyType NextEnemyType(StreetEnemyType t, int dir) {
@@ -76,17 +77,15 @@ const char* VSMode::StageName() const {
     return kStageNames[std::clamp(stage, 0, kStageCount - 1)];
 }
 const char* VSMode::ScenarioText() const {
-    if (stage == 0) return kStage1Scenarios[std::clamp(scenario, 0, 3)];
-    if (stage == 1) return kStage2Scenarios[std::clamp(scenario, 0, 4)];
-    if (stage == 2) return kStage3Scenarios[std::clamp(scenario, 0, 2)];
-    if (stage == 3) return kStage4Scenarios[std::clamp(scenario, 0, 1)];
-    return kStage5Scenarios[0];
+    const int sc = std::clamp(scenario, 0, 3);
+    if (stage == 0) return kStage1Scenarios[sc];
+    if (stage == 1) return kStage2Scenarios[sc];
+    if (stage == 2) return kStage3Scenarios[sc];
+    if (stage == 3) return kStage4Scenarios[sc];
+    return kStage5Scenarios[sc];
 }
 const char* VSMode::BackgroundKey() const {
-    if (stage == 0 && scenario == 1) return "bg_mercado_antiguo";
-    if (stage == 1 && scenario == 2) return "bg_zona_quimica";
-    if (stage == 3) return "bg_zona_quimica";
-    return stage == 0 ? "bg_industrial" : "bg_steel_deep";
+    return TextFormat("bg_s%d_%d", std::clamp(stage, 0, kStageCount - 1) + 1, std::clamp(scenario, 0, 3) + 1);
 }
 const char* VSMode::EnemyTypeName(StreetEnemyType t) {
     return kEnemyNames[static_cast<int>(t)];
@@ -254,16 +253,16 @@ void VSMode::Update(float dt) {
 }
 void VSMode::DrawBackground() const {
     DrawRectangle(0, 0, 1280, 720, {5, 8, 12, 255});
-    // Escenario del Modo VS: calle "BETA" del usuario (centro del fondo de 1600 px).
-    const Texture2D beta = AssetManager::Get().GetTextureByPath("assets/backgrounds/hd/vs_beta.png");
-    if (beta.id) {
-        const float sx = beta.width * 160.0f / 1600.0f;
-        DrawTexturePro(beta, {sx, 0, beta.width - 2 * sx, (float)beta.height}, {0, 0, 1280, 720}, {0, 0}, 0, WHITE);
+    // El escenario elegido (STAGE + ESCENARIO), recortado al centro en 16:9 para
+    // no aplastarlo. La calle "BETA" solo se usa si ese escenario no existe.
+    Texture2D bg = AssetManager::Get().GetTexture(BackgroundKey());
+    if (!bg.id) bg = AssetManager::Get().GetTextureByPath("assets/backgrounds/hd/vs_beta.png");
+    if (bg.id) {
+        const float srcW = std::min((float)bg.width, bg.height * 16.0f / 9.0f);
+        const float sx = (bg.width - srcW) * 0.5f;
+        DrawTexturePro(bg, {sx, 0, srcW, (float)bg.height}, {0, 0, 1280, 720}, {0, 0}, 0, WHITE);
         return;
     }
-    const Texture2D bg = AssetManager::Get().GetTexture(BackgroundKey());
-    if (bg.id)
-        DrawTexturePro(bg, {0, 0, (float)bg.width, (float)bg.height}, {0, 0, 1280, 720}, {0, 0}, 0, WHITE);
     DrawRectangle(0, 625, 1280, 95, {7, 10, 13, 220});
     for (int x = 0; x < 1280; x += 160) {
         DrawRectangle(x, 617, 108, 8, {55, 60, 61, 235});

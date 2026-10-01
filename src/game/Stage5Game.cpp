@@ -509,15 +509,17 @@ void Stage5Game::DrawWorld() const {
     DrawRectangle(0, 0, 1920, 720, {6, 4, 9, 255});
     // DF-013.2: la camara del clon cambia de sala segun la fase del combate
     // (los 4 fondos del Stage 5 se usan como progresion del enfrentamiento).
-    DrawScenarioBackdrop(AssetManager::Get().GetTexture(TextFormat("bg_s5_%d", std::clamp(zone, 1, 4))),
-                         cameraX, 0.30f);
-    for (int x = -100; x < 1900; x += 220) {
-        DrawRectangle(x, 180, 10, 460, {22, 14, 20, 220});
-        DrawCircle(x + 5, 175, 5, {255, 60, 90, 160});
-    }
-    DrawRectangle(0, 635, 1920, 100, {4, 3, 7, 255});
-    for (int x = 0; x < 1900; x += 160) {
-        DrawRectangle(x, 618, 110, 10, {35, 22, 28, 255});
+    const Texture2D scenarioBg = AssetManager::Get().GetTexture(TextFormat("bg_s5_%d", std::clamp(zone, 1, 4)));
+    DrawScenarioBackdrop(scenarioBg, cameraX, 0.30f);
+    if (scenarioBg.id == 0) {   // escenografia de respaldo: solo sin fondo (antes se dibujaba encima)
+        for (int x = -100; x < 1900; x += 220) {
+            DrawRectangle(x, 180, 10, 460, {22, 14, 20, 220});
+            DrawCircle(x + 5, 175, 5, {255, 60, 90, 160});
+        }
+        DrawRectangle(0, 635, 1920, 100, {4, 3, 7, 255});
+        for (int x = 0; x < 1900; x += 160) {
+            DrawRectangle(x, 618, 110, 10, {35, 22, 28, 255});
+        }
     }
     for (auto& p : projectiles) {
         Vector2 s = p.pos.ToScreen();
@@ -566,7 +568,7 @@ void Stage5Game::DrawHUD() const {
     vitals.maxRage = player.maxRage;
     vitals.isRageMode = player.isRageMode;
     vitals.combo = combo;
-    vitals.title = TextFormat("%s // CAMARA DEL CLON", GetCharacterVisual(player.skin).name);
+    vitals.title = TextFormat("%s // CAMARA DEL CLON", ShortCharacterName(player.skin).c_str());
     vitals.x = 16;
     vitals.y = 14;
     vitals.width = 500;

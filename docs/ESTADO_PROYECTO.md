@@ -63,3 +63,13 @@ Corregido en esta auditoria:
 - F3 (depuracion de GPT) cambiaba al Stage 3 en Historia: ahora es F9.
 - Rayden Cruz volvio a avanzar al golpear; tests con assert activos en Release.
 - "RAYDEN CLON" (clon viejo con chaqueta) renombrado "CLON ANTIGUO (CHAQUETA)"; el VS muestra n/22.
+
+## Escenarios (v0.24)
+
+- Vuelven los 20 escenarios originales (assets/backgrounds/stageN_scenarioMM.png) en Historia y en VS.
+  En v0.16 las copias BETA de assets/backgrounds/hd/ los tapaban; ahora estan en
+  assets/backgrounds/beta/ (no se usan ni van en el APK). HD real: stage1_scenario01,
+  stage2_scenario01 y stage2_scenario02.
+- Stages 4 y 5 ya no dibujan postes y franjas de respaldo encima del fondo.
+- Modo VS: STAGE + ESCENARIO eligen uno de los 20 escenarios (antes siempre la calle BETA);
+  la calle BETA queda solo si falta un escenario.

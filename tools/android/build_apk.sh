@@ -32,7 +32,7 @@ rm -rf "$STAGE"; mkdir -p "$STAGE/assets" "$STAGE/lib/arm64-v8a"
 cp -r "$ROOT/assets" "$ROOT/data" "$STAGE/assets/"
 find "$STAGE/assets" -type d -name source -prune -exec rm -rf {} +   # hojas originales: solo para las herramientas
 # despiece del clon: el juego solo usa rig_rojo.* e img_1.png; las hojas de Canva y pruebas no van al APK
-rm -rf "$STAGE/assets/assets/characters/rayder/kf_clone/canva" "$STAGE/assets/assets/characters/rayder/kf_clone/canva_sin_mangas" "$STAGE/assets/assets/characters/rayder/kf_clone/"img_1_rig_* \
+rm -rf "$STAGE/assets/assets/backgrounds/beta" "$STAGE/assets/assets/characters/rayder/kf_clone/canva" "$STAGE/assets/assets/characters/rayder/kf_clone/canva_sin_mangas" "$STAGE/assets/assets/characters/rayder/kf_clone/"img_1_rig_* \
        "$STAGE/assets/assets/characters/rayder/kf_clone/"despiece_*
 # Laboratorio (temporal): datos de la APK para los personajes de prueba del Modo VS.
 if [ -f "$ROOT/apk_reference/king_fighter_iii/bin/animation.bin" ]; then

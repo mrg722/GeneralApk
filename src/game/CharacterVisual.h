@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include "game/Types.h"
 
 // DF-013.2 (19-09) — personajes jugables del Modo VS.
@@ -50,6 +51,8 @@ int CharacterCount();
 // Personajes elegibles en la historia (Rayden y Rayder).
 constexpr int kStoryCharacters[] = {0, 6};
 const CharacterVisual& GetCharacterVisual(int id);
+// Nombre sin el parentesis ("RAYDEN (ORIGINAL)" -> "RAYDEN") para paneles angostos.
+std::string ShortCharacterName(int id);
 // Devuelve la pose del set para el estado actual del jugador.
 const char* CharacterPose(int id, PlayerState state, AttackType attack, bool rage, double time);
 

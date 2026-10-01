@@ -494,15 +494,16 @@ void Stage4Game::DrawWorld() const {
                            {0, 0}, 0, {255, 255, 255, 235});
         else
             DrawRectangle((int)(cameraX - 640), 0, 1280, 720, {10, 16, 14, 255});
-    }
-    DrawRectangle(0, 635, (int)kStageEnd, 100, {7, 11, 9, 255});
-    for (int x = 0; x < (int)kStageEnd; x += 170) {
-        DrawRectangle(x, 615, 120, 14, {30, 45, 35, 255});
-        DrawRectangle(x + 25, 650, 80, 5, {50, 90, 60, 255});
-    }
-    for (int x = 140; x < (int)kStageEnd; x += 460) {
-        DrawRectangle(x, 260, 14, 300, {18, 28, 22, 220});
-        DrawCircle(x + 7, 255, 6, {110, 255, 150, 200});
+        // Escenografia de respaldo: solo sin fondo del escenario (antes se dibujaba encima).
+        DrawRectangle(0, 635, (int)kStageEnd, 100, {7, 11, 9, 255});
+        for (int x = 0; x < (int)kStageEnd; x += 170) {
+            DrawRectangle(x, 615, 120, 14, {30, 45, 35, 255});
+            DrawRectangle(x + 25, 650, 80, 5, {50, 90, 60, 255});
+        }
+        for (int x = 140; x < (int)kStageEnd; x += 460) {
+            DrawRectangle(x, 260, 14, 300, {18, 28, 22, 220});
+            DrawCircle(x + 7, 255, 6, {110, 255, 150, 200});
+        }
     }
     DrawArenaLock();
     combatWorld.DrawGround();
@@ -550,7 +551,7 @@ void Stage4Game::DrawHUD() const {
     vitals.maxRage = player.maxRage;
     vitals.isRageMode = player.isRageMode;
     vitals.combo = combo;
-    vitals.title = TextFormat("%s // KESSLER TOWER", GetCharacterVisual(player.skin).name);
+    vitals.title = TextFormat("%s // KESSLER TOWER", ShortCharacterName(player.skin).c_str());
     vitals.x = 16;
     vitals.y = 14;
     vitals.width = 500;
