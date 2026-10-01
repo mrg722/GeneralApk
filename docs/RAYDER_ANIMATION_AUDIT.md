@@ -35,3 +35,33 @@ Esta rama mejora exclusivamente la presentacion y la respuesta visual de Rayder 
 ## Validacion
 
 Se usa el CI existente del repositorio: validate_assets.py, CMake y CTest. El workflow actual corre en pull requests y en pushes configurados; esta rama se deja lista para validacion mediante PR.
+
+## Fase 2 — sincronización combate/animación
+
+La segunda fase añade un perfil de timing reutilizable para los atlas propios de Rayder normal (skin 6) y Brakk (skin 2).
+
+- AttackData sigue siendo la fuente de verdad para startup/active/recovery, daño, prioridad, hitstop, shake y reglas de combo.
+- AttackAnimationProfile únicamente asocia el clip existente, frame visual de impacto y root motion por ataque.
+- Los clips existentes se retimean a la duración total de AttackData; no se crean ni reemplazan sprites.
+- El root motion se aplica incrementalmente y con curva de anticipación/aceleración, termina al final de active y no desplaza al personaje durante recovery.
+- El frame de impacto se expone mediante AttackIsImpactFrame() y el cambio startup -> active se registra con attackImpactTriggered.
+- Rayder Clone (skin 1) conserva sus poses sueltas, pero sus transiciones ahora usan AttackData.startup y AttackData.active en vez de tiempos visuales independientes.
+- KF/Rayder Cruz siguen fuera del perfil: IsKfCharacter() evita retime, root motion nuevo y squash/stretch de esta fase.
+- Se añadió F3 como overlay de depuración de Rayder/Brakk: ataque, tiempo total, frame actual, frame de impacto, fase, hitbox y root motion. Es solo diagnóstico y no altera el combate.
+- Se añadió tests/AttackAnimationTimingTests.cpp para comprobar perfiles, fases y root-motion.
+
+### Ataques cubiertos
+
+Punch1, Punch2, Punch3, Kick, EnergyWave, DashAttack, RageAttack y Finisher.
+
+### Brakk
+
+Se usan directamente sus clips existentes del manifiesto brakk_v2: punch1, punch2, punch3, kick, energy, dash_attack, rage_attack y finisher. No se cambia su daño ni sus cajas de combate.
+
+### Rayder
+
+Se usan sus clips existentes de rayder_kf para los mismos ocho ataques. La duración visual se adapta al timing real del ataque para evitar que el arte termine antes/después que el estado de combate.
+
+### Validación
+
+El PR #2 ejecuta el workflow de CI con validate_assets.py, CMake, build y CTest. La ejecución más reciente observada estaba en progreso; no se marca como pasada hasta que GitHub reporte success.
