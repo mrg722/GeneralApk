@@ -56,6 +56,7 @@ for g, ids in {
     "shin": [2, 5, 20, 21, 37, 38, 48, 50, 62, 71, 75, 82, 91, 95, 109, 118, 120, 126, 139, 151, 157, 161, 162, 165,
              174, 180, 188, 190, 196],
     "boot": [1, 4, 28, 30, 42, 43, 52, 53, 61, 64, 73, 77, 78, 116, 119, 127, 136, 140, 141, 149, 155, 163, 192],
+    "belt": [8, 12, 15, 32, 175],
 }.items():
     for i in ids: LABELS[i] = g
 
@@ -140,17 +141,29 @@ def recolor_red(px, leather=False):
 
 def lift_skin(p, k=1.45):
     """Brazos desnudos: la hoja es muy oscura y rojiza. La piel pasa al cafe de las
-    cabezas (boceto) y las cicatrices quedan rojo oscuro; el negro no se toca."""
+    cabezas (boceto), suavizada; las cicatrices quedan como lineas rojo oscuro
+    tenues (fuertes se ven como camuflaje a tamano de juego). El negro no se toca."""
     q = p.copy().astype(float)
     rgb = q[..., :3]
-    L = rgb.mean(-1)
+    L = ndimage.median_filter(rgb.mean(-1), size=5)
     skin = (rgb[..., 0] > rgb[..., 2] + 12) & (rgb.max(-1) > 45)
+    skin = ndimage.binary_closing(skin, iterations=2) & (q[..., 3] > 0) & (rgb.max(-1) > 30)
     scar = skin & (rgb[..., 0] > rgb[..., 1] * 1.9) & (rgb[..., 0] > 90)
-    tone = np.stack([L * 1.55, L * 1.05, L * 0.8], -1) * (k / 1.45)
-    rgb[skin & ~scar] = np.clip(tone[skin & ~scar], 0, 235)
-    rgb[scar] = np.clip(rgb[scar] * np.array([1.0, 0.55, 0.55]), 0, 255)
+    L = np.clip(L, 55, 150)
+    tone = np.stack([L * 1.5, L * 1.02, L * 0.78], -1) * (k / 1.45)
+    rgb[skin] = np.clip(tone[skin], 0, 225)
+    rgb[scar] = rgb[scar] * np.array([0.92, 0.62, 0.6])
     q[..., :3] = rgb
     return q.astype(np.uint8)
+
+
+def outline(t, px=2, col=(14, 9, 11)):
+    """Contorno oscuro como el de las piezas del KF (se lee mejor sobre el fondo)."""
+    a = t[..., 3] > 0
+    ring = ndimage.binary_dilation(a, iterations=px) & ~a
+    o = t.copy()
+    o[ring, :3] = col; o[ring, 3] = 255
+    return o
 
 
 def axis(mask):
@@ -255,6 +268,8 @@ def main():
     base = []
     print({g: len(v) for g, v in lib.items()}, "base", len(base))
     group_of = {g: [g] for g in lib}
+    if "--chaqueta" not in sys.argv:
+        group_of["forearm"] = ["forearm", "sleeve"]   # boceto: brazo desnudo; el guantelete va en el puño
     sprites, images = load(ROOT / "apk_reference/king_fighter_iii/bin/animation.bin")
     sheet = np.array(Image.open(io.BytesIO(images[1]["png"])).convert("RGBA"))
     tiles = []
@@ -272,15 +287,16 @@ def main():
         upright = cls in ("head", "torso_head", "torso")
         for p in cands_src:
             for v in (range(2) if upright else range(4)):
-                c = place_upright(p, mask, v) if upright else place(p, mask, v, 1.0)
+                c = place_upright(p, mask, v) if upright else place(p, mask, v, 1.18 if cls == "boot" else 1.0)
                 sc = score(c, big, mask)
                 if sc > bs: best, bs = c, sc
         # recorte: sobre la silueta del KF + un margen (las cabezas con mas margen: pelo)
-        grow = 3 * RES if cls in ("head", "torso_head") else RES
+        grow = 3 * RES if cls in ("head", "torso_head", "boot") else RES
         lim = np.zeros(best.shape[:2], bool)
         lim[PAD:PAD + mask.shape[0], PAD:PAD + mask.shape[1]] = mask
         lim = ndimage.binary_dilation(lim, iterations=grow)
         best[~lim] = 0
+        if "--chaqueta" not in sys.argv: best = outline(best)
         tiles.append(best)
     W = 4096; xx = yy = rowh = 0; rects = []
     for t in tiles:
