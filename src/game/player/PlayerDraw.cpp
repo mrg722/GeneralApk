@@ -198,13 +198,16 @@ void Player::Draw() const {
         // Rayden clon jugable: refuerza anticipacion/impacto/recuperacion usando
         // exclusivamente sus poses reales. No modifica KF ni Rayder Cruz.
         if (skin == 1 && state == PlayerState::Attack) {
-            const float t = attackElapsed;
+            // El clon usa poses sueltas, pero sus transiciones ahora respetan el
+            // mismo startup/active/recovery de AttackData que el atlas de Rayder.
+            const AttackDef& ad=GetAttack(currentAttack);
+            const float startup=ad.startup, activeEnd=ad.startup+ad.active;
             if (attackType == AttackType::Energy) {
-                pose = t < 0.16f ? "ready" : t < 0.42f ? "release_orb" : "idle2";
+                pose = attackElapsed < startup ? "ready" : attackElapsed < activeEnd ? "release_orb" : "idle2";
             } else if (attackType == AttackType::Kick) {
-                pose = t < 0.10f ? "ready" : t < 0.30f ? "kick" : "idle3";
+                pose = attackElapsed < startup ? "ready" : attackElapsed < activeEnd ? "kick" : "idle3";
             } else {
-                pose = t < 0.09f ? "ready" : t < 0.28f ? "punch" : t < 0.44f ? "idle2" : "idle1";
+                pose = attackElapsed < startup ? "ready" : attackElapsed < activeEnd ? "punch" : "idle1";
             }
         }
         altTex = AssetManager::Get().GetTexture(std::string(cv.folder) + "_" + pose);
