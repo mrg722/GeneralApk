@@ -65,10 +65,59 @@ void Player::DrawRageAura(Vector2 screen, float scale) const {
                      {255, 205, 110, rimAlpha});
 }
 
+void Player::UpdateMotionFeel(float dt) {
+    animClock += dt;
+    if (facing != lastFacing) { turnTimer = 0.10f; lastFacing = facing; }
+    turnTimer = std::max(0.0f, turnTimer - dt);
+    const bool wasDown = lastState == PlayerState::Airborne || lastState == PlayerState::Knockdown;
+    const bool isDown = state == PlayerState::Airborne || state == PlayerState::Knockdown;
+    if (wasDown && !isDown) landTimer = 0.14f;
+    if (lastState == PlayerState::Dash && state != PlayerState::Dash) landTimer = std::max(landTimer, 0.08f);
+    landTimer = std::max(0.0f, landTimer - dt);
+    if (state == PlayerState::Walk) walkPhase += dt * GetMoveSpeed() / 34.0f;
+    lastState = state;
+
+    // Avance real durante el golpe (root motion): en King Fighter cada golpe
+    // da un paso; aqui el personaje se desliza mientras arranca y pega.
+    if (!IsKfCharacter() && state == PlayerState::Attack && !clipDriven) {
+        float dist = 0.0f;
+        switch (currentAttack) {
+            case AttackId::Punch1: dist = 14.0f; break;
+            case AttackId::Punch2: dist = 18.0f; break;
+            case AttackId::Punch3: dist = 26.0f; break;
+            case AttackId::Kick: dist = 22.0f; break;
+            case AttackId::DashAttack: dist = 46.0f; break;
+            case AttackId::Finisher: dist = 30.0f; break;
+            case AttackId::RageAttack: dist = 20.0f; break;
+            default: break;
+        }
+        const AttackDef& def = GetAttack(currentAttack);
+        const float window = std::max(0.05f, def.startup + def.active);
+        if (dist > 0.0f && attackElapsed <= window) {
+            position.x += (facing == Facing::Right ? 1.0f : -1.0f) * dist / window * dt;
+            position.x = std::clamp(position.x, kStageStartX, kStageEndX - 90.f);
+        }
+    }
+
+    // Estelas (afterimages) en dash, golpes fuertes, habilidades y transformacion.
+    for (Ghost& g : ghosts) g.life = std::max(0.0f, g.life - dt);
+    const bool trail = state == PlayerState::Dash ||
+                       (state == PlayerState::Attack && (activeSkill >= 0 || GetAttack(currentAttack).heavy)) ||
+                       (IsTransformed() && state == PlayerState::Walk);
+    ghostTimer -= dt;
+    if (trail && ghostTimer <= 0.0f && animator.texture.id != 0) {
+        for (int i = kGhostCount - 1; i > 0; --i) ghosts[i] = ghosts[i - 1];
+        ghosts[0] = {position.ToScreen(), animator.currentFrame, facing == Facing::Left, 0.22f};
+        ghostTimer = 0.035f;
+    }
+}
+
 float Player::SpriteScale() const {
     const float scale = DepthScaleFor(position.y);
-    const float kfScale = GetCharacterVisual(skin).kfRoster >= 0 ? GetCharacterVisual(skin).scale : 1.0f;
-    return (animator.normalizedAtlas ? 1.20f * scale : 0.76f * scale) * kfScale;
+    const CharacterVisual& cv = GetCharacterVisual(skin);
+    // KF y personajes con atlas propio (Rayder) usan su escala; el resto, 1.
+    const float charScale = (cv.kfRoster >= 0 || cv.atlasId != nullptr) ? cv.scale : 1.0f;
+    return (animator.normalizedAtlas ? 1.20f * scale : 0.76f * scale) * charScale;
 }
 
 void Player::Draw() const {
@@ -133,7 +182,67 @@ void Player::Draw() const {
         if (cv.uniformCanvas) DrawSpriteUniform(altTex, p, cv.scale * scale, flip, spriteTint, cv.footInset);
         else DrawBossPose(altTex, p, cv.targetHeight * scale, flip, spriteTint);
     } else if (animator.texture.id != 0) {
-        animator.Draw(p, spriteScale, facing == Facing::Left, spriteTint);
+        const bool flip = facing == Facing::Left;
+        // Estelas: copias del cuadro anterior que se desvanecen.
+        for (int i = kGhostCount - 1; i >= 0; --i) {
+            const Ghost& g = ghosts[i];
+            if (g.life <= 0.0f) continue;
+            const unsigned char a = static_cast<unsigned char>(std::clamp(g.life / 0.22f, 0.0f, 1.0f) * 110.0f);
+            const Color gc = IsTransformed() ? Color{255, 220, 120, a} : Color{110, 190, 255, a};
+            animator.DrawFrame(g.frame, g.pos, spriteScale, g.flip, gc);
+        }
+        if (IsKfCharacter()) {
+            // El arte de la APK ya trae su propio movimiento cuadro a cuadro.
+            animator.Draw(p, spriteScale, flip, spriteTint);
+        } else {
+            const float dir = flip ? -1.0f : 1.0f;
+            float sx = 1.0f, sy = 1.0f, angle = 0.0f;
+            Vector2 at = p;
+            switch (state) {
+                case PlayerState::Idle:
+                case PlayerState::Recovery: {   // respiracion
+                    const float b = std::sin(animClock * 3.4f);
+                    sy = 1.0f + 0.016f * b;
+                    sx = 1.0f - 0.008f * b;
+                    break;
+                }
+                case PlayerState::Walk: {       // balanceo y peso hacia adelante
+                    const float st = std::sin(walkPhase);
+                    at.y -= std::fabs(st) * 3.0f * scale;
+                    sy = 1.0f + 0.012f * std::fabs(st);
+                    angle = 3.5f * dir;
+                    break;
+                }
+                case PlayerState::Dash:
+                    angle = 9.0f * dir; sx = 1.06f; sy = 0.96f;
+                    break;
+                case PlayerState::Attack: {     // se estira hacia el golpe y vuelve
+                    const AttackDef& ad = GetAttack(currentAttack);
+                    const float t = std::clamp(attackElapsed / std::max(0.01f, ad.startup + ad.active), 0.0f, 1.0f);
+                    const float impact = std::sin(t * 3.14159f);
+                    angle = 5.0f * dir * impact;
+                    sx = 1.0f + 0.05f * impact;
+                    sy = 1.0f - 0.025f * impact;
+                    break;
+                }
+                case PlayerState::Hit:
+                case PlayerState::GuardBreak:  // retrocede y tiembla
+                    angle = -7.0f * dir;
+                    at.x += std::sin(animClock * 90.0f) * 2.0f * scale;
+                    break;
+                case PlayerState::Block:
+                    sy = 0.98f; angle = -2.0f * dir;
+                    break;
+                default: break;
+            }
+            if (turnTimer > 0.0f) sx *= 0.72f + 0.28f * (1.0f - turnTimer / 0.10f);   // giro
+            if (landTimer > 0.0f) {                                                 // aterrizaje
+                const float k = landTimer / 0.14f;
+                sy *= 1.0f - 0.10f * k;
+                sx *= 1.0f + 0.08f * k;
+            }
+            animator.DrawScaled(at, spriteScale * sx * cv.widthScale, spriteScale * sy, flip, spriteTint, angle);
+        }
     } else {
         Color tint = state == PlayerState::Hit ? RED
                    : state == PlayerState::Attack ? YELLOW

@@ -166,6 +166,11 @@ V2_LABEL_BANDS = [(5, 33), (209, 240), (382, 413), (562, 593)]
 V2_MERGES = {2: [(4, 5), (8, 9)], 3: [(9, 10)]}
 V2_DROP = {1: [3]}   # estallido suelto de la onda: el juego lo dibuja como proyectil
 V2_PROJECTILES = set(range(22, 27)) | {50, 51}
+# La hoja dibuja cada fila a distinta estatura (golpes ~146 px, caminar ~122 px):
+# estos grupos se reducen para que Rayder mida lo mismo en todos sus frames
+# (ver tools/normalize_rayder_scale.py, que aplica lo mismo al atlas ya limpio).
+V2_GROUP_SCALE = {**{i: 122 / 146 for i in range(0, 18)}, **{i: 122 / 133 for i in range(35, 40)},
+                  40: 122 / 148, 41: 122 / 148}
 
 
 def v2_is_label(p):
@@ -251,10 +256,11 @@ def build_v2(old_atlas):
             torso = body.crop((bb2[0], bb2[1] + (bb2[3] - bb2[1]) * 3 // 10, bb2[2], bb2[1] + (bb2[3] - bb2[1]) * 6 // 10))
             tb = solid_bbox(torso)
             cx = bb2[0] + ((tb[0] + tb[2]) / 2 if tb else (bb2[2] - bb2[0]) / 2); gy = ground
-        small = c.resize((max(1, round(c.width * scale)), max(1, round(c.height * scale))), Image.LANCZOS)
+        k = scale * V2_GROUP_SCALE.get(i, 1.0)
+        small = c.resize((max(1, round(c.width * k)), max(1, round(c.height * k))), Image.LANCZOS)
         small.putalpha(small.getchannel("A").point(lambda v: 0 if v < 24 else v))
         cell = Image.new("RGBA", (CW, CH), (0, 0, 0, 0))
-        cell.paste(small, (round(PIVOT[0] - cx * scale), round(PIVOT[1] - gy * scale)), small)
+        cell.paste(small, (round(PIVOT[0] - cx * k), round(PIVOT[1] - gy * k)), small)
         cells.append(cell)
     print(f"set v2: {len(cells)} frames, escala {scale:.3f}")
     return cells

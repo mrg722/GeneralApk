@@ -115,6 +115,20 @@ public:
     // Escala de dibujo del sprite (la usa tambien la caja de golpe de las habilidades).
     float SpriteScale() const;
 
+    // Fluidez (estilo King Fighter) para nuestros personajes: respiracion,
+    // balanceo, inclinacion, giro suave, aterrizaje y estelas. Solo visual,
+    // salvo el avance de los golpes (root motion), que si mueve al personaje.
+    struct Ghost { Vector2 pos; int frame; bool flip; float life; };
+    static constexpr int kGhostCount = 5;
+    Ghost ghosts[kGhostCount] = {};
+    float ghostTimer{0.0f};
+    float animClock{0.0f};
+    float walkPhase{0.0f};
+    float turnTimer{0.0f};
+    float landTimer{0.0f};
+    Facing lastFacing{Facing::Right};
+    PlayerState lastState{PlayerState::Idle};
+
     PlayerUpgrades upgrades;
     Animator animator;
 
@@ -179,6 +193,7 @@ private:
     void UpdateRage(float dt);
     void HandleInput(float dt);
     void DrawRageAura(Vector2 screen, float scale) const;
+    void UpdateMotionFeel(float dt);
 };
 
 }  // namespace district_fury

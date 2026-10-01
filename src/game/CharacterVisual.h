@@ -35,6 +35,8 @@ struct CharacterVisual {
     const char* atlasId = nullptr;
     // Laboratorio: personaje extraido de la APK (indice en KfRoster), -1 = no.
     int kfRoster = -1;
+    // Ancho del dibujo (1 = original). Rayder: 0.84 para la complexion de Rayden.
+    float widthScale = 1.0f;
 };
 
 int CharacterCount();

@@ -416,9 +416,11 @@ void Stage1StoryGame::DrawCharacterSelect() const {
         const AtlasProfile* prof = SpriteManifest::Get().FindAtlas(atlas);
         Texture2D tex = prof ? AssetManager::Get().GetTextureByPath(prof->path) : Texture2D{0};
         if (prof && tex.id) {
-            const float scale = 2.6f;
+            // Misma escala y ancho que en combate (Rayder: complexion de Rayden).
+            const float scale = 2.6f * (cv.atlasId ? cv.scale : 1.0f);
+            const float scaleX = scale * cv.widthScale;
             const Rectangle src{0, 0, prof->cellW, prof->cellH};
-            const Rectangle dst{cx - prof->pivotX * scale, 520 - prof->pivotY * scale, prof->cellW * scale,
+            const Rectangle dst{cx - prof->pivotX * scaleX, 520 - prof->pivotY * scale, prof->cellW * scaleX,
                                 prof->cellH * scale};
             DrawTexturePro(tex, src, dst, {0, 0}, 0, WHITE);
         }

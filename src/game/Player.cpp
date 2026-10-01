@@ -239,6 +239,7 @@ float Player::GetMoveSpeed() const {
 void Player::Update(float dt) {
     EnsurePlayerAnimator(animator, skin);
     animator.Update(dt);
+    UpdateMotionFeel(dt);
 
     dashInvulnerability = std::max(0.0f, dashInvulnerability - dt);
     dashCooldown = std::max(0.0f, dashCooldown - dt);
