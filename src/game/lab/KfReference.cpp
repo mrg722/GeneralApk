@@ -143,7 +143,7 @@ void CloneTint(Image& img) {
             continue;
         }
         const Vector3 hsv = ColorToHSV(px[i]);
-        if ((hsv.x < 45.0f || hsv.x > 320.0f) && hsv.y > 0.35f) {   // fuego, cortes y destellos -> morado
+        if ((hsv.x < 66.0f || hsv.x > 320.0f) && hsv.y > 0.35f) {   // fuego, cortes y destellos (rojo a amarillo) -> morado
             const unsigned char a = px[i].a;
             px[i] = ColorFromHSV(282.0f, hsv.y * 0.62f, std::min(1.0f, hsv.z * 1.2f + 0.1f));
             px[i].a = a;
@@ -297,6 +297,28 @@ KfReference Load(const KfRosterEntry& who) {
         Image img = LoadImageFromMemory(".png", im.png.data(), (int)im.png.size());
         if (!img.data) return nullptr;
         ImageFormat(&img, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+        if (who.tint == 2) {
+            // Rayder clon BETA: hoja de piezas armada con los recortes del clon
+            // (tools/build_kf_clone_pieces.py), mismas medidas y posiciones que la
+            // del KF. Las demas imagenes (efectos, poderes) se pintan de morado.
+            const std::string rel = "assets/characters/rayder/kf_clone/img_" + std::to_string(id) + ".png";
+            std::vector<unsigned char> bytes;
+            bool replaced = false;
+            for (const std::string& path : {rel, "../" + rel, "../../" + rel}) {
+                if (!platform::AssetExists(path) || !platform::LoadBinaryFile(path, bytes)) continue;
+                Image rep = LoadImageFromMemory(".png", bytes.data(), (int)bytes.size());
+                if (rep.data && rep.width == img.width && rep.height == img.height) {
+                    ImageFormat(&rep, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+                    UnloadImage(img);
+                    img = rep;
+                    replaced = true;
+                } else if (rep.data) {
+                    UnloadImage(rep);
+                }
+                break;
+            }
+            if (!replaced) CloneTint(img);
+        }
         sheets[id] = img;
         clipsOf[id] = im.clips;
         return &sheets[id];
@@ -343,7 +365,6 @@ KfReference Load(const KfRosterEntry& who) {
             if (who.tint == 1) RayderTint(canvas);
             float upscale = 1.0f;
             if (who.tint == 2) {
-                CloneTint(canvas);
                 Image big = Scale2x(canvas);
                 UnloadImage(canvas);
                 canvas = big;

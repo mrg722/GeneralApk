@@ -1,4 +1,4 @@
-# District Fury: estado del proyecto (v0.18-lab)
+# District Fury: estado del proyecto (v0.19-lab)
 
 ## Lo que llevamos ✅
 
@@ -9,7 +9,7 @@
 | **Rayden Cruz** | Jugable, 22 frames, con fluidez añadida (respiración, balanceo, avance al golpear y estelas). |
 | **Rayder** | Usa todas las hojas recibidas: estilo KF, combate 50, avanzada 36, carga de transformación 12 y forma de pelo blanco completa. Aparece de espaldas en la elección. |
 | **Rayden clon (rojo)** | Igual que antes (poses del jefe). |
-| **Rayder clon BETA (prueba, morado)** | **Copia completa del héroe KF de pelo blanco**: sus 311 piezas, 521 cuadros, 61 acciones, habilidades, súper y transformación (sprites 1 y 3 de la APK). Cada pieza está vestida con el material del Rayder clon: pelo negro, chaqueta de cuero negra, camiseta blanca, pantalón negro, detalles y poderes morado claro eléctrico, y la piel intacta (`tools/build_kf_clone_palette.py` → `data/kf_clone_palette.json`). La calidad se subió a 2x con Scale2x para pixel art. Las formas son las del KF cuadro a cuadro. El héroe KF original no se toca. |
+| **Rayder clon BETA (prueba, morado)** | **Rompecabezas sobre una copia del héroe KF de pelo blanco**, con todos sus cuadros, habilidades, súper y transformación. Cada una de las 208 piezas de su cuerpo se clasificó en cabeza, torso, chaqueta, manga, antebrazo, puño, muslo, pierna o bota. En cada pieza se pegó la misma parte recortada de la figura del Rayder clon, girada y escalada para seguir su forma y con las sombras y el contorno del KF (`tools/build_kf_clone_pieces.py` → `assets/characters/rayder/kf_clone/img_1.png`). Los rojos pasaron a morado claro eléctrico, la piel quedó intacta y los poderes son morados. La calidad se subió a 2x con Scale2x. El héroe KF original no se toca. |
 | **Laboratorio KF** | 13 personajes con sus colores originales. El héroe y la heroína se transforman en sus formas reales (sprites 1 y 3). |
 | **Brakk** | Hoja mejorada en el Nivel 1 y jugable en VS. |
 | **Nivel 1** | Completable: 4 escenarios, oleadas, "GO >>", guardianes y Brakk. |
