@@ -1,4 +1,4 @@
-# District Fury: estado del proyecto (v0.20-lab)
+# District Fury: estado del proyecto (v0.21-lab)
 
 ## Lo que llevamos ✅
 
@@ -9,6 +9,9 @@
 | **Rayden Cruz** | Jugable, 22 frames, con fluidez añadida (respiración, balanceo, avance al golpear y estelas). |
 | **Rayder** | Usa todas las hojas recibidas: estilo KF, combate 50, avanzada 36, carga de transformación 12 y forma de pelo blanco completa. Aparece de espaldas en la elección. |
 | **Rayden clon (rojo)** | Igual que antes (poses del jefe). |
+| **Rayder clon (rojo) — NUEVO** | La fórmula del héroe KF con un despiece propio generado con Canva (8 cabezas, 6 torsos, 12 piezas de brazo, 10 de pierna y otras 17 base). Cada una de las 208 piezas del KF se etiquetó a mano y recibe la pieza del clon de la misma parte, a 3x de resolución. Tiene todas las habilidades del KF y los poderes en rojo (`tools/build_kf_clone_rig_canva.py`). Modo VS: personaje "RAYDER CLON". |
+| **Todas las habilidades KF** | Los personajes KF ya no tienen solo 5 habilidades: el héroe tiene 23 (fuego, súper, despertar, acrobacias), repartidas en páginas de 5 en los botones 1–5. El botón PAG (TAB) cambia de página y cada habilidad tiene su propia espera de 15 s. |
+| **Rama mejora-de-diseno (GPT)** | Integrada: secuencias del Rayden clon, tiempos y avance de los ataques sincronizados con AttackData para Rayder y Brakk, superposición de depuración F3 y prueba AttackAnimationTimingTests. |
 | **Rayder clon BETA (prueba, morado)** | **Rompecabezas sobre una copia del héroe KF de pelo blanco**, con todos sus cuadros, habilidades, súper y transformación. Cada una de las 208 piezas de su cuerpo se clasificó en cabeza, torso, chaqueta, manga, antebrazo, puño, muslo, pierna o bota. En cada pieza se pegó la misma parte recortada de la figura del Rayder clon, girada y escalada para seguir su forma y con las sombras y el contorno del KF (`tools/build_kf_clone_pieces.py` → `assets/characters/rayder/kf_clone/img_1.png`). Los rojos pasaron a morado claro eléctrico, la piel quedó intacta y los poderes son morados. La calidad se subió a 2x con Scale2x. El héroe KF original no se toca. |
 | **Laboratorio KF** | 13 personajes con sus colores originales. El héroe y la heroína se transforman en sus formas reales (sprites 1 y 3). |
 | **Brakk** | Hoja mejorada en el Nivel 1 y jugable en VS. |

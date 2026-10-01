@@ -180,6 +180,7 @@ void Draw(Context context, const Player* player) {
     const Button* buttons = ButtonsFor(context, n);
     for (size_t i = 0; i < n; ++i) {
         const Button& b = buttons[i];
+        if (b.key == input::kVirtualSkillPage && (!player || player->SkillPageCount() <= 1)) continue;
         const bool held = input::Down(b.key);
         bool dim = false, glow = false;
         if (player && b.key == input::kVirtualSpecialWave) dim = player->sp < GetAttack(AttackId::EnergyWave).spCost;
@@ -231,6 +232,7 @@ void Draw(Context context, const Player* player) {
         if (art && b.artHasText) continue;   // GOLPE / DASH / BLOQ: el arte ya lo dice
         if (b.key == input::kVirtualSkillPage) {   // pagina de habilidades: "1/5"
             const int pages = player ? player->SkillPageCount() : 1;
+            if (pages <= 1) continue;   // sin paginas: no se muestra (no hay boton inutil)
             const char* t = TextFormat("%d/%d", player ? player->skillPage % pages + 1 : 1, pages);
             DrawText("PAG", (int)(b.center.x - MeasureText("PAG", 10) / 2.0f), (int)(b.center.y - 11), 10, {245, 240, 235, a});
             DrawText(t, (int)(b.center.x - MeasureText(t, 10) / 2.0f), (int)(b.center.y + 1), 10, {255, 214, 72, a});
