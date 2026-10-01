@@ -50,7 +50,7 @@ for g, ids in {
     "sleeve": [0, 14, 33, 44, 59, 65, 84, 153, 201],
     "forearm": [10, 13, 18, 19, 26, 34, 35, 36, 45, 46, 54, 56, 57, 66, 67, 68, 69, 93, 97, 98, 100, 111, 160, 172,
                 173, 178, 197, 202, 203, 204, 206, 207],
-    "fist": [17, 23, 25, 55, 74, 85, 87, 104, 108, 112, 117, 121, 132, 133, 134, 164],
+    "fist": [17, 23, 25, 55, 74, 85, 87, 104, 107, 108, 112, 117, 121, 132, 133, 134, 164],
     "thigh": [3, 6, 22, 29, 39, 40, 47, 51, 60, 70, 72, 76, 79, 81, 89, 90, 96, 110, 123, 128, 135, 146, 148, 181,
               186, 187, 189, 195, 198, 200],
     "shin": [2, 5, 20, 21, 37, 38, 48, 50, 62, 71, 75, 82, 91, 95, 109, 118, 120, 126, 139, 151, 157, 161, 162, 165,
@@ -121,16 +121,36 @@ def cut_pieces(path, groups):
     return out
 
 
-def recolor_red(px):
-    """Colores del KF -> paleta del clon: amarillos/naranjas a rojo, grises a negro."""
+def recolor_red(px, leather=False):
+    """Colores del KF -> paleta del clon: amarillos/naranjas a rojo, grises a negro.
+    leather: cinturon de cuero negro (boceto sin mangas), con un brillo rojo tenue."""
     out = px.copy()
     h, s_, v = hsv(px.astype(float))
     a = px[..., 3] > 0
     warm = a & (s_ > 0.35) & ((h < 70) | (h > 320))
     gray = a & (s_ < 0.25) & (v > 0.15)
+    if leather:
+        out[warm, 0] = v[warm] * 58; out[warm, 1] = v[warm] * 20; out[warm, 2] = v[warm] * 22
+        out[gray, :3] = (np.stack([v[gray]] * 3, -1) * 255 * 0.16).astype(np.uint8)
+        return out
     out[warm, 0] = np.clip(v[warm] * 200, 0, 255); out[warm, 1] = (v[warm] * 30); out[warm, 2] = (v[warm] * 38)
     out[gray, :3] = (np.stack([v[gray]] * 3, -1) * 255 * 0.32).astype(np.uint8)
     return out
+
+
+def lift_skin(p, k=1.45):
+    """Brazos desnudos: la hoja es muy oscura y rojiza. La piel pasa al cafe de las
+    cabezas (boceto) y las cicatrices quedan rojo oscuro; el negro no se toca."""
+    q = p.copy().astype(float)
+    rgb = q[..., :3]
+    L = rgb.mean(-1)
+    skin = (rgb[..., 0] > rgb[..., 2] + 12) & (rgb.max(-1) > 45)
+    scar = skin & (rgb[..., 0] > rgb[..., 1] * 1.9) & (rgb[..., 0] > 90)
+    tone = np.stack([L * 1.55, L * 1.05, L * 0.8], -1) * (k / 1.45)
+    rgb[skin & ~scar] = np.clip(tone[skin & ~scar], 0, 235)
+    rgb[scar] = np.clip(rgb[scar] * np.array([1.0, 0.55, 0.55]), 0, 255)
+    q[..., :3] = rgb
+    return q.astype(np.uint8)
 
 
 def axis(mask):
@@ -141,21 +161,35 @@ def axis(mask):
     return math.degrees(math.atan2(v[1, 1], v[0, 1])), 4 * math.sqrt(max(w[1], 1e-3)), (cx, cy)
 
 
+def axis2(mask):
+    """Angulo, largo y grosor (ejes principales) de una silueta."""
+    ys, xs = np.nonzero(mask)
+    if len(xs) < 3: return 0.0, 1.0, 1.0, (mask.shape[1] / 2, mask.shape[0] / 2)
+    cx, cy = xs.mean(), ys.mean()
+    w, v = np.linalg.eigh(np.cov(np.vstack([xs - cx, ys - cy])))
+    return (math.degrees(math.atan2(v[1, 1], v[0, 1])), 4 * math.sqrt(max(w[1], 1e-3)),
+            4 * math.sqrt(max(w[0], 1e-3)), (cx, cy))
+
+
 def place(piece, mask, variant, grow):
-    """Pieza del clon orientada y escalada para cubrir `mask` (ya a RES)."""
+    """Pieza del clon con el LARGO y el GROSOR de la pieza del KF (brazos y
+    piernas finos como los del KF, sin hinchar): se alinea su eje con el
+    horizontal, se escala por separado largo/grosor (con un limite para no
+    deformar el dibujo) y se gira al angulo de la pieza del KF."""
     H, W = mask.shape
-    a_t, len_t, c_t = axis(mask)
-    pm = piece[..., 3] > 60
-    a_s, len_s, _ = axis(pm)
+    a_t, len_t, thk_t, c_t = axis2(mask)
     img = Image.fromarray(piece, "RGBA")
-    if variant & 1: img = img.transpose(Image.Transpose.FLIP_LEFT_RIGHT); a_s = 180 - a_s
-    k = 0.5 * len_t / max(len_s, 1) + 0.5 * math.sqrt(mask.sum() / max(1, pm.sum()))
-    k *= grow
-    img = img.resize((max(1, round(img.width * k)), max(1, round(img.height * k))), Image.LANCZOS)
-    img = img.rotate(-(a_t - a_s + (180 if variant & 2 else 0)), resample=Image.BICUBIC, expand=True)
+    if variant & 1: img = img.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+    a_s, len_s, thk_s, _ = axis2(np.array(img)[..., 3] > 60)
+    img = img.rotate(a_s, resample=Image.BICUBIC, expand=True)          # eje mayor horizontal
+    kx = len_t / max(len_s, 1) * grow
+    ky = thk_t / max(thk_s, 1) * grow
+    ky = min(max(ky, kx * 0.7), kx * 1.35)                               # deformacion maxima
+    img = img.resize((max(1, round(img.width * kx)), max(1, round(img.height * ky))), Image.LANCZOS)
+    img = img.rotate(-(a_t + (180 if variant & 2 else 0)), resample=Image.BICUBIC, expand=True)
     arr = np.array(img)
     arr[..., 3] = np.where(arr[..., 3] > 110, 255, 0)
-    _, _, c2 = axis(arr[..., 3] > 0)
+    _, _, _, c2 = axis2(arr[..., 3] > 0)
     out = np.zeros((H + 2 * PAD, W + 2 * PAD, 4), np.uint8)
     ox, oy = round(c_t[0] + PAD - c2[0]), round(c_t[1] + PAD - c2[1])
     sy0, sx0, dy0, dx0 = max(0, -oy), max(0, -ox), max(0, oy), max(0, ox)
@@ -198,18 +232,27 @@ def score(cand, kf, mask):
 
 
 def main():
-    heads = ordered_pieces(CANVA / "cabezas.png", 2)        # 8: perfil, 3/4, frente, 3/4 abajo | arriba, grito, nuca, abajo
-    arms = ordered_pieces(CANVA / "brazos.png", 3)          # 4 mangas | 4 antebrazos | 4 puños/manos
-    legs = ordered_pieces(CANVA / "piernas.png", 3)         # muslos | piernas con bota | botas
-    torsos = ordered_pieces(CANVA / "torsos.png", 2)        # frente, lado, 3/4 | espalda, inclinado adelante, atras
-    base = ordered_pieces(CANVA / "piezas_base.png", 4)
-    lib = {"head": heads[:], "torso": torsos[:], "sleeve": arms[0:4], "forearm": arms[4:8], "fist": arms[8:12],
-           "thigh": legs[0:3], "shin": legs[3:6],
-           # sin la bota vista desde la suela (casi toda blanca): se ve como una mancha gris
-           "boot": [b for b in legs[6:] if b[..., :3][b[..., 3] > 0].mean() < 110]}
-    # cabeza + torso: frente, perfil, 3/4, nuca, inclinado (perfil), atras (perfil arriba)
-    pair = [(2, 0), (0, 1), (1, 2), (6, 3), (0, 4), (4, 5), (5, 4), (3, 2)]
+    if "--chaqueta" in sys.argv:   # despiece anterior (chaqueta con mangas)
+        heads = ordered_pieces(CANVA / "cabezas.png", 2)        # 8: perfil, 3/4, frente, 3/4 abajo | arriba, grito, nuca, abajo
+        arms = ordered_pieces(CANVA / "brazos.png", 3)          # 4 mangas | 4 antebrazos | 4 puños/manos
+        legs = ordered_pieces(CANVA / "piernas.png", 3)         # muslos | piernas con bota | botas
+        torsos = ordered_pieces(CANVA / "torsos.png", 2)        # frente, lado, 3/4 | espalda, inclinado adelante, atras
+        lib = {"head": heads[:], "torso": torsos[:], "sleeve": arms[0:4], "forearm": arms[4:8], "fist": arms[8:12],
+               "thigh": legs[0:3], "shin": legs[3:6],
+               # sin la bota vista desde la suela (casi toda blanca): se ve como una mancha gris
+               "boot": [b for b in legs[6:] if b[..., :3][b[..., 3] > 0].mean() < 110]}
+        pair = [(2, 0), (0, 1), (1, 2), (6, 3), (0, 4), (4, 5), (5, 4), (3, 2)]
+    else:   # boceto final: chaleco sin mangas, brazos desnudos, guanteletes (ver clone_sin_mangas_pieces.py)
+        from clone_sin_mangas_pieces import library
+        lib = library()
+        lib["sleeve"] = [lift_skin(p) for p in lib["sleeve"]]
+        lib["forearm"] = [lift_skin(p, 1.3) for p in lib["forearm"]]
+        lib["torso"] = [lift_skin(p, 1.2) for p in lib["torso"]]
+        heads, torsos = lib["head"], lib["torso"]
+        # cabezas: perfil, 3/4, frente, 3/4 abajo | arriba, grito, nuca, abajo; torsos: frente, espalda, lado
+        pair = [(2, 0), (1, 0), (0, 2), (6, 1), (4, 2), (5, 2), (7, 2), (3, 0)]
     lib["torso_head"] = [stack(heads[h], torsos[t]) for h, t in pair if h < len(heads) and t < len(torsos)]
+    base = []
     print({g: len(v) for g, v in lib.items()}, "base", len(base))
     group_of = {g: [g] for g in lib}
     sprites, images = load(ROOT / "apk_reference/king_fighter_iii/bin/animation.bin")
@@ -223,7 +266,7 @@ def main():
         cands_src = [p for g in group_of.get(cls, []) for p in lib.get(g, [])]
         if not cands_src:   # cinturones, cintas y efectos: la pieza del KF con colores del clon
             t = np.zeros((mask.shape[0] + 2 * PAD, mask.shape[1] + 2 * PAD, 4), np.uint8)
-            t[PAD:PAD + mask.shape[0], PAD:PAD + mask.shape[1]] = recolor_red(big)
+            t[PAD:PAD + mask.shape[0], PAD:PAD + mask.shape[1]] = recolor_red(big, leather="--chaqueta" not in sys.argv)
             tiles.append(t); continue
         best, bs = None, -9
         upright = cls in ("head", "torso_head", "torso")
