@@ -81,6 +81,7 @@ private:
     bool arenaLocked{false}, scenarioBossSpawned{false}, finalBossSpawned{false}, stageComplete{false}, saveLoaded{false};
     StoryDifficulty difficulty{StoryDifficulty::Normal}; std::string savePath{"district_fury_save.dat"}; std::string storyMessage;
     int menuCursor{0}; int characterCursor{0}; bool vsRequested{false}; bool newGameStarted{false}; bool exitRequested{false};
+    int optionsCursor{0};   // OPCIONES: 0 sonido, 1 ancho de pantalla
 
     void ResetRun(); void BuildScenario(int id); void SpawnWave(int id); void BuildWaves(); void UpdateArena(float dt); void UpdateBossFight(float dt); void ClampToArena(); void LockArenaBetween(float playerX, float farX); void SpawnScenarioBoss(); void EnterFinalBoss(); void DefeatFinalBoss();
     void ApplyDifficulty(); void UpdateCombat(float dt); void UpdateBoss(float dt); void UpdateProjectiles(float dt); void UpdateParticles(float dt);

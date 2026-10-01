@@ -1,5 +1,6 @@
 // Stage 1: todo el dibujo (mundo, jefe, HUD, menus y pantallas).
 #include "game/stage1/Stage1Common.h"
+#include "core/DisplaySettings.h"
 #include "ui/TouchControls.h"
 
 namespace district_fury {
@@ -195,6 +196,7 @@ void Stage1StoryGame::DrawWorld() const {
 
 void Stage1StoryGame::DrawHUD() const {
     ui::PlayerVitals vitals{};
+    vitals.player = &player;
     vitals.hp = player.hp;
     vitals.maxHp = player.maxHp;
     vitals.shield = player.shield;
@@ -296,12 +298,22 @@ void Stage1StoryGame::DrawOptions() const {
     DrawRectangle(0, 0, 1280, 720, {3, 7, 12, 190});
     DrawText("OPCIONES", 520, 110, 48, WHITE);
     const bool muted = AudioSystem::Get().IsMuted();
-    DrawText("SONIDO", 470, 270, 26, {200, 220, 230, 255});
+    const Color hi{255, 214, 72, 255}, lo{200, 220, 230, 255};
+    if (optionsCursor == 0) DrawRectangle(430, 258, 520, 48, {30, 50, 70, 200});
+    DrawText("SONIDO", 470, 270, 26, optionsCursor == 0 ? hi : lo);
     DrawText(muted ? "DESACTIVADO" : "ACTIVADO", 700, 270, 26,
              muted ? Color{255, 110, 100, 255} : Color{110, 240, 160, 255});
-    DrawText("ENTER/J — ALTERNAR SONIDO", 440, 340, 18, {150, 190, 200, 230});
-    DrawText(TextFormat("DIFICULTAD ACTUAL: %s", DifficultyText()), 440, 385, 18, {150, 190, 200, 230});
-    DrawText("ESC — VOLVER", 520, 470, 20, {180, 195, 200, 220});
+    if (optionsCursor == 1) DrawRectangle(430, 318, 520, 48, {30, 50, 70, 200});
+    DrawText("ANCHO DE PANTALLA", 470, 330, 26, optionsCursor == 1 ? hi : lo);
+    DrawText(TextFormat("< %d%% >", display::WidthPercent()), 790, 330, 26, {110, 240, 160, 255});
+    const bool t = touch::Enabled();
+    DrawText(t ? "CRUCETA ARRIBA/ABAJO: ELEGIR   IZQ/DER: CAMBIAR   OK: ALTERNAR"
+               : "W/S ELEGIR   A/D CAMBIAR   ENTER/J ALTERNAR",
+             t ? 330 : 420, 395, 18, {150, 190, 200, 230});
+    DrawText("ANCHO: si tu celular es muy alargado y todo se ve ancho, bajalo (solo cambia lo horizontal).",
+             200, 430, 16, {150, 175, 185, 220});
+    DrawText(TextFormat("DIFICULTAD ACTUAL: %s", DifficultyText()), 440, 470, 18, {150, 190, 200, 230});
+    DrawText(t ? "ATRAS - VOLVER" : "ESC - VOLVER", 540, 520, 20, {180, 195, 200, 220});
 }
 
 void Stage1StoryGame::DrawCredits() const {

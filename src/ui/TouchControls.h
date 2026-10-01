@@ -19,6 +19,8 @@ void SetEnabled(bool enabled);
 bool Enabled();
 // scale = pixeles de pantalla por pixel virtual; offset = esquina del area de juego.
 void SetScreenTransform(float scale, float offsetX, float offsetY);
+// Igual, con escala horizontal distinta (ajuste de ancho de pantalla).
+void SetScreenTransform(float scaleX, float scaleY, float offsetX, float offsetY);
 // Lee los toques, fija las teclas virtuales y hace input::Commit(). Llamar una
 // vez por frame antes de actualizar el juego (tambien si esta desactivado).
 void Update(Context context);

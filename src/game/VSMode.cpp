@@ -269,6 +269,7 @@ void VSMode::DrawHud() const {
     // copia, para que un cambio futuro al panel se haga en un solo lugar.
     {
         ui::PlayerVitals vitals{};
+    vitals.player = &player;
         vitals.hp = player.hp;
         vitals.maxHp = player.maxHp;
         vitals.shield = player.shield;

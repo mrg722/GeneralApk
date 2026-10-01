@@ -276,6 +276,31 @@ void Player::Draw() const {
     }
 }
 
+void Player::DrawPortrait(Rectangle box) const {
+    const CharacterVisual& cv = GetCharacterVisual(skin);
+    if (skin != 0 && cv.folder != nullptr && cv.atlasId == nullptr) {
+        const Texture2D tex = AssetManager::Get().GetTexture(std::string(cv.folder) + (cv.uniformCanvas ? "_idle" : "_idle1"));
+        if (tex.id == 0) return;
+        const float s = box.height / (tex.height * 0.5f);
+        const float w = tex.width * s;
+        const bool flip = !cv.facesRightByDefault;
+        DrawTexturePro(tex, {0, 0, flip ? -(float)tex.width : (float)tex.width, (float)tex.height},
+                       {box.x + box.width * 0.5f - w * 0.5f, box.y + 4.0f, w, tex.height * s}, {0, 0}, 0, WHITE);
+        return;
+    }
+    if (animator.texture.id == 0 || animator.frames.empty()) return;
+    int idx = animator.currentFrame;
+    const auto it = animator.namedClips.find("idle");
+    if (it != animator.namedClips.end()) idx = it->second.frames.empty() ? it->second.startFrame : it->second.frames.front();
+    const SpriteFrame& f = animator.frames[static_cast<std::size_t>(std::clamp(idx, 0, (int)animator.frames.size() - 1))];
+    // Estatura de la figura: los frames KF vienen recortados al dibujo; las
+    // celdas del manifiesto tienen aire arriba (~26 %).
+    const float figH = std::min(f.pivotY, f.height) * (IsKfCharacter() ? 1.0f : 0.74f);
+    if (figH <= 1.0f) return;
+    const float s = box.height / (figH * 0.55f);
+    animator.DrawFrame(idx, {box.x + box.width * 0.5f, box.y + 3.0f + figH * s}, s, false);
+}
+
 bool Player::DrawEnergyProjectile(Vector2 center, bool movingLeft, float time) const {
     const auto it = animator.namedClips.find("projectile");
     if (it == animator.namedClips.end() || it->second.frames.empty()) return false;

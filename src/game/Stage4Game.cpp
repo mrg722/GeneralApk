@@ -538,6 +538,7 @@ void Stage4Game::DrawWorld() const {
 }
 void Stage4Game::DrawHUD() const {
     ui::PlayerVitals vitals{};
+    vitals.player = &player;
     vitals.hp = player.hp;
     vitals.maxHp = player.maxHp;
     vitals.shield = player.shield;

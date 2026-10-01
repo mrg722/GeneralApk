@@ -114,6 +114,8 @@ public:
     bool TryStartSkill(int i);
     // Escala de dibujo del sprite (la usa tambien la caja de golpe de las habilidades).
     float SpriteScale() const;
+    // Retrato para el HUD: cabeza y torso del primer cuadro de reposo dentro de `box`.
+    void DrawPortrait(Rectangle box) const;
 
     // Fluidez (estilo King Fighter) para nuestros personajes: respiracion,
     // balanceo, inclinacion, giro suave, aterrizaje y estelas. Solo visual,

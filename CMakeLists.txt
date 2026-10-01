@@ -42,6 +42,7 @@ add_library(district_fury_core
     src/core/Json.cpp
     src/core/Platform.cpp
     src/core/InputMap.cpp
+    src/core/DisplaySettings.cpp
     src/game/combat/AttackData.cpp
     src/game/combat/Boss.cpp
     src/game/combat/BossDefinition.cpp

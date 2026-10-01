@@ -1,6 +1,8 @@
 #include "ui/TouchControls.h"
 #include "core/InputMap.h"
 #include "game/Player.h"
+#include "rendering/AssetManager.h"
+#include <string>
 #include <algorithm>
 #include <cmath>
 #include <vector>
@@ -15,10 +17,12 @@ struct Button {
     int key;
     const char* label;
     Color ring;
+    const char* art = nullptr;   // assets/ui/touch/<art>.png (arte del usuario)
+    bool artHasText = false;     // el arte ya trae su texto (GOLPE, DASH, BLOQ)
 };
 
 bool gEnabled = false;
-float gScale = 1.0f, gOffX = 0.0f, gOffY = 0.0f;
+float gScaleX = 1.0f, gScaleY = 1.0f, gOffX = 0.0f, gOffY = 0.0f;
 std::vector<Vector2> gInjected;
 
 // Joystick (izquierda).
@@ -30,18 +34,18 @@ Vector2 gKnob = kStick;
 // Combate estilo King Fighter: GOLPE grande abajo a la derecha y las 6
 // habilidades en arco alrededor (cada una con su espera de 15 s).
 const Button kCombat[] = {
-    {{1170.0f, 615.0f}, 62.0f, KEY_J, "GOLPE", {225, 55, 45, 255}},
-    {{1057.0f, 574.0f}, 40.0f, KEY_K, "PATADA", {230, 140, 40, 255}},
-    {{961.0f, 633.0f}, 30.0f, input::kVirtualSkill0 + 0, "1", {60, 170, 255, 255}},
-    {{965.0f, 568.0f}, 30.0f, input::kVirtualSkill0 + 1, "2", {150, 110, 255, 255}},
-    {{990.0f, 507.0f}, 30.0f, input::kVirtualSkill0 + 2, "3", {60, 220, 160, 255}},
-    {{1032.0f, 456.0f}, 30.0f, input::kVirtualSkill0 + 3, "4", {255, 120, 70, 255}},
-    {{1088.0f, 422.0f}, 30.0f, input::kVirtualSkill0 + 4, "5", {255, 70, 120, 255}},
-    {{1152.0f, 406.0f}, 30.0f, input::kVirtualSkill0 + 5, "6", {255, 205, 70, 255}},
-    {{1245.0f, 485.0f}, 28.0f, input::kVirtualSpecialWave, "ESPECIAL", {60, 170, 255, 255}},
-    {{860.0f, 668.0f}, 36.0f, KEY_B, "BLOQ", {90, 200, 230, 255}},
-    {{865.0f, 578.0f}, 32.0f, KEY_LEFT_SHIFT, "DASH", {200, 200, 210, 255}},
-    {{1240.0f, 330.0f}, 30.0f, KEY_SPACE, "FURIA", {255, 190, 60, 255}},
+    {{1170.0f, 615.0f}, 62.0f, KEY_J, "GOLPE", {225, 55, 45, 255}, "golpe", true},
+    {{1057.0f, 574.0f}, 40.0f, KEY_K, "PATADA", {230, 140, 40, 255}, "estallido_rojo"},
+    {{961.0f, 633.0f}, 30.0f, input::kVirtualSkill0 + 0, "1", {60, 170, 255, 255}, "espiral_azul"},
+    {{965.0f, 568.0f}, 30.0f, input::kVirtualSkill0 + 1, "2", {150, 110, 255, 255}, "puno_azul"},
+    {{990.0f, 507.0f}, 30.0f, input::kVirtualSkill0 + 2, "3", {60, 220, 160, 255}, "mira_verde"},
+    {{1032.0f, 456.0f}, 30.0f, input::kVirtualSkill0 + 3, "4", {255, 120, 70, 255}, "corredor_azul"},
+    {{1088.0f, 422.0f}, 30.0f, input::kVirtualSkill0 + 4, "5", {255, 70, 120, 255}, "calavera_verde"},
+    {{1152.0f, 406.0f}, 30.0f, input::kVirtualSkill0 + 5, "6", {255, 205, 70, 255}, "estallido_verde"},
+    {{1245.0f, 485.0f}, 28.0f, input::kVirtualSpecialWave, "ESPECIAL", {60, 170, 255, 255}, "puno_verde"},
+    {{860.0f, 668.0f}, 36.0f, KEY_B, "BLOQ", {90, 200, 230, 255}, "bloq", true},
+    {{865.0f, 578.0f}, 32.0f, KEY_LEFT_SHIFT, "DASH", {200, 200, 210, 255}, "dash", true},
+    {{1240.0f, 330.0f}, 30.0f, KEY_SPACE, "FURIA", {255, 190, 60, 255}, "mano_roja"},
     {{1245.0f, 150.0f}, 26.0f, KEY_ESCAPE, "PAUSA", {170, 170, 180, 255}},
 };
 // Menus: cruceta a la derecha (no tapa las listas, que estan a la izquierda).
@@ -78,12 +82,26 @@ const Button* ButtonsFor(Context c, size_t& n) {
 
 bool UsesStick(Context c) { return c == Context::Combat; }
 
+Texture2D Art(const char* name) {
+    if (!name || !IsWindowReady()) return Texture2D{};
+    return AssetManager::Get().GetTextureByPath(std::string("assets/ui/touch/") + name + ".png");
+}
+
+// Dibuja el arte centrado en el boton (diametro = 2 * radio * k).
+bool DrawArt(const char* name, Vector2 c, float r, Color tint, float k = 1.12f) {
+    const Texture2D t = Art(name);
+    if (t.id == 0) return false;
+    const float d = 2.0f * r * k;
+    DrawTexturePro(t, {0, 0, (float)t.width, (float)t.height}, {c.x - d / 2, c.y - d / 2, d, d}, {0, 0}, 0, tint);
+    return true;
+}
+
 std::vector<Vector2> Touches() {
     std::vector<Vector2> pts = gInjected;
     const int count = GetTouchPointCount();
     for (int i = 0; i < count; ++i) {
         const Vector2 p = GetTouchPosition(i);
-        pts.push_back({(p.x - gOffX) / gScale, (p.y - gOffY) / gScale});
+        pts.push_back({(p.x - gOffX) / gScaleX, (p.y - gOffY) / gScaleY});
     }
     return pts;
 }
@@ -109,8 +127,9 @@ void ApplyStick(Vector2 p, Context c) {
 
 void SetEnabled(bool enabled) { gEnabled = enabled; }
 bool Enabled() { return gEnabled; }
-void SetScreenTransform(float scale, float offsetX, float offsetY) {
-    gScale = scale > 0.0f ? scale : 1.0f; gOffX = offsetX; gOffY = offsetY;
+void SetScreenTransform(float scale, float offsetX, float offsetY) { SetScreenTransform(scale, scale, offsetX, offsetY); }
+void SetScreenTransform(float scaleX, float scaleY, float offsetX, float offsetY) {
+    gScaleX = scaleX > 0.0f ? scaleX : 1.0f; gScaleY = scaleY > 0.0f ? scaleY : 1.0f; gOffX = offsetX; gOffY = offsetY;
 }
 void InjectTouchForTest(Vector2 p) { gInjected.push_back(p); }
 
@@ -147,19 +166,14 @@ void Update(Context context) {
 void Draw(Context context, const Player* player) {
     if (!gEnabled) return;
     if (UsesStick(context)) {
-        DrawCircleV(kStick, kStickRadius + 14.0f, {20, 10, 12, 90});
-        DrawCircleLinesV(kStick, kStickRadius + 14.0f, {220, 60, 50, 170});
-        DrawCircleLinesV(kStick, kStickRadius - 30.0f, {220, 60, 50, 90});
-        for (int i = 0; i < 4; ++i) {   // chevrones de direccion
-            const float a = i * 1.5708f;
-            const Vector2 tip{kStick.x + std::cos(a) * (kStickRadius + 2.0f), kStick.y + std::sin(a) * (kStickRadius + 2.0f)};
-            const Vector2 l{kStick.x + std::cos(a - 0.18f) * (kStickRadius - 20.0f), kStick.y + std::sin(a - 0.18f) * (kStickRadius - 20.0f)};
-            const Vector2 r{kStick.x + std::cos(a + 0.18f) * (kStickRadius - 20.0f), kStick.y + std::sin(a + 0.18f) * (kStickRadius - 20.0f)};
-            DrawTriangle(tip, l, r, {235, 120, 110, 150});
-            DrawTriangle(tip, r, l, {235, 120, 110, 150});
+        if (DrawArt("palanca_base", kStick, kStickRadius + 14.0f, {255, 255, 255, 215}, 1.0f)) {
+            DrawArt("palanca_perilla", gKnob, 46.0f, WHITE, 1.0f);
+        } else {
+            DrawCircleV(kStick, kStickRadius + 14.0f, {20, 10, 12, 90});
+            DrawCircleLinesV(kStick, kStickRadius + 14.0f, {220, 60, 50, 170});
+            DrawCircleV(gKnob, 42.0f, {60, 60, 66, 200});
+            DrawCircleLinesV(gKnob, 42.0f, {240, 240, 245, 200});
         }
-        DrawCircleV(gKnob, 42.0f, {60, 60, 66, 200});
-        DrawCircleLinesV(gKnob, 42.0f, {240, 240, 245, 200});
     }
     size_t n = 0;
     const Button* buttons = ButtonsFor(context, n);
@@ -170,9 +184,15 @@ void Draw(Context context, const Player* player) {
         if (player && b.key == input::kVirtualSpecialWave) dim = player->sp < GetAttack(AttackId::EnergyWave).spCost;
         if (player && b.key == KEY_SPACE) { glow = player->rage >= player->maxRage; dim = !glow && !player->isRageMode; }
         const unsigned char a = dim ? 90 : 215;
-        DrawCircleV(b.center, b.radius, held ? Color{70, 70, 78, 235} : Color{28, 26, 30, a});
-        DrawCircleLinesV(b.center, b.radius, {b.ring.r, b.ring.g, b.ring.b, a});
-        DrawCircleLinesV(b.center, b.radius - 3.0f, {b.ring.r, b.ring.g, b.ring.b, (unsigned char)(a / 2)});
+        const int skillIdx = b.key - input::kVirtualSkill0;
+        const bool cooling = player && skillIdx >= 0 && skillIdx < input::kSkillKeys && !player->SkillReady(skillIdx);
+        const unsigned char lum = held ? 255 : (dim || cooling) ? 95 : 235;
+        const bool art = DrawArt(b.art, b.center, b.radius, {lum, lum, lum, 255}, held ? 1.05f : 1.12f);
+        if (!art) {
+            DrawCircleV(b.center, b.radius, held ? Color{70, 70, 78, 235} : Color{28, 26, 30, a});
+            DrawCircleLinesV(b.center, b.radius, {b.ring.r, b.ring.g, b.ring.b, a});
+            DrawCircleLinesV(b.center, b.radius - 3.0f, {b.ring.r, b.ring.g, b.ring.b, (unsigned char)(a / 2)});
+        }
         if (glow) DrawCircleLinesV(b.center, b.radius + 5.0f + 3.0f * std::sin((float)GetTime() * 8.0f), {255, 210, 90, 220});
         const int skill = b.key - input::kVirtualSkill0;
         if (skill >= 0 && skill < input::kSkillKeys) {
@@ -189,7 +209,7 @@ void Draw(Context context, const Player* player) {
             const int fs = 10;
             DrawText(name, (int)(b.center.x - MeasureText(name, fs) / 2.0f), (int)(b.center.y + b.radius + 3.0f), fs, {245, 240, 235, 230});
             const char* num = b.label;
-            if (!player || player->SkillReady(skill))
+            if (!art && (!player || player->SkillReady(skill)))
                 DrawText(num, (int)(b.center.x - MeasureText(num, 22) / 2.0f), (int)(b.center.y - 11), 22, {b.ring.r, b.ring.g, b.ring.b, 240});
             continue;
         }
@@ -207,8 +227,13 @@ void Draw(Context context, const Player* player) {
             DrawTriangle(p1, p3, p2, {245, 240, 235, a});
             continue;
         }
+        if (art && b.artHasText) continue;   // GOLPE / DASH / BLOQ: el arte ya lo dice
         const int fs = b.radius >= 55.0f ? 20 : (b.radius >= 40.0f ? 14 : 11);
         const int w = MeasureText(b.label, fs);
+        if (art) {   // icono: etiqueta en espanol debajo
+            DrawText(b.label, (int)(b.center.x - MeasureText(b.label, 10) / 2.0f), (int)(b.center.y + b.radius + 4.0f), 10, {245, 240, 235, 235});
+            continue;
+        }
         DrawText(b.label, (int)(b.center.x - w / 2.0f), (int)(b.center.y - fs / 2.0f), fs, {245, 240, 235, a});
     }
 }
