@@ -292,7 +292,26 @@ void Stage5Game::UpdateBoss(float dt) {
         boss.elapsed = 0;
         boss.teleportCooldown = boss.phase >= 3 ? 2.2f : 3.0f;
     } else if (boss.attack == BossAttack::None && boss.attackTimer <= 0) {
-        int pick = GetRandomValue(0, boss.phase >= 3 ? 3 : 2);
+        // Seleccion contextual: mantiene exactamente el mismo moveset, pero evita
+        // ataques poco legibles a distancia o finishers sin alcance real.
+        const float distance = std::abs(dx);
+        const bool close = distance < 190.0f;
+        const bool far = distance > 360.0f;
+        int pick = 0;
+        if (far) {
+            // A distancia: proyectil o dash para cerrar espacio.
+            pick = GetRandomValue(0, 1) == 0 ? 1 : 2;
+        } else if (close) {
+            // Cerca: combo cuerpo a cuerpo o finisher; el finisher conserva su
+            // cooldown y ventana existentes.
+            if (boss.phase >= 2 && GetRandomValue(0, 99) < 28) pick = 3;
+            else pick = 0;
+        } else {
+            // Distancia media: alterna presion y aproximacion.
+            pick = GetRandomValue(0, boss.phase >= 3 ? 2 : 1);
+            if (pick == 0) pick = 2;
+        }
+        if (pick == 3 && !close) pick = 2;
         boss.attack = pick == 0   ? BossAttack::MirrorCombo
                       : pick == 1 ? BossAttack::DarkWave
                       : pick == 2 ? BossAttack::Dash
