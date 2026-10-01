@@ -355,6 +355,20 @@ int Player::GetAttackDamage() const {
     return std::max(1, static_cast<int>(std::round(damage)));
 }
 
+bool Player::AttackIsImpactFrame() const {
+    if(state!=PlayerState::Attack || clipDriven || !UsesAttackAnimationProfile(skin)) return false;
+    const auto& def=GetAttack(currentAttack);
+    if(attackElapsed<def.startup || attackElapsed>def.startup+def.active) return false;
+    const auto& profile=GetAttackAnimationProfile(skin,currentAttack);
+    return static_cast<int>(animator.CurrentClipFrameIndex())==profile.impactFrameIndex;
+}
+
+const AttackAnimationProfile& Player::CurrentAttackAnimationProfile() const {
+    static const AttackAnimationProfile kNone{"idle",0.0f,0,1.0f,1.0f,1.0f};
+    if(!UsesAttackAnimationProfile(skin)) return kNone;
+    return GetAttackAnimationProfile(skin,currentAttack);
+}
+
 float Player::GetAttackRange() const { return GetAttack(currentAttack).range; }
 
 float Player::GetAttackDepthRange() const { return GetAttack(currentAttack).depth; }
