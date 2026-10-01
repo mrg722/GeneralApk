@@ -166,7 +166,12 @@ Texture2D AssetManager::GetTextureByPath(const std::string& relativePath){
     const std::string key="path:"+relativePath;
     const auto it=textures.find(key);
     if(it!=textures.end())return it->second;
-    textures[key]=LoadRequiredTexture(relativePath.c_str(),{relativePath,"../"+relativePath,"../../"+relativePath},TEXTURE_FILTER_POINT);
+    // Arte en alta resolucion (hojas del usuario, efectos, botones, fondos): filtro
+    // suave para que se vea limpio al escalar. El pixel art pequeno queda nitido.
+    const bool hiRes=relativePath.find("rayder_kf")!=std::string::npos||relativePath.find("brakk_v2")!=std::string::npos||
+        relativePath.find("rayder_espalda")!=std::string::npos||relativePath.find("assets/fx/")!=std::string::npos||
+        relativePath.find("assets/ui/")!=std::string::npos||relativePath.find("backgrounds/")!=std::string::npos;
+    textures[key]=LoadRequiredTexture(relativePath.c_str(),{relativePath,"../"+relativePath,"../../"+relativePath},hiRes?TEXTURE_FILTER_BILINEAR:TEXTURE_FILTER_POINT);
     return textures[key];
 }
 

@@ -17,10 +17,11 @@ from scipy import ndimage
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "assets/characters/rayder/source/rayder_movimientos_kf_negro.jpg"
 OUT = ROOT / "assets/characters/rayder/rayder_kf_atlas.png"
-CW, CH = 224, 144          # celda
-PIVOT = (112, 138)         # pies
-SCALE = 0.83               # figura de pie ~120 px -> ~100 px (igual que Rayder)
-COLS = 12
+CW, CH = 270, 175          # celda
+PIVOT = (135, 168)         # pies
+SCALE = 1.0                # resolucion original de la hoja (el juego escala al dibujar)
+COLS = 14                  # atlas <= 4096 px de lado (limite seguro en celulares)
+STAND_H = 110              # estatura de Rayder de pie en el atlas
 
 # fila: (y etiqueta, y techo de figuras, y de las cajas numeradas)
 ROWS = [(12, 20, 153), (177, 168, 320), (343, 340, 469), (492, 490, 600), (623, 615, 735), (756, 752, 855),
@@ -119,6 +120,73 @@ def advanced_frames():
     return checker_grid(ADV_SRC, A_ROWS, A_COLS, (22, 26))
 
 
+C50_SRC = ROOT / "assets/characters/rayder/source/rayder_combate_50_negro.jpg"
+# por fila: y de los numeros, techo y suelo de las figuras, x de cada numero (10 por fila)
+C50_ROWS = [
+    (20, 32, 205, [17, 167, 313, 452, 569, 731, 926, 1130, 1272, 1429]),
+    (230, 242, 415, [17, 167, 308, 453, 651, 779, 918, 1082, 1252, 1416]),
+    (440, 452, 625, [17, 172, 324, 476, 623, 792, 962, 1102, 1231, 1398]),
+    (650, 662, 832, [17, 155, 312, 455, 610, 763, 901, 1073, 1231, 1368]),
+    (840, 852, 1024, [17, 178, 315, 470, 636, 807, 952, 1076, 1226, 1393]),
+]
+
+
+def combat50_frames():
+    """Hoja de combate de 50 cuadros (fondo negro, numerada): cada cuadro se toma
+    entero (piezas conectadas completas: piernas, pelo, estelas), sin recortar
+    partes del personaje. Se escala a la estatura de Rayder."""
+    img = np.array(Image.open(C50_SRC).convert("RGB")).astype(int)
+    H, W, _ = img.shape
+    work = img.copy()
+    for ny, _, _, xs in C50_ROWS:                     # borrar numeros
+        for x in xs: work[max(0, ny - 16):ny + 17, max(0, x - 8):x + 40] = 0
+    raw = []
+    for ny, top, ground_guess, xs in C50_ROWS:
+        band = work[top:min(H, ground_guess + 4)]
+        edges = [x - 10 for x in xs] + [W]
+        for i in range(10):
+            x0, x1 = edges[i], edges[i + 1]
+            r0, r1 = max(0, x0 - 18), min(W, x1 + 18)
+            sub = band[:, r0:r1]
+            fg = ~background(sub) & (sub.max(-1) > 24)
+            lab, n = ndimage.label(fg, structure=np.ones((3, 3)))
+            keep = np.zeros(band.shape[:2], bool)
+            for k, sl in enumerate(ndimage.find_objects(lab), 1):
+                comp = lab[sl] == k
+                if comp.sum() < 30: continue
+                cxs = np.nonzero(comp)[1] + sl[1].start + r0
+                if ((cxs >= x0) & (cxs < x1)).mean() >= 0.5:      # la mayor parte en su casilla
+                    keep[sl[0], sl[1].start + r0:sl[1].stop + r0] |= comp
+            ys, xs_ = np.nonzero(keep)
+            raw.append((band, keep, ys.max() if len(ys) else 0, 0, 0))
+    # suelo comun por fila y escala
+    out = []
+    first = raw[0]
+    k = STAND_H / (first[2] - np.nonzero(first[1])[0].min())
+    for r in range(5):
+        frames = raw[r * 10:(r + 1) * 10]
+        ground = int(np.percentile([f[2] for f in frames], 80))
+        for band, keep, bottom, xa, xb in frames:
+            ys, xs_ = np.nonzero(keep)
+            if len(ys) == 0:
+                out.append(Image.new("RGBA", (CW, CH), (0, 0, 0, 0))); continue
+            y0, y1 = ys.min(), ys.max() + 1
+            x0, x1 = xs_.min(), xs_.max() + 1
+            rgba = np.dstack([band[y0:y1, x0:x1].astype(np.uint8), (keep[y0:y1, x0:x1] * 255).astype(np.uint8)])
+            piece = Image.fromarray(rgba, "RGBA")
+            # centro = torso (columna con mas cuerpo en la mitad superior)
+            body = keep[y0:y0 + (y1 - y0) // 2, x0:x1]
+            cx = np.average(np.arange(x1 - x0), weights=body.sum(0) + 1e-6)
+            small = piece.resize((max(1, round(piece.width * k)), max(1, round(piece.height * k))), Image.LANCZOS)
+            small.putalpha(small.getchannel("A").point(lambda v: 0 if v < 40 else min(255, int(v * 1.25))))
+            cell = Image.new("RGBA", (CW, CH), (0, 0, 0, 0))
+            gy = min(bottom, ground) if bottom > ground - 25 else bottom   # pies al suelo; los saltos conservan su altura
+            gy = ground
+            cell.paste(small, (round(PIVOT[0] - cx * k), round(PIVOT[1] - (ground - y0) * k)), small)
+            out.append(cell)
+    return out
+
+
 def checker_grid(src, grid_rows, grid_cols, number_box):
     """Celdas sobre damero azul: el fondo se quita por inundacion desde el
     borde de cada celda (los dos tonos del damero)."""
@@ -152,7 +220,7 @@ def checker_grid(src, grid_rows, grid_cols, number_box):
             tiles.append((c, fg))
     # escala comun: el cuadro 1 (de pie) mide como el Rayder de la hoja nueva (~91 px)
     ys = np.nonzero(tiles[0][1])[0]
-    k = 91.0 / (ys.max() - ys.min())
+    k = STAND_H * 0.83 / (ys.max() - ys.min())
     cells = []
     for c, fg in tiles:
         ys, xs = np.nonzero(fg)
@@ -224,7 +292,7 @@ def main():
             piece = Image.fromarray(rgba, "RGBA")
             sw, sh = max(1, round(piece.width * SCALE)), max(1, round(piece.height * SCALE))
             small = piece.resize((sw, sh), Image.LANCZOS)
-            small.putalpha(small.getchannel("A").point(lambda v: 0 if v < 40 else 255))
+            small.putalpha(small.getchannel("A").point(lambda v: 0 if v < 40 else min(255, int(v * 1.25))))
             cell = Image.new("RGBA", (CW, CH), (0, 0, 0, 0))
             px = round(PIVOT[0] - (cx - left) * SCALE)
             py = round(PIVOT[1] - (ground - top) * SCALE)
@@ -240,15 +308,15 @@ def main():
     for f in LEGACY:
         c = old.crop(((f % 10) * ocw, (f // 10) * och, (f % 10 + 1) * ocw, (f // 10 + 1) * och))
         # el set anterior era mas ancho y alto: misma complexion que la hoja nueva
-        kx, ky = 0.93 * 0.84, 0.93
+        kx, ky = 0.93 * 0.84 / 0.83, 0.93 / 0.83
         c = c.resize((round(ocw * kx), round(och * ky)), Image.LANCZOS)
         c.putalpha(c.getchannel("A").point(lambda v: 0 if v < 40 else 255))
         cell = Image.new("RGBA", (CW, CH), (0, 0, 0, 0))
         cell.paste(c, (round(PIVOT[0] - opiv[0] * kx), round(PIVOT[1] - opiv[1] * ky)), c)
         names["legacy"].append(len(cells))
         cells.append(cell)
-    extras = (("transform12", transform_frames), ("advanced36", advanced_frames)) if out == OUT \
-        else (("advanced36", advanced_frames),)   # forma de pelo blanco: sus golpes cargados
+    extras = (("transform12", transform_frames), ("advanced36", advanced_frames), ("combat50", combat50_frames)) \
+        if out == OUT else (("advanced36", advanced_frames),)   # forma de pelo blanco: sus golpes cargados
     if True:
         for key, fn in extras:
             extra = fn()

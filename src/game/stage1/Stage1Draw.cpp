@@ -439,9 +439,9 @@ void Stage1StoryGame::DrawCharacterSelect() const {
                                        : Texture2D{0};
         if (back.id) {
             // Rayder de espaldas (como en la caratula), con la estatura de Rayden.
-            // 2.6x como Rayden (pixel art sin suavizar).
-            SetTextureFilter(back, TEXTURE_FILTER_POINT);
-            const float h = back.height * 2.6f, w = back.width * 2.6f;
+            // Calidad completa reducida con filtro suave a la estatura de Rayden Cruz
+            // (cabeza a botas ~234 px); el ancho mantiene su proporcion.
+            const float h = 234.0f, w = back.width * h / back.height;
             DrawTexturePro(back, {0, 0, (float)back.width, (float)back.height}, {cx - w / 2, 520 - h, w, h}, {0, 0}, 0,
                            WHITE);
         } else if (prof && tex.id) {

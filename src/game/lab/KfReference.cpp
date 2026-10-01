@@ -13,7 +13,8 @@ namespace {
 
 constexpr int kMidp[8] = {0, 6, 3, 5, 2, 1, 7, 4};   // interno -> MIDP
 constexpr float kTickSeconds = 0.05f;                 // el juego original corre a 20 ticks/s
-constexpr float kHueShift = 200.0f;                   // "pintado": giro de tono, formas intactas
+// Colores originales. La copia "Rayder" (tint 1) cambia acentos rojos/naranjas
+// por azul electrico y la ropa gris por negro; las formas no se tocan.
 
 struct Reader {
     const std::vector<unsigned char>& d; size_t p = 0; bool bad = false;
@@ -101,14 +102,19 @@ Image TransformPiece(Image piece, int midp) {
     return piece;
 }
 
-void HueShift(Image& img, float degrees) {
+void RayderTint(Image& img) {
     ImageFormat(&img, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
     Color* px = (Color*)img.data;
     for (int i = 0; i < img.width * img.height; ++i) {
         if (px[i].a == 0) continue;
-        Vector3 hsv = ColorToHSV(px[i]);
+        const Vector3 hsv = ColorToHSV(px[i]);   // h 0-360, s 0-1, v 0-1
         const unsigned char a = px[i].a;
-        px[i] = ColorFromHSV(std::fmod(hsv.x + degrees, 360.0f), hsv.y, hsv.z);
+        const bool warm = hsv.x < 60.0f || hsv.x > 320.0f;
+        if (hsv.y > 0.55f && warm && !(hsv.x > 12.0f && hsv.x < 38.0f && hsv.y < 0.7f && hsv.z > 0.6f)) {
+            px[i] = ColorFromHSV(218.0f, std::min(1.0f, hsv.y + 0.1f), hsv.z);   // acentos -> azul
+        } else if (hsv.y < 0.18f && hsv.z > 0.2f && hsv.z < 0.82f) {
+            px[i] = ColorFromHSV(220.0f, 0.12f, hsv.z * 0.42f);                  // ropa gris -> negra
+        }
         px[i].a = a;
     }
 }
@@ -155,6 +161,10 @@ constexpr KfRosterEntry kRoster[] = {
     {15, "KF BUFONA", false, 140, 1.8f},
     {1, "KF HEROE TRANSFORMADO", true, 120, 1.8f},     // el heroe transformado (llamas rojas, otros golpes)
     {3, "KF HEROINA TRANSFORMADA", true, 100, 1.8f},   // la heroina transformada (lanza y rayos)
+    // Copias del heroe (normal y transformado) con los colores de Rayder: el
+    // "Rayder clon" juega con todos sus movimientos sin tocar al heroe original.
+    {0, "RAYDER CLON (BASE KF)", true, 115, 1.8f, 1},
+    {1, "RAYDER CLON TRANSFORMADO", true, 125, 1.8f, 1},
     // El sprite 33 no es luchador (vendedor/puesto del escenario): excluido.
 };
 
@@ -256,7 +266,7 @@ KfReference Load(const KfRosterEntry& who) {
                           {(float)(p.x - x0), (float)(p.y - y0), (float)p.img.width, (float)p.img.height}, WHITE);
                 UnloadImage(p.img);
             }
-            HueShift(canvas, kHueShift);
+            if (who.tint == 1) RayderTint(canvas);
             frameSlot[st.frame] = (int)composed.size();
             composed.push_back(canvas);
             origin.push_back({(float)-x0, (float)-y0});

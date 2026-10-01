@@ -9,7 +9,9 @@ namespace {
 // facesRightByDefault, maxHp, damageMultiplier, speedMultiplier
 const std::array<CharacterVisual, 20> kCharacters{{
     {"RAYDEN (ORIGINAL)", nullptr,           false, 1.00f,   0.0f, 0.0f, true,  100, 1.00f, 1.00f},
-    {"RAYDEN CLON",       "rayder_clone",    false, 1.00f, 118.0f, 0.0f, true,  110, 1.05f, 1.05f},
+    // Rayder clon: copia del heroe KF (todos sus movimientos y habilidades) con
+    // los colores de Rayder; se transforma en la copia del heroe transformado.
+    {"RAYDER CLON",       nullptr,           false, 1.50f,   0.0f, 0.0f, true,  115, 1.05f, 1.05f, nullptr, 13, 1.0f, nullptr, 14},
     // Brakk jugable con la hoja mejorada (atlas brakk_v2); las poses sueltas siguen en assets/bosses/brakk.
     {"BRAKK",             "brakk",           true,  175.0f/188.0f, 0.0f, 9.0f, true, 150, 1.25f, 0.85f, "brakk_v2"},
     {"GRINDER",           "grinder",         true,  3.00f,   0.0f, 0.0f, true,  160, 1.30f, 0.80f},
@@ -18,7 +20,7 @@ const std::array<CharacterVisual, 20> kCharacters{{
     // DF-014: Rayder, hoja de 50 poses del usuario (tools/build_rayder_sheet.py).
     // Hoja de movimientos estilo KF (tools/build_rayder_kf_sheet.py): ya trae la
     // complexion de Rayden Cruz. El atlas anterior ("rayder") sigue en el manifiesto.
-    {"RAYDER",            nullptr,           false, 1.00f,   0.0f, 0.0f, true,  100, 1.00f, 1.00f, "rayder_kf", -1, 1.00f, "rayder_kf_white"},
+    {"RAYDER",            nullptr,           false, 0.83f,   0.0f, 0.0f, true,  100, 1.00f, 1.00f, "rayder_kf", -1, 1.00f, "rayder_kf_white"},
     // Laboratorio (temporales, solo Modo VS): personajes extraidos de la APK.
     {"KF HEROE (PELO BLANCO)", nullptr, false, 1.50f, 0.0f, 0.0f, true, 110, 1.00f, 1.05f, nullptr, 0, 1.0f, nullptr, 11},
     {"KF HEROINA (PELIRROJA)", nullptr, false, 1.50f, 0.0f, 0.0f, true, 100, 0.95f, 1.10f, nullptr, 1, 1.0f, nullptr, 12},
