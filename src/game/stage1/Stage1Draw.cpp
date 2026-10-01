@@ -1,5 +1,6 @@
 // Stage 1: todo el dibujo (mundo, jefe, HUD, menus y pantallas).
 #include "game/stage1/Stage1Common.h"
+#include "core/DisplaySettings.h"
 #include "ui/TouchControls.h"
 
 namespace district_fury {
@@ -120,7 +121,15 @@ void Stage1StoryGame::DrawBoss() const {
                   : boss.phase >= 3        ? Color{255, 150, 140, 255}
                                            : Color{235, 205, 195, 255};
         DrawEllipse((int)p.x, (int)p.y, 70, 14, {0, 0, 0, 150});
-        bossAnim.Draw(p, 1.55f * DepthScaleFor(boss.position.y), !flip, t);
+        if (brakkV2) {
+            // Hoja mejorada: mira a la derecha como las poses sueltas; ~175 px de alto.
+            const Color tv = boss.invulnerability > 0 ? Color{255, 180, 180, 255}
+                             : boss.blocking          ? Color{200, 220, 255, 255}
+                                                      : WHITE;
+            bossAnim.Draw(p, 1.45f * DepthScaleFor(boss.position.y), flip, tv);
+        } else {
+            bossAnim.Draw(p, 1.55f * DepthScaleFor(boss.position.y), !flip, t);
+        }
         if (boss.blocking) DrawCircleLines((int)p.x, (int)(p.y - 95), 96, {120, 190, 255, 170});
         (void)pose;
         return;
@@ -152,8 +161,8 @@ void Stage1StoryGame::DrawWorld() const {
     c.target = {cameraX, 360};
     c.zoom = 1;
     if (shake > 0) {
-        c.target.x += GetRandomValue(-100, 100) * shake * 7;
-        c.target.y += GetRandomValue(-100, 100) * shake * 4;
+        c.target.x += GetRandomValue(-100, 100) * std::min(shake, 0.2f) * (7 * 0.15f);   // sacudida suave (antes x7)
+        c.target.y += GetRandomValue(-100, 100) * std::min(shake, 0.2f) * (4 * 0.15f);   // sacudida suave (antes x4)
     }
     BeginMode2D(c);
     DrawScenarioArt();
@@ -195,6 +204,7 @@ void Stage1StoryGame::DrawWorld() const {
 
 void Stage1StoryGame::DrawHUD() const {
     ui::PlayerVitals vitals{};
+    vitals.player = &player;
     vitals.hp = player.hp;
     vitals.maxHp = player.maxHp;
     vitals.shield = player.shield;
@@ -296,12 +306,22 @@ void Stage1StoryGame::DrawOptions() const {
     DrawRectangle(0, 0, 1280, 720, {3, 7, 12, 190});
     DrawText("OPCIONES", 520, 110, 48, WHITE);
     const bool muted = AudioSystem::Get().IsMuted();
-    DrawText("SONIDO", 470, 270, 26, {200, 220, 230, 255});
+    const Color hi{255, 214, 72, 255}, lo{200, 220, 230, 255};
+    if (optionsCursor == 0) DrawRectangle(430, 258, 520, 48, {30, 50, 70, 200});
+    DrawText("SONIDO", 470, 270, 26, optionsCursor == 0 ? hi : lo);
     DrawText(muted ? "DESACTIVADO" : "ACTIVADO", 700, 270, 26,
              muted ? Color{255, 110, 100, 255} : Color{110, 240, 160, 255});
-    DrawText("ENTER/J — ALTERNAR SONIDO", 440, 340, 18, {150, 190, 200, 230});
-    DrawText(TextFormat("DIFICULTAD ACTUAL: %s", DifficultyText()), 440, 385, 18, {150, 190, 200, 230});
-    DrawText("ESC — VOLVER", 520, 470, 20, {180, 195, 200, 220});
+    if (optionsCursor == 1) DrawRectangle(430, 318, 520, 48, {30, 50, 70, 200});
+    DrawText("ANCHO DE PANTALLA", 470, 330, 26, optionsCursor == 1 ? hi : lo);
+    DrawText(TextFormat("< %d%% >", display::WidthPercent()), 790, 330, 26, {110, 240, 160, 255});
+    const bool t = touch::Enabled();
+    DrawText(t ? "CRUCETA ARRIBA/ABAJO: ELEGIR   IZQ/DER: CAMBIAR   OK: ALTERNAR"
+               : "W/S ELEGIR   A/D CAMBIAR   ENTER/J ALTERNAR",
+             t ? 330 : 420, 395, 18, {150, 190, 200, 230});
+    DrawText("ANCHO: si tu celular es muy alargado y todo se ve ancho, bajalo (solo cambia lo horizontal).",
+             200, 430, 16, {150, 175, 185, 220});
+    DrawText(TextFormat("DIFICULTAD ACTUAL: %s", DifficultyText()), 440, 470, 18, {150, 190, 200, 230});
+    DrawText(t ? "ATRAS - VOLVER" : "ESC - VOLVER", 540, 520, 20, {180, 195, 200, 220});
 }
 
 void Stage1StoryGame::DrawCredits() const {
@@ -415,10 +435,21 @@ void Stage1StoryGame::DrawCharacterSelect() const {
         const char* atlas = cv.atlasId ? cv.atlasId : "rayden";
         const AtlasProfile* prof = SpriteManifest::Get().FindAtlas(atlas);
         Texture2D tex = prof ? AssetManager::Get().GetTextureByPath(prof->path) : Texture2D{0};
-        if (prof && tex.id) {
-            const float scale = 2.6f;
+        const Texture2D back = id == 6 ? AssetManager::Get().GetTextureByPath("assets/characters/rayder/rayder_espalda.png")
+                                       : Texture2D{0};
+        if (back.id) {
+            // Rayder de espaldas (como en la caratula), con la estatura de Rayden.
+            // 2.6x como Rayden (pixel art sin suavizar).
+            SetTextureFilter(back, TEXTURE_FILTER_POINT);
+            const float h = back.height * 2.6f, w = back.width * 2.6f;
+            DrawTexturePro(back, {0, 0, (float)back.width, (float)back.height}, {cx - w / 2, 520 - h, w, h}, {0, 0}, 0,
+                           WHITE);
+        } else if (prof && tex.id) {
+            // Misma escala y ancho que en combate (Rayder: complexion de Rayden).
+            const float scale = 2.6f * (cv.atlasId ? cv.scale : 1.0f);
+            const float scaleX = scale * cv.widthScale;
             const Rectangle src{0, 0, prof->cellW, prof->cellH};
-            const Rectangle dst{cx - prof->pivotX * scale, 520 - prof->pivotY * scale, prof->cellW * scale,
+            const Rectangle dst{cx - prof->pivotX * scaleX, 520 - prof->pivotY * scale, prof->cellW * scaleX,
                                 prof->cellH * scale};
             DrawTexturePro(tex, src, dst, {0, 0}, 0, WHITE);
         }

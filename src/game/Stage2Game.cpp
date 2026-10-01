@@ -452,8 +452,8 @@ void Stage2Game::DrawWorld() const {
     c.target = {cameraX, 360};
     c.zoom = 1;
     if (shake > 0) {
-        c.target.x += GetRandomValue(-100, 100) * shake * 8;
-        c.target.y += GetRandomValue(-100, 100) * shake * 5;
+        c.target.x += GetRandomValue(-100, 100) * std::min(shake, 0.2f) * (8 * 0.15f);   // sacudida suave (antes x8)
+        c.target.y += GetRandomValue(-100, 100) * std::min(shake, 0.2f) * (5 * 0.15f);   // sacudida suave (antes x5)
     }
     BeginMode2D(c); // DF-013.2: fondo propio por sector (4 escenarios del Stage 2).
     const int sc = std::clamp(wave <= 1 ? 1 : wave >= 4 ? 4 : wave, 1, 4);
@@ -507,6 +507,7 @@ void Stage2Game::DrawWorld() const {
 }
 void Stage2Game::DrawHUD() const {
     ui::PlayerVitals vitals{};
+    vitals.player = &player;
     vitals.hp = player.hp;
     vitals.maxHp = player.maxHp;
     vitals.shield = player.shield;

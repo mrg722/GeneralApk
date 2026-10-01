@@ -1,5 +1,19 @@
 # Pedido de assets — District Fury V1
 
+## Prioridad actual (v0.15)
+
+| # | Qué falta | Por qué |
+|---|---|---|
+| 1 | **Rayden Cruz** con hoja estilo KF, igual que la de Rayder (reposo 6, caminar 8, carrera, golpe ligero/fuerte, patada ligera/fuerte, bloqueo, golpes recibidos, derribo, levantarse, especiales 1-3 y súper) | Hoy tiene 22 frames: es el menos fluido de los jugables |
+| 2 | **Rayder de pelo blanco**: las mismas filas de la hoja transformada, pero **una figura por casilla** y **sin texto** encima | En la hoja actual, la carrera, los especiales y el súper se tocan entre sí y quedan cortados al separarlos |
+| 3 | **Brakk**: la hoja mejorada sobre **fondo transparente** o negro liso | El fondo rojo degradado obliga a recortar a mano; en las llamas rojas queda un borde |
+| 4 | **Enemigos comunes** (8): caminar 4, en el aire 2, levantarse 2, con su diseño actual | Hoy caminan con la pose de reposo |
+| 5 | **Fondos HD** de los escenarios 2-4 del Nivel 1 y de los Stages 2-5 (1600×900 o más) | Se ven borrosos |
+| 6 | **Sonido**: golpes, poderes, transformación y voz de los personajes | Hoy solo hay sonidos genéricos |
+
+Formato que más ayuda: PNG con transparencia; una fila por movimiento; cada figura en su casilla con aire alrededor; sin números ni etiquetas tocando el dibujo; mirando a la derecha; pies en la misma línea.
+
+
 Lo que falta para que las mecánicas nuevas se vean completas en pantalla. La
 lógica ya existe y funciona: buffer de 15 frames, cadena J-J-J-K, cancelación,
 especiales por comando, estado en el aire, levantarse y bloqueo. Hoy varios

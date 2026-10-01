@@ -46,21 +46,46 @@ int main() {
     touch::Update(touch::Context::EndScreen);
     assert(input::Pressed(KEY_R));
 
-    // Jugador: el boton ONDA lanza el especial sin comando.
+    // Habilidad 1 (ONDA en nuestros personajes): lanza la onda sin gastar energia.
     Player p;
     touch::Update(touch::Context::Combat);
-    touch::InjectTouchForTest({1052, 548});
+    touch::InjectTouchForTest({961, 633});
     touch::Update(touch::Context::Combat);
+    const int spBefore = p.sp;
     p.Update(1.0f / 60.0f);
     assert(p.state == PlayerState::Attack && p.currentAttack == AttackId::EnergyWave);
+    assert(p.sp == spBefore && !p.SkillReady(0));
+    assert(p.skillCooldown[0] > Player::kSkillCooldown - 0.1f);
+    // En espera: volver a pulsar no la lanza otra vez.
+    for (int i = 0; i < 120; ++i) { touch::Update(touch::Context::Combat); p.Update(1.0f / 60.0f); }
+    touch::InjectTouchForTest({961, 633});
+    touch::Update(touch::Context::Combat);
+    p.Update(1.0f / 60.0f);
+    assert(p.currentAttack != AttackId::EnergyWave || p.state != PlayerState::Attack);
 
-    // Boton GANCHO -> gancho ascendente (Punch3).
+    // Habilidad 2 (GANCHO) -> gancho ascendente (Punch3).
     Player q;
     touch::Update(touch::Context::Combat);
-    touch::InjectTouchForTest({1160, 488});
+    touch::InjectTouchForTest({965, 568});
     touch::Update(touch::Context::Combat);
     q.Update(1.0f / 60.0f);
     assert(q.currentAttack == AttackId::Punch3);
+
+    // ESPECIAL: el especial por boton (energia), como antes la ONDA.
+    Player e;
+    touch::Update(touch::Context::Combat);
+    touch::InjectTouchForTest({1245, 485});
+    touch::Update(touch::Context::Combat);
+    e.Update(1.0f / 60.0f);
+    assert(e.currentAttack == AttackId::EnergyWave);
+
+    // Habilidad 6: transformacion (dano y velocidad extra durante 12 s).
+    Player t;
+    touch::Update(touch::Context::Combat);
+    touch::InjectTouchForTest({1152, 406});
+    touch::Update(touch::Context::Combat);
+    t.Update(1.0f / 60.0f);
+    assert(t.IsTransformed() && t.activeSkill == Player::kSkillCount - 1);
 
     // Desactivado: los toques no hacen nada.
     touch::SetEnabled(false);

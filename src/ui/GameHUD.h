@@ -21,6 +21,7 @@
 // display: la unica adicion real es el retrato.
 
 namespace district_fury {
+class Player;
 namespace ui {
 
 struct PlayerVitals {
@@ -37,6 +38,8 @@ struct PlayerVitals {
 
     // Panel de encabezado (titulo del stage, ej. "RAYDEN CRUZ // SLUM DISTRICT").
     const char* title = "RAYDEN CRUZ";
+    // Si se indica, el retrato es el del personaje que se esta usando.
+    const district_fury::Player* player = nullptr;
 
     // Posicion/tamano del panel. Los valores por defecto reproducen el
     // panel de Stage1StoryGame (el mas completo de los tres).

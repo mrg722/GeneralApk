@@ -8,6 +8,9 @@ namespace input {
 // Teclas virtuales sin equivalente de teclado (comandos especiales directos).
 constexpr int kVirtualSpecialWave = 400;   // "ONDA": abajo, abajo-adelante, adelante + J
 constexpr int kVirtualSpecialRise = 401;   // "GANCHO": adelante, abajo, abajo-adelante + K
+// Habilidades 1..6 (boton tactil; teclado: 1..6). 402..407.
+constexpr int kVirtualSkill0 = 402;
+constexpr int kSkillKeys = 6;
 constexpr int kKeyCount = 512;
 
 // La UI tactil marca teclas virtuales pulsadas este frame y luego llama a Commit().

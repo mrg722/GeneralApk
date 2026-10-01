@@ -2,6 +2,7 @@
 #include "audio/AudioSystem.h"
 #include "game/Stage1StoryGame.h"
 #include "core/InputMap.h"
+#include "core/DisplaySettings.h"
 #include "ui/TouchControls.h"
 #include <algorithm>
 #include <cstdlib>
@@ -69,6 +70,7 @@ int main() {
     RenderTexture2D target = LoadRenderTexture(windowWidth, windowHeight);
     SetTextureFilter(target.texture, TEXTURE_FILTER_BILINEAR);
     district_fury::AssetManager::Get().LoadAll();
+    district_fury::display::Load();
     district_fury::AudioSystem::Get().Init();
     district_fury::Stage1StoryGame stage1;
     district_fury::Stage2Game stage2;
@@ -119,9 +121,11 @@ int main() {
     while (district_fury::core::shouldContinue(state)) {
         const float screenScale =
             std::min(GetScreenWidth() / (float)windowWidth, GetScreenHeight() / (float)windowHeight);
-        const float offX = (GetScreenWidth() - windowWidth * screenScale) * 0.5f,
+        // OPCIONES > ANCHO DE PANTALLA: solo se angosta el ancho; la altura no cambia.
+        const float screenScaleX = screenScale * district_fury::display::WidthPercent() / 100.0f;
+        const float offX = (GetScreenWidth() - windowWidth * screenScaleX) * 0.5f,
                     offY = (GetScreenHeight() - windowHeight * screenScale) * 0.5f;
-        touch::SetScreenTransform(screenScale, offX, offY);
+        touch::SetScreenTransform(screenScaleX, screenScale, offX, offY);
         const touch::Context ctx = touchContext();
         touch::Update(ctx);
         if (WindowShouldClose()) {
@@ -289,7 +293,7 @@ int main() {
         BeginDrawing();
         ClearBackground(BLACK);
         DrawTexturePro(target.texture, {0, 0, (float)windowWidth, -(float)windowHeight},
-                       {offX, offY, windowWidth * screenScale, windowHeight * screenScale}, {0, 0}, 0, WHITE);
+                       {offX, offY, windowWidth * screenScaleX, windowHeight * screenScale}, {0, 0}, 0, WHITE);
         EndDrawing();
     }
     UnloadRenderTexture(target);

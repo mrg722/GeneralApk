@@ -145,6 +145,43 @@ public:
         DrawTexturePro(texture, source, {pivotPosition.x - px, pivotPosition.y - frame.pivotY * scale, width, height}, {0.0f, 0.0f}, 0.0f, tint);
     }
 
+    // Frame actual con metadatos (nullptr en atlas de rejilla sin metadatos).
+    const SpriteFrame* CurrentFrameData() const {
+        if (frames.empty()) return nullptr;
+        return &frames[static_cast<std::size_t>(std::clamp(currentFrame, 0, static_cast<int>(frames.size()) - 1))];
+    }
+
+    // Duracion total de un clip con nombre (0 si no existe).
+    float ClipSeconds(const std::string& name) const {
+        const auto it = namedClips.find(name);
+        if (it == namedClips.end()) return 0.0f;
+        const AnimationClip& c = it->second;
+        if (!c.durations.empty()) {
+            float t = 0.0f;
+            for (float d : c.durations) t += std::max(0.016f, d);
+            return t;
+        }
+        const int n = c.frames.empty() ? std::max(1, c.endFrame - c.startFrame + 1) : static_cast<int>(c.frames.size());
+        return n * std::max(0.016f, c.frameDuration);
+    }
+
+    // Igual que Draw pero con escala horizontal y vertical separadas (respiracion,
+    // estiramiento en saltos y golpes, o un personaje mas delgado). Gira `angle`
+    // grados alrededor de los pies.
+    void DrawScaled(Vector2 feetPosition, float scaleX, float scaleY, bool flipX, Color tint = WHITE,
+                    float angle = 0.0f) const {
+        const SpriteFrame* frame = CurrentFrameData();
+        if (!frame || texture.id == 0) { Draw(feetPosition, scaleY, flipX, tint); return; }
+        const float width = frame->width * scaleX, height = frame->height * scaleY;
+        if (width <= 0.0f || height <= 0.0f || frame->source.width <= 0.0f || frame->source.height <= 0.0f) return;
+        const Rectangle source = {frame->source.x, frame->source.y, flipX ? -frame->source.width : frame->source.width,
+                                  frame->source.height};
+        const float drawPivotX = flipX ? width - frame->pivotX * scaleX : frame->pivotX * scaleX;
+        const float drawPivotY = frame->pivotY * scaleY;
+        // El origen de rotacion es el pivote (pies), asi el personaje se inclina sin despegarse del suelo.
+        DrawTexturePro(texture, source, {feetPosition.x, feetPosition.y, width, height}, {drawPivotX, drawPivotY}, angle, tint);
+    }
+
     void Draw(Vector2 feetPosition, float scale, bool flipX, Color tint = WHITE) const {
         if (texture.id == 0 || texture.width <= 0 || texture.height <= 0) return;
 

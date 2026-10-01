@@ -456,8 +456,8 @@ void Stage5Game::DrawWorld() const {
     c.target = {cameraX, 360};
     c.zoom = 1;
     if (shake > 0) {
-        c.target.x += GetRandomValue(-100, 100) * shake * 9;
-        c.target.y += GetRandomValue(-100, 100) * shake * 6;
+        c.target.x += GetRandomValue(-100, 100) * std::min(shake, 0.2f) * (9 * 0.15f);   // sacudida suave (antes x9)
+        c.target.y += GetRandomValue(-100, 100) * std::min(shake, 0.2f) * (6 * 0.15f);   // sacudida suave (antes x6)
     }
     BeginMode2D(c);
     DrawRectangle(0, 0, 1920, 720, {6, 4, 9, 255});
@@ -509,6 +509,7 @@ void Stage5Game::DrawWorld() const {
 }
 void Stage5Game::DrawHUD() const {
     ui::PlayerVitals vitals{};
+    vitals.player = &player;
     vitals.hp = player.hp;
     vitals.maxHp = player.maxHp;
     vitals.shield = player.shield;

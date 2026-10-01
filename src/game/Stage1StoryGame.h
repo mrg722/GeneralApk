@@ -75,12 +75,13 @@ private:
     StageCamera camera; ArenaDirector arena; HitstopClock hitstop;
     // Cuerpo provisional de Brakk: atlas completo del Brute (los PNG de
     // assets/bosses/brakk vienen recortados sin piernas). -1 = sin iniciar.
-    Animator bossAnim; int bossAnimMode{-1};
+    Animator bossAnim; int bossAnimMode{-1}; bool brakkV2{false};   // brakkV2: hoja mejorada cargada
     float cameraX{640}, stageTime{0}, comboTimer{0}, shake{0}, bannerTimer{0}, transitionTimer{0}, storyTimer{0};
     bool advanceRequested{false};
     bool arenaLocked{false}, scenarioBossSpawned{false}, finalBossSpawned{false}, stageComplete{false}, saveLoaded{false};
     StoryDifficulty difficulty{StoryDifficulty::Normal}; std::string savePath{"district_fury_save.dat"}; std::string storyMessage;
     int menuCursor{0}; int characterCursor{0}; bool vsRequested{false}; bool newGameStarted{false}; bool exitRequested{false};
+    int optionsCursor{0};   // OPCIONES: 0 sonido, 1 ancho de pantalla
 
     void ResetRun(); void BuildScenario(int id); void SpawnWave(int id); void BuildWaves(); void UpdateArena(float dt); void UpdateBossFight(float dt); void ClampToArena(); void LockArenaBetween(float playerX, float farX); void SpawnScenarioBoss(); void EnterFinalBoss(); void DefeatFinalBoss();
     void ApplyDifficulty(); void UpdateCombat(float dt); void UpdateBoss(float dt); void UpdateProjectiles(float dt); void UpdateParticles(float dt);

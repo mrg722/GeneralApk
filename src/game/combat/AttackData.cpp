@@ -81,6 +81,15 @@ const AttackDef kAttacks[static_cast<int>(AttackId::Count)] = {
      35, 0, 5, 1.60f,
      false, false, true, true, false,
      0.180f, 0.300f, 0.30f},
+
+    // Skill — habilidad (botones 1-6). Golpea varias veces mientras dura su
+    // animacion; la caja de golpe la marca el dibujo del frame (ver Player).
+    {"HABILIDAD", 9, 0.0f, 0.0f, 0.0f, 160.0f, 64.0f,
+     160.0f, 110.0f, 80.0f, -70.0f,
+     420.0f, 0.30f, 120.0f,
+     0, 6, 4, 0.0f,
+     false, false, true, true, false,
+     0.070f, 0.120f, 0.30f},
 };
 
 }  // namespace

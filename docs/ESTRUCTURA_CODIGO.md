@@ -6,6 +6,7 @@ Los archivos que eran una sola línea gigante se formatearon con `clang-format` 
 | Archivo | Qué hace |
 |---|---|
 | `src/main.cpp` | Ventana, lienzo virtual 1280x720 escalado a la pantalla, campaña, cambio de stages, contexto táctil |
+| `src/core/DisplaySettings.*` | Ajuste de ancho de pantalla (OPCIONES), guardado en `display_settings.txt` |
 | `src/core/InputMap.*` | Entrada única: teclado + teclas virtuales (`input::Pressed`, `input::Down`) |
 | `src/core/Platform.*` | Archivos iguales en PC y Android (assets dentro del APK, guardado interno) |
 | `src/core/Json.*` | Lector JSON propio |
@@ -16,7 +17,8 @@ Los archivos que eran una sola línea gigante se formatearon con `clang-format` 
 |---|---|
 | `Player.cpp` | Estado, FSM (Idle, Walk, Attack, Recovery, Airborne, Knockdown…), daño, personaje elegido |
 | `player/PlayerCombat.cpp` | Lectura de entrada, Input Buffer, comandos especiales, combos y cancelaciones |
-| `player/PlayerDraw.cpp` | Dibujo del personaje, aura de furia, escudo y proyectil de energía |
+| `player/PlayerCombat.cpp` (habilidades) | 6 habilidades con espera de 15 s (`TryStartSkill`); ataques guiados por animación en personajes KF (`BeginClipAttack`) |
+| `player/PlayerDraw.cpp` | Dibujo del personaje, fluidez (respiración, balanceo, inclinación, estelas), retrato del HUD, aura de furia y transformación, proyectil |
 | `player/PlayerCommon.h` | Constantes y tablas internas (cadena de combo, clips por ataque) |
 | `InputBuffer.h` | Cola de 15 frames y reconocimiento de comandos (↓↘→ / →↓↘) |
 
@@ -40,7 +42,8 @@ Los archivos que eran una sola línea gigante se formatearon con `clang-format` 
 Para quitar el Laboratorio: borrar `src/game/lab/`, las entradas `KF ...` de `CharacterVisual.cpp`, el campo "RIVAL KF" de `VSMode` y la línea de `KfReference.cpp` en `CMakeLists.txt`.
 
 ## Herramientas de assets (`tools/`)
-- **Hojas de personajes:** `build_rayden_sheet.py` y `build_rayder_sheet.py`.
+- **Hojas de personajes:** `build_rayden_sheet.py`, `build_rayder_sheet.py`, `build_rayder_kf_sheet.py` (hoja estilo KF de Rayder), `normalize_rayder_scale.py` y `build_brakk_sheet.py` (Brakk mejorado).
+- **Botones táctiles:** `build_ui_buttons.py` (recorta el arte del usuario a `assets/ui/touch/`).
 - **Limpieza de recortes:** `clean_sprite_cutouts.py` (fondo atrapado y astillas) y `fix_edge_halo.py` (halo blanco).
 - **Auditoría y fondos:** `audit_sprites.py` y `build_backgrounds.py`.
 - **Android:** `android/build_apk.sh` (ver `docs/ANDROID_ADB.md`).
@@ -52,4 +55,4 @@ Para quitar el Laboratorio: borrar `src/game/lab/`, las entradas `KF ...` de `Ch
 - `stage1_playthrough_test`: un bot recorre el Nivel 1 completo.
 - `combat_smoke_tests` y `application_state_tests`.
 
-Herramientas visuales, que no forman parte de `ctest`: `stage1_visual_check` y `kf_bot_visual_check`.
+Herramientas visuales, que no forman parte de `ctest`: `stage1_visual_check`, `kf_bot_visual_check`, `skills_visual_check` (las 6 habilidades de un personaje) y `roster_sheets` (genera `docs/personajes_jugables/`).

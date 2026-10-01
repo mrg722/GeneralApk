@@ -45,9 +45,12 @@ void Player::Reset() {
     for (int i = 0; i < static_cast<int>(AttackId::Count); ++i) attackCooldowns[i] = 0.0f;
 
     comboCount = 0; comboStep = 0; hasHit = false; energyReleased = false;
+    for (float& cd : skillCooldown) cd = 0.0f;
+    activeSkill = -1; clipDriven = false; multiHitTimer = 0.0f; transformTimer = 0.0f;
     inputEnabled = true;
     debugInvulnerable = false;
     animator = Animator{};
+    altAnimator = Animator{}; usingAlt = false; altTried = false;
 }
 
 void Player::ApplyUpgrades(const PlayerUpgrades& newUpgrades) {
@@ -77,7 +80,7 @@ void Player::SetState(PlayerState next) {
     if (state == next && next != PlayerState::Attack) return;
     state = next;
     hasHit = false;
-    if (state != PlayerState::Attack) attackPhase = AttackPhase::None;
+    if (state != PlayerState::Attack) { attackPhase = AttackPhase::None; activeSkill = -1; clipDriven = false; }
     if (state == PlayerState::Hit || state == PlayerState::GuardBreak ||
         state == PlayerState::Knockdown || state == PlayerState::Defeat ||
         state == PlayerState::Airborne) {
@@ -169,6 +172,41 @@ static void EnsurePlayerAnimator(Animator& animator, int skin) {
     if (legacy.id != 0) { animator.Init(legacy, 5, 3, false); animator.Play({0, 4, 0.12f, true}); }
 }
 
+void Player::UpdateTransformForm() {
+    const CharacterVisual& cv = GetCharacterVisual(skin);
+    if (cv.transformAtlasId == nullptr && cv.transformKfRoster < 0) return;
+    // Cambia de forma al terminar la animacion de transformar y vuelve al acabar
+    // los 12 s; nunca a mitad de un ataque.
+    const bool want = IsTransformed() && !(state == PlayerState::Attack && activeSkill == kSkillCount - 1);
+    if (want == usingAlt || state == PlayerState::Attack) return;
+    if (!altTried) {
+        altTried = true;
+        if (cv.transformAtlasId) {
+            const AtlasProfile* prof = SpriteManifest::Get().FindAtlas(cv.transformAtlasId);
+            if (prof) altAnimator.InitFromManifest(cv.transformAtlasId, AssetManager::Get().GetTextureByPath(prof->path));
+        } else {
+            const KfReference& k = GetKfCharacter(cv.transformKfRoster);
+            if (k.loaded) altAnimator = k.templ;
+        }
+    }
+    if (altAnimator.texture.id == 0) return;
+    std::swap(animator, altAnimator);
+    usingAlt = want;
+    const char* clip = "idle";
+    switch (state) {
+        case PlayerState::Walk: clip = "walk"; break;
+        case PlayerState::Dash: clip = "dash"; break;
+        case PlayerState::Block: clip = "block"; break;
+        case PlayerState::Recovery: clip = "recovery"; break;
+        case PlayerState::Hit: case PlayerState::GuardBreak: clip = "hit_high"; break;
+        case PlayerState::Knockdown: clip = "knockdown"; break;
+        case PlayerState::Airborne: clip = "airborne"; break;
+        case PlayerState::Defeat: clip = "defeat"; break;
+        default: break;
+    }
+    if (!animator.PlayNamed(clip)) animator.PlayNamed("idle");
+}
+
 void Player::UpdateRage(float dt) {
     rageAuraPhase += dt;
 
@@ -230,12 +268,15 @@ float Player::GetMoveSpeed() const {
     float speed = 245.0f * upgrades.moveSpeedScale;
     if (isRageMode) speed *= 1.16f;
     if (speedBuffTimer > 0.0f) speed *= 1.22f;
+    if (transformTimer > 0.0f) speed *= 1.15f;
     return speed;
 }
 
 void Player::Update(float dt) {
     EnsurePlayerAnimator(animator, skin);
+    UpdateTransformForm();
     animator.Update(dt);
+    UpdateMotionFeel(dt);
 
     dashInvulnerability = std::max(0.0f, dashInvulnerability - dt);
     dashCooldown = std::max(0.0f, dashCooldown - dt);
@@ -244,6 +285,8 @@ void Player::Update(float dt) {
     for (int i = 0; i < static_cast<int>(AttackId::Count); ++i) {
         attackCooldowns[i] = std::max(0.0f, attackCooldowns[i] - dt);
     }
+    for (float& cd : skillCooldown) cd = std::max(0.0f, cd - dt);
+    transformTimer = std::max(0.0f, transformTimer - dt);
 
     UpdateRage(dt);
 
@@ -339,6 +382,10 @@ void Player::Update(float dt) {
         if (def.spawnsProjectile && !energyReleased && attackElapsed >= def.startup) {
             energyReleased = true;
         }
+        if (clipDriven && (multiHitTimer -= dt) <= 0.0f) {
+            hasHit = false;   // la animacion larga vuelve a golpear
+            multiHitTimer = currentAttack == AttackId::Skill ? 0.26f : 0.30f;
+        }
         // Animation cancel: con un comando valido en el buffer y el ataque en su
         // ventana final, se corta el winddown y se encadena el siguiente golpe.
         if (inputEnabled && InCancelWindow() && TryStartBufferedAttack(true)) return;
@@ -427,6 +474,7 @@ void Player::TakeDamage(int damage) {
 void Player::ApplyCharacter(int id) {
     skin = id;
     animator = Animator{};                     // se reinicia con el atlas del personaje
+    altAnimator = Animator{}; usingAlt = false; altTried = false;
     if (id == 0) return;                       // Rayden original: intacto
     const CharacterVisual& cv = GetCharacterVisual(id);
     // Los personajes con hoja completa (Rayder) conservan las mejoras de campana.

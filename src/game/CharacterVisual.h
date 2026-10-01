@@ -35,6 +35,12 @@ struct CharacterVisual {
     const char* atlasId = nullptr;
     // Laboratorio: personaje extraido de la APK (indice en KfRoster), -1 = no.
     int kfRoster = -1;
+    // Ancho del dibujo (1 = original). Rayder: 0.84 para la complexion de Rayden.
+    float widthScale = 1.0f;
+    // Forma transformada (habilidad 6): otro atlas del manifiesto o, en el
+    // laboratorio, otro personaje KF (el mismo luchador transformado).
+    const char* transformAtlasId = nullptr;
+    int transformKfRoster = -1;
 };
 
 int CharacterCount();

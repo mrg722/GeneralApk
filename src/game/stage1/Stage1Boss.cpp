@@ -1,5 +1,6 @@
 // Stage 1: jefe final Brakk (IA, pelea, derrota).
 #include "game/stage1/Stage1Common.h"
+#include "rendering/SpriteManifest.h"
 
 namespace district_fury {
 
@@ -140,8 +141,28 @@ void Stage1StoryGame::UpdateBoss(float dt) {
 // (solo UpdateBoss), por lo que no podia moverse ni atacar y el nivel no
 // se podia terminar.
 void Stage1StoryGame::UpdateBossFight(float dt) {
-    // Animacion del cuerpo de Brakk: 0 reposo, 1 caminar, 2 ataque, 3 golpe, 4 derrota.
-    if (StreetEnemy::PrepareAtlasAnimator(bossAnim, StreetEnemyType::Brute)) {
+    // Animacion del cuerpo de Brakk. Hoja mejorada (atlas "brakk_v2"): un clip
+    // por accion. Si no esta, se usa el atlas del Brute como antes.
+    if (!brakkV2 && bossAnim.texture.id == 0) {
+        const AtlasProfile* prof = SpriteManifest::Get().FindAtlas("brakk_v2");
+        brakkV2 = prof && bossAnim.InitFromManifest("brakk_v2", AssetManager::Get().GetTextureByPath(prof->path));
+    }
+    if (brakkV2) {
+        const float dx = std::abs(player.position.x - boss.position.x);
+        const char* clip = boss.defeated                                   ? "defeat"
+                           : boss.invulnerability > 0.08f                  ? "hit"
+                           : boss.blocking                                 ? "block"
+                           : boss.attack == StoryBossAttack::ChainSwing    ? "chain"
+                           : boss.attack == StoryBossAttack::GroundSmash   ? "smash"
+                           : boss.attack == StoryBossAttack::Charge        ? "charge"
+                           : boss.attack == StoryBossAttack::PowerWave     ? "chain_throw"
+                           : boss.attack == StoryBossAttack::Frenzy        ? (boss.phase >= 3 ? "explosive" : "fury")
+                           : dx > 190.f                                    ? (boss.phase >= 3 ? "run" : "walk")
+                                                                           : "idle";
+        if (bossAnim.currentClipName != clip) bossAnim.PlayNamed(clip);
+        bossAnim.Update(dt);
+    } else if (StreetEnemy::PrepareAtlasAnimator(bossAnim, StreetEnemyType::Brute)) {
+        // 0 reposo, 1 caminar, 2 ataque, 3 golpe, 4 derrota.
         const int mode = boss.defeated                                           ? 4
                          : boss.invulnerability > 0.08f                          ? 3
                          : boss.attack != StoryBossAttack::None                  ? 2

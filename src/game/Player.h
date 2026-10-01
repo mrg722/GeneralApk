@@ -3,6 +3,7 @@
 #include "game/InputBuffer.h"
 #include "game/combat/AttackData.h"
 #include "rendering/Animator.h"
+#include <vector>
 
 namespace district_fury {
 
@@ -17,6 +18,7 @@ struct PlayerInput {
     bool block = false, dash = false, punch = false, kick = false, energy = false, rage = false;
     // Botones tactiles de especial directo (sin tener que hacer el comando).
     bool specialWave = false, specialRise = false;
+    int skill = -1;   // habilidad pulsada este frame (0..5), -1 = ninguna
 };
 
 // Sub-estado de la FSM mientras state == Attack.
@@ -93,8 +95,58 @@ public:
 
     int comboCount; int comboStep; bool hasHit; bool energyReleased;
 
+    // Habilidades (botones 1-6, estilo King Fighter): cada una con 15 s de espera.
+    static constexpr int kSkillCount = 6;
+    static constexpr float kSkillCooldown = 15.0f;
+    static constexpr float kTransformDuration = 12.0f;
+    float skillCooldown[kSkillCount] = {};
+    int activeSkill{-1};          // habilidad en curso (-1 = ataque normal)
+    bool clipDriven{false};       // la animacion manda duracion y golpes (KF y habilidades)
+    float multiHitTimer{0.0f};    // golpes repetidos durante una animacion larga
+    float transformTimer{0.0f};   // transformacion activa (dano y velocidad extra)
+
+    // Nombre en pantalla de la habilidad i (segun el personaje).
+    const char* SkillName(int i) const;
+    bool SkillReady(int i) const { return i >= 0 && i < kSkillCount && skillCooldown[i] <= 0.0f; }
+    bool IsTransformed() const { return transformTimer > 0.0f; }
+    // Personaje extraido de la APK (sus clips traen su propio arte de poderes).
+    bool IsKfCharacter() const;
+    // Intenta lanzar la habilidad i ahora; false si esta en espera o no puede actuar.
+    bool TryStartSkill(int i);
+    // Escala de dibujo del sprite (la usa tambien la caja de golpe de las habilidades).
+    float SpriteScale() const;
+    // Retrato para el HUD: cabeza y torso del primer cuadro de reposo dentro de `box`.
+    void DrawPortrait(Rectangle box) const;
+
+    // Fluidez (estilo King Fighter) para nuestros personajes: respiracion,
+    // balanceo, inclinacion, giro suave, aterrizaje y estelas. Solo visual,
+    // salvo el avance de los golpes (root motion), que si mueve al personaje.
+    struct Ghost { Vector2 pos; int frame; bool flip; float life; };
+    static constexpr int kGhostCount = 5;
+    Ghost ghosts[kGhostCount] = {};
+    float ghostTimer{0.0f};
+    float animClock{0.0f};
+    float walkPhase{0.0f};
+    float turnTimer{0.0f};
+    float landTimer{0.0f};
+    Facing lastFacing{Facing::Right};
+    PlayerState lastState{PlayerState::Idle};
+
+    // Efectos de poder (assets/fx/efectos_azules.png, rejilla 8x5): chispa al
+    // conectar, estallido al transformarse. Solo nuestros personajes (los KF
+    // traen sus efectos dentro de su animacion).
+    struct Fx { int first, count; Vector2 pos; float t, dur, scale; };
+    std::vector<Fx> effects;
+    bool prevHasHit{false};
+    void SpawnFx(int first, int count, Vector2 pos, float dur, float scale);
+
     PlayerUpgrades upgrades;
     Animator animator;
+    // Forma transformada: se intercambia con `animator` mientras dura la
+    // transformacion (Rayder de pelo blanco, heroe/heroina KF transformados).
+    Animator altAnimator;
+    bool usingAlt{false};
+    bool altTried{false};
 
     // Permite que el tutorial o una cinematica corten la entrada sin tocar el loop.
     bool inputEnabled;
@@ -147,6 +199,8 @@ public:
 
 private:
     void BeginAttack(AttackId id);
+    void BeginClipAttack(const char* clip, int skillIndex);
+    float ClipSeconds(const char* clip) const;
     void PollAttackInput();
     PlayerInput ReadInput() const;
     bool inputPumped{false};
@@ -155,6 +209,8 @@ private:
     void UpdateRage(float dt);
     void HandleInput(float dt);
     void DrawRageAura(Vector2 screen, float scale) const;
+    void UpdateMotionFeel(float dt);
+    void UpdateTransformForm();
 };
 
 }  // namespace district_fury

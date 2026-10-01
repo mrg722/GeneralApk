@@ -589,6 +589,7 @@ void Stage3Game::DrawHUD() const {
     // combo interno del panel compartido para no duplicarlo.
     {
         ui::PlayerVitals vitals{};
+    vitals.player = &player;
         vitals.hp = player.hp;
         vitals.maxHp = player.maxHp;
         vitals.shield = player.shield;

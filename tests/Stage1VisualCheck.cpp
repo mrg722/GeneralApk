@@ -65,6 +65,9 @@ int main(int argc, char** argv) {
         for (const StreetEnemy& e : game.Enemies())
             if (!sawAir && e.state == StreetEnemyState::Airborne && e.position.z > 40.f) { sawAir = true; Shot("enemigo_en_el_aire"); }
         if (game.Flow() == StoryFlow::Boss && !sawBoss && game.Boss().hp < game.Boss().maxHp * 0.8f) { sawBoss = true; Shot("brakk"); }
+        // Mas capturas de Brakk a lo largo de la pelea (ataques, fases, derrota).
+        static int bossShots = 0;
+        if (game.Flow() == StoryFlow::Boss && bossShots < 6 && frame % 150 == 0) { ++bossShots; Shot("brakk_pelea"); }
         if (!running) { Shot(game.Flow() == StoryFlow::StageClear ? "nivel_completado" : "game_over"); break; }
     }
     AssetManager::Get().UnloadAll();
