@@ -209,6 +209,18 @@ void Player::Draw() const {
     Texture2D altTex{};
     if (skin != 0 && cv.folder != nullptr && cv.atlasId == nullptr) {
         const char* pose = CharacterPose(skin, state, attackType, isRageMode, GetTime());
+        // Rayden clon jugable: refuerza anticipacion/impacto/recuperacion usando
+        // exclusivamente sus poses reales. No modifica KF ni Rayder Cruz.
+        if (skin == 1 && state == PlayerState::Attack) {
+            const float t = attackElapsed;
+            if (attackType == AttackType::Energy) {
+                pose = t < 0.16f ? "ready" : t < 0.42f ? "release_orb" : "idle2";
+            } else if (attackType == AttackType::Kick) {
+                pose = t < 0.10f ? "ready" : t < 0.30f ? "kick" : "idle3";
+            } else {
+                pose = t < 0.09f ? "ready" : t < 0.28f ? "punch" : t < 0.44f ? "idle2" : "idle1";
+            }
+        }
         altTex = AssetManager::Get().GetTexture(std::string(cv.folder) + "_" + pose);
         if (altTex.id == 0) altTex = AssetManager::Get().GetTexture(std::string(cv.folder) + (cv.uniformCanvas ? "_idle" : "_idle1"));
     }
@@ -235,29 +247,51 @@ void Player::Draw() const {
             Vector2 at = p;
             switch (state) {
                 case PlayerState::Idle:
-                case PlayerState::Recovery: {   // respiracion
+                case PlayerState::Recovery: {
                     const float b = std::sin(animClock * 3.4f);
                     sy = 1.0f + 0.016f * b;
                     sx = 1.0f - 0.008f * b;
+                    if (skin == 6) sy += 0.008f * std::sin(animClock * 6.8f);
                     break;
                 }
-                case PlayerState::Walk: {       // balanceo y peso hacia adelante
+                case PlayerState::Walk: {
                     const float st = std::sin(walkPhase);
                     at.y -= std::fabs(st) * 3.0f * scale;
                     sy = 1.0f + 0.012f * std::fabs(st);
                     angle = 3.5f * dir;
+                    if (skin == 6) {
+                        at.x += dir * 2.0f * std::sin(walkPhase);
+                        angle = 4.5f * dir * std::sin(walkPhase);
+                        sy += 0.008f * std::fabs(std::sin(walkPhase * 0.5f));
+                    }
                     break;
                 }
                 case PlayerState::Dash:
                     angle = 9.0f * dir; sx = 1.06f; sy = 0.96f;
+                    if (skin == 6) { sx = 1.10f; sy = 0.93f; angle = 11.0f * dir; }
                     break;
-                case PlayerState::Attack: {     // se estira hacia el golpe y vuelve
+                case PlayerState::Attack: {
                     const AttackDef& ad = GetAttack(currentAttack);
-                    const float t = std::clamp(attackElapsed / std::max(0.01f, ad.startup + ad.active), 0.0f, 1.0f);
+                    const float activeStart = ad.startup;
+                    const float activeEnd = ad.startup + ad.active;
+                    const float t = std::clamp(attackElapsed / std::max(0.01f, activeEnd), 0.0f, 1.0f);
                     const float impact = std::sin(t * 3.14159f);
                     angle = 5.0f * dir * impact;
                     sx = 1.0f + 0.05f * impact;
                     sy = 1.0f - 0.025f * impact;
+                    if (skin == 6) {
+                        if (attackElapsed < activeStart) {
+                            sx = 0.94f; sy = 1.045f; angle = -3.5f * dir;
+                        } else {
+                            const float post = std::clamp((attackElapsed - activeStart) /
+                                                          std::max(0.01f, ad.active), 0.0f, 1.0f);
+                            const float hit = std::sin(post * 3.14159f);
+                            sx = 1.0f + 0.075f * hit;
+                            sy = 1.0f - 0.040f * hit;
+                            angle = 6.5f * dir * hit;
+                            at.x += dir * 2.5f * hit;
+                        }
+                    }
                     break;
                 }
                 case PlayerState::Hit:
