@@ -6,6 +6,9 @@
 #include <fstream>
 #include <iterator>
 #include <map>
+#include <unordered_map>
+#include <cstdlib>
+#include <string>
 #include <vector>
 
 namespace district_fury {
@@ -102,6 +105,77 @@ Image TransformPiece(Image piece, int midp) {
     return piece;
 }
 
+// Copia "Rayder clon BETA" (tint 2): cada color exacto de las piezas del heroe
+// se cambia por el material del clon (data/kf_clone_palette.json, generado por
+// tools/build_kf_clone_palette.py). Los efectos fuera de la tabla pasan a morado.
+const std::unordered_map<uint32_t, uint32_t>& ClonePalette() {
+    static std::unordered_map<uint32_t, uint32_t> table;
+    static bool loaded = false;
+    if (loaded) return table;
+    loaded = true;
+    std::string text;
+    for (const char* path : {"data/kf_clone_palette.json", "../data/kf_clone_palette.json", "../../data/kf_clone_palette.json"})
+        if (platform::LoadTextFile(path, text)) break;
+    auto hex = [](const std::string& s, size_t at) { return (uint32_t)std::strtoul(s.substr(at, 6).c_str(), nullptr, 16); };
+    for (size_t p = text.find('"'); p != std::string::npos; p = text.find('"', p + 1)) {
+        // pares "rrggbb": "rrggbb"
+        if (p + 7 < text.size() && text[p + 7] == '"') {
+            const size_t q = text.find('"', p + 8);
+            if (q != std::string::npos && q + 7 < text.size() && text[q + 7] == '"') {
+                table[hex(text, p + 1)] = hex(text, q + 1);
+                p = q + 7;
+            }
+        }
+    }
+    return table;
+}
+
+void CloneTint(Image& img) {
+    ImageFormat(&img, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    const auto& table = ClonePalette();
+    Color* px = (Color*)img.data;
+    for (int i = 0; i < img.width * img.height; ++i) {
+        if (px[i].a == 0) continue;
+        const uint32_t key = (uint32_t(px[i].r) << 16) | (uint32_t(px[i].g) << 8) | px[i].b;
+        const auto it = table.find(key);
+        if (it != table.end()) {
+            px[i].r = (it->second >> 16) & 255; px[i].g = (it->second >> 8) & 255; px[i].b = it->second & 255;
+            continue;
+        }
+        const Vector3 hsv = ColorToHSV(px[i]);
+        if ((hsv.x < 45.0f || hsv.x > 320.0f) && hsv.y > 0.35f) {   // fuego, cortes y destellos -> morado
+            const unsigned char a = px[i].a;
+            px[i] = ColorFromHSV(282.0f, hsv.y * 0.62f, std::min(1.0f, hsv.z * 1.2f + 0.1f));
+            px[i].a = a;
+        }
+    }
+}
+
+// Escala x2 para pixel art (EPX/Scale2x): suaviza diagonales sin difuminar.
+Image Scale2x(const Image& src) {
+    Image dst = GenImageColor(src.width * 2, src.height * 2, BLANK);
+    const Color* s = (const Color*)src.data;
+    Color* d = (Color*)dst.data;
+    auto at = [&](int x, int y) {
+        x = std::clamp(x, 0, src.width - 1); y = std::clamp(y, 0, src.height - 1);
+        return s[y * src.width + x];
+    };
+    auto eq = [](Color a, Color b) { return a.r == b.r && a.g == b.g && a.b == b.b && a.a == b.a; };
+    for (int y = 0; y < src.height; ++y)
+        for (int x = 0; x < src.width; ++x) {
+            const Color P = at(x, y), A = at(x, y - 1), B = at(x + 1, y), C = at(x - 1, y), D = at(x, y + 1);
+            Color e0 = P, e1 = P, e2 = P, e3 = P;
+            if (eq(C, A) && !eq(C, D) && !eq(A, B)) e0 = A;
+            if (eq(A, B) && !eq(A, C) && !eq(B, D)) e1 = B;
+            if (eq(D, C) && !eq(D, B) && !eq(C, A)) e2 = C;
+            if (eq(B, D) && !eq(B, A) && !eq(D, C)) e3 = D;
+            const int w = dst.width;
+            d[(2 * y) * w + 2 * x] = e0; d[(2 * y) * w + 2 * x + 1] = e1;
+            d[(2 * y + 1) * w + 2 * x] = e2; d[(2 * y + 1) * w + 2 * x + 1] = e3;
+        }
+    return dst;
+}
+
 void RayderTint(Image& img) {
     ImageFormat(&img, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
     Color* px = (Color*)img.data;
@@ -161,6 +235,10 @@ constexpr KfRosterEntry kRoster[] = {
     {15, "KF BUFONA", false, 140, 1.8f},
     {1, "KF HEROE TRANSFORMADO", true, 120, 1.8f},     // el heroe transformado (llamas rojas, otros golpes)
     {3, "KF HEROINA TRANSFORMADA", true, 100, 1.8f},   // la heroina transformada (lanza y rayos)
+    // COPIA del heroe (normal y transformado) vestida como el Rayder clon BETA:
+    // mismas piezas, cuadros, tiempos y habilidades; el heroe original no se toca.
+    {0, "RAYDER CLON BETA", true, 115, 0.9f, 2},
+    {1, "RAYDER CLON BETA TRANSFORMADO", true, 125, 0.9f, 2},
     // El sprite 33 no es luchador (vendedor/puesto del escenario): excluido.
 };
 
@@ -263,16 +341,24 @@ KfReference Load(const KfRosterEntry& who) {
                 UnloadImage(p.img);
             }
             if (who.tint == 1) RayderTint(canvas);
+            float upscale = 1.0f;
+            if (who.tint == 2) {
+                CloneTint(canvas);
+                Image big = Scale2x(canvas);
+                UnloadImage(canvas);
+                canvas = big;
+                upscale = 2.0f;
+            }
             frameSlot[st.frame] = (int)composed.size();
             composed.push_back(canvas);
-            origin.push_back({(float)-x0, (float)-y0});
+            origin.push_back({(float)-x0 * upscale, (float)-y0 * upscale});
         }
     }
     for (auto& kv : sheets) UnloadImage(kv.second);
     if (composed.empty()) { out.error = "sin frames"; return out; }
 
     // Empaquetado por estantes en un atlas de 2048 de ancho.
-    const int atlasW = 2048; int x = 0, y = 0, rowH = 0;
+    const int atlasW = who.tint == 2 ? 4096 : 2048; int x = 0, y = 0, rowH = 0;   // x2: atlas mas ancho (<= 4096)
     std::vector<Rectangle> place;
     for (auto& img : composed) {
         if (x + img.width > atlasW) { x = 0; y += rowH + 2; rowH = 0; }

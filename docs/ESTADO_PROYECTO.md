@@ -1,4 +1,4 @@
-# District Fury: estado del proyecto (v0.17-lab)
+# District Fury: estado del proyecto (v0.18-lab)
 
 ## Lo que llevamos ✅
 
@@ -9,7 +9,7 @@
 | **Rayden Cruz** | Jugable, 22 frames, con fluidez añadida (respiración, balanceo, avance al golpear y estelas). |
 | **Rayder** | Usa todas las hojas recibidas: estilo KF, combate 50, avanzada 36, carga de transformación 12 y forma de pelo blanco completa. Aparece de espaldas en la elección. |
 | **Rayden clon (rojo)** | Igual que antes (poses del jefe). |
-| **Rayder clon BETA (prueba, morado)** | Se recortaron las 23 animaciones de tu hoja del clon (idle, caminar, correr, dash, saltar, golpes, combos, patada, onda oscura, rage, teletransporte, clones, ataque aéreo, finisher, daño y muerte) y se pintaron de morado claro eléctrico, con la piel intacta. Luego se montaron cuadro a cuadro sobre una copia de los pasos y tiempos del héroe KF: hereda su cadencia, sus 5 habilidades, el súper y la transformación. El héroe KF original no se toca. Herramienta: `tools/build_rayder_clone_beta.py`. |
+| **Rayder clon BETA (prueba, morado)** | **Copia completa del héroe KF de pelo blanco**: sus 311 piezas, 521 cuadros, 61 acciones, habilidades, súper y transformación (sprites 1 y 3 de la APK). Cada pieza está vestida con el material del Rayder clon: pelo negro, chaqueta de cuero negra, camiseta blanca, pantalón negro, detalles y poderes morado claro eléctrico, y la piel intacta (`tools/build_kf_clone_palette.py` → `data/kf_clone_palette.json`). La calidad se subió a 2x con Scale2x para pixel art. Las formas son las del KF cuadro a cuadro. El héroe KF original no se toca. |
 | **Laboratorio KF** | 13 personajes con sus colores originales. El héroe y la heroína se transforman en sus formas reales (sprites 1 y 3). |
 | **Brakk** | Hoja mejorada en el Nivel 1 y jugable en VS. |
 | **Nivel 1** | Completable: 4 escenarios, oleadas, "GO >>", guardianes y Brakk. |
