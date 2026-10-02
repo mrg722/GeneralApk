@@ -1,0 +1,157 @@
+
+medusa3.png
+size: 503,502
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+meidusha_gebo
+  rotate: false
+  xy: 2, 2
+  size: 159, 117
+  orig: 159, 117
+  offset: 0, 0
+  index: -1
+meidusha_hair_02
+  rotate: false
+  xy: 163, 4
+  size: 159, 115
+  orig: 159, 115
+  offset: 0, 0
+  index: -1
+meidusha_head
+  rotate: false
+  xy: 2, 121
+  size: 459, 379
+  orig: 459, 379
+  offset: 0, 0
+  index: -1
+zhujue_qunbai
+  rotate: false
+  xy: 324, 25
+  size: 162, 94
+  orig: 162, 94
+  offset: 0, 0
+  index: -1
+zm_0000_A
+  rotate: false
+  xy: 463, 449
+  size: 38, 51
+  orig: 38, 51
+  offset: 0, 0
+  index: -1
+zm_0007_H
+  rotate: false
+  xy: 463, 395
+  size: 34, 52
+  orig: 34, 52
+  offset: 0, 0
+  index: -1
+
+medusa32.png
+size: 487,508
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+beijing_02
+  rotate: false
+  xy: 133, 64
+  size: 237, 147
+  orig: 237, 147
+  offset: 0, 0
+  index: -1
+jingkuang1
+  rotate: false
+  xy: 2, 213
+  size: 473, 293
+  orig: 473, 293
+  offset: 0, 0
+  index: -1
+meidusha_hair_01
+  rotate: false
+  xy: 133, 2
+  size: 85, 60
+  orig: 85, 60
+  offset: 0, 0
+  index: -1
+meidusha_hair_03
+  rotate: false
+  xy: 372, 129
+  size: 113, 82
+  orig: 113, 82
+  offset: 0, 0
+  index: -1
+zhujue_leg_R
+  rotate: false
+  xy: 372, 33
+  size: 84, 94
+  orig: 84, 94
+  offset: 0, 0
+  index: -1
+zhujue_suishi
+  rotate: false
+  xy: 2, 6
+  size: 129, 205
+  orig: 129, 205
+  offset: 0, 0
+  index: -1
+
+medusa33.png
+size: 480,446
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+meidusha_texiao
+  rotate: false
+  xy: 2, 151
+  size: 473, 293
+  orig: 473, 293
+  offset: 0, 0
+  index: -1
+meidusha_weiba
+  rotate: false
+  xy: 2, 2
+  size: 237, 147
+  orig: 237, 147
+  offset: 0, 0
+  index: -1
+zhezhao
+  rotate: false
+  xy: 241, 2
+  size: 237, 147
+  orig: 237, 147
+  offset: 0, 0
+  index: -1
+
+medusa34.png
+size: 431,337
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+beijing_01
+  rotate: false
+  xy: 240, 239
+  size: 189, 96
+  orig: 189, 96
+  offset: 0, 0
+  index: -1
+meidusha_hair_04
+  rotate: false
+  xy: 240, 148
+  size: 158, 89
+  orig: 158, 89
+  offset: 0, 0
+  index: -1
+zhujue
+  rotate: false
+  xy: 2, 2
+  size: 236, 333
+  orig: 236, 333
+  offset: 0, 0
+  index: -1
+zhujue_leg_L
+  rotate: false
+  xy: 240, 67
+  size: 94, 79
+  orig: 94, 79
+  offset: 0, 0
+  index: -1

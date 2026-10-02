@@ -1,0 +1,7 @@
+qte tentaculos
+dir assets/beta/spine/qte/PoseidonBabyQTE
+seg poseidonbaby1 fenjingdonghua1 3.1666 fenjingdonghua6
+seg poseidonbaby1 fenjingdonghua2 -1 -
+seg poseidonbaby2 fenjingdonghua3 1.7 fenjingdonghua7
+seg poseidonbaby3 fenjingdonghua4 -1 -
+seg poseidonbaby3 fenjingdonghua5 -1 -

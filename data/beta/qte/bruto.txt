@@ -1,0 +1,9 @@
+qte bruto
+dir assets/beta/spine/qte/ChainfattyQTE
+seg Chainfatty1 fenjingdonghua1 1 fenjingdonghua8
+seg Chainfatty2 fenjingdonghua2 -1 -
+seg Chainfatty2 fenjingdonghua3 -1 -
+seg Chainfatty3 fenjingdonghua4 -1 -
+seg Chainfatty4 fenjingdonghua5 0.7333 fenjingdonghua9
+seg Chainfatty5 fenjingdonghua6 -1 -
+seg Chainfatty6 fenjingdonghua7 -1 -

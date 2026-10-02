@@ -137,6 +137,7 @@ void BetaMode::StartFight() {
     banner = 0;
     time = 0;
     boss = BossFight{};
+    qte = Qte{};
     stage.Load(kStageIds[std::clamp(selStage, 0, kStageCount - 1)]);
     const float left = stage.Loaded() ? stage.WorldLeft() : 90.0f;
     AddFighter(CharIndex(selCharacter), false, left + 220.0f, 570.0f);
@@ -237,7 +238,9 @@ void BetaMode::Update(float dt) {
         if (resultTimer > 0.6f && (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J))) StartFight();
         return;
     }
+    if (qte.active) { UpdateQte(dt); return; }
     UpdateFight(dt);
+    CheckQteTriggers();
 }
 
 void BetaMode::UpdateFight(float dt) {
@@ -645,6 +648,174 @@ void BetaMode::DrawBoss() const {
     boss.skel.Draw({boss.pos.x, boss.pos.y - boss.ground * k}, k * boss.scale, flip, tint);
 }
 
+
+// ---------------------------------------------------------------- remate (QTE)
+
+namespace {
+const char* QteKeyFor(int betaIndex) {
+    switch (betaIndex) {
+    case Centauro: case CentauroRojo: return "centauro";
+    case Bruto: case BrutoRojo: return "bruto";
+    case Medusa: case MedusaRoja: return "medusa";
+    default: return nullptr;
+    }
+}
+}  // namespace
+
+void BetaMode::CheckQteTriggers() {
+    if (qte.active || fighters.empty()) return;
+    Fighter& hero = *fighters[0];
+    // Las vinetas muestran al guerrero: solo si el jugador usa una de sus 4 armas.
+    if (selCharacter > Garras || hero.p.state == PlayerState::Defeat) return;
+    for (size_t i = 1; i < fighters.size(); ++i) {
+        Fighter& f = *fighters[i];
+        const char* key = QteKeyFor(f.character - FirstBetaCharacter());
+        if (!key || f.qteDone || f.p.state == PlayerState::Defeat || f.p.hp <= 0) continue;
+        if (f.p.hp * 5 <= f.p.maxHp) {   // <= 20% (QteControl.lua Section1)
+            f.qteDone = true;
+            if (StartQte(key, (int)i)) return;
+        }
+    }
+    if (boss.active && !boss.qteDone && boss.phase != 4 && boss.hp * 5 <= boss.maxHp) {
+        boss.qteDone = true;
+        const char* key = boss.id == "jefe_poseidon" ? "poseidon" : boss.id == "jefe_tentaculos" ? "tentaculos" : nullptr;
+        if (key) StartQte(key, -1);
+    }
+}
+
+bool BetaMode::StartQte(const std::string& key, int fighter) {
+    std::string text;
+    const std::string rel = "data/beta/qte/" + key + ".txt";
+    for (const std::string& p : {rel, "../" + rel, "../../" + rel})
+        if (platform::LoadTextFile(p, text)) break;
+    if (text.empty()) return false;
+    Qte q;
+    std::istringstream in(text);
+    std::string line;
+    while (std::getline(in, line)) {
+        std::istringstream ls(line);
+        std::string tag;
+        ls >> tag;
+        if (tag == "dir") ls >> q.dir;
+        else if (tag == "seg") {
+            QteSeg sg;
+            ls >> sg.file >> sg.anim >> sg.prompt >> sg.fail;
+            if (sg.fail == "-") sg.fail.clear();
+            q.segs.push_back(sg);
+        }
+    }
+    if (q.segs.empty()) return false;
+    q.fighter = fighter;
+    q.active = true;
+    qte = std::move(q);
+    QtePlaySegment();
+    if (!qte.skel.Valid()) { qte = Qte{}; return false; }
+    PlaySound("sound25");
+    return true;
+}
+
+void BetaMode::QtePlaySegment() {
+    static std::map<std::string, std::shared_ptr<spine21::SkeletonData>> cache;
+    const QteSeg& sg = qte.segs[(size_t)qte.seg];
+    const std::string key = qte.dir + "/" + sg.file;
+    auto it = cache.find(key);
+    if (it == cache.end()) {
+        auto data = std::make_shared<spine21::SkeletonData>();
+        if (!data->Load(qte.dir, sg.file)) {
+            TraceLog(LOG_WARNING, "BETA: no cargo la cinematica %s: %s", key.c_str(), data->error.c_str());
+            data.reset();
+        }
+        it = cache.emplace(key, data).first;
+    }
+    qte.skel = spine21::Skeleton{};
+    if (!it->second) return;
+    qte.skel.SetData(it->second);
+    qte.skel.Play(qte.failing ? sg.fail : sg.anim, false);
+    qte.waiting = false;
+    qte.resolved = false;
+}
+
+void BetaMode::UpdateQte(float dt) {
+    if (qte.waiting) {
+        // Boton a tiempo: golpe (J / boton GOLPE), patada o ENTER.
+        if (input::Pressed(KEY_J) || input::Pressed(KEY_K) || input::Pressed(KEY_ENTER)) {
+            qte.waiting = false;
+            qte.resolved = true;
+            PlaySound("sound61");
+            shake = 0.15f;
+        } else if ((qte.timer -= dt) <= 0.0f) {
+            qte.waiting = false;
+            const QteSeg& sg = qte.segs[(size_t)qte.seg];
+            if (sg.fail.empty()) { EndQte(false); return; }
+            qte.failing = true;
+            QtePlaySegment();
+        }
+        return;
+    }
+    qte.skel.Update(dt);
+    const QteSeg& sg = qte.segs[(size_t)qte.seg];
+    if (!qte.failing && !qte.resolved && sg.prompt >= 0.0f && qte.skel.Time() >= sg.prompt) {
+        qte.waiting = true;
+        qte.timer = 2.0f;
+        PlaySound("sound24");
+        return;
+    }
+    if (qte.skel.Finished()) {
+        if (qte.failing) { EndQte(false); return; }
+        if (++qte.seg >= (int)qte.segs.size()) { EndQte(true); return; }
+        QtePlaySegment();
+    }
+}
+
+void BetaMode::EndQte(bool success) {
+    const int target = qte.fighter;
+    qte = Qte{};
+    if (target >= 0 && target < (int)fighters.size()) {
+        Fighter& f = *fighters[(size_t)target];
+        if (success) {   // remate
+            f.p.hp = 0;
+            f.p.SetState(PlayerState::Defeat);
+            PlaySound("sound48");
+        } else {         // QteControl.lua AddHP: +10%
+            f.p.hp = std::min(f.p.maxHp, f.p.hp + f.p.maxHp / 10);
+        }
+        f.lastHp = f.p.hp + (success ? 1 : 0);
+    } else if (target < 0 && boss.active) {
+        if (success) {
+            boss.hp = 0;
+            boss.phase = 4;
+            boss.warnOn = false;
+            boss.Play("defeat");
+            const auto it = boss.sounds.find("die");
+            if (it != boss.sounds.end()) PlaySound(it->second);
+            SpawnFx("fx_alma_roja", "a0", {boss.pos.x, boss.pos.y - 120.0f}, false);
+        } else {
+            boss.hp = std::min(boss.maxHp, boss.hp + boss.maxHp / 10);
+        }
+    }
+    bannerText = success ? "REMATE" : "FALLASTE EL REMATE";
+    banner = 1.6f;
+}
+
+void BetaMode::DrawQte() const {
+    if (!qte.active) return;
+    DrawRectangle(0, 0, 1280, 720, {0, 0, 0, 190});
+    // Disenadas para 640 px de alto con el origen al centro: 720/640.
+    qte.skel.Draw({640.0f, 360.0f}, 1.125f, false, WHITE);
+    DrawText("REMATE", 24, 20, 30, {255, 215, 120, 255});
+    if (qte.waiting) {
+        const float k = std::max(0.0f, qte.timer / 2.0f);
+        const float pulse = 1.0f + 0.08f * std::sin(time * 14.0f);
+        DrawCircle(640, 600, 58 * pulse, {200, 30, 30, 230});
+        DrawCircleLines(640, 600, 66, {255, 220, 120, 255});
+        DrawRing({640, 600}, 66, 72, -90, -90 + 360 * k, 48, {255, 220, 120, 255});
+        const char* t = touch::Enabled() ? "GOLPE" : "J";
+        DrawText(t, 640 - MeasureText(t, 34) / 2, 583, 34, WHITE);
+        const char* h = "PULSA AHORA";
+        DrawText(h, 640 - MeasureText(h, 22) / 2, 520, 22, {255, 235, 180, 255});
+    }
+}
+
 // ---------------------------------------------------------------- dibujo
 
 void BetaMode::Draw() const {
@@ -744,6 +915,7 @@ void BetaMode::DrawFight() const {
     EndMode2D();
     stage.DrawWeather(cameraX, time);
     DrawHud();
+    DrawQte();
     if (banner > 0 && result == 0) {
         const unsigned char a = (unsigned char)(255 * std::min(1.0f, banner));
         DrawText(bannerText.c_str(), 640 - MeasureText(bannerText.c_str(), 46) / 2, 300, 46, {255, 215, 120, a});

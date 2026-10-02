@@ -534,8 +534,8 @@ plataformas verticales con mecanismos; los demas repiten los mismos tilesets que
 
 - `spine/Titan`, `spine/Poseidon`, `spine/PoseidonBaby` (= monstruo de tentaculos, anim 15): Spine 2.1.27 con
   mallas y mallas con huesos. Sus cajas y tiempos estan en anim 51/64/15 (cuadros con imagen de relleno 597).
-  INTEGRADOS: el juego dibuja el Spine en vivo (src/game/beta/Spine21.cpp); QTE pendientes.
-- `ChainfattyQTE`, `medsuaQTE`, `RenMaQTE`, `PoseidonQTE`, `PoseidonBabyQTE`: cinematicas de remate (QTE).
+  INTEGRADOS: el juego dibuja el Spine en vivo (src/game/beta/Spine21.cpp, con IK de dos huesos).
+- `ChainfattyQTE`, `medsuaQTE`, `RenMaQTE`, `PoseidonQTE`, `PoseidonBabyQTE`: cinematicas de remate (QTE): INTEGRADAS (data/beta/qte, boton a tiempo).
 - `Menu/zhujue.json`: heroe animado del menu original.
 
 ## Archivos ambiguos

@@ -1,0 +1,452 @@
+
+poseidon7.png
+size: 510,498
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+cam10_toukui
+  rotate: false
+  xy: 224, 9
+  size: 257, 192
+  orig: 257, 192
+  offset: 0, 0
+  index: -1
+cam10_yu
+  rotate: false
+  xy: 2, 203
+  size: 473, 293
+  orig: 473, 293
+  offset: 0, 0
+  index: -1
+cam9_chazi
+  rotate: false
+  xy: 2, 2
+  size: 220, 199
+  orig: 220, 199
+  offset: 0, 0
+  index: -1
+zm_0015_P
+  rotate: false
+  xy: 477, 445
+  size: 31, 51
+  orig: 31, 51
+  offset: 0, 0
+  index: -1
+
+poseidon72.png
+size: 508,504
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+cam10_lian
+  rotate: false
+  xy: 395, 2
+  size: 97, 106
+  orig: 97, 106
+  offset: 0, 0
+  index: -1
+cam8_B_zuodabi
+  rotate: false
+  xy: 395, 110
+  size: 111, 97
+  orig: 111, 97
+  offset: 0, 0
+  index: -1
+cam8_shui
+  rotate: false
+  xy: 2, 22
+  size: 391, 185
+  orig: 391, 185
+  offset: 0, 0
+  index: -1
+cam8_yu1
+  rotate: false
+  xy: 2, 209
+  size: 473, 293
+  orig: 473, 293
+  offset: 0, 0
+  index: -1
+
+poseidon73.png
+size: 503,510
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+cam10_shandian1
+  rotate: false
+  xy: 167, 2
+  size: 173, 150
+  orig: 173, 150
+  offset: 0, 0
+  index: -1
+cam9_A_texiao
+  rotate: false
+  xy: 2, 36
+  size: 163, 177
+  orig: 163, 177
+  offset: 0, 0
+  index: -1
+cam9_A_youshou
+  rotate: false
+  xy: 383, 8
+  size: 37, 39
+  orig: 37, 39
+  offset: 0, 0
+  index: -1
+cam9_A_zuodabi
+  rotate: false
+  xy: 342, 2
+  size: 39, 45
+  orig: 39, 45
+  offset: 0, 0
+  index: -1
+cam9_shandian2
+  rotate: false
+  xy: 342, 49
+  size: 159, 103
+  orig: 159, 103
+  offset: 0, 0
+  index: -1
+cam9_yu
+  rotate: false
+  xy: 2, 215
+  size: 473, 293
+  orig: 473, 293
+  offset: 0, 0
+  index: -1
+suoduxian
+  rotate: false
+  xy: 167, 154
+  size: 325, 59
+  orig: 325, 59
+  offset: 0, 0
+  index: -1
+
+poseidon74.png
+size: 506,510
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+cam10_shenti
+  rotate: false
+  xy: 99, 55
+  size: 166, 158
+  orig: 166, 158
+  offset: 0, 0
+  index: -1
+cam8_beijing
+  rotate: false
+  xy: 267, 66
+  size: 237, 147
+  orig: 237, 147
+  offset: 0, 0
+  index: -1
+cam9_A_texiao2
+  rotate: false
+  xy: 2, 40
+  size: 95, 173
+  orig: 95, 173
+  offset: 0, 0
+  index: -1
+cam9_A_youdabi
+  rotate: false
+  xy: 349, 8
+  size: 68, 56
+  orig: 68, 56
+  offset: 0, 0
+  index: -1
+cam9_A_youtui
+  rotate: false
+  xy: 419, 12
+  size: 81, 52
+  orig: 81, 52
+  offset: 0, 0
+  index: -1
+cam9_A_youxiaobi
+  rotate: false
+  xy: 134, 3
+  size: 57, 50
+  orig: 57, 50
+  offset: 0, 0
+  index: -1
+cam9_A_zuotui
+  rotate: false
+  xy: 267, 3
+  size: 80, 61
+  orig: 80, 61
+  offset: 0, 0
+  index: -1
+cam9_A_zuoxiaobi
+  rotate: false
+  xy: 193, 6
+  size: 35, 47
+  orig: 35, 47
+  offset: 0, 0
+  index: -1
+jingkuang1
+  rotate: false
+  xy: 2, 215
+  size: 473, 293
+  orig: 473, 293
+  offset: 0, 0
+  index: -1
+zm_0005_F
+  rotate: false
+  xy: 99, 2
+  size: 33, 51
+  orig: 33, 51
+  offset: 0, 0
+  index: -1
+
+poseidon75.png
+size: 489,507
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+cam10_xue
+  rotate: false
+  xy: 2, 56
+  size: 449, 449
+  orig: 449, 449
+  offset: 0, 0
+  index: -1
+cam8_B_youshou
+  rotate: false
+  xy: 2, 2
+  size: 90, 52
+  orig: 90, 52
+  offset: 0, 0
+  index: -1
+zm_0003_D
+  rotate: false
+  xy: 94, 2
+  size: 33, 52
+  orig: 33, 52
+  offset: 0, 0
+  index: -1
+zm_0020_U
+  rotate: false
+  xy: 453, 453
+  size: 34, 52
+  orig: 34, 52
+  offset: 0, 0
+  index: -1
+
+poseidon76.png
+size: 510,509
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+cam10_xuewu
+  rotate: false
+  xy: 2, 247
+  size: 410, 260
+  orig: 410, 260
+  offset: 0, 0
+  index: -1
+cam10_youdabi
+  rotate: false
+  xy: 414, 340
+  size: 82, 91
+  orig: 82, 91
+  offset: 0, 0
+  index: -1
+cam10_youxiaobi
+  rotate: false
+  xy: 414, 247
+  size: 82, 91
+  orig: 82, 91
+  offset: 0, 0
+  index: -1
+cam8_B_shenti
+  rotate: false
+  xy: 307, 88
+  size: 194, 157
+  orig: 194, 157
+  offset: 0, 0
+  index: -1
+cam8_B_youdabi
+  rotate: false
+  xy: 307, 3
+  size: 71, 83
+  orig: 71, 83
+  offset: 0, 0
+  index: -1
+cam8_wuqi1
+  rotate: false
+  xy: 2, 2
+  size: 303, 243
+  orig: 303, 243
+  offset: 0, 0
+  index: -1
+cam9_A_qunbai
+  rotate: false
+  xy: 380, 15
+  size: 119, 71
+  orig: 119, 71
+  offset: 0, 0
+  index: -1
+cam9_shandian1
+  rotate: false
+  xy: 414, 433
+  size: 94, 74
+  orig: 94, 74
+  offset: 0, 0
+  index: -1
+
+poseidon77.png
+size: 505,506
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+cam10_shuiwu
+  rotate: false
+  xy: 2, 2
+  size: 281, 238
+  orig: 281, 238
+  offset: 0, 0
+  index: -1
+cam10_youshou
+  rotate: false
+  xy: 386, 269
+  size: 115, 111
+  orig: 115, 111
+  offset: 0, 0
+  index: -1
+cam10_zuodabi
+  rotate: false
+  xy: 285, 101
+  size: 177, 139
+  orig: 177, 139
+  offset: 0, 0
+  index: -1
+cam10_zuoxiaobi
+  rotate: false
+  xy: 433, 6
+  size: 70, 93
+  orig: 70, 93
+  offset: 0, 0
+  index: -1
+cam8_wuqi2
+  rotate: false
+  xy: 2, 242
+  size: 382, 262
+  orig: 382, 262
+  offset: 0, 0
+  index: -1
+cam9_A_shenti
+  rotate: false
+  xy: 386, 382
+  size: 116, 122
+  orig: 116, 122
+  offset: 0, 0
+  index: -1
+cam9_shandian3
+  rotate: false
+  xy: 285, 5
+  size: 146, 94
+  orig: 146, 94
+  offset: 0, 0
+  index: -1
+
+poseidon78.png
+size: 506,506
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+cam10_beijing
+  rotate: false
+  xy: 2, 5
+  size: 247, 157
+  orig: 247, 157
+  offset: 0, 0
+  index: -1
+cam10_chazi
+  rotate: false
+  xy: 336, 2
+  size: 127, 250
+  orig: 127, 250
+  offset: 0, 0
+  index: -1
+cam10_zuoshou
+  rotate: false
+  xy: 251, 96
+  size: 80, 66
+  orig: 80, 66
+  offset: 0, 0
+  index: -1
+cam8_B_lian
+  rotate: false
+  xy: 336, 254
+  size: 158, 139
+  orig: 158, 139
+  offset: 0, 0
+  index: -1
+cam8_B_toukui
+  rotate: false
+  xy: 2, 164
+  size: 332, 340
+  orig: 332, 340
+  offset: 0, 0
+  index: -1
+cam8_B_youxiaobi
+  rotate: false
+  xy: 251, 20
+  size: 79, 74
+  orig: 79, 74
+  offset: 0, 0
+  index: -1
+cam9_shandian4
+  rotate: false
+  xy: 336, 395
+  size: 168, 109
+  orig: 168, 109
+  offset: 0, 0
+  index: -1
+
+poseidon79.png
+size: 361,467
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+cam8_B_zuoshou
+  rotate: false
+  xy: 2, 2
+  size: 152, 65
+  orig: 152, 65
+  offset: 0, 0
+  index: -1
+cam8_B_zuoxiaobi
+  rotate: false
+  xy: 261, 343
+  size: 98, 122
+  orig: 98, 122
+  offset: 0, 0
+  index: -1
+cam9_lianzi
+  rotate: false
+  xy: 2, 69
+  size: 175, 108
+  orig: 175, 108
+  offset: 0, 0
+  index: -1
+cam9_shui
+  rotate: false
+  xy: 2, 179
+  size: 257, 286
+  orig: 257, 286
+  offset: 0, 0
+  index: -1
+
+poseidon710.png
+size: 288,256
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+cam10_texiao1
+  rotate: false
+  xy: 2, 2
+  size: 284, 252
+  orig: 284, 252
+  offset: 0, 0
+  index: -1

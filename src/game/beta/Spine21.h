@@ -25,7 +25,7 @@ struct FfdKey { float time = 0; std::vector<float> v; Curve curve; };
 struct BoneData {
     std::string name;
     int parent = -1;
-    float x = 0, y = 0, rotation = 0, scaleX = 1, scaleY = 1;
+    float x = 0, y = 0, rotation = 0, scaleX = 1, scaleY = 1, length = 0;
     bool inheritScale = true, inheritRotation = true;
 };
 struct SlotData {
@@ -55,6 +55,10 @@ struct SlotAttachments {
     std::vector<Attachment> list;
     int Find(const std::string& name) const;
 };
+// IK de dos huesos (padre -> hijo apuntando al hueso objetivo).
+struct IkData { std::string name; int parent = -1, child = -1, target = -1; int bend = 1; float mix = 1; };
+struct IkKey { float time = 0, mix = 1; int bend = 1; Curve curve; };
+struct IkTimeline { int ik = 0; std::vector<IkKey> keys; };
 struct BoneTimeline { int bone = 0; std::vector<RotKey> rotate; std::vector<VecKey> translate, scale; };
 struct SlotTimeline { int slot = 0; std::vector<AttKey> attachment; std::vector<ColorKey> color; };
 struct FfdTimeline { int slot = 0; int attachment = 0; std::vector<FfdKey> keys; };
@@ -68,6 +72,7 @@ struct Animation {
     std::vector<FfdTimeline> ffd;
     std::vector<DrawOrderKey> drawOrder;
     std::vector<Event> events;
+    std::vector<IkTimeline> ik;
 };
 
 class SkeletonData {
@@ -79,6 +84,7 @@ public:
 
     std::vector<BoneData> bones;
     std::vector<SlotData> slots;
+    std::vector<IkData> iks;
     std::vector<SlotAttachments> skin;   // por slot
     std::vector<Animation> animations;
     std::vector<Region> regions;

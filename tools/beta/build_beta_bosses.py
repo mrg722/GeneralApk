@@ -78,3 +78,51 @@ def build(ns, b):
 
 if __name__ == "__main__":
     for b in BOSSES: build(sys.argv[1], b)
+
+
+# ------------------------------------------------------------------ QTE
+# Cinematicas de remate (spine/*QTE). Cada archivo trae uno o dos "fenjingdonghua"
+# (vinetas). La vineta con evento chuanniu*/jiaoxue*/QTEchuxian muestra el boton;
+# la otra animacion de ese archivo (numero mas alto) es la rama de fallo. Las
+# demas se encadenan en orden numerico. data/EnemyDate.lua: elites y jefes con
+# spineName; data/QteControl.lua: se activa con <=20% de vida, exito -10% de vida
+# (aqui: remate), fallo +10%.
+QTES = [("medusa", "medsuaQTE"), ("centauro", "RenMaQTE"), ("bruto", "ChainfattyQTE"),
+        ("tentaculos", "PoseidonBabyQTE"), ("poseidon", "PoseidonQTE")]
+PROMPTS = ("chuanniu", "jiaoxue", "QTEchuxian")
+
+
+def num(name):
+    import re
+    m = re.search(r"(\d+)$", name)
+    return int(m.group(1)) if m else 0
+
+
+def build_qte(ns, key, folder):
+    src = Path(ns) / "spine" / folder
+    dst = ROOT / "assets/beta/spine/qte" / folder
+    dst.mkdir(parents=True, exist_ok=True)
+    for f in src.iterdir():
+        if f.suffix in (".json", ".atlas", ".png"): shutil.copyfile(f, dst / f.name)
+    main, fails = [], {}
+    for jf in sorted(src.glob("*.json")):
+        anims = json.loads(jf.read_text(encoding="utf-8"))["animations"]
+        prompt = {a: next((e["time"] for e in v.get("events", []) if e["name"].startswith(PROMPTS)), -1)
+                  for a, v in anims.items()}
+        with_prompt = [a for a in anims if prompt[a] >= 0]
+        for a in anims:
+            if with_prompt and a not in with_prompt and num(a) == max(num(x) for x in anims) and len(anims) > 1:
+                fails[with_prompt[0]] = a
+            else:
+                main.append((num(a), jf.stem, a, prompt[a]))
+    L = [f"qte {key}", f"dir assets/beta/spine/qte/{folder}"]
+    for _, file, a, p in sorted(main):
+        L.append(f"seg {file} {a} {p} {fails.get(a, '-')}")
+    out = ROOT / "data/beta/qte" / f"{key}.txt"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text("\n".join(L) + "\n", encoding="utf-8")
+    print("qte", key, [(x[2], x[3]) for x in sorted(main)], "fallos", fails)
+
+
+if __name__ == "__main__":
+    for key, folder in QTES: build_qte(sys.argv[1], key, folder)

@@ -108,3 +108,7 @@ no aparecen en VS).
 - **Jefes (Spine 2.1 en vivo, `src/game/beta/Spine21.cpp`):** Poseidon (barco), monstruo de
   tentaculos (montana/cueva) y Titan (volcan) como jefe final de las oleadas o en el modo JEFE.
   Avisan su area de ataque (anim 99) y golpean en el evento del Spine original.
+- **Remates (QTE):** con el guerrero, al dejar a Medusa, Centauro, Bruto (y sus versiones
+  rojas), Poseidon o el monstruo de tentaculos en 20% de vida se reproduce su cinematica
+  original (vinetas Spine, `data/beta/qte`). Hay que pulsar GOLPE (J) cuando aparece el
+  boton: acierto = remate; fallo = la rama de fallo original y el enemigo recupera 10%.

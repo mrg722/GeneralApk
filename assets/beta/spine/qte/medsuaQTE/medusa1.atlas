@@ -1,0 +1,176 @@
+
+medusa1.png
+size: 501,502
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+beijing_01
+  rotate: false
+  xy: 2, 30
+  size: 389, 175
+  orig: 389, 175
+  offset: 0, 0
+  index: -1
+beijing_03
+  rotate: false
+  xy: 477, 207
+  size: 22, 293
+  orig: 22, 293
+  offset: 0, 0
+  index: -1
+jingkuang1
+  rotate: false
+  xy: 2, 207
+  size: 473, 293
+  orig: 473, 293
+  offset: 0, 0
+  index: -1
+meidusha_hair04
+  rotate: false
+  xy: 393, 2
+  size: 90, 89
+  orig: 90, 89
+  offset: 0, 0
+  index: -1
+meidusha_hair05
+  rotate: false
+  xy: 393, 93
+  size: 85, 112
+  orig: 85, 112
+  offset: 0, 0
+  index: -1
+
+medusa12.png
+size: 478,505
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+juese_suishi
+  rotate: false
+  xy: 2, 100
+  size: 422, 108
+  orig: 422, 108
+  offset: 0, 0
+  index: -1
+meidusha_hair01
+  rotate: false
+  xy: 221, 8
+  size: 88, 90
+  orig: 88, 90
+  offset: 0, 0
+  index: -1
+meidusha_hair02
+  rotate: false
+  xy: 311, 2
+  size: 70, 96
+  orig: 70, 96
+  offset: 0, 0
+  index: -1
+meidusha_hair03
+  rotate: false
+  xy: 426, 108
+  size: 50, 100
+  orig: 50, 100
+  offset: 0, 0
+  index: -1
+qunbai
+  rotate: false
+  xy: 2, 10
+  size: 217, 88
+  orig: 217, 88
+  offset: 0, 0
+  index: -1
+texiao01
+  rotate: false
+  xy: 2, 210
+  size: 473, 293
+  orig: 473, 293
+  offset: 0, 0
+  index: -1
+
+medusa13.png
+size: 480,446
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+beijing_05
+  rotate: false
+  xy: 2, 2
+  size: 237, 147
+  orig: 237, 147
+  offset: 0, 0
+  index: -1
+texiao02
+  rotate: false
+  xy: 2, 151
+  size: 473, 293
+  orig: 473, 293
+  offset: 0, 0
+  index: -1
+yanwu
+  rotate: false
+  xy: 241, 2
+  size: 237, 147
+  orig: 237, 147
+  offset: 0, 0
+  index: -1
+
+medusa14.png
+size: 397,509
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+beijing_02
+  rotate: false
+  xy: 2, 220
+  size: 393, 287
+  orig: 393, 287
+  offset: 0, 0
+  index: -1
+juese
+  rotate: false
+  xy: 2, 2
+  size: 350, 216
+  orig: 350, 216
+  offset: 0, 0
+  index: -1
+
+medusa15.png
+size: 461,409
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+beijing_04
+  rotate: false
+  xy: 276, 114
+  size: 183, 293
+  orig: 183, 293
+  offset: 0, 0
+  index: -1
+meidusha_head
+  rotate: false
+  xy: 2, 114
+  size: 272, 293
+  orig: 272, 293
+  offset: 0, 0
+  index: -1
+meidusha_weiba
+  rotate: false
+  xy: 2, 2
+  size: 214, 110
+  orig: 214, 110
+  offset: 0, 0
+  index: -1
+
+medusa16.png
+size: 207,259
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+meidusha
+  rotate: false
+  xy: 2, 2
+  size: 203, 255
+  orig: 203, 255
+  offset: 0, 0
+  index: -1

@@ -1,0 +1,7 @@
+qte centauro
+dir assets/beta/spine/qte/RenMaQTE
+seg renma1 fenjingdonghua1 -1 -
+seg renma2 fenjingdonghua2 1.5666 fenjingdonghua6
+seg renma3 fenjingdonghua3 -1 -
+seg renma4 fenjingdonghua4 1 fenjingdonghua7
+seg renma5 fenjingdonghua5 -1 -

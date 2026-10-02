@@ -1,0 +1,261 @@
+
+Chainfatty2.png
+size: 510,509
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+baitiao01
+  rotate: false
+  xy: 187, 17
+  size: 224, 92
+  orig: 224, 92
+  offset: 0, 0
+  index: -1
+baitiao2
+  rotate: false
+  xy: 187, 111
+  size: 316, 101
+  orig: 316, 101
+  offset: 0, 0
+  index: -1
+jingkuang1
+  rotate: false
+  xy: 2, 214
+  size: 473, 293
+  orig: 473, 293
+  offset: 0, 0
+  index: -1
+suoduxian
+  rotate: false
+  xy: 187, 2
+  size: 285, 13
+  orig: 285, 13
+  offset: 0, 0
+  index: -1
+suolian1
+  rotate: false
+  xy: 2, 11
+  size: 183, 201
+  orig: 183, 201
+  offset: 0, 0
+  index: -1
+zm_0006_G
+  rotate: false
+  xy: 474, 3
+  size: 33, 52
+  orig: 33, 52
+  offset: 0, 0
+  index: -1
+zm_0007_H
+  rotate: false
+  xy: 474, 57
+  size: 34, 52
+  orig: 34, 52
+  offset: 0, 0
+  index: -1
+zm_0014_O
+  rotate: false
+  xy: 413, 58
+  size: 33, 51
+  orig: 33, 51
+  offset: 0, 0
+  index: -1
+
+Chainfatty22.png
+size: 506,486
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+beijing2
+  rotate: false
+  xy: 2, 244
+  size: 400, 240
+  orig: 400, 240
+  offset: 0, 0
+  index: -1
+beijing4
+  rotate: false
+  xy: 2, 2
+  size: 314, 240
+  orig: 314, 240
+  offset: 0, 0
+  index: -1
+modian
+  rotate: false
+  xy: 318, 2
+  size: 185, 113
+  orig: 185, 113
+  offset: 0, 0
+  index: -1
+wuqi02
+  rotate: false
+  xy: 318, 117
+  size: 186, 125
+  orig: 186, 125
+  offset: 0, 0
+  index: -1
+zm_0018_S
+  rotate: false
+  xy: 404, 433
+  size: 33, 51
+  orig: 33, 51
+  offset: 0, 0
+  index: -1
+zm_0020_U
+  rotate: false
+  xy: 404, 380
+  size: 33, 51
+  orig: 33, 51
+  offset: 0, 0
+  index: -1
+
+Chainfatty23.png
+size: 507,501
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+guangxian2
+  rotate: false
+  xy: 2, 2
+  size: 282, 84
+  orig: 282, 84
+  offset: 0, 0
+  index: -1
+shoubi3
+  rotate: false
+  xy: 298, 6
+  size: 207, 180
+  orig: 207, 180
+  offset: 0, 0
+  index: -1
+suolian01
+  rotate: false
+  xy: 2, 88
+  size: 294, 184
+  orig: 294, 184
+  offset: 0, 0
+  index: -1
+suolian2
+  rotate: false
+  xy: 2, 274
+  size: 314, 225
+  orig: 314, 225
+  offset: 0, 0
+  index: -1
+wuqi
+  rotate: false
+  xy: 318, 188
+  size: 176, 123
+  orig: 176, 123
+  offset: 0, 0
+  index: -1
+wuqi01
+  rotate: false
+  xy: 318, 313
+  size: 163, 186
+  orig: 163, 186
+  offset: 0, 0
+  index: -1
+
+Chainfatty24.png
+size: 499,508
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+baitiao02
+  rotate: false
+  xy: 2, 233
+  size: 378, 151
+  orig: 378, 151
+  offset: 0, 0
+  index: -1
+baitiao1
+  rotate: false
+  xy: 2, 70
+  size: 217, 161
+  orig: 217, 161
+  offset: 0, 0
+  index: -1
+baitiao3
+  rotate: false
+  xy: 221, 3
+  size: 218, 109
+  orig: 218, 109
+  offset: 0, 0
+  index: -1
+beijing1
+  rotate: false
+  xy: 2, 386
+  size: 400, 120
+  orig: 400, 120
+  offset: 0, 0
+  index: -1
+shoubi2
+  rotate: false
+  xy: 382, 271
+  size: 115, 113
+  orig: 115, 113
+  offset: 0, 0
+  index: -1
+suolian
+  rotate: false
+  xy: 221, 114
+  size: 255, 117
+  orig: 255, 117
+  offset: 0, 0
+  index: -1
+yanwu
+  rotate: false
+  xy: 2, 2
+  size: 200, 66
+  orig: 200, 66
+  offset: 0, 0
+  index: -1
+
+Chainfatty25.png
+size: 462,353
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+baitiao4
+  rotate: false
+  xy: 248, 2
+  size: 212, 80
+  orig: 212, 80
+  offset: 0, 0
+  index: -1
+beijing3
+  rotate: false
+  xy: 232, 84
+  size: 173, 113
+  orig: 173, 113
+  offset: 0, 0
+  index: -1
+guangxian1
+  rotate: false
+  xy: 2, 16
+  size: 244, 51
+  orig: 244, 51
+  offset: 0, 0
+  index: -1
+guangxian3
+  rotate: false
+  xy: 2, 69
+  size: 228, 128
+  orig: 228, 128
+  offset: 0, 0
+  index: -1
+guangxian4
+  rotate: false
+  xy: 2, 199
+  size: 308, 152
+  orig: 308, 152
+  offset: 0, 0
+  index: -1
+shoubi
+  rotate: false
+  xy: 312, 209
+  size: 143, 142
+  orig: 143, 142
+  offset: 0, 0
+  index: -1

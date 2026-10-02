@@ -36,6 +36,8 @@ public:
         selCharacter = character; selStage = stage; selMode = 2; selBoss = bossIndex; StartFight();
     }
     bool BossActive() const { return boss.active; }
+    bool QteActive() const { return qte.active; }
+    bool QteWaiting() const { return qte.waiting; }
     int BossHp() const { return boss.hp; }
     float BossX() const { return boss.pos.x; }
     const char* BossName() const { return boss.name.c_str(); }
@@ -62,6 +64,7 @@ private:
         std::string lastClip;
         std::size_t lastFrame = static_cast<std::size_t>(-1);
         bool deathFx = false;
+        bool qteDone = false;        // la cinematica de remate solo se ofrece una vez
         float gone = 0.0f;           // tiempo tras la derrota (se desvanece)
         std::map<std::string, std::string> sounds;
     };
@@ -96,6 +99,7 @@ private:
         int attack = -1;
         float cooldown = 1.5f, flash = 0.0f, deadTime = 0.0f;
         bool struck = false;
+        bool qteDone = false;
         float ground = 0.0f;    // pixeles del dibujo bajo el origen (Titan sale del suelo)
         bool Play(const std::string& c) {
             const auto it = clips.find(c);
@@ -106,6 +110,19 @@ private:
         Rectangle body{};
         std::vector<BossAttack> attacks;
         std::map<std::string, std::string> sounds;
+    };
+    // Cinematica de remate (QTE) de nuevosSprites: vinetas Spine encadenadas con
+    // boton a tiempo (data/beta/qte, data/QteControl.lua).
+    struct QteSeg { std::string file, anim, fail; float prompt = -1.0f; };
+    struct Qte {
+        bool active = false;
+        std::string dir;
+        std::vector<QteSeg> segs;
+        int seg = 0;
+        bool waiting = false, resolved = false, failing = false;
+        float timer = 0.0f;
+        int fighter = -1;         // indice en fighters; -1 = el jefe
+        spine21::Skeleton skel;
     };
     enum class Flow { Select, Fight };
 
@@ -135,6 +152,7 @@ private:
     float hitstop{0.0f};
     Player placeholder;
     BossFight boss;
+    Qte qte;
 
     std::map<std::string, Sound> soundCache;
     Music music{};
@@ -152,6 +170,12 @@ private:
     void UpdateBoss(float dt);
     CombatBox BossHurtbox() const;
     void DrawBoss() const;
+    bool StartQte(const std::string& key, int fighter);
+    void QtePlaySegment();
+    void UpdateQte(float dt);
+    void EndQte(bool success);
+    void DrawQte() const;
+    void CheckQteTriggers();
     void PollSounds(Fighter& f);
     void SpawnFx(const std::string& id, const std::string& clip, Vector2 pos, bool flip);
     void PlaySound(const std::string& name);

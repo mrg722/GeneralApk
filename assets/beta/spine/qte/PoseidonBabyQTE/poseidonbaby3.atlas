@@ -1,0 +1,316 @@
+
+poseidonbaby3.png
+size: 512,511
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+5shuihua2
+  rotate: false
+  xy: 2, 28
+  size: 161, 77
+  orig: 161, 77
+  offset: 0, 0
+  index: -1
+5shuihua3
+  rotate: false
+  xy: 363, 97
+  size: 134, 117
+  orig: 134, 117
+  offset: 0, 0
+  index: -1
+houxiaobi
+  rotate: false
+  xy: 165, 7
+  size: 120, 98
+  orig: 120, 98
+  offset: 0, 0
+  index: -1
+jingkuang
+  rotate: false
+  xy: 2, 216
+  size: 473, 293
+  orig: 473, 293
+  offset: 0, 0
+  index: -1
+qiandabi
+  rotate: false
+  xy: 440, 17
+  size: 64, 78
+  orig: 64, 78
+  offset: 0, 0
+  index: -1
+qiandatui
+  rotate: false
+  xy: 357, 2
+  size: 81, 93
+  orig: 81, 93
+  offset: 0, 0
+  index: -1
+shanti
+  rotate: false
+  xy: 2, 107
+  size: 359, 107
+  orig: 359, 107
+  offset: 0, 0
+  index: -1
+zm_0005_F
+  rotate: false
+  xy: 477, 351
+  size: 29, 51
+  orig: 29, 51
+  offset: 0, 0
+  index: -1
+zm_0015_P
+  rotate: false
+  xy: 477, 457
+  size: 33, 52
+  orig: 33, 52
+  offset: 0, 0
+  index: -1
+zm_0020_U
+  rotate: false
+  xy: 477, 404
+  size: 33, 51
+  orig: 33, 51
+  offset: 0, 0
+  index: -1
+zuobi_1
+  rotate: false
+  xy: 287, 4
+  size: 68, 101
+  orig: 68, 101
+  offset: 0, 0
+  index: -1
+
+poseidonbaby32.png
+size: 511,510
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+datui
+  rotate: false
+  xy: 459, 449
+  size: 50, 59
+  orig: 50, 59
+  offset: 0, 0
+  index: -1
+houjian
+  rotate: false
+  xy: 459, 267
+  size: 34, 52
+  orig: 34, 52
+  offset: 0, 0
+  index: -1
+meidusha_Blood
+  rotate: false
+  xy: 331, 96
+  size: 170, 128
+  orig: 170, 128
+  offset: 0, 0
+  index: -1
+qianxiaobi
+  rotate: false
+  xy: 205, 63
+  size: 124, 161
+  orig: 124, 161
+  offset: 0, 0
+  index: -1
+qunbai_1
+  rotate: false
+  xy: 255, 2
+  size: 60, 59
+  orig: 60, 59
+  offset: 0, 0
+  index: -1
+tou_1
+  rotate: false
+  xy: 459, 321
+  size: 37, 39
+  orig: 37, 39
+  offset: 0, 0
+  index: -1
+wu
+  rotate: false
+  xy: 2, 226
+  size: 455, 282
+  orig: 455, 282
+  offset: 0, 0
+  index: -1
+xiaotui_1
+  rotate: false
+  xy: 459, 362
+  size: 41, 85
+  orig: 41, 85
+  offset: 0, 0
+  index: -1
+youbi_1
+  rotate: false
+  xy: 98, 5
+  size: 91, 47
+  orig: 91, 47
+  offset: 0, 0
+  index: -1
+youdabi
+  rotate: false
+  xy: 98, 54
+  size: 105, 170
+  orig: 105, 170
+  offset: 0, 0
+  index: -1
+youqianbi
+  rotate: false
+  xy: 2, 36
+  size: 94, 188
+  orig: 94, 188
+  offset: 0, 0
+  index: -1
+zuodao_1
+  rotate: false
+  xy: 404, 22
+  size: 56, 72
+  orig: 56, 72
+  offset: 0, 0
+  index: -1
+zuodatui
+  rotate: false
+  xy: 331, 10
+  size: 71, 84
+  orig: 71, 84
+  offset: 0, 0
+  index: -1
+zuoxiaotui
+  rotate: false
+  xy: 191, 7
+  size: 62, 45
+  orig: 62, 45
+  offset: 0, 0
+  index: -1
+
+poseidonbaby33.png
+size: 508,507
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+A_youdatui
+  rotate: false
+  xy: 2, 2
+  size: 189, 160
+  orig: 189, 160
+  offset: 0, 0
+  index: -1
+qianxiaotui
+  rotate: false
+  xy: 404, 164
+  size: 68, 114
+  orig: 68, 114
+  offset: 0, 0
+  index: -1
+shenti
+  rotate: false
+  xy: 359, 7
+  size: 119, 155
+  orig: 119, 155
+  offset: 0, 0
+  index: -1
+shenti_1
+  rotate: false
+  xy: 404, 280
+  size: 91, 107
+  orig: 91, 107
+  offset: 0, 0
+  index: -1
+suishi
+  rotate: false
+  xy: 2, 223
+  size: 400, 282
+  orig: 400, 282
+  offset: 0, 0
+  index: -1
+zu
+  rotate: false
+  xy: 193, 4
+  size: 164, 158
+  orig: 164, 158
+  offset: 0, 0
+  index: -1
+zuobi
+  rotate: false
+  xy: 404, 389
+  size: 102, 116
+  orig: 102, 116
+  offset: 0, 0
+  index: -1
+
+poseidonbaby34.png
+size: 504,452
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+5shuihua1
+  rotate: false
+  xy: 261, 2
+  size: 181, 156
+  orig: 181, 156
+  offset: 0, 0
+  index: -1
+A_youxiaotui
+  rotate: false
+  xy: 2, 28
+  size: 257, 130
+  orig: 257, 130
+  offset: 0, 0
+  index: -1
+guaibody
+  rotate: false
+  xy: 2, 160
+  size: 365, 290
+  orig: 365, 290
+  offset: 0, 0
+  index: -1
+qunbai
+  rotate: false
+  xy: 369, 342
+  size: 133, 108
+  orig: 133, 108
+  offset: 0, 0
+  index: -1
+
+poseidonbaby35.png
+size: 476,379
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+beijing
+  rotate: false
+  xy: 2, 253
+  size: 200, 124
+  orig: 200, 124
+  offset: 0, 0
+  index: -1
+suishi2
+  rotate: false
+  xy: 204, 131
+  size: 270, 246
+  orig: 270, 246
+  offset: 0, 0
+  index: -1
+xuying
+  rotate: false
+  xy: 2, 2
+  size: 172, 249
+  orig: 172, 249
+  offset: 0, 0
+  index: -1
+
+poseidonbaby36.png
+size: 341,269
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+xue
+  rotate: false
+  xy: 2, 2
+  size: 337, 265
+  orig: 337, 265
+  offset: 0, 0
+  index: -1

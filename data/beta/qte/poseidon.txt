@@ -1,0 +1,9 @@
+qte poseidon
+dir assets/beta/spine/qte/PoseidonQTE
+seg poseidon1 fenjingdonghua1 1.6666 fenjingdonghua9
+seg poseidon3 fenjingdonghua3 -1 -
+seg poseidon4 fenjingdonghua4 -1 -
+seg poseidon4 fenjingdonghua5 -1 -
+seg poseidon6 fenjingdonghua6 1 fenjingdonghua10
+seg poseidon7 fenjingdonghua7 -1 -
+seg poseidon7 fenjingdonghua8 -1 -

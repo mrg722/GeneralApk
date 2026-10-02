@@ -1,0 +1,129 @@
+
+medusa7.png
+size: 508,504
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+beijing
+  rotate: false
+  xy: 2, 2
+  size: 331, 205
+  orig: 331, 205
+  offset: 0, 0
+  index: -1
+jingkuang1
+  rotate: false
+  xy: 2, 209
+  size: 473, 293
+  orig: 473, 293
+  offset: 0, 0
+  index: -1
+meidusha_Blood
+  rotate: false
+  xy: 335, 79
+  size: 170, 128
+  orig: 170, 128
+  offset: 0, 0
+  index: -1
+meidusha_hair
+  rotate: false
+  xy: 370, 26
+  size: 51, 51
+  orig: 51, 51
+  offset: 0, 0
+  index: -1
+zm_0005_F
+  rotate: false
+  xy: 477, 451
+  size: 29, 51
+  orig: 29, 51
+  offset: 0, 0
+  index: -1
+zm_0015_P
+  rotate: false
+  xy: 335, 25
+  size: 33, 52
+  orig: 33, 52
+  offset: 0, 0
+  index: -1
+zm_0020_U
+  rotate: false
+  xy: 423, 26
+  size: 33, 51
+  orig: 33, 51
+  offset: 0, 0
+  index: -1
+
+medusa72.png
+size: 494,463
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+meidusha_gebo
+  rotate: false
+  xy: 358, 136
+  size: 111, 121
+  orig: 111, 121
+  offset: 0, 0
+  index: -1
+texiao
+  rotate: false
+  xy: 2, 2
+  size: 354, 459
+  orig: 354, 459
+  offset: 0, 0
+  index: -1
+zhujue
+  rotate: false
+  xy: 358, 259
+  size: 134, 202
+  orig: 134, 202
+  offset: 0, 0
+  index: -1
+
+medusa73.png
+size: 457,480
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+meidusha
+  rotate: false
+  xy: 2, 285
+  size: 330, 193
+  orig: 330, 193
+  offset: 0, 0
+  index: -1
+meidusha_suishi
+  rotate: false
+  xy: 2, 67
+  size: 214, 216
+  orig: 214, 216
+  offset: 0, 0
+  index: -1
+yanwu
+  rotate: false
+  xy: 218, 136
+  size: 237, 147
+  orig: 237, 147
+  offset: 0, 0
+  index: -1
+zhezhao
+  rotate: false
+  xy: 218, 2
+  size: 237, 132
+  orig: 237, 132
+  offset: 0, 0
+  index: -1
+
+medusa74.png
+size: 200,104
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+penjian
+  rotate: false
+  xy: 2, 2
+  size: 196, 100
+  orig: 196, 100
+  offset: 0, 0
+  index: -1

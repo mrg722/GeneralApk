@@ -1,0 +1,9 @@
+qte medusa
+dir assets/beta/spine/qte/medsuaQTE
+seg medusa1 meidusha1 1.2666 -
+seg medusa2 meidusha2 -1 -
+seg medusa3 meidusha3 1 meidusha8
+seg medusa4 meidusha4 -1 -
+seg medusa5 meidusha5 -1 -
+seg medusa6 meidusha6 0.8333 meidusha9
+seg medusa7 meidusha7 -1 -

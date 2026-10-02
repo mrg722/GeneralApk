@@ -67,8 +67,17 @@ int Play(BetaMode& g, const std::string& tag, float seconds, bool invulnerable) 
     int f = 0;
     for (; f < frames && !g.Won() && !g.Lost(); ++f) {
         in = Bot(g, g.PlayerRef(), f);
-        input::ClearNext(); input::Commit();
+        input::ClearNext();
+        // Remate: pulsa el boton a los 0.3 s de que aparece (como un jugador).
+        static int waitFrames = 0;
+        waitFrames = g.QteWaiting() ? waitFrames + 1 : 0;
+        if (waitFrames == 18) input::SetVirtual(KEY_J, true);
+        input::Commit();
         g.Update(1.0f / 60.0f);
+        if (g.QteActive()) {
+            static int qteShots = 0;
+            if ((f % 90) == 0 && qteShots < 40) { Frame(g); Shot(tag + "_remate_" + std::to_string(qteShots++)); }
+        }
         if (f % 420 == 200) { Frame(g); Shot(tag + "_" + std::to_string(f / 420)); }
     }
     Frame(g);

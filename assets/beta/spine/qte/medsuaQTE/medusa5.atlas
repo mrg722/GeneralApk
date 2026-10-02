@@ -1,0 +1,74 @@
+
+medusa5.png
+size: 510,498
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+beijing
+  rotate: false
+  xy: 2, 203
+  size: 473, 293
+  orig: 473, 293
+  offset: 0, 0
+  index: -1
+diceng
+  rotate: false
+  xy: 477, 343
+  size: 31, 153
+  orig: 31, 153
+  offset: 0, 0
+  index: -1
+zhujue_texiao_01
+  rotate: false
+  xy: 255, 55
+  size: 171, 146
+  orig: 171, 146
+  offset: 0, 0
+  index: -1
+zhujue_texiao_02
+  rotate: false
+  xy: 2, 2
+  size: 251, 199
+  orig: 251, 199
+  offset: 0, 0
+  index: -1
+
+medusa52.png
+size: 477,474
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+jingkuang1
+  rotate: false
+  xy: 2, 179
+  size: 473, 293
+  orig: 473, 293
+  offset: 0, 0
+  index: -1
+suoduxian
+  rotate: false
+  xy: 2, 2
+  size: 285, 13
+  orig: 285, 13
+  offset: 0, 0
+  index: -1
+zhujue_kuang
+  rotate: false
+  xy: 2, 17
+  size: 362, 160
+  orig: 362, 160
+  offset: 0, 0
+  index: -1
+
+medusa53.png
+size: 271,151
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+zhujue_arm
+  rotate: false
+  xy: 2, 2
+  size: 267, 147
+  orig: 267, 147
+  offset: 0, 0
+  index: -1

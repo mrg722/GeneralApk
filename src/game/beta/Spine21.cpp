@@ -161,6 +161,7 @@ bool SkeletonData::Load(const std::string& dir, const std::string& name) {
             d.x = Num(b.Find("x"), 0); d.y = Num(b.Find("y"), 0);
             d.rotation = Num(b.Find("rotation"), 0);
             d.scaleX = Num(b.Find("scaleX"), 1); d.scaleY = Num(b.Find("scaleY"), 1);
+            d.length = Num(b.Find("length"), 0);
             if (const JsonValue* v = b.Find("inheritScale")) d.inheritScale = v->BoolOr(true);
             if (const JsonValue* v = b.Find("inheritRotation")) d.inheritRotation = v->BoolOr(true);
             bones.push_back(d);
@@ -173,6 +174,19 @@ bool SkeletonData::Load(const std::string& dir, const std::string& name) {
             if (const JsonValue* a = s.Find("attachment")) d.attachment = a->StringOr("");
             if (const JsonValue* c = s.Find("color")) ParseColor(c->string, d.color);
             slots.push_back(d);
+        }
+    if (const JsonValue* ik = root.Find("ik"))
+        for (const JsonValue& k : ik->array) {
+            IkData d;
+            d.name = k.Find("name") ? k.Find("name")->string : "";
+            if (const JsonValue* bs = k.Find("bones"); bs && bs->array.size() == 2) {
+                d.parent = boneIndex(bs->array[0].string);
+                d.child = boneIndex(bs->array[1].string);
+            }
+            if (const JsonValue* t = k.Find("target")) d.target = boneIndex(t->string);
+            if (const JsonValue* bp = k.Find("bendPositive")) d.bend = bp->BoolOr(true) ? 1 : -1;
+            d.mix = Num(k.Find("mix"), 1);
+            if (d.parent >= 0 && d.child >= 0 && d.target >= 0) iks.push_back(d);
         }
     skin.assign(slots.size(), {});
     const JsonValue* skins = root.Find("skins");
@@ -319,6 +333,23 @@ bool SkeletonData::Load(const std::string& dir, const std::string& name) {
                     }
                     an.drawOrder.push_back(std::move(key));
                 }
+            if (const JsonValue* ikt = a.Find("ik"))
+                for (const auto& [ikName, keys] : ikt->object) {
+                    IkTimeline tl;
+                    tl.ik = -1;
+                    for (size_t i = 0; i < iks.size(); ++i) if (iks[i].name == ikName) tl.ik = (int)i;
+                    if (tl.ik < 0) continue;
+                    for (const JsonValue& k : keys.array) {
+                        IkKey key;
+                        key.time = Num(k.Find("time"), 0);
+                        key.mix = Num(k.Find("mix"), 1);
+                        if (const JsonValue* bp = k.Find("bendPositive")) key.bend = bp->BoolOr(true) ? 1 : -1;
+                        key.curve = ParseCurve(k);
+                        tl.keys.push_back(key);
+                        upd(key.time);
+                    }
+                    an.ik.push_back(std::move(tl));
+                }
             if (const JsonValue* evs = a.Find("events"))
                 for (const JsonValue& k : evs->array) {
                     Event e{Num(k.Find("time"), 0), k.Find("name") ? k.Find("name")->string : ""};
@@ -410,23 +441,78 @@ void Skeleton::BuildTriangles(std::vector<Tri>& out) const {
             }
         }
     std::vector<World> world(d.bones.size());
-    for (size_t i = 0; i < d.bones.size(); ++i) {
-        const BoneData& b = d.bones[i];
-        const Local& L = local[i];
-        World w{};
-        if (b.parent >= 0) {
-            const World& P = world[(size_t)b.parent];
-            w.x = L.x * P.m00 + L.y * P.m01 + P.x;
-            w.y = L.x * P.m10 + L.y * P.m11 + P.y;
-            w.sx = b.inheritScale ? P.sx * L.sx : L.sx;
-            w.sy = b.inheritScale ? P.sy * L.sy : L.sy;
-            w.rot = b.inheritRotation ? P.rot + L.rot : L.rot;
-        } else {
-            w.x = L.x; w.y = L.y; w.sx = L.sx; w.sy = L.sy; w.rot = L.rot;
+    auto updateWorld = [&]() {
+        for (size_t i = 0; i < d.bones.size(); ++i) {
+            const BoneData& b = d.bones[i];
+            const Local& L = local[i];
+            World w{};
+            if (b.parent >= 0) {
+                const World& P = world[(size_t)b.parent];
+                w.x = L.x * P.m00 + L.y * P.m01 + P.x;
+                w.y = L.x * P.m10 + L.y * P.m11 + P.y;
+                w.sx = b.inheritScale ? P.sx * L.sx : L.sx;
+                w.sy = b.inheritScale ? P.sy * L.sy : L.sy;
+                w.rot = b.inheritRotation ? P.rot + L.rot : L.rot;
+            } else {
+                w.x = L.x; w.y = L.y; w.sx = L.sx; w.sy = L.sy; w.rot = L.rot;
+            }
+            const float r = w.rot * DEG2RAD, c = std::cos(r), s = std::sin(r);
+            w.m00 = c * w.sx; w.m10 = s * w.sx; w.m01 = -s * w.sy; w.m11 = c * w.sy;
+            world[i] = w;
         }
-        const float r = w.rot * DEG2RAD, c = std::cos(r), s = std::sin(r);
-        w.m00 = c * w.sx; w.m10 = s * w.sx; w.m01 = -s * w.sy; w.m11 = c * w.sy;
-        world[i] = w;
+    };
+    updateWorld();
+    // IK de dos huesos (IkConstraint.apply2 de spine-runtimes 2.1).
+    for (size_t ci = 0; ci < d.iks.size(); ++ci) {
+        const IkData& ik = d.iks[ci];
+        float mix = ik.mix;
+        int bend = ik.bend;
+        if (a)
+            for (const IkTimeline& tl : a->ik) {
+                if (tl.ik != (int)ci || tl.keys.empty()) continue;
+                const int k = Sample(tl.keys, t, pct);
+                mix = tl.keys[(size_t)k].mix;
+                if ((size_t)k + 1 < tl.keys.size() && t > tl.keys[(size_t)k].time) mix += (tl.keys[(size_t)k + 1].mix - mix) * pct;
+                bend = tl.keys[(size_t)k].bend;
+            }
+        if (mix <= 0.0f || d.bones[(size_t)ik.child].parent != ik.parent) continue;
+        Local& LP = local[(size_t)ik.parent];
+        Local& LC = local[(size_t)ik.child];
+        const World& T = world[(size_t)ik.target];
+        float tx = T.x, ty = T.y;
+        const int pp = d.bones[(size_t)ik.parent].parent;
+        if (pp >= 0) {
+            const World& W = world[(size_t)pp];
+            const float dx = tx - W.x, dy = ty - W.y;
+            const float det = W.m00 * W.m11 - W.m01 * W.m10;
+            if (std::fabs(det) < 1e-9f) continue;
+            const float lx = (W.m11 * dx - W.m01 * dy) / det, ly = (W.m00 * dy - W.m10 * dx) / det;
+            tx = (lx - LP.x) * W.sx;
+            ty = (ly - LP.y) * W.sy;
+        } else {
+            tx -= LP.x;
+            ty -= LP.y;
+        }
+        const World& WP = world[(size_t)ik.parent];
+        const float childX = LC.x * WP.sx, childY = LC.y * WP.sy;
+        const float offset = std::atan2(childY, childX);
+        const float len1 = std::sqrt(childX * childX + childY * childY);
+        const float len2 = d.bones[(size_t)ik.child].length * world[(size_t)ik.child].sx;
+        const float denom = 2 * len1 * len2;
+        auto wrap = [](float r) { while (r > 180) r -= 360; while (r < -180) r += 360; return r; };
+        if (denom < 0.0001f) {
+            LC.rot += (std::atan2(ty, tx) * RAD2DEG - LP.rot - LC.rot) * mix;
+        } else {
+            const float cosv = std::clamp((tx * tx + ty * ty - len1 * len1 - len2 * len2) / denom, -1.0f, 1.0f);
+            const float childAngle = std::acos(cosv) * (float)bend;
+            const float adjacent = len1 + len2 * cosv, opposite = len2 * std::sin(childAngle);
+            const float parentAngle = std::atan2(ty * adjacent - tx * opposite, tx * adjacent + ty * opposite);
+            const float rp = wrap((parentAngle - offset) * RAD2DEG - LP.rot);
+            const float rc = wrap((childAngle + offset) * RAD2DEG - LC.rot);
+            LP.rot += rp * mix;
+            LC.rot += rc * mix;
+        }
+        updateWorld();
     }
     // Slots: adjunto y color de la animacion.
     std::vector<int> att(d.slots.size(), -1);

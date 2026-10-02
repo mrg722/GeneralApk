@@ -1,0 +1,405 @@
+
+renma5.png
+size: 510,510
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+cam7_beijing
+  rotate: false
+  xy: 2, 215
+  size: 473, 293
+  orig: 473, 293
+  offset: 0, 0
+  index: -1
+cam8_A_youdabi
+  rotate: false
+  xy: 444, 125
+  size: 53, 88
+  orig: 53, 88
+  offset: 0, 0
+  index: -1
+cam8_A_youshou
+  rotate: false
+  xy: 444, 68
+  size: 56, 55
+  orig: 56, 55
+  offset: 0, 0
+  index: -1
+cam8_texiao
+  rotate: false
+  xy: 2, 2
+  size: 440, 211
+  orig: 440, 211
+  offset: 0, 0
+  index: -1
+mashou_2
+  rotate: false
+  xy: 477, 484
+  size: 17, 24
+  orig: 17, 24
+  offset: 0, 0
+  index: -1
+zm_0005_F
+  rotate: false
+  xy: 479, 15
+  size: 29, 51
+  orig: 29, 51
+  offset: 0, 0
+  index: -1
+zm_0015_P
+  rotate: false
+  xy: 444, 14
+  size: 33, 52
+  orig: 33, 52
+  offset: 0, 0
+  index: -1
+
+renma52.png
+size: 487,506
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+B_zuoqiandatui
+  rotate: false
+  xy: 2, 13
+  size: 103, 196
+  orig: 103, 196
+  offset: 0, 0
+  index: -1
+body
+  rotate: false
+  xy: 340, 48
+  size: 145, 161
+  orig: 145, 161
+  offset: 0, 0
+  index: -1
+cam7_texiao
+  rotate: false
+  xy: 107, 22
+  size: 231, 187
+  orig: 231, 187
+  offset: 0, 0
+  index: -1
+cam7_wu2
+  rotate: false
+  xy: 2, 211
+  size: 473, 293
+  orig: 473, 293
+  offset: 0, 0
+  index: -1
+cam8_A_youxiaobi
+  rotate: false
+  xy: 340, 2
+  size: 73, 44
+  orig: 73, 44
+  offset: 0, 0
+  index: -1
+mashou
+  rotate: false
+  xy: 415, 26
+  size: 41, 20
+  orig: 41, 20
+  offset: 0, 0
+  index: -1
+
+renma53.png
+size: 486,482
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+cam8_A_zuodao
+  rotate: false
+  xy: 2, 2
+  size: 181, 183
+  orig: 181, 183
+  offset: 0, 0
+  index: -1
+cam8_texiao2
+  rotate: false
+  xy: 185, 9
+  size: 299, 176
+  orig: 299, 176
+  offset: 0, 0
+  index: -1
+jingkuang1
+  rotate: false
+  xy: 2, 187
+  size: 473, 293
+  orig: 473, 293
+  offset: 0, 0
+  index: -1
+
+renma54.png
+size: 507,510
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+B_weiba
+  rotate: false
+  xy: 280, 249
+  size: 133, 259
+  orig: 133, 259
+  offset: 0, 0
+  index: -1
+cam7_xue
+  rotate: false
+  xy: 415, 246
+  size: 90, 262
+  orig: 90, 262
+  offset: 0, 0
+  index: -1
+cam7_xue2
+  rotate: false
+  xy: 280, 30
+  size: 125, 217
+  orig: 125, 217
+  offset: 0, 0
+  index: -1
+cam8_A_shenti
+  rotate: false
+  xy: 2, 87
+  size: 276, 421
+  orig: 276, 421
+  offset: 0, 0
+  index: -1
+cam8_A_zuoshou
+  rotate: false
+  xy: 209, 12
+  size: 67, 73
+  orig: 67, 73
+  offset: 0, 0
+  index: -1
+cam8_A_zuoxiaobi
+  rotate: false
+  xy: 119, 9
+  size: 88, 76
+  orig: 88, 76
+  offset: 0, 0
+  index: -1
+matui1
+  rotate: false
+  xy: 2, 15
+  size: 115, 70
+  orig: 115, 70
+  offset: 0, 0
+  index: -1
+xiaobi2
+  rotate: false
+  xy: 407, 2
+  size: 71, 88
+  orig: 71, 88
+  offset: 0, 0
+  index: -1
+youbi
+  rotate: false
+  xy: 407, 92
+  size: 79, 152
+  orig: 79, 152
+  offset: 0, 0
+  index: -1
+
+renma55.png
+size: 495,504
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+cam7_wu
+  rotate: false
+  xy: 2, 169
+  size: 473, 164
+  orig: 473, 164
+  offset: 0, 0
+  index: -1
+cam8_A_qunbai
+  rotate: false
+  xy: 236, 19
+  size: 257, 148
+  orig: 257, 148
+  offset: 0, 0
+  index: -1
+cam8_wu
+  rotate: false
+  xy: 2, 335
+  size: 473, 167
+  orig: 473, 167
+  offset: 0, 0
+  index: -1
+cam8_xue2
+  rotate: false
+  xy: 2, 2
+  size: 232, 165
+  orig: 232, 165
+  offset: 0, 0
+  index: -1
+
+renma56.png
+size: 510,505
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+B_shenti
+  rotate: false
+  xy: 2, 222
+  size: 406, 281
+  orig: 406, 281
+  offset: 0, 0
+  index: -1
+B_youqianti
+  rotate: false
+  xy: 410, 403
+  size: 92, 100
+  orig: 92, 100
+  offset: 0, 0
+  index: -1
+cam8_xue
+  rotate: false
+  xy: 2, 4
+  size: 249, 216
+  orig: 249, 216
+  offset: 0, 0
+  index: -1
+dao2
+  rotate: false
+  xy: 410, 233
+  size: 69, 106
+  orig: 69, 106
+  offset: 0, 0
+  index: -1
+matui2
+  rotate: false
+  xy: 410, 341
+  size: 92, 60
+  orig: 92, 60
+  offset: 0, 0
+  index: -1
+suishi
+  rotate: false
+  xy: 253, 112
+  size: 221, 108
+  orig: 221, 108
+  offset: 0, 0
+  index: -1
+suishi2
+  rotate: false
+  xy: 253, 2
+  size: 220, 108
+  orig: 220, 108
+  offset: 0, 0
+  index: -1
+zm_0014_O
+  rotate: false
+  xy: 475, 59
+  size: 33, 51
+  orig: 33, 51
+  offset: 0, 0
+  index: -1
+
+renma57.png
+size: 504,505
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+B_youqiandatui
+  rotate: false
+  xy: 380, 173
+  size: 119, 182
+  orig: 119, 182
+  offset: 0, 0
+  index: -1
+B_youqianxiaotui
+  rotate: false
+  xy: 261, 8
+  size: 139, 104
+  orig: 139, 104
+  offset: 0, 0
+  index: -1
+B_zuoqianxiaotui
+  rotate: false
+  xy: 261, 114
+  size: 107, 123
+  orig: 107, 123
+  offset: 0, 0
+  index: -1
+cam7_A_tou
+  rotate: false
+  xy: 402, 94
+  size: 86, 77
+  orig: 86, 77
+  offset: 0, 0
+  index: -1
+cam7_xue3
+  rotate: false
+  xy: 2, 239
+  size: 376, 264
+  orig: 376, 264
+  offset: 0, 0
+  index: -1
+cam7_xuewu
+  rotate: false
+  xy: 2, 2
+  size: 152, 235
+  orig: 152, 235
+  offset: 0, 0
+  index: -1
+shangbi
+  rotate: false
+  xy: 402, 23
+  size: 86, 69
+  orig: 86, 69
+  offset: 0, 0
+  index: -1
+youtui
+  rotate: false
+  xy: 380, 357
+  size: 122, 146
+  orig: 122, 146
+  offset: 0, 0
+  index: -1
+zuotui
+  rotate: false
+  xy: 156, 13
+  size: 103, 224
+  orig: 103, 224
+  offset: 0, 0
+  index: -1
+
+renma58.png
+size: 399,302
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+B_daoba
+  rotate: false
+  xy: 190, 2
+  size: 185, 118
+  orig: 185, 118
+  offset: 0, 0
+  index: -1
+B_zuoqianti
+  rotate: false
+  xy: 2, 26
+  size: 119, 92
+  orig: 119, 92
+  offset: 0, 0
+  index: -1
+cam7_A_qunbai
+  rotate: false
+  xy: 2, 120
+  size: 186, 180
+  orig: 186, 180
+  offset: 0, 0
+  index: -1
+cam8_A_youdao
+  rotate: false
+  xy: 190, 122
+  size: 139, 178
+  orig: 139, 178
+  offset: 0, 0
+  index: -1
+dao1
+  rotate: false
+  xy: 331, 232
+  size: 66, 68
+  orig: 66, 68
+  offset: 0, 0
+  index: -1
