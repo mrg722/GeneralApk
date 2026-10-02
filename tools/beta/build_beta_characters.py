@@ -108,11 +108,14 @@ class Builder:
             sx0, sy0 = max(0, m["x"]), max(0, m["y"])
             sx1, sy1 = min(iw, m["x"] + m["w"]), min(ih, m["y"] + m["h"])
             if sx1 <= sx0 or sy1 <= sy0: continue
-            flip = s.get("flip", 0) & 3
-            fx, fy = flip & 1, (flip >> 1) & 1
+            flip = s.get("flip", 0) & 7
+            fx, fy, rot = flip & 1, (flip >> 1) & 1, (flip >> 2) & 1
             # desplazamiento de la parte recortada dentro de la pieza (respetando el espejo)
             dx = (m["x"] + m["w"] - sx1) if fx else (sx0 - m["x"])
             dy = (m["y"] + m["h"] - sy1) if fy else (sy0 - m["y"])
+            if rot:
+                # bit 4: girada 90 antihorario; el punto (u,v) pasa a (v, w-u)
+                dx, dy = dy, m["w"] - dx - (sx1 - sx0)
             pieces.append((gi, sx0, sy0, sx1 - sx0, sy1 - sy0, s["x"] + dx, s["y"] + dy, flip))
         attack = fr["attack"] if any(fr["attack"]) else (extra_attack or [0, 0, 0, 0])
         key = (tuple(pieces), tuple(fr["body"]), tuple(attack))

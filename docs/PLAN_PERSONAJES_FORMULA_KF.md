@@ -222,7 +222,7 @@ Mínimo, tomando la heroína como referencia (132 piezas); completo, como el hé
 - **Revisar el detalle:** imágenes de cerca de 8 poses y de las 6 habilidades.
 - **Validar:** probar en el teléfono y pasar los tests.
 
-### Nota sobre originalidad (`AGENTS.md`)
+### Nota sobre originalidad
 
 Hoy Rayder Clon usa las posiciones y tiempos del KF con piezas nuestras. Para una
 versión publicable, la Fase 0-B y la Fase 3 permiten tener **cuadros y acciones

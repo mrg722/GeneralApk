@@ -13,6 +13,8 @@ enum class Context {
     Menu,       // cruceta + OK + ATRAS
     EndScreen,  // cruceta + OK + REINTENTAR + MENU (derrota / etapa superada)
     Reward,     // 1 / 2 / 3 (eleccion de mejora)
+    Beta,       // MODO BETA: botones originales del guerrero (joystick, ataque, omega,
+                // 3 habilidades, pociones, esquiva, bloqueo, pausa y cambio de arma)
 };
 
 void SetEnabled(bool enabled);

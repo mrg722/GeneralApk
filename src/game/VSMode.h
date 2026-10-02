@@ -16,7 +16,8 @@ public:
     // Pantalla actual para los controles tactiles: 0 combate, 1 menu, 2 fin.
     int TouchContext() const {
         if (flow == VSFlow::Select) return 1;
-        return (playerDefeated || (selectedBoss >= 0 && boss.IsDefeated()) || RivalDefeated()) ? 2 : 0;
+        if (playerDefeated || (selectedBoss >= 0 && boss.IsDefeated()) || RivalDefeated()) return 2;
+        return PlayerIsWarrior() ? 3 : 0;   // guerrero BETA: botones originales (cambio de arma)
     }
     VSMode();
     void Init();
@@ -62,6 +63,9 @@ private:
     bool RivalActive() const { return rivalCharacter_ >= 0 && selectedBoss < 0; }
     bool RivalDefeated() const { return RivalActive() && rival.state == PlayerState::Defeat; }
     void UpdateRival(float dt);
+    // Guerrero BETA (4 armas): se cambia de arma en plena pelea (Q / boton).
+    bool PlayerIsWarrior() const;
+    float rivalWeaponTimer{6.0f};
     std::array<StreetEnemyType, 4> enemyTypes{
         StreetEnemyType::Punk,
         StreetEnemyType::Brute,

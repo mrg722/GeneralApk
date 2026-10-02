@@ -6,6 +6,8 @@
 #include "core/InputMap.h"
 #include "game/CharacterVisual.h"
 #include "game/beta/BetaMode.h"
+#include "game/VSMode.h"
+#include "ui/TouchControls.h"
 #include "game/lab/KfReference.h"
 #include "rendering/AssetManager.h"
 #include "raylib.h"
@@ -128,6 +130,75 @@ int main(int argc, char** argv) {
         if (!g.BossActive()) { std::printf("jefe %d NO CARGA\n", b); ++problems; continue; }
         problems += Play(g, std::string("beta_jefe_") + g.BossName(), 180.0f, true);
         if (!g.Won()) ++problems;
+    }
+    // 7) Controles tactiles originales (captura) con el guerrero.
+    {
+        touch::SetEnabled(true);
+        g.StartForTest(0, 0, false);
+        for (int f = 0; f < 120; ++f) { input::ClearNext(); input::Commit(); g.Update(1.0f / 60.0f); }
+        BeginDrawing(); ClearBackground(BLACK); g.Draw(); touch::Draw(touch::Context::Beta, &g.PlayerRef()); EndDrawing();
+        Shot("tactil_beta");
+        touch::SetEnabled(false);
+    }
+    // 6) HISTORIA completa: tarjetas, 3 capitulos, remates y vuelta al menu.
+    {
+        g.StartStoryForTest(0);
+        PlayerInput in;
+        int f = 0, shots = 0, lastChapter = -1;
+        for (; f < 60 * 900 && !g.ShouldExit(); ++f) {
+            input::ClearNext();
+            static int wait = 0;
+            wait = g.QteWaiting() ? wait + 1 : 0;
+            if (g.InStoryCard() && f % 90 == 60) input::SetVirtual(KEY_ENTER, true);
+            if ((g.Won() || g.Lost()) && f % 60 == 30) input::SetVirtual(KEY_ENTER, true);
+            if (wait == 18) input::SetVirtual(KEY_J, true);
+            input::Commit();
+            if (!g.InStoryCard() && !g.Won() && !g.Lost()) {
+                Player& p = g.PlayerRef();
+                p.debugInvulnerable = true;
+                p.scriptedInput = &in;
+                in = Bot(g, p, f);
+            }
+            g.Update(1.0f / 60.0f);
+            if (g.StoryChapter() != lastChapter || (f % 1200 == 600 && shots < 30)) {
+                lastChapter = g.StoryChapter();
+                Frame(g);
+                Shot("historia_" + std::to_string(shots++));
+            }
+        }
+        std::printf("HISTORIA: capitulo final %d, vuelta al menu %s (%.0fs)\n", g.StoryChapter(), g.ShouldExit() ? "si" : "no", f / 60.0f);
+        if (!g.ShouldExit()) ++problems;
+        g.ClearExit();
+    }
+    // 5) Guerrero en el Modo VS: como jugador (cambia de arma con Q) contra el guerrero IA.
+    {
+        SetRandomSeed(7);
+        VSMode vs;
+        vs.Init();
+        vs.StartRivalForTest(FirstBetaCharacter(), FirstBetaCharacter());
+        Player& me = vs.PlayerRef();
+        PlayerInput pin;
+        me.scriptedInput = &pin;
+        const int rivalStart = vs.RivalRef().hp;
+        int weapons = 0, rivalWeapons = 0, lastRivalSkin = vs.RivalRef().skin;
+        bool hurt = false;
+        for (int f = 0; f < 60 * 30; ++f) {
+            pin = PlayerInput{};
+            const float dx = vs.RivalRef().position.x - me.position.x;
+            pin.moveX = std::fabs(dx) > 120 ? (dx > 0 ? 1.0f : -1.0f) : 0.0f;
+            pin.punch = (f % 16) == 0;
+            input::ClearNext();
+            if (f % 400 == 200) { input::SetVirtual(KEY_Q, true); ++weapons; }
+            input::Commit();
+            vs.Update(1.0f / 60.0f);
+            if (vs.RivalRef().skin != lastRivalSkin) { ++rivalWeapons; lastRivalSkin = vs.RivalRef().skin; }
+            if (me.hp < me.maxHp) hurt = true;
+            if (f % 450 == 225) { BeginDrawing(); ClearBackground(BLACK); vs.Draw(); EndDrawing(); Shot("vs_guerrero_" + std::to_string(f / 450)); }
+        }
+        std::printf("VS guerrero: arma final %s, cambios jugador %d, cambios rival %d, rival %d->%d, jugador herido %s\n",
+                    GetCharacterVisual(me.skin).name, weapons, rivalWeapons, rivalStart, vs.RivalRef().hp, hurt ? "si" : "no");
+        if (vs.RivalRef().hp >= rivalStart || !hurt || rivalWeapons == 0) ++problems;
+        me.scriptedInput = nullptr;
     }
     g.Shutdown();
     CloseWindow();

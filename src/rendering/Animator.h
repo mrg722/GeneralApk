@@ -157,6 +157,19 @@ public:
             if (p.tex < 0 || p.tex >= static_cast<int>(pieceTextures->size())) continue;
             const Texture2D& t = (*pieceTextures)[static_cast<std::size_t>(p.tex)];
             if (t.id == 0) continue;
+            if (p.rot90) {
+                // Pieza girada 90 antihorario: ocupa (alto x ancho). Al reflejar el
+                // personaje, el espejo horizontal equivale a invertir la textura en vertical.
+                const bool fx = p.flipX, fy = p.flipY != flipX;
+                const Rectangle src{p.src.x, p.src.y, fx ? -p.src.width : p.src.width, fy ? -p.src.height : p.src.height};
+                const float bw = p.src.height * scaleX;          // ancho del cuadro girado
+                const float relX = flipX ? -(p.x * scaleX + bw) : p.x * scaleX;
+                const float relY = p.y * scaleY;
+                // girar -90 alrededor de la esquina: el rectangulo queda en [x, x+bw] x [y, y+ancho]
+                DrawTexturePro(t, src, {feet.x + relX, feet.y + relY + p.src.width * scaleY, p.src.width * scaleY, p.src.height * scaleX},
+                               {0, 0}, -90.0f + angle, tint);
+                continue;
+            }
             const bool fx = p.flipX != flipX;
             const Rectangle src{p.src.x, p.src.y, fx ? -p.src.width : p.src.width, p.flipY ? -p.src.height : p.src.height};
             const float w = p.src.width * scaleX, h = p.src.height * scaleY;

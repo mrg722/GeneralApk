@@ -96,8 +96,23 @@ no aparecen en VS).
 - **Escenarios (6):** cubierta del barco, montana nevada, cueva helada, camino y arena
   del volcan, paso de la montana. Mapas de tiles originales + parallax + clima; la
   franja caminable sale de la capa de colision.
-- **Modos:** OLEADAS (avanzar por el escenario, 4-5 oleadas con enemigo final) y
-  1 VS 1 contra cualquier personaje BETA manejado por RivalAI.
+- **Modos:** OLEADAS (avanzar por el escenario, oleadas con jefe final), 1 VS 1 contra
+  cualquier personaje BETA manejado por RivalAI, JEFE directo e HISTORIA.
+- **HISTORIA (3 capitulos):** 1) el ataque en la costa (barco, jefe: Bruto de la bola con
+  remate), 2) el templo y las catacumbas (cueva, jefe: Medusa con remate; las almas verdes
+  curan), 3) el climax en el volcan (Titan y al final Poseidon con el remate final). Cada
+  capitulo abre con una tarjeta narrada y su jefe animado; al terminar se guarda la mejora
+  (+15 de vida maxima por historia completada, hasta 3) y se vuelve al menu principal.
+  Adaptada a lo que trae el paquete: no hay Rey Persa, Basilisco ni Ares, asi que esos
+  papeles los hacen el Bruto, Medusa y Poseidon.
+- **Interfaz y controles originales:** barra con forma de espada y retrato, barra de jefe
+  de 3 capas, barritas de enemigos, contador HITS y numeros de dano con las fuentes del
+  juego. Tactil: joystick original, ataque, omega (furia), 3 habilidades + 2 combos,
+  esquiva, bloqueo, pociones (Z vida / X magia, 5 de cada una) y CAMBIAR ARMA (Q).
+- **Guerrero en el Modo VS:** como jugador o rival IA ("GUERRERO"); cambia entre sus 4
+  armas dentro de la pelea (Q / boton) y el rival IA tambien cambia solo.
+- **Piezas giradas:** el bit 4 de `flip` en los XML es un giro de 90 grados (antihorario);
+  sin el se veian bloques y cortes en las habilidades.
 - **Sonido:** sonidos por cuadro de golpes y habilidades, herido/muerte por personaje,
   UI y musica (menu, barco, volcan, victoria, derrota) del paquete original.
 - **Efectos:** chispas de impacto, humo de muerte, almas; lluvia/rayos, nieve y ceniza.

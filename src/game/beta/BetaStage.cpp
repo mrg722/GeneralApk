@@ -55,7 +55,7 @@ bool BetaStage::Load(const std::string& stageId) {
     return true;
 }
 
-void BetaStage::DrawBack(float cameraX) const {
+void BetaStage::DrawSky(float cameraX) const {
     DrawRectangle(0, 0, 1280, 720, sky);
     const float top = mapTop + cameraDy;
     for (const BetaStageLayer& l : layers) {
@@ -75,6 +75,10 @@ void BetaStage::DrawBack(float cameraX) const {
         for (float x = x0; x < 1280.0f; x += step)
             DrawTexturePro(l.tex, {0, 0, (float)l.tex.width, (float)l.tex.height}, {x, y, w, h}, {0, 0}, 0, WHITE);
     }
+}
+
+void BetaStage::DrawMap(float cameraX) const {
+    const float top = mapTop + cameraDy;
     for (const BetaStageChunk& c : chunks) {
         if (!c.tex.id) continue;
         const float x = c.x * kScale - cameraX;

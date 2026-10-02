@@ -12,7 +12,7 @@ afirmación sale de leer el árbol entregado en `Proyecto.zip`.
 
 - Lectura completa de los 34 archivos de `src/` y `tests/` (3.362 líneas).
 - Lectura de `README.md`, `MASTER_PROMPT.md`, `GAME_DESIGN.md`, `ARCHITECTURE.md`,
-  `ROADMAP.md`, `AGENTS.md`, `CMakeLists.txt`, `.github/workflows/ci.yml`,
+  `ROADMAP.md`, `CMakeLists.txt`, `.github/workflows/ci.yml`,
   `data/sprite_manifest.json`, `assets/`.
 - Grafo de consumidores por símbolo (`grep` sobre declaraciones y usos).
 - **Chequeo de compilación por unidad de traducción**: los 14 `.cpp` pasan
@@ -249,7 +249,7 @@ consume**: no hay upgrades. §10/§12 parten de cero.
 `main.cpp::DrawMenuPrincipal()` y `Stage1StoryGame::DrawMenu()` dibujan dos
 menús principales distintos (distinto layout, distinto texto, uno menciona VS y
 el otro no). Cuál se ve depende de `activeStage`. Son 40 líneas de raylib crudo
-en `main.cpp`, justo lo que `AGENTS.md` prohíbe.
+en `main.cpp`, justo lo que la arquitectura modular del proyecto evita.
 
 ### D10 — La hitbox Energy del jugador es código muerto
 `Player::GetAttackHitbox()` calcula una caja de 220×76 para `AttackType::Energy`,

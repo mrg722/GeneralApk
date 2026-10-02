@@ -31,6 +31,7 @@ def render(d, fid, cache):
         p = cache[aid].crop((sx, sy, sx + sw, sy + sh))
         if flip & 1: p = p.transpose(Image.FLIP_LEFT_RIGHT)
         if flip & 2: p = p.transpose(Image.FLIP_TOP_BOTTOM)
+        if flip & 4: p = p.transpose(Image.ROTATE_90)
         out.alpha_composite(p, (ox + x, oy + y))
     dr = ImageDraw.Draw(out)
     if any(fr["attack"]): a = fr["attack"]; dr.rectangle((ox + a[0], oy + a[1], ox + a[2], oy + a[3]), outline=(255, 40, 40, 255), width=2)

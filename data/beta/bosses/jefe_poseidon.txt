@@ -3,6 +3,7 @@ boss jefe_poseidon
 name POSEIDON
 spine assets/beta/spine/Poseidon Poseidon 1.0
 hp 650
+draw 1.5 -100 147 1
 body -199 -264 2 95
 sound hurt sound59
 sound die sound60

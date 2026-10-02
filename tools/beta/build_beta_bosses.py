@@ -10,9 +10,9 @@ assets/beta/spine/<Carpeta>/ y se escribe data/beta/bosses/<id>.txt con:
     data/EnemyDate.lua) con su escala de getScale(), alcance AttakFont1/2,
     segundo del golpe = evento Spine attackEffect/skillEffect, efecto y sonido.
 
-Escala: Poseidon y tentaculos a 1 (sus cajas del XML coinciden con el Spine);
-el Titan a 0.44, la proporcion entre su caja de cuerpo del XML 51 (593 px) y su
-esqueleto, como lo mostraba el juego original. Uniforme: no deforma.
+Escala y lugar: los de las capturas del juego original (Poseidon gigante sobre
+la cubierta, el Titan asomando detras del escenario, tentaculos en el piso).
+Uniforme: no deforma.
 `tools/beta/spine21.py` es la misma logica en Python (vista previa offline).
 
 Uso: python3 tools/beta/build_beta_bosses.py <carpeta nuevosSprites>
@@ -27,7 +27,12 @@ from beta_anim import parse
 ROOT = Path(__file__).resolve().parents[2]
 
 BOSSES = [
+    # draw = (escala en pantalla, dx, dy desde la posicion del jefe en el carril, capa):
+    #   capa 0 = en el piso con los demas (tentaculos), 1 = gigante delante del mapa
+    #   (Poseidon sobre la cubierta), 2 = gigante detras del mapa (Titan asomando).
+    #   Medidas tomadas de capturas del juego original (1280x720).
     dict(id="jefe_poseidon", name="POSEIDON", dir="Poseidon", file="Poseidon", scale=1.0, xml=64, hp=650,
+         draw=(1.5, -100, 147, 1),
          behit="sound59", die="sound60",
          clips={"intro": ("stand", 0), "idle": ("stand", 1), "hit": ("behit", 0), "defeat": ("die4", 0),
                 "down": ("lay", 1), "warn1": ("warningAttack", 0), "warn2": ("warningSkill", 0)},
@@ -35,17 +40,19 @@ BOSSES = [
          attacks=[("warn1", "a8", 0.8, 280, "fx_poseidon:a0", "sound59", 22),
                   ("warn2", "a9", 0.7, 320, "fx_poseidon:a2", "sound60", 28)]),
     dict(id="jefe_tentaculos", name="MONSTRUO DE TENTACULOS", dir="PoseidonBaby", file="ZS_chushou", scale=1.0, xml=15,
+         draw=(1.25, 0, 0, 0),
          hp=600, behit="sound52", die="sound51",
          clips={"intro": ("chuchang", 0), "idle": ("stand", 1), "hit": ("behit", 0), "defeat": ("die5", 0),
                 "down": ("lay", 1), "warn1": ("warningAttack", 0), "warn2": ("warningSkill", 0)},
          attacks=[("warn1", "a6", 1.0, 300, "fx_tentaculos:a0", "sound52", 20),
-                  ("warn2", "a7", 1.0, 300, "fx_tentaculos:a1", "sound51", 26)]),
-    dict(id="jefe_titan", name="TITAN", dir="Titan", file="Titan", scale=0.44, xml=51, hp=700,
+                  ("warn2", "a7", 1.0, 300, "fx_tentaculos:a2", "sound51", 26)]),
+    dict(id="jefe_titan", name="TITAN", dir="Titan", file="Titan", scale=1.0, xml=51, hp=700,
+         draw=(1.6, 334, 1078, 2),
          behit="sound56", die="sound55",
          clips={"intro": ("stand", 0), "idle": ("stand", 1), "hit": ("behit", 0), "defeat": ("die", 0),
                 "down": ("lay", 1), "warn1": ("warningAttack", 0), "warn2": ("warningSkill", 0)},
-         attacks=[("warn1", "a10", 1.0, 260, "fx_titan:a0", "sound56", 24),
-                  ("warn2", "a11", 1.0, 470, "fx_titan:a1", "sound55", 32)]),
+         attacks=[("warn1", "a10", 1.0, 260, "fx_titan:a1", "sound56", 24),
+                  ("warn2", "a11", 1.0, 470, "fx_titan:a3", "sound55", 32)]),
 ]
 
 
@@ -61,14 +68,14 @@ def build(ns, b):
     body = xml["frames"][xml["actions"][0]["seq"][0]["frameid"]]["body"]
     L = [f"# BETA jefe {b['name']} (generado por tools/beta/build_beta_bosses.py)",
          f"boss {b['id']}", f"name {b['name']}", f"spine assets/beta/spine/{b['dir']} {b['file']} {b['scale']}",
-         f"hp {b['hp']}", f"body {' '.join(map(str, body))}", f"sound hurt {b['behit']}", f"sound die {b['die']}"]
+         f"hp {b['hp']}", "draw " + " ".join(map(str, b["draw"])), f"body {' '.join(map(str, body))}", f"sound hurt {b['behit']}", f"sound die {b['die']}"]
     for clip, (anim, loop) in b["clips"].items():
         assert anim in data["animations"], (b["id"], anim)
         L.append(f"clip {clip} {anim} {loop}")
     for clip, warn, wscale, reach, fx, snd, dmg in b["attacks"]:
         anim = b["clips"][clip][0]
         evs = [e["time"] for e in data["animations"][anim].get("events", []) if "Effect" in e["name"]]
-        hit = evs[0] if evs else 0.7
+        hit = ",".join(str(t) for t in evs) if evs else "0.7"
         L.append(f"attack {clip} {warn} {wscale} {reach} {hit} {fx} {snd} {dmg}")
     out = ROOT / "data/beta/bosses" / f"{b['id']}.txt"
     out.parent.mkdir(parents=True, exist_ok=True)

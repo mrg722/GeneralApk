@@ -113,7 +113,10 @@ int main() {
             c = stage4.TouchContext();
         else
             c = stage5.TouchContext();
-        return c == 0 ? touch::Context::Combat : c == 2 ? touch::Context::EndScreen : touch::Context::Menu;
+        return c == 0   ? touch::Context::Combat
+               : c == 3 ? touch::Context::Beta   // BETA / guerrero en VS: botones originales
+               : c == 2 ? touch::Context::EndScreen
+                        : touch::Context::Menu;
     };
     auto activePlayer = [&]() -> const district_fury::Player* {
         if (betaActive) return &betaMode.PlayerRef();

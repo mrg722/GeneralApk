@@ -65,6 +65,8 @@ class Composer:
         fx, fy = FLIPS.get(flip & 3, (False, False))
         if fx: p = p.transpose(Image.FLIP_LEFT_RIGHT)
         if fy: p = p.transpose(Image.FLIP_TOP_BOTTOM)
+        # bit 4: pieza girada 90 grados (antihorario), despues de los espejos
+        if flip & 4: p = p.transpose(Image.ROTATE_90)
         return p
 
     def frame(self, fid):

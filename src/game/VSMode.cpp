@@ -39,6 +39,30 @@ const char* kStage5Scenarios[] = {"CAMARA DEL CLON // PASILLO", "SALA DE CONTROL
                                   "CAMARA DEL CLON // ARENA FINAL"};
 const char* kEnemyNames[] = {"PUNK",        "BRUTE",  "CHARGER",      "ENFORCER", "CHEMICAL SOLDIER",
                              "URBAN NINJA", "MUTANT", "ARMORED GUARD"};
+// Personajes del VS: los de siempre + el guerrero BETA (Espadas del Caos; las
+// otras 3 armas se eligen dentro de la pelea).
+int VsCount() { return StableCharacterCount() + 1; }
+int VsChar(int slot) { return slot < StableCharacterCount() ? slot : FirstBetaCharacter(); }
+int VsSlot(int ch) { return ch < StableCharacterCount() ? ch : StableCharacterCount(); }
+bool IsWarrior(int ch) { const int w = ch - FirstBetaCharacter(); return w >= 0 && w < 4; }
+// Cambia el arma del guerrero conservando vida, energia, furia, posicion y direccion.
+void SwitchWarriorWeapon(Player& p) {
+    if (!IsWarrior(p.skin)) return;
+    const int next = FirstBetaCharacter() + (p.skin - FirstBetaCharacter() + 1) % 4;
+    const float hpRatio = (float)p.hp / std::max(1, p.maxHp);
+    const int sp = p.sp, rage = p.rage;
+    const Vector3D pos = p.position;
+    const Facing facing = p.facing;
+    const PlayerInput* scripted = p.scriptedInput;
+    p.Reset();
+    p.ApplyCharacter(next);
+    p.position = pos;
+    p.facing = facing;
+    p.hp = std::max(1, (int)std::lround(hpRatio * p.maxHp));
+    p.sp = sp;
+    p.rage = rage;
+    p.scriptedInput = scripted;
+}
 StreetEnemyType NextEnemyType(StreetEnemyType t, int dir) {
     int i = (static_cast<int>(t) + dir + 8) % 8;
     return static_cast<StreetEnemyType>(i);
@@ -113,6 +137,7 @@ void VSMode::ResetFight() {
         rivalInput = PlayerInput{};
         rival.scriptedInput = &rivalInput;
         rivalAI.Reset();
+        rivalWeaponTimer = 6.0f;
         return;
     }
     const std::array<float, 4> xs{700, 835, 970, 1105};
@@ -153,13 +178,17 @@ void VSMode::Update(float dt) {
             else if (cursor == 2)
                 enemyCount = std::clamp(enemyCount + dir, 1, 4);
             else if (cursor == 3)
-                selectedCharacter = (selectedCharacter + dir + StableCharacterCount()) % StableCharacterCount();
+                selectedCharacter = VsChar((VsSlot(selectedCharacter) + dir + VsCount()) % VsCount());
             else if (cursor == 4)
                 selectedBoss = ((selectedBoss + 1 + dir + kBossOptionCount) % kBossOptionCount) - 1;
             else if (cursor == 9)
                 kfRival = ((kfRival + 1 + dir + KfStableRosterCount() + 1) % (KfStableRosterCount() + 1)) - 1;
             else if (cursor == 10)
-                rivalCharacter_ = ((rivalCharacter_ + 1 + dir + StableCharacterCount() + 1) % (StableCharacterCount() + 1)) - 1;
+            {
+                int r = rivalCharacter_ < 0 ? -1 : VsSlot(rivalCharacter_);
+                r = ((r + 1 + dir + VsCount() + 1) % (VsCount() + 1)) - 1;
+                rivalCharacter_ = r < 0 ? -1 : VsChar(r);
+            }
             else {
                 int slot = cursor - 5;
                 enemyTypes[(size_t)slot] = NextEnemyType(enemyTypes[(size_t)slot], dir);
@@ -189,6 +218,10 @@ void VSMode::Update(float dt) {
     if (playerDefeated || (selectedBoss >= 0 && boss.IsDefeated()) || RivalDefeated()) {
         if (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J)) ResetFight();
         return;
+    }
+    if (input::Pressed(KEY_Q) && IsWarrior(player.skin) && player.state != PlayerState::Defeat) {
+        SwitchWarriorWeapon(player);
+        selectedCharacter = player.skin;
     }
     player.PumpInput(dt);
     if (hitstop > 0) {
@@ -267,7 +300,15 @@ void VSMode::Update(float dt) {
     }
     playerDefeated = player.state == PlayerState::Defeat;
 }
+bool VSMode::PlayerIsWarrior() const { return IsWarrior(player.skin); }
+
 void VSMode::UpdateRival(float dt) {
+    // El guerrero rival tambien cambia de arma de vez en cuando (sus "transformaciones").
+    if (IsWarrior(rival.skin) && rival.state != PlayerState::Attack && rival.state != PlayerState::Defeat &&
+        (rivalWeaponTimer -= dt) <= 0.0f) {
+        SwitchWarriorWeapon(rival);
+        rivalWeaponTimer = 10.0f + GetRandomValue(0, 60) / 10.0f;
+    }
     rivalInput = rivalAI.Think(rival, player, dt);
     if (rival.state != PlayerState::Attack)
         rival.facing = player.position.x > rival.position.x ? Facing::Right : Facing::Left;
@@ -381,7 +422,7 @@ void VSMode::DrawSelection() const {
     DrawText(TextFormat("%d ENEMIGO%s", enemyCount, enemyCount == 1 ? "" : "S"), 600, y[2], 14,
              selectedBoss >= 0 ? Color{85, 95, 100, 130} : Color{190, 220, 230, 255});
     // Numero de personaje: deja claro que hay mas (KF incluidos) con < y >.
-    DrawText(TextFormat("%s   %d/%d", GetCharacterVisual(selectedCharacter).name, selectedCharacter + 1, StableCharacterCount()),
+    DrawText(TextFormat("%s   %d/%d", IsWarrior(selectedCharacter) ? "GUERRERO (4 ARMAS, Q CAMBIA)" : GetCharacterVisual(selectedCharacter).name, VsSlot(selectedCharacter) + 1, VsCount()),
              600, y[3], 14, selectedCharacter == 1 ? Color{255, 160, 170, 255} : Color{190, 220, 230, 255});
     DrawText(kBossNames[selectedBoss + 1], 600, y[4], 14,
              selectedBoss >= 0 ? Color{255, 150, 150, 255} : Color{190, 220, 230, 255});
@@ -402,7 +443,7 @@ void VSMode::DrawSelection() const {
     if (rivalCharacter_ < 0)
         DrawText("NO (PELEA CONTRA ENEMIGOS)", 600, y[10], 14, {190, 220, 230, 255});
     else
-        DrawText(TextFormat("%s   %d/%d", GetCharacterVisual(rivalCharacter_).name, rivalCharacter_ + 1, StableCharacterCount()),
+        DrawText(TextFormat("%s   %d/%d", IsWarrior(rivalCharacter_) ? "GUERRERO (CAMBIA DE ARMA)" : GetCharacterVisual(rivalCharacter_).name, VsSlot(rivalCharacter_) + 1, VsCount()),
                  600, y[10], 14, {255, 200, 90, 255});
     if (selectedBoss >= 0)
         DrawText("BOSS ACTIVO: los campos de enemigos y el rival se ignoran (1 vs 1).", 335, 529, 12,
@@ -458,7 +499,8 @@ void VSMode::DrawFight() const {
     DrawHud();
     if (!touch::Enabled()) {
         DrawRectangle(260, 657, 760, 45, {3, 7, 11, 225});
-        DrawText("J GOLPE   K PATADA   L ENERGIA   B BLOQUEO   SHIFT DASH   SPACE FURIA", 296, 669, 12,
+        DrawText(PlayerIsWarrior() ? "J GOLPE   K PATADA   1-5 HABILIDADES   B BLOQUEO   SHIFT ESQUIVA   SPACE FURIA   Q ARMA"
+                                   : "J GOLPE   K PATADA   L ENERGIA   B BLOQUEO   SHIFT DASH   SPACE FURIA", 296, 669, 12,
                  {170, 200, 210, 240});
         DrawText(!enemies.empty() && enemies[0].referenceSkin
                      ? TextFormat("R REINICIAR   ESC CONFIGURACION   N ACCION DEL BOT KF: %s",

@@ -1,6 +1,7 @@
 #include "ui/TouchControls.h"
 #include "core/InputMap.h"
 #include "game/Player.h"
+#include "game/CharacterVisual.h"
 #include "rendering/AssetManager.h"
 #include <string>
 #include <algorithm>
@@ -69,6 +70,24 @@ const Button kReward[] = {
     {{760.0f, 640.0f}, 44.0f, KEY_THREE, "3", {230, 170, 60, 255}},
 };
 
+// MODO BETA: interfaz original del juego (assets/beta/ui, "@" = esa carpeta).
+// Pociones: Z vida, X magia. Q cambia de arma (el icono es la siguiente).
+const Button kBeta[] = {
+    {{1168.0f, 610.0f}, 70.0f, KEY_J, "GOLPE", {225, 55, 45, 255}, "@boton_ataque", true},
+    {{890.0f, 662.0f}, 40.0f, KEY_SPACE, "FURIA", {255, 190, 60, 255}, "@boton_omega", true},
+    {{1012.0f, 664.0f}, 40.0f, input::kVirtualSkill0 + 0, "1", {255, 120, 60, 255}, "@boton_hab1", true},
+    {{1046.0f, 545.0f}, 40.0f, input::kVirtualSkill0 + 1, "2", {255, 120, 60, 255}, "@boton_hab2", true},
+    {{1150.0f, 470.0f}, 40.0f, input::kVirtualSkill0 + 2, "3", {255, 120, 60, 255}, "@boton_hab3", true},
+    {{1212.0f, 392.0f}, 26.0f, input::kVirtualSkill0 + 3, "4", {255, 120, 60, 255}, "@boton_hab2", true},
+    {{1212.0f, 318.0f}, 26.0f, input::kVirtualSkill0 + 4, "5", {255, 120, 60, 255}, "@boton_hab3", true},
+    {{905.0f, 560.0f}, 28.0f, KEY_LEFT_SHIFT, "ESQUIVA", {230, 200, 120, 255}},
+    {{790.0f, 662.0f}, 28.0f, KEY_B, "BLOQUEO", {230, 200, 120, 255}},
+    {{560.0f, 668.0f}, 30.0f, KEY_Z, "VIDA", {230, 60, 60, 255}, "@pocion_roja", true},
+    {{690.0f, 668.0f}, 30.0f, KEY_X, "MAGIA", {60, 140, 230, 255}, "@pocion_azul", true},
+    {{440.0f, 34.0f}, 22.0f, KEY_ESCAPE, "PAUSA", {170, 170, 180, 255}, "@pausa", true},
+    {{70.0f, 215.0f}, 36.0f, KEY_Q, "CAMBIAR ARMA", {255, 205, 90, 255}},
+};
+
 template <size_t N>
 const Button* Set(const Button (&arr)[N], size_t& n) { n = N; return arr; }
 
@@ -77,14 +96,16 @@ const Button* ButtonsFor(Context c, size_t& n) {
         case Context::Combat:    return Set(kCombat, n);
         case Context::EndScreen: return Set(kEnd, n);
         case Context::Reward:    return Set(kReward, n);
+        case Context::Beta:      return Set(kBeta, n);
         default:                 return Set(kMenu, n);
     }
 }
 
-bool UsesStick(Context c) { return c == Context::Combat; }
+bool UsesStick(Context c) { return c == Context::Combat || c == Context::Beta; }
 
 Texture2D Art(const char* name) {
     if (!name || !IsWindowReady()) return Texture2D{};
+    if (name[0] == '@') return AssetManager::Get().GetTextureByPath(std::string("assets/beta/ui/") + (name + 1) + ".png");
     return AssetManager::Get().GetTextureByPath(std::string("assets/ui/touch/") + name + ".png");
 }
 
@@ -116,6 +137,7 @@ void ApplyStick(Vector2 p, Context c) {
     const float nx = d.x / std::max(len, 1.0f), ny = d.y / std::max(len, 1.0f);
     const bool right = nx > 0.38f, left = nx < -0.38f, down = ny > 0.38f, up = ny < -0.38f;
     // Combate: WASD (movimiento y comandos). Menus: tambien flechas.
+    if (c == Context::Beta) c = Context::Combat;
     input::SetVirtual(KEY_D, right); input::SetVirtual(KEY_A, left);
     input::SetVirtual(KEY_S, down); input::SetVirtual(KEY_W, up);
     if (c != Context::Combat) {
@@ -166,7 +188,14 @@ void Update(Context context) {
 
 void Draw(Context context, const Player* player) {
     if (!gEnabled) return;
-    if (UsesStick(context)) {
+    if (context == Context::Beta) {
+        // Joystick original: base con flechas; la perilla dorada sigue al dedo.
+        DrawArt("@flecha", {kStick.x + 128.0f, kStick.y}, 26.0f, {255, 255, 255, 220}, 1.0f);
+        const Texture2D fl = Art("@flecha");
+        if (fl.id) DrawTexturePro(fl, {0, 0, -(float)fl.width, (float)fl.height}, {kStick.x - 154.0f, kStick.y - 26.0f, 52, 52}, {0, 0}, 0, {255, 255, 255, 220});
+        DrawArt("@joystick", kStick, kStickRadius, {255, 255, 255, 225}, 1.0f);
+        DrawCircleV(gKnob, 20.0f, {230, 190, 90, gKnob.x == kStick.x && gKnob.y == kStick.y ? (unsigned char)0 : (unsigned char)150});
+    } else if (UsesStick(context)) {
         if (DrawArt("palanca_base", kStick, kStickRadius + 14.0f, {255, 255, 255, 215}, 1.0f)) {
             DrawArt("palanca_perilla", gKnob, 46.0f, WHITE, 1.0f);
         } else {
@@ -181,6 +210,21 @@ void Draw(Context context, const Player* player) {
     for (size_t i = 0; i < n; ++i) {
         const Button& b = buttons[i];
         if (b.key == input::kVirtualSkillPage && (!player || player->SkillPageCount() <= 1)) continue;
+        if (b.key == KEY_Q && context == Context::Beta) {
+            // Cambio de arma: solo con el guerrero; muestra el arma siguiente.
+            const int w = player ? player->skin - FirstBetaCharacter() : -1;
+            if (w < 0 || w > 3) continue;
+            const bool held = input::Down(KEY_Q);
+            DrawCircleV(b.center, b.radius + 4.0f, {10, 8, 6, 170});
+            DrawCircleLinesV(b.center, b.radius + 4.0f, {230, 190, 90, 220});
+            DrawArt(TextFormat("@arma_%d", (w + 1) % 4), b.center, b.radius, held ? WHITE : Color{235, 235, 235, 255}, 1.05f);
+            DrawText(b.label, (int)(b.center.x - MeasureText(b.label, 10) / 2.0f), (int)(b.center.y + b.radius + 6.0f), 10, {255, 225, 150, 240});
+            continue;
+        }
+        if (b.key == KEY_Z || b.key == KEY_X) {
+            const Texture2D bg = Art("@pociones_fondo");
+            if (b.key == KEY_Z && bg.id) DrawTexturePro(bg, {0, 0, (float)bg.width, (float)bg.height}, {520, 646, 220, 36}, {0, 0}, 0, {255, 255, 255, 200});
+        }
         const bool held = input::Down(b.key);
         bool dim = false, glow = false;
         if (player && b.key == input::kVirtualSpecialWave) dim = player->sp < GetAttack(AttackId::EnergyWave).spCost;

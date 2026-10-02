@@ -58,6 +58,7 @@ KfReference LoadBetaCharacter(const std::string& id) {
             p.y = (float)y;
             p.flipX = (flip & 1) != 0;
             p.flipY = (flip & 2) != 0;
+            p.rot90 = (flip & 4) != 0;
             frames.back().pieces.push_back(p);
         } else if (tag == "clip") {
             std::string name;
@@ -101,9 +102,10 @@ KfReference LoadBetaCharacter(const std::string& id) {
         float x0 = 0, y0 = 0, x1 = 0, y1 = 0;
         bool first = true;
         for (const FramePiece& p : f.pieces) {
-            if (first) { x0 = p.x; y0 = p.y; x1 = p.x + p.src.width; y1 = p.y + p.src.height; first = false; }
+            const float w = p.rot90 ? p.src.height : p.src.width, h = p.rot90 ? p.src.width : p.src.height;
+            if (first) { x0 = p.x; y0 = p.y; x1 = p.x + w; y1 = p.y + h; first = false; }
             x0 = std::min(x0, p.x); y0 = std::min(y0, p.y);
-            x1 = std::max(x1, p.x + p.src.width); y1 = std::max(y1, p.y + p.src.height);
+            x1 = std::max(x1, p.x + w); y1 = std::max(y1, p.y + h);
         }
         f.width = std::max(1.0f, x1 - x0);
         f.height = std::max(1.0f, y1 - y0);

@@ -13,7 +13,7 @@ struct FramePiece {
     int tex = 0;
     Rectangle src = {};
     float x = 0.0f, y = 0.0f;
-    bool flipX = false, flipY = false;
+    bool flipX = false, flipY = false, rot90 = false;  // rot90: girada 90 antihorario (tras los espejos)
 };
 
 struct SpriteFrame {

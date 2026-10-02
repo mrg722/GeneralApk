@@ -3,6 +3,7 @@ boss jefe_tentaculos
 name MONSTRUO DE TENTACULOS
 spine assets/beta/spine/PoseidonBaby ZS_chushou 1.0
 hp 600
+draw 1.25 0 0 0
 body -150 -239 30 66
 sound hurt sound52
 sound die sound51
@@ -13,5 +14,5 @@ clip defeat die5 0
 clip down lay 1
 clip warn1 warningAttack 0
 clip warn2 warningSkill 0
-attack warn1 a6 1.0 300 1.7333 fx_tentaculos:a0 sound52 20
-attack warn2 a7 1.0 300 1.1666 fx_tentaculos:a1 sound51 26
+attack warn1 a6 1.0 300 1.7333,2.4666 fx_tentaculos:a0 sound52 20
+attack warn2 a7 1.0 300 1.1666,1.3666 fx_tentaculos:a2 sound51 26

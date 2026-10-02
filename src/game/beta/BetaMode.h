@@ -29,6 +29,9 @@ public:
     Player& PlayerRef() { return fighters.empty() ? placeholder : fighters[0]->p; }
 
     // Automatizacion (tests).
+    void StartStoryForTest(int character) { selCharacter = character; selMode = 3; StartStory(); }
+    int StoryChapter() const { return storyChapter; }
+    bool InStoryCard() const { return flow == Flow::StoryCard; }
     void StartForTest(int character, int stage, bool duel, int rival = 0) {
         selCharacter = character; selStage = stage; selMode = duel ? 1 : 0; selRival = rival; StartFight();
     }
@@ -79,7 +82,7 @@ private:
     struct BossAttack {
         std::string clip, warn, fx, fxClip, sound;
         float warnScale = 1.0f, reach = 0.0f;
-        float hitTime = 0.0f;  // segundo del evento Spine attackEffect/skillEffect
+        std::vector<float> hitTimes;   // segundos de los eventos Spine attackEffect/skillEffect
         int damage = 20;
         Rectangle area{};      // area del aviso (pies = 0,0; hacia adelante = +x)
     };
@@ -98,8 +101,13 @@ private:
         int phase = 0;          // 0 entrada, 1 quieto, 2 ataque, 3 herido, 4 vencido
         int attack = -1;
         float cooldown = 1.5f, flash = 0.0f, deadTime = 0.0f;
-        bool struck = false;
+        int strikes = 0;        // golpes ya resueltos del ataque actual
         bool qteDone = false;
+        // Dibujo (capturas del original): escala en pantalla, desplazamiento desde
+        // la posicion del jefe y capa: 0 en el piso, 1 gigante delante del mapa,
+        // 2 gigante detras del mapa (asoma por detras del escenario).
+        float drawScale = 1.25f, drawDx = 0.0f, drawDy = 0.0f;
+        int layer = 0;
         float ground = 0.0f;    // pixeles del dibujo bajo el origen (Titan sale del suelo)
         bool Play(const std::string& c) {
             const auto it = clips.find(c);
@@ -124,13 +132,13 @@ private:
         int fighter = -1;         // indice en fighters; -1 = el jefe
         spine21::Skeleton skel;
     };
-    enum class Flow { Select, Fight };
+    enum class Flow { Select, Fight, StoryCard };
 
     Flow flow{Flow::Select};
     int cursor{0};
     int selCharacter{0};   // 0..14 dentro del bloque BETA
     int selStage{0};
-    int selMode{0};        // 0 oleadas, 1 1 VS 1, 2 jefe
+    int selMode{0};        // 0 oleadas, 1 1 VS 1, 2 jefe, 3 historia
     int selRival{13};      // MEDUSA por defecto
     int selBoss{0};        // 0 Poseidon, 1 tentaculos, 2 Titan
     bool exitRequested{false};
@@ -152,7 +160,29 @@ private:
     float hitstop{0.0f};
     Player placeholder;
     BossFight boss;
+    // Interfaz original: combo, numeros de dano y pociones (Z vida, X magia).
+    struct DamageNumber { Vector2 pos{}; int value = 0; float t = 0.0f; bool hero = true; };
+    std::vector<DamageNumber> numbers;
+    int comboHits{0};
+    float comboTimer{0.0f};
+    int redPotions{5}, bluePotions{5};
+    void OnHeroHit(Vector2 at, int damage);
+    void SwitchWeapon();
     Qte qte;
+    // HISTORIA: 3 capitulos con tarjeta narrada (texto + jefe animado) antes de
+    // cada uno y final que guarda las mejoras (district_fury_beta.dat).
+    int storyChapter{0};       // 0..2; 3 = final
+    bool qteExplained{false};  // primera vez: tarjeta que explica el remate
+    float cardTime{0.0f};
+    Animator cardAnim;
+    spine21::Skeleton cardSkel;
+    int storyClears{0};
+    void StartStory();
+    void ShowStoryCard();
+    void LoadProgress();
+    void SaveProgress() const;
+    const std::vector<std::vector<int>>& CurrentWaves() const;
+    void DrawStoryCard() const;
 
     std::map<std::string, Sound> soundCache;
     Music music{};
@@ -170,6 +200,7 @@ private:
     void UpdateBoss(float dt);
     CombatBox BossHurtbox() const;
     void DrawBoss() const;
+    void DrawBossWarning() const;
     bool StartQte(const std::string& key, int fighter);
     void QtePlaySegment();
     void UpdateQte(float dt);

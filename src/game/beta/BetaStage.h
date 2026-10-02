@@ -38,7 +38,9 @@ public:
     // Desplazamiento vertical de la camara (el mapa termina en el borde inferior).
     float CameraOffsetY() const { return cameraDy; }
 
-    void DrawBack(float cameraX) const;    // cielo + parallax + mapa
+    void DrawBack(float cameraX) const { DrawSky(cameraX); DrawMap(cameraX); }   // cielo + parallax + mapa
+    void DrawSky(float cameraX) const;     // cielo y capas de parallax
+    void DrawMap(float cameraX) const;     // el mapa de tiles (suelo, barandas...)
     void DrawWeather(float cameraX, float time) const;  // clima procedural en pantalla
 
     std::string id, name, music, weather;
