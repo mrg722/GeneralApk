@@ -1,0 +1,16 @@
+stage arena_titan
+name ARENA: TITAN
+source mapdata/393.XML
+size 1024 576
+walk 353 449 88 616
+sky 180 196 214
+music gate1music.ogg
+weather nieve
+arena 1
+chunk arena_titan_0.png 0
+boss jefe_titan 726 368 1038 998 1.0 2
+layer bg/Xueshanwaibeijing.png 0.08 0 1 0
+layer bg/Xueshanwaizhongjing_4.png 0.3 150 1 300
+layer bg/Xueshanwaizhongjing_5.png 0.38 260 1 500
+layer bg/Xueshanwaizhongjing_1.png 0.5 110 1 900
+layer bg/Xueshanwaizhongjing_3.png 0.55 70 1 1300

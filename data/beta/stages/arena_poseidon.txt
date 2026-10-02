@@ -1,0 +1,17 @@
+stage arena_poseidon
+name ARENA: POSEIDON
+source mapdata/293.XML
+size 1024 576
+walk 384 480 4 592
+sky 38 44 58
+music gate1music.ogg
+weather lluvia
+arena 1
+chunk arena_poseidon_0.png 0
+boss jefe_poseidon 722 415 784 444 1.0 1
+layer bg/Sky.png 0.05 0 1 0
+layer bg/Sea.png 0.15 250 1 0
+layer bg/Boat_04.png 0.2 236 1 900
+layer bg/Boat_03.png 0.25 226 1 700
+layer bg/Boat_02.png 0.32 170 1 1300
+layer bg/Boat_01.png 0.4 140 1 1700

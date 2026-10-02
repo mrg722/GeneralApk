@@ -111,6 +111,11 @@ no aparecen en VS).
   esquiva, bloqueo, pociones (Z vida / X magia, 5 de cada una) y CAMBIAR ARMA (Q).
 - **Guerrero en el Modo VS:** como jugador o rival IA ("GUERRERO"); cambia entre sus 4
   armas dentro de la pelea (Q / boton) y el rival IA tambien cambia solo.
+- **Arenas originales de los jefes:** cada jefe pelea en su nivel del juego original con la
+  camara fija (`data/beta/stages/arena_*.txt`): Poseidon en la punta rota de la cubierta
+  (nivel 293, sale del mar), tentaculos en el agujero con agua del barco por dentro (nivel
+  193) y el Titan detras de la isla nevada flotante (nivel 393, solo asoman cabeza y mano).
+  Posicion del jefe de `script_npc/<nivel>.lua`; raiz del Spine medida en capturas.
 - **Piezas giradas:** el bit 4 de `flip` en los XML es un giro de 90 grados (antihorario);
   sin el se veian bloques y cortes en las habilidades.
 - **Sonido:** sonidos por cuadro de golpes y habilidades, herido/muerte por personaje,

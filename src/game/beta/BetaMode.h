@@ -108,6 +108,9 @@ private:
         // 2 gigante detras del mapa (asoma por detras del escenario).
         float drawScale = 1.25f, drawDx = 0.0f, drawDy = 0.0f;
         int layer = 0;
+        // En su arena original: la raiz del Spine va donde la ponia el juego.
+        bool arena = false;
+        Vector2 root{};
         float ground = 0.0f;    // pixeles del dibujo bajo el origen (Titan sale del suelo)
         bool Play(const std::string& c) {
             const auto it = clips.find(c);
@@ -168,6 +171,7 @@ private:
     int redPotions{5}, bluePotions{5};
     void OnHeroHit(Vector2 at, int damage);
     void SwitchWeapon();
+    bool EnterArena(const std::string& bossId);   // escenario original del jefe
     Qte qte;
     // HISTORIA: 3 capitulos con tarjeta narrada (texto + jefe animado) antes de
     // cada uno y final que guarda las mejoras (district_fury_beta.dat).

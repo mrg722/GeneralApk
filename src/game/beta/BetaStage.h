@@ -25,6 +25,15 @@ struct BetaStageChunk {
     Texture2D tex{};
 };
 
+// Jefe de una arena (data/beta/stages/arena_*.txt): posicion de la entidad y raiz
+// del esqueleto Spine en coordenadas del mapa, escala del Spine y capa de dibujo.
+struct BetaArenaBoss {
+    bool valid = false;
+    std::string id;
+    float ex = 0, ey = 0, rx = 0, ry = 0, scale = 1.0f;
+    int layer = 0;   // 0 en el piso, 1 gigante delante del mapa, 2 gigante detras del mapa
+};
+
 class BetaStage {
 public:
     static constexpr float kScale = 1.25f;
@@ -37,6 +46,10 @@ public:
     float WorldWidth() const { return width * kScale; }
     // Desplazamiento vertical de la camara (el mapa termina en el borde inferior).
     float CameraOffsetY() const { return cameraDy; }
+    // Coordenadas del mapa original -> mundo del juego.
+    Vector2 MapToWorld(float x, float y) const { return {x * kScale, mapTop + y * kScale}; }
+    bool IsArena() const { return arena; }
+    const BetaArenaBoss& Boss() const { return boss; }
 
     void DrawBack(float cameraX) const { DrawSky(cameraX); DrawMap(cameraX); }   // cielo + parallax + mapa
     void DrawSky(float cameraX) const;     // cielo y capas de parallax
@@ -48,6 +61,8 @@ public:
 
 private:
     bool loaded = false;
+    bool arena = false;
+    BetaArenaBoss boss;
     int width = 0, height = 0;
     int walkY0 = 0, walkY1 = 0, walkX0 = 0, walkX1 = 0;
     float mapTop = 0.0f;   // y del borde superior del mapa en el mundo

@@ -201,7 +201,8 @@ void BetaMode::StartFight() {
         lockLeft = cameraX + 60.0f;
         lockRight = cameraX + 1220.0f;
         waveCount = 1;
-        waveActive = SpawnBoss(kBossIds[std::clamp(selBoss, 0, kBossCount - 1)], lockRight);
+        const char* bid = kBossIds[std::clamp(selBoss, 0, kBossCount - 1)];
+        waveActive = EnterArena(bid) || SpawnBoss(bid, lockRight);
         bannerText = TextFormat("JEFE  //  %s", kBossNames[std::clamp(selBoss, 0, kBossCount - 1)]);
     } else if (selMode == 1) {
         // 1 VS 1: el rival aparece enfrente, en la misma pantalla.
@@ -234,8 +235,9 @@ void BetaMode::SpawnWave() {
     lockRight = std::min(std::min(stage.WorldRight(), kStageEndX) - 40.0f, cameraX + 1220.0f);
     const float ys[] = {560.0f, 520.0f, 605.0f, 540.0f};
     for (size_t i = 0; i < list.size(); ++i) {
-        if (list[i] < 0) {   // jefe
-            SpawnBoss(kBossIds[std::clamp(-list[i] - 1, 0, kBossCount - 1)], lockRight);
+        if (list[i] < 0) {   // jefe: a su arena original
+            const char* bid = kBossIds[std::clamp(-list[i] - 1, 0, kBossCount - 1)];
+            if (!EnterArena(bid)) SpawnBoss(bid, lockRight);
             continue;
         }
         // Llegan por los dos lados de la pantalla, como en el original.
@@ -500,6 +502,7 @@ void BetaMode::SpawnFx(const std::string& id, const std::string& clip, Vector2 p
 }
 
 void BetaMode::UpdateCamera(float dt) {
+    if (stage.IsArena()) { cameraX = 0.0f; return; }   // arena: camara fija como en el original
     const Fighter& hero = *fighters[0];
     const float worldMax = std::min(stage.Loaded() ? stage.WorldWidth() : 1280.0f, kStageEndX + 90.0f);
     float target = hero.p.position.x - 560.0f;
@@ -650,6 +653,26 @@ void BetaMode::DrawStoryCard() const {
     DrawText(storyChapter >= 3 ? "EL GUERRERO" : "TE ESPERA:", 836, 330, 16, {255, 200, 120, al});
 }
 
+bool BetaMode::EnterArena(const std::string& bossId) {
+    // Cada jefe pelea en su escenario original (nivel 293 Poseidon, 193 tentaculos,
+    // 393 Titan): camara fija, franja caminable y jefe donde los ponia el juego.
+    const std::string arenaId = "arena_" + bossId.substr(bossId.find('_') + 1);
+    BetaStage next;
+    if (!next.Load(arenaId)) return false;
+    stage = next;
+    for (size_t i = fighters.size(); i-- > 1;) fighters.erase(fighters.begin() + (long)i);   // solo queda el heroe
+    effects.clear();
+    numbers.clear();
+    Fighter& hero = *fighters[0];
+    hero.p.position = {stage.WorldLeft() + 120.0f, 565.0f, 0};
+    hero.p.facing = Facing::Right;
+    cameraX = 0.0f;
+    lockLeft = stage.WorldLeft() + 30.0f;
+    lockRight = stage.WorldRight() - 30.0f;
+    PlayMusic(stage.music.empty() ? "gate1music.ogg" : stage.music);
+    return SpawnBoss(bossId, lockRight);
+}
+
 void BetaMode::OnHeroHit(Vector2 at, int damage) {
     ++comboHits;
     comboTimer = 2.0f;
@@ -768,12 +791,23 @@ bool BetaMode::SpawnBoss(const std::string& id, float rightEdge) {
     b.Play("idle");
     const Rectangle bounds = b.skel.Bounds();
     b.ground = std::max(0.0f, (bounds.y + bounds.height) * b.scale);
-    if (b.layer > 0) {
-        // Gigante: ocupa el lado derecho de la pantalla; el heroe pelea a su izquierda.
+    const bool inArena = stage.Boss().valid && stage.Boss().id == id;
+    if (b.layer > 0 && !inArena) {
+        // Gigante fuera de su arena: ocupa el lado derecho; el heroe pelea a su izquierda.
         b.pos = {rightEdge - 210.0f, 570.0f, 0};
         lockRight = std::min(lockRight, b.pos.x - 110.0f);   // el heroe pelea delante, no dentro
     } else {
         b.pos = {rightEdge - std::max(80.0f, (bounds.x + bounds.width) * b.scale * BetaStage::kScale) - 20.0f, 575.0f, 0};
+    }
+    if (stage.Boss().valid && stage.Boss().id == id) {
+        // Arena original: entidad (golpes, aviso) y raiz del Spine en sus posiciones.
+        const BetaArenaBoss& ab = stage.Boss();
+        const Vector2 e = stage.MapToWorld(ab.ex, ab.ey);
+        b.pos = {e.x, std::clamp(e.y, kLaneMinY, kLaneMaxY), 0};
+        b.root = stage.MapToWorld(ab.rx, ab.ry);
+        b.drawScale = ab.scale * BetaStage::kScale;
+        b.layer = ab.layer;
+        b.arena = true;
     }
     if (!b.Play("intro")) b.Play("idle");
     b.phase = 0;
@@ -789,7 +823,7 @@ CombatBox BetaMode::BossHurtbox() const {
     // Arte nativo mirando a la izquierda: la caja se refleja al mirar a la derecha.
     const float k = BetaStage::kScale;
     const Rectangle& b = boss.body;
-    const float feetY = boss.layer > 0 ? boss.pos.y : boss.pos.y - boss.ground * k;
+    const float feetY = (boss.layer > 0 || boss.arena) ? boss.pos.y : boss.pos.y - boss.ground * k;
     const float x0 = boss.facing == Facing::Left ? boss.pos.x + b.x * k : boss.pos.x - (b.x + b.width) * k;
     return {x0, feetY + b.y * k, b.width * k, b.height * k};
 }
@@ -905,7 +939,9 @@ void BetaMode::DrawBoss() const {
     const bool flip = boss.facing == Facing::Right;   // arte nativo: mirando a la izquierda
     const unsigned char a = boss.phase == 4 && boss.deadTime > 1.6f ? (unsigned char)(255 * std::max(0.0f, 1.0f - (boss.deadTime - 1.6f))) : 255;
     const Color tint = boss.flash > 0 ? Color{255, 170, 170, a} : Color{255, 255, 255, a};
-    if (boss.layer > 0)
+    if (boss.arena)
+        boss.skel.Draw(boss.root, boss.drawScale, flip, tint);
+    else if (boss.layer > 0)
         boss.skel.Draw({boss.pos.x + boss.drawDx, boss.pos.y + boss.drawDy}, boss.drawScale, flip, tint);
     else
         boss.skel.Draw({boss.pos.x, boss.pos.y - boss.ground * boss.drawScale}, boss.drawScale * boss.scale, flip, tint);

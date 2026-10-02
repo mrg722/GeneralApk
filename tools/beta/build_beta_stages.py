@@ -61,12 +61,31 @@ BACKGROUNDS = {
         ("Xueshanneizhongjing (1).png", 0.45, 170, 1, 700),
         ("Xueshanneizhongjing (4).png", 0.55, 160, 1, 1100),
     ],
+    "interior": [
+        ("ChuanNeiBJ.png", 0.10, 0, 1, 0),
+    ],
     "volcan": [
         ("Huoshanbeijing.png", 0.08, 0, 1, 0),
         ("HuoShanZhongJing_02.png", 0.30, 90, 1, 700),
         ("HuoShanZhongJing_01.png", 0.45, 130, 1, 1000),
     ],
 }
+
+
+# Arenas de jefe: la ventana del nivel original donde se pelea cada jefe, con la
+# camara fija. Posiciones del jefe sacadas de script_npc/<nivel>.lua (fila del anim
+# 51/64/15: x, y) y la raiz del esqueleto Spine medida en capturas del original.
+#   id, nivel, ventana (x0, y0), franja (pies y0, y1, x0, x1), fondo, musica, clima, cielo,
+#   jefe: (id, entidad x, y, raiz Spine x, y, escala, capa)
+#   capa 0 = en el piso, 1 = gigante delante del mapa, 2 = gigante detras del mapa
+ARENAS = [
+    ("arena_poseidon", 293, (896, 0), (384, 480, 900, 1488), "barco", "gate1music.ogg", "lluvia", (38, 44, 58),
+     ("jefe_poseidon", 1618, 415, 1680, 444, 1.0, 1)),
+    ("arena_tentaculos", 193, (547, 0), (384, 480, 560, 1560), "interior", "gate1music.ogg", "ninguno", (24, 18, 14),
+     ("jefe_tentaculos", 1059, 431, 1059, 431, 1.0, 0)),
+    ("arena_titan", 393, (1592, 31), (384, 480, 1680, 2208), "nieve", "gate1music.ogg", "nieve", (180, 196, 214),
+     ("jefe_titan", 2318, 399, 2630, 1029, 1.0, 2)),
+]
 
 
 def strip(v):
@@ -131,6 +150,31 @@ def main(src):
             lines.append(f"layer bg/{safe} {par} {y} {rep} {gap}")
         (OUT_DAT / f"{sid}.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
         print(f"{sid:13s} nivel {level} {w}x{h} pies {y0}..{y1} x {xmin}..{xmax}")
+
+    for sid, level, (wx, wy), (fy0, fy1, fx0, fx1), kind, music, weather, sky, boss in ARENAS:
+        layers = parse_level(src / "mapdata" / f"{level}.XML")
+        img = None
+        for l in layers:
+            if l["tileset"] == 4: continue
+            r = render_layer(l, src / "map", cache)
+            if img is None: img = r
+            else: img.alpha_composite(r)
+        w, h = 1024, 576
+        crop = img.crop((wx, wy, wx + w, wy + h))
+        fn = f"{sid}_0.png"
+        crop.save(OUT_IMG / fn, optimize=True)
+        bid, ex, ey, rx, ry, sc, layer = boss
+        lines = [f"stage {sid}", f"name ARENA: {bid.replace('jefe_', '').upper()}", f"source mapdata/{level}.XML",
+                 f"size {w} {h}", f"walk {fy0 - wy} {fy1 - wy} {fx0 - wx} {fx1 - wx}",
+                 f"sky {sky[0]} {sky[1]} {sky[2]}", f"music {music}", f"weather {weather}", "arena 1",
+                 f"chunk {fn} 0",
+                 f"boss {bid} {ex - wx} {ey - wy} {rx - wx} {ry - wy} {sc} {layer}"]
+        for bfn, par, y, rep, gap in BACKGROUNDS[kind]:
+            safe = bfn.replace(" (", "_").replace(")", "")
+            shutil.copyfile(src / "image" / bfn, OUT_IMG / "bg" / safe)
+            lines.append(f"layer bg/{safe} {par} {y} {rep} {gap}")
+        (OUT_DAT / f"{sid}.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+        print(f"{sid:16s} nivel {level} ventana {wx},{wy} jefe {bid}")
 
     # Musica y efectos de sonido (ogg originales, se copian tal cual).
     aud = ROOT / "assets/beta/audio"

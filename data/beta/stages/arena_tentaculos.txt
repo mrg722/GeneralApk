@@ -1,0 +1,12 @@
+stage arena_tentaculos
+name ARENA: TENTACULOS
+source mapdata/193.XML
+size 1024 576
+walk 384 480 13 1013
+sky 24 18 14
+music gate1music.ogg
+weather ninguno
+arena 1
+chunk arena_tentaculos_0.png 0
+boss jefe_tentaculos 512 431 512 431 1.0 0
+layer bg/ChuanNeiBJ.png 0.1 0 1 0

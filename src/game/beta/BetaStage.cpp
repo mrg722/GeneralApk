@@ -26,6 +26,11 @@ bool BetaStage::Load(const std::string& stageId) {
         else if (tag == "size") ls >> width >> height;
         else if (tag == "walk") ls >> walkY0 >> walkY1 >> walkX0 >> walkX1;
         else if (tag == "music") ls >> music;
+        else if (tag == "arena") { int a = 0; ls >> a; arena = a != 0; }
+        else if (tag == "boss") {
+            ls >> boss.id >> boss.ex >> boss.ey >> boss.rx >> boss.ry >> boss.scale >> boss.layer;
+            boss.valid = !boss.id.empty();
+        }
         else if (tag == "weather") ls >> weather;
         else if (tag == "sky") {
             int r = 0, g = 0, b = 0;

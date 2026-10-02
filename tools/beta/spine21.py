@@ -161,6 +161,7 @@ class Skeleton:
             c, s = math.cos(r), math.sin(r)
             world.append(dict(x=wx, y=wy, sx=wsx, sy=wsy, rot=wr, m00=c * wsx, m10=s * wsx, m01=-s * wsy, m11=c * wsy))
 
+        self.last_world = world
         # Slots: adjunto y color.
         att = [s.get("attachment") for s in self.slots]
         col = [parse_color(s.get("color")) for s in self.slots]
