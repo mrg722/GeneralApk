@@ -45,6 +45,7 @@ public:
     int MenuCursor() const { return menuCursor; }
     const char* MenuDifficultyLabel() const { return DifficultyText(); }
     bool ConsumeVsRequest() { if (vsRequested) { vsRequested = false; return true; } return false; }
+    bool ConsumeBetaRequest() { if (betaRequested) { betaRequested = false; return true; } return false; }
     // DF-013.2: avisa que el jugador pulso NUEVA PARTIDA, para que main.cpp
     // reinicie las mejoras de campana antes de empezar.
     bool ConsumeNewGame() { if (newGameStarted) { newGameStarted = false; return true; } return false; }
@@ -80,7 +81,7 @@ private:
     bool advanceRequested{false};
     bool arenaLocked{false}, scenarioBossSpawned{false}, finalBossSpawned{false}, stageComplete{false}, saveLoaded{false};
     StoryDifficulty difficulty{StoryDifficulty::Normal}; std::string savePath{"district_fury_save.dat"}; std::string storyMessage;
-    int menuCursor{0}; int characterCursor{0}; bool vsRequested{false}; bool newGameStarted{false}; bool exitRequested{false};
+    int menuCursor{0}; int characterCursor{0}; bool vsRequested{false}; bool betaRequested{false}; bool newGameStarted{false}; bool exitRequested{false};
     int optionsCursor{0};   // OPCIONES: 0 sonido, 1 ancho de pantalla
 
     void ResetRun(); void BuildScenario(int id); void SpawnWave(int id); void BuildWaves(); void UpdateArena(float dt); void UpdateBossFight(float dt); void ClampToArena(); void LockArenaBetween(float playerX, float farX); void SpawnScenarioBoss(); void EnterFinalBoss(); void DefeatFinalBoss();

@@ -47,6 +47,9 @@ add_library(district_fury_core
     src/game/combat/Boss.cpp
     src/game/combat/RayderCloneVisual.cpp
     src/game/RivalAI.cpp
+    src/game/beta/BetaCharacter.cpp
+    src/game/beta/BetaStage.cpp
+    src/game/beta/BetaMode.cpp
     src/game/combat/BossDefinition.cpp
     src/game/combat/CombatWorld.cpp
     src/game/enemies/EnemyBrain.cpp
@@ -130,6 +133,9 @@ if(BUILD_TESTING)
 
     add_executable(all_modes_check tests/AllModesCheck.cpp)
     target_link_libraries(all_modes_check PRIVATE district_fury_core)
+
+    add_executable(beta_mode_check tests/BetaModeCheck.cpp)
+    target_link_libraries(beta_mode_check PRIVATE district_fury_core)
 
     add_executable(vs_boss_visual_check tests/VsBossVisualCheck.cpp)
     target_link_libraries(vs_boss_visual_check PRIVATE district_fury_core)

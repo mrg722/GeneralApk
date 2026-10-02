@@ -99,7 +99,7 @@ void AudioSystem::Init() {
 
 void AudioSystem::UpdateAmbient() {
     if (!ambientReady) return;
-    if (muted) { if (IsMusicStreamPlaying(ambient)) PauseMusicStream(ambient); return; }
+    if (muted || betaAudio) { if (IsMusicStreamPlaying(ambient)) PauseMusicStream(ambient); return; }
     if (!IsMusicStreamPlaying(ambient)) ResumeMusicStream(ambient);
     UpdateMusicStream(ambient);
 }
@@ -130,7 +130,7 @@ void AudioSystem::BuildSound(Sfx sfx, float frequency, float duration, float vol
 }
 
 void AudioSystem::Play(Sfx sfx) {
-    if (!ready || muted) return;
+    if (!ready || muted || betaAudio) return;
     Sound& sound = sounds[Index(sfx)];
     if (sound.frameCount > 0) PlaySound(sound);
 }

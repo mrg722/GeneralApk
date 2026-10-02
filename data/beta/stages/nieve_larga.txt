@@ -1,0 +1,16 @@
+stage nieve_larga
+name PASO DE LA MONTANA
+source mapdata/351.XML
+size 5520 576
+walk 384 480 240 4512
+sky 180 196 214
+music gate1music.ogg
+weather nieve
+chunk nieve_larga_0.png 0
+chunk nieve_larga_1.png 2048
+chunk nieve_larga_2.png 4096
+layer bg/Xueshanwaibeijing.png 0.08 0 1 0
+layer bg/Xueshanwaizhongjing_4.png 0.3 150 1 300
+layer bg/Xueshanwaizhongjing_5.png 0.38 260 1 500
+layer bg/Xueshanwaizhongjing_1.png 0.5 110 1 900
+layer bg/Xueshanwaizhongjing_3.png 0.55 70 1 1300

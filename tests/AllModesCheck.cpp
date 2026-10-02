@@ -64,13 +64,14 @@ int main(int argc, char** argv) {
     if (argc > 1) gOut = argv[1];
     SetTraceLogLevel(LOG_WARNING);
     InitWindow(1280, 720, "all modes check");
+    SetRandomSeed(20261002);   // IA del rival reproducible (antes dependia de la hora)
     SetTargetFPS(0);
     AssetManager::Get().LoadAll();
     int problems = 0;
     VSMode vs;
     vs.Init();
     for (int i = 0; i < 3; ++i) Press(vs, KEY_DOWN);   // campo PERSONAJE
-    for (int c = 0; c < CharacterCount(); ++c) {
+    for (int c = 0; c < StableCharacterCount(); ++c) {
         if (c > 0) Press(vs, KEY_RIGHT);
         Frame(vs);
         Shot("sel_" + std::to_string(c));
@@ -102,6 +103,7 @@ int main(int argc, char** argv) {
     }
     // Rival (IA): personajes principales KF y otros, peleando contra Rayder.
     for (int rc : {7, 8, 18, 19, 6, 21, 2}) {
+        SetRandomSeed(20261002u + (unsigned)rc);   // cada duelo con su azar fijo (independiente del orden)
         VSMode duel;
         duel.Init();
         duel.StartRivalForTest(rc, 6);

@@ -9,11 +9,11 @@ namespace {
 // de brillo por fila) y escaladas al canvas del juego (1280x720). El arte y
 // el canvas comparten casi la misma proporcion (1.776 vs 1.778), asi que
 // estirarlo a pantalla completa no lo distorsiona de forma perceptible.
-constexpr float kItemY[kMainMenuItemCount] = {333.f, 367.f, 403.f, 437.f, 472.f, 506.f, 540.f};
+constexpr float kItemY[kMainMenuItemCount] = {333.f, 367.f, 401.f, 435.f, 469.f, 503.f, 537.f, 571.f};
 constexpr float kTextLeft = 110.f;
 
 const char* kItemLabels[kMainMenuItemCount] = {
-    "NUEVA PARTIDA", "MODO VS", "DIFICULTAD", "CONTROLES", "OPCIONES", "CREDITOS", "SALIR",
+    "NUEVA PARTIDA", "MODO VS", "MODO BETA", "DIFICULTAD", "CONTROLES", "OPCIONES", "CREDITOS", "SALIR",
 };
 
 // Bloque completo donde el arte trae los 7 renglones + el resaltado propio de
@@ -21,7 +21,7 @@ const char* kItemLabels[kMainMenuItemCount] = {
 // oscuro y luego se redibujan los 7 labels a mano: asi el texto queda legible
 // sin importar cual item este seleccionado (dibujarlo semi-transparente
 // encima del arte original lo volvia ilegible).
-constexpr Rectangle kMenuColumnPatch = {46.f, 308.f, 385.f, 253.f};
+constexpr Rectangle kMenuColumnPatch = {46.f, 308.f, 385.f, 287.f};
 
 void DrawSelectorBar(float centerY) {
     const float height = 34.f;
@@ -68,7 +68,7 @@ void DrawMainMenuArt(Texture2D art, int selectedIndex, const char* difficultyLab
     // los 7 labels horneados y el resaltado por defecto del arte.
     DrawRectangle(static_cast<int>(kMenuColumnPatch.x), static_cast<int>(kMenuColumnPatch.y),
                   static_cast<int>(kMenuColumnPatch.width), static_cast<int>(kMenuColumnPatch.height),
-                  {2, 7, 15, 214});
+                  {2, 7, 15, 250});
 
     DrawSelectorBar(kItemY[selectedIndex]);
 

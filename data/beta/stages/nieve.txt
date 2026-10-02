@@ -1,0 +1,15 @@
+stage nieve
+name MONTANA NEVADA
+source mapdata/201.XML
+size 3168 576
+walk 384 480 48 3168
+sky 180 196 214
+music gate1music.ogg
+weather nieve
+chunk nieve_0.png 0
+chunk nieve_1.png 2048
+layer bg/Xueshanwaibeijing.png 0.08 0 1 0
+layer bg/Xueshanwaizhongjing_4.png 0.3 150 1 300
+layer bg/Xueshanwaizhongjing_5.png 0.38 260 1 500
+layer bg/Xueshanwaizhongjing_1.png 0.5 110 1 900
+layer bg/Xueshanwaizhongjing_3.png 0.55 70 1 1300

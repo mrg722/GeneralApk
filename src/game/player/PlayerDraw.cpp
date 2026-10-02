@@ -306,6 +306,7 @@ void Player::Draw() const {
                 sy *= 1.0f - 0.10f * k;
                 sx *= 1.0f + 0.08f * k;
             }
+            if (cv.beta) { sx = sy = 1.0f; angle = 0.0f; }   // BETA: forma y tamano originales, sin estirar
             animator.DrawScaled(at, spriteScale * sx * cv.widthScale, spriteScale * sy, flip, spriteTint, angle);
         }
     } else {

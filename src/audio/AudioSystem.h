@@ -43,6 +43,10 @@ public:
     // DF-013: usado por la pantalla de OPCIONES del menu principal.
     void SetMuted(bool value) { muted = value; }
     bool IsMuted() const { return muted; }
+    // Modo BETA: usa los sonidos originales de nuevosSprites, asi que apaga los
+    // efectos genericos del juego y la lluvia ambiente mientras esta activo.
+    void SetBetaAudio(bool value) { betaAudio = value; }
+    bool BetaAudio() const { return betaAudio; }
     // Ambiente de lluvia en bucle (se llama cada frame desde main).
     void UpdateAmbient();
 
@@ -58,6 +62,7 @@ private:
     bool ready = false;
     bool deviceOwned = false;
     bool muted = false;
+    bool betaAudio = false;
 
     void BuildSound(Sfx sfx, float frequency, float duration, float volume, bool noise = false);
 };

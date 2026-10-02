@@ -1,0 +1,12 @@
+stage arena_volcan
+name ARENA DEL VOLCAN
+source mapdata/142.XML
+size 1440 528
+walk 336 432 0 1392
+sky 60 22 14
+music gate2music.ogg
+weather ceniza
+chunk arena_volcan_0.png 0
+layer bg/Huoshanbeijing.png 0.08 0 1 0
+layer bg/HuoShanZhongJing_02.png 0.3 90 1 700
+layer bg/HuoShanZhongJing_01.png 0.45 130 1 1000

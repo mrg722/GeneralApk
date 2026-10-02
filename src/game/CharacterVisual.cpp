@@ -8,7 +8,7 @@ namespace {
 
 // name, folder, uniformCanvas, scale, targetHeight, footInset,
 // facesRightByDefault, maxHp, damageMultiplier, speedMultiplier
-const std::array<CharacterVisual, 22> kCharacters{{
+const std::array<CharacterVisual, 37> kCharacters{{
     {"RAYDEN (ORIGINAL)", nullptr,           false, 1.00f,   0.0f, 0.0f, true,  100, 1.00f, 1.00f},
     {"CLON ANTIGUO (CHAQUETA)", "rayder_clone",    false, 1.00f, 118.0f, 0.0f, true,  110, 1.05f, 1.05f},
     // Brakk jugable con la hoja mejorada (atlas brakk_v2); las poses sueltas siguen en assets/bosses/brakk.
@@ -40,6 +40,23 @@ const std::array<CharacterVisual, 22> kCharacters{{
     {"RAYDER CLON BETA",       nullptr, false, 0.75f, 0.0f, 0.0f, true, 115, 1.05f, 1.05f, nullptr, 13, 1.0f, nullptr, 14},
     // Rayder clon (rojo): formula del heroe KF + despiece propio a 3x (escala 1.5/3).
     {"RAYDER CLON",            nullptr, false, 0.50f, 0.0f, 0.0f, true, 120, 1.10f, 1.05f, nullptr, 15, 1.0f, nullptr, 16},
+    // ---- BETA (nuevosSprites): roster KF 17+ (data/beta/characters). Escala 1.25 en
+    // pantalla (1.0417 x 1.2): la misma que el escenario (576 px de alto -> 720), sin deformar. ----
+    {"GUERRERO (ESPADAS DEL CAOS)", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 160, 1.00f, 1.00f, nullptr, 17, 1.0f, nullptr, -1, false, true},
+    {"GUERRERO (CESTUS DE NEMEA)", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 160, 1.00f, 1.00f, nullptr, 18, 1.0f, nullptr, -1, false, true},
+    {"GUERRERO (CADENA DEL RAYO)", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 160, 1.00f, 1.00f, nullptr, 19, 1.0f, nullptr, -1, false, true},
+    {"GUERRERO (GARRAS DE HADES)", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 160, 1.00f, 1.00f, nullptr, 20, 1.0f, nullptr, -1, false, true},
+    {"SOLDADO ESQUELETO", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 60, 1.00f, 1.00f, nullptr, 21, 1.0f, nullptr, -1, false, true},
+    {"BESTIA EXCAVADORA", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 70, 1.00f, 1.00f, nullptr, 22, 1.0f, nullptr, -1, false, true},
+    {"MOMIA CON ESCUDO", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 80, 1.00f, 1.00f, nullptr, 23, 1.0f, nullptr, -1, false, true},
+    {"BESTIA ELEFANTE", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 120, 1.00f, 1.00f, nullptr, 24, 1.0f, nullptr, -1, false, true},
+    {"AVE SANADORA", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 50, 1.00f, 1.00f, nullptr, 25, 1.0f, nullptr, -1, false, true},
+    {"CENTAURO", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 220, 1.00f, 1.00f, nullptr, 26, 1.0f, nullptr, -1, false, true},
+    {"CENTAURO ROJO", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 300, 1.00f, 1.00f, nullptr, 27, 1.0f, nullptr, -1, false, true},
+    {"BRUTO DE LA BOLA", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 240, 1.00f, 1.00f, nullptr, 28, 1.0f, nullptr, -1, false, true},
+    {"BRUTO DE LA BOLA ROJO", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 320, 1.00f, 1.00f, nullptr, 29, 1.0f, nullptr, -1, false, true},
+    {"MEDUSA", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 200, 1.00f, 1.00f, nullptr, 30, 1.0f, nullptr, -1, false, true},
+    {"MEDUSA ROJA", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 280, 1.00f, 1.00f, nullptr, 31, 1.0f, nullptr, -1, false, true},
 }};
 
 }  // namespace
@@ -49,6 +66,13 @@ std::string ShortCharacterName(int id) {
     const auto cut = n.find(" (");
     return cut == std::string::npos ? n : n.substr(0, cut);
 }
+
+int FirstBetaCharacter() {
+    int n = 0;
+    while (n < CharacterCount() && !kCharacters[static_cast<std::size_t>(n)].beta) ++n;
+    return n;
+}
+int StableCharacterCount() { return FirstBetaCharacter(); }
 
 int CharacterCount() { return static_cast<int>(kCharacters.size()); }
 

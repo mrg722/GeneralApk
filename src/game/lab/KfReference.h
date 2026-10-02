@@ -5,6 +5,7 @@
 // documentado en tools/apk/kf_decode.py) y lo recolorea en memoria. No se copia
 // ni se guarda arte de la APK en assets/: si el respaldo no esta, no hay bot.
 #include "rendering/Animator.h"
+#include <map>
 #include <string>
 #include <vector>
 
@@ -18,8 +19,11 @@ struct KfRosterEntry {
     int maxHp;
     float scale;         // escala de dibujo (los sprites de la APK miden ~65 px)
     int tint = 0;        // 0 = colores originales; 1 = copia con los colores de Rayder
+    const char* betaId = nullptr;   // BETA: data/beta/characters/<betaId>.txt (no animation.bin)
 };
 int KfRosterCount();
+// Personajes del roster que no son BETA (los que ve el Modo VS de siempre).
+int KfStableRosterCount();
 const KfRosterEntry& KfRoster(int index);
 
 struct KfReference {
@@ -32,6 +36,12 @@ struct KfReference {
     std::vector<std::string> abilityClips;
     std::vector<std::string> abilityNames;
     float scale = 1.8f;                // el luchador mide ~65 px en la APK
+    // BETA (data/beta/characters): nombre, vida y sonidos por evento ("hurt", "die"...).
+    bool beta = false;
+    bool betaHero = false;
+    std::string displayName;
+    int maxHp = 0;
+    std::map<std::string, std::string> sounds;
 };
 
 // Carga perezosa (necesita ventana abierta) del personaje `rosterIndex`.

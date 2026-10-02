@@ -1,0 +1,17 @@
+stage barco
+name CUBIERTA DEL BARCO
+source mapdata/101.XML
+size 4800 624
+walk 432 528 384 4608
+sky 38 44 58
+music gate1music.ogg
+weather lluvia
+chunk barco_0.png 0
+chunk barco_1.png 2048
+chunk barco_2.png 4096
+layer bg/Sky.png 0.05 0 1 0
+layer bg/Sea.png 0.15 250 1 0
+layer bg/Boat_04.png 0.2 236 1 900
+layer bg/Boat_03.png 0.25 226 1 700
+layer bg/Boat_02.png 0.32 170 1 1300
+layer bg/Boat_01.png 0.4 140 1 1700

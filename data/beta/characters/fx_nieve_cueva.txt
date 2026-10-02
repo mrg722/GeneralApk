@@ -1,0 +1,8 @@
+# BETA: NEVADA LIGERA (generado por tools/beta/build_beta_characters.py)
+character fx_nieve_cueva fx 0
+name NEVADA LIGERA
+image 0 367
+frame 0 1 -8 -16 8 0 0 0 0 0
+piece 0 0 0 48 48 -24 -26 0
+clip a0 0 1 0:0.0333
+clip idle 0 1 0:0.0333

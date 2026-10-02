@@ -388,6 +388,8 @@ bool Player::AttackIsActive() const {
     if (state != PlayerState::Attack) return false;
     if (clipDriven) {
         if (activeSkill == kSkillCount - 1) return false;   // transformacion: sin dano
+        // BETA: golpea solo en los cuadros que traen caja de ataque (datos originales).
+        if (const SpriteFrame* f = animator.CurrentFrameData(); f && !f->pieces.empty()) return f->hitbox.has_value();
         const float t = attackElapsed / std::max(0.01f, attackDuration);
         return t >= 0.12f && t <= 0.92f;
     }
@@ -433,6 +435,13 @@ CombatBox Player::GetAttackHitbox() const {
     const AttackDef& def = GetAttack(currentAttack);
     const float direction = facing == Facing::Right ? 1.f : -1.f;
     const SpriteFrame* f = clipDriven ? animator.CurrentFrameData() : nullptr;
+    if (f && !f->pieces.empty() && f->hitbox) {
+        // BETA: la caja de ataque del cuadro, tal cual la definio el juego original.
+        const float sc = SpriteScale();
+        const Rectangle& b = *f->hitbox;
+        const float x0 = direction > 0 ? position.x + b.x * sc : position.x - (b.x + b.width) * sc;
+        return {x0, position.y - position.z + b.y * sc, b.width * sc, b.height * sc};
+    }
     if (f && f->width > 0.0f) {
         // La caja la marca el dibujo: llega hasta donde llegan el puno, la
         // patada o el fuego de la habilidad en este frame.

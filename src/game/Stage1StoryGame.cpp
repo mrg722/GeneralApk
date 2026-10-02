@@ -166,7 +166,7 @@ void Stage1StoryGame::Update(float dt) {
         // DF-013: navegacion real de 7 items (ui/MainMenu.h dibuja el
         // selector). Se conservan los atajos directos (V, C) para no romper
         // habitos de quien ya jugaba la version anterior.
-        constexpr int kMenuItemCount = 7;
+        constexpr int kMenuItemCount = 8;
         auto CycleDifficulty = [&](int dir) {
             const int order[3] = {0, 1, 2};
             (void)order;
@@ -183,7 +183,7 @@ void Stage1StoryGame::Update(float dt) {
         if (input::Pressed(KEY_UP) || input::Pressed(KEY_W))
             menuCursor = (menuCursor + kMenuItemCount - 1) % kMenuItemCount;
         if (input::Pressed(KEY_DOWN) || input::Pressed(KEY_S)) menuCursor = (menuCursor + 1) % kMenuItemCount;
-        if (menuCursor == 2 && (input::Pressed(KEY_LEFT) || input::Pressed(KEY_RIGHT)))
+        if (menuCursor == 3 && (input::Pressed(KEY_LEFT) || input::Pressed(KEY_RIGHT)))
             CycleDifficulty(input::Pressed(KEY_RIGHT) ? 1 : -1);
         if (input::Pressed(KEY_V)) {
             vsRequested = true;
@@ -204,18 +204,21 @@ void Stage1StoryGame::Update(float dt) {
                 vsRequested = true;
                 break;
             case 2:
-                CycleDifficulty(1);
+                betaRequested = true;
                 break;
             case 3:
-                flow = StoryFlow::Controls;
+                CycleDifficulty(1);
                 break;
             case 4:
-                flow = StoryFlow::Options;
+                flow = StoryFlow::Controls;
                 break;
             case 5:
-                flow = StoryFlow::Credits;
+                flow = StoryFlow::Options;
                 break;
             case 6:
+                flow = StoryFlow::Credits;
+                break;
+            case 7:
                 exitRequested = true;
                 break;
             default:

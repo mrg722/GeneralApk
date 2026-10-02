@@ -418,6 +418,13 @@ bool Player::IsBlocking() const { return state == PlayerState::Block; }
 bool Player::IsGuardBroken() const { return state == PlayerState::GuardBreak; }
 
 CombatBox Player::GetHurtbox() const {
+    // BETA: caja de cuerpo del cuadro actual (la del juego original).
+    if (const SpriteFrame* f = animator.CurrentFrameData(); f && !f->pieces.empty() && f->hurtbox) {
+        const float sc = SpriteScale();
+        const Rectangle& b = *f->hurtbox;
+        const float x0 = facing == Facing::Right ? position.x + b.x * sc : position.x - (b.x + b.width) * sc;
+        return {x0, position.y - position.z + b.y * sc, b.width * sc, b.height * sc};
+    }
     if (state == PlayerState::Knockdown) {
         return {position.x - 38.f, position.y - 40.f, 76.f, 36.f};
     }

@@ -1,0 +1,17 @@
+# BETA: NEVADA FUERTE (generado por tools/beta/build_beta_characters.py)
+character fx_nieve fx 0
+name NEVADA FUERTE
+image 0 100
+image 1 101
+image 2 102
+image 3 103
+frame 0 1 -8 -16 8 0 0 0 0 0
+piece 0 0 0 300 480 -150 -240 0
+frame 1 1 -8 -16 8 0 0 0 0 0
+piece 1 0 0 300 480 -150 -240 0
+frame 2 1 -8 -16 8 0 0 0 0 0
+piece 2 0 0 300 480 -150 -240 0
+frame 3 1 -8 -16 8 0 0 0 0 0
+piece 3 0 0 300 480 -150 -240 0
+clip a0 0 4 0:0.0667 1:0.0667 2:0.0667 3:0.0667
+clip idle 0 4 0:0.0667 1:0.0667 2:0.0667 3:0.0667

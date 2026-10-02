@@ -1,0 +1,21 @@
+# BETA: ALMA ROJA (generado por tools/beta/build_beta_characters.py)
+character fx_alma_roja fx 0
+name ALMA ROJA
+image 0 27
+frame 0 1 -8 -16 8 0 0 0 0 0
+piece 0 0 0 26 26 -13 -13 0
+clip a0 0 1 0:0.0333
+clip a1 0 1 0:0.0333
+clip a2 0 1 0:0.0333
+clip a3 0 1 0:0.0333
+clip a4 0 1 0:0.0333
+clip a5 0 1 0:0.0333
+clip a6 0 1 0:0.0333
+clip a7 0 1 0:0.0333
+clip a8 0 1 0:0.0333
+clip a9 0 1 0:0.0333
+clip a10 0 1 0:0.0333
+clip a11 0 1 0:0.0333
+clip a12 0 1 0:0.0333
+clip a13 0 1 0:0.0333
+clip idle 0 1 0:0.0333

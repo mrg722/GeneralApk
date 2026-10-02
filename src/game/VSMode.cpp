@@ -153,13 +153,13 @@ void VSMode::Update(float dt) {
             else if (cursor == 2)
                 enemyCount = std::clamp(enemyCount + dir, 1, 4);
             else if (cursor == 3)
-                selectedCharacter = (selectedCharacter + dir + CharacterCount()) % CharacterCount();
+                selectedCharacter = (selectedCharacter + dir + StableCharacterCount()) % StableCharacterCount();
             else if (cursor == 4)
                 selectedBoss = ((selectedBoss + 1 + dir + kBossOptionCount) % kBossOptionCount) - 1;
             else if (cursor == 9)
-                kfRival = ((kfRival + 1 + dir + KfRosterCount() + 1) % (KfRosterCount() + 1)) - 1;
+                kfRival = ((kfRival + 1 + dir + KfStableRosterCount() + 1) % (KfStableRosterCount() + 1)) - 1;
             else if (cursor == 10)
-                rivalCharacter_ = ((rivalCharacter_ + 1 + dir + CharacterCount() + 1) % (CharacterCount() + 1)) - 1;
+                rivalCharacter_ = ((rivalCharacter_ + 1 + dir + StableCharacterCount() + 1) % (StableCharacterCount() + 1)) - 1;
             else {
                 int slot = cursor - 5;
                 enemyTypes[(size_t)slot] = NextEnemyType(enemyTypes[(size_t)slot], dir);
@@ -381,7 +381,7 @@ void VSMode::DrawSelection() const {
     DrawText(TextFormat("%d ENEMIGO%s", enemyCount, enemyCount == 1 ? "" : "S"), 600, y[2], 14,
              selectedBoss >= 0 ? Color{85, 95, 100, 130} : Color{190, 220, 230, 255});
     // Numero de personaje: deja claro que hay mas (KF incluidos) con < y >.
-    DrawText(TextFormat("%s   %d/%d", GetCharacterVisual(selectedCharacter).name, selectedCharacter + 1, CharacterCount()),
+    DrawText(TextFormat("%s   %d/%d", GetCharacterVisual(selectedCharacter).name, selectedCharacter + 1, StableCharacterCount()),
              600, y[3], 14, selectedCharacter == 1 ? Color{255, 160, 170, 255} : Color{190, 220, 230, 255});
     DrawText(kBossNames[selectedBoss + 1], 600, y[4], 14,
              selectedBoss >= 0 ? Color{255, 150, 150, 255} : Color{190, 220, 230, 255});
@@ -402,7 +402,7 @@ void VSMode::DrawSelection() const {
     if (rivalCharacter_ < 0)
         DrawText("NO (PELEA CONTRA ENEMIGOS)", 600, y[10], 14, {190, 220, 230, 255});
     else
-        DrawText(TextFormat("%s   %d/%d", GetCharacterVisual(rivalCharacter_).name, rivalCharacter_ + 1, CharacterCount()),
+        DrawText(TextFormat("%s   %d/%d", GetCharacterVisual(rivalCharacter_).name, rivalCharacter_ + 1, StableCharacterCount()),
                  600, y[10], 14, {255, 200, 90, 255});
     if (selectedBoss >= 0)
         DrawText("BOSS ACTIVO: los campos de enemigos y el rival se ignoran (1 vs 1).", 335, 529, 12,

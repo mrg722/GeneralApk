@@ -45,9 +45,15 @@ struct CharacterVisual {
     // Juega como un personaje KF (habilidades skill1-5, super, ataques guiados
     // por la animacion) con un atlas propio: el Rayder clon BETA.
     bool kfMoves = false;
+    // BETA (nuevosSprites): solo se elige en el modo BETA, no en VS ni Historia.
+    bool beta = false;
 };
 
 int CharacterCount();
+// Personajes de siempre (sin los BETA): los que muestra el Modo VS.
+int StableCharacterCount();
+// Primer personaje BETA (indice en la lista) y cuantos hay.
+int FirstBetaCharacter();
 // Personajes elegibles en la historia (Rayden y Rayder).
 constexpr int kStoryCharacters[] = {0, 6};
 const CharacterVisual& GetCharacterVisual(int id);

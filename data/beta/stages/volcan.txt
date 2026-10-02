@@ -1,0 +1,14 @@
+stage volcan
+name CAMINO DEL VOLCAN
+source mapdata/301.XML
+size 4800 576
+walk 384 480 0 4800
+sky 60 22 14
+music gate2music.ogg
+weather ceniza
+chunk volcan_0.png 0
+chunk volcan_1.png 2048
+chunk volcan_2.png 4096
+layer bg/Huoshanbeijing.png 0.08 0 1 0
+layer bg/HuoShanZhongJing_02.png 0.3 90 1 700
+layer bg/HuoShanZhongJing_01.png 0.45 130 1 1000

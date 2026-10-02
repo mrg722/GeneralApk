@@ -11,6 +11,7 @@
 #include "game/Stage4Game.h"
 #include "game/Stage5Game.h"
 #include "game/VSMode.h"
+#include "game/beta/BetaMode.h"
 #include "core/ApplicationState.h"
 #include "game/Campaign.h"
 #include "rendering/AssetManager.h"
@@ -78,6 +79,8 @@ int main() {
     district_fury::Stage4Game stage4;
     district_fury::Stage5Game stage5;
     district_fury::VSMode vsMode;
+    district_fury::BetaMode betaMode;
+    bool betaActive = false;
     stage1.Init();
     stage2.Init();
     stage3.Init();
@@ -94,7 +97,9 @@ int main() {
     namespace touch = district_fury::touch;
     auto touchContext = [&]() -> touch::Context {
         int c = 1;
-        if (vsActive)
+        if (betaActive)
+            c = betaMode.TouchContext();
+        else if (vsActive)
             c = vsMode.TouchContext();
         else if (rewardStage > 0)
             return touch::Context::Reward;
@@ -111,6 +116,7 @@ int main() {
         return c == 0 ? touch::Context::Combat : c == 2 ? touch::Context::EndScreen : touch::Context::Menu;
     };
     auto activePlayer = [&]() -> const district_fury::Player* {
+        if (betaActive) return &betaMode.PlayerRef();
         if (vsActive) return &vsMode.PlayerRef();
         if (activeStage == 1) return &stage1.PlayerRef();
         if (activeStage == 2) return &stage2.PlayerRef();
@@ -133,7 +139,16 @@ int main() {
             state = district_fury::core::ApplicationState::ExitRequested;
             continue;
         }
-        if (vsActive) {
+        if (betaActive) {
+            // MODO BETA (nuevosSprites): experiencia aparte; al salir vuelve al menu.
+            betaMode.Update(GetFrameTime());
+            if (betaMode.ShouldExit()) {
+                betaMode.ClearExit();
+                betaMode.Shutdown();
+                betaActive = false;
+                stage1.ReturnToMenu();
+            }
+        } else if (vsActive) {
             vsMode.Update(GetFrameTime());
             if (vsMode.ShouldExit()) {
                 vsMode.ClearExit();
@@ -147,6 +162,10 @@ int main() {
             if (stage1.IsMenu() && (district_fury::input::Pressed(KEY_V) || stage1.ConsumeVsRequest())) {
                 vsMode.Init();
                 vsActive = true;
+            }
+            if (!vsActive && stage1.IsMenu() && stage1.ConsumeBetaRequest()) {
+                betaMode.Init();
+                betaActive = true;
             }
             // Nueva partida: la campana arranca sin mejoras acumuladas.
             if (!vsActive && stage1.ConsumeNewGame()) {
@@ -253,7 +272,8 @@ int main() {
         }
         BeginTextureMode(target);
         ClearBackground({8, 11, 11, 255});
-        if (vsActive) vsMode.Draw();
+        if (betaActive) betaMode.Draw();
+        else if (vsActive) vsMode.Draw();
         // DF-013: Stage1StoryGame::Draw() ahora dibuja su propio menu con el
         // arte final (ui/MainMenu.h); ya no hace falta la vista alternativa
         // que vivia aqui (DrawMenuPrincipal queda sin usar, ver DF-013 D9).
@@ -267,7 +287,7 @@ int main() {
             stage4.Draw();
         else
             stage5.Draw();
-        if (!vsActive && rewardStage > 0) {
+        if (!vsActive && !betaActive && rewardStage > 0) {
             DrawRectangle(0, 0, 1280, 720, {0, 0, 0, 205});
             DrawRectangle(190, 120, 900, 480, {8, 12, 16, 240});
             DrawRectangleLines(190, 120, 900, 480, {255, 205, 75, 180});
@@ -285,7 +305,7 @@ int main() {
             }
             DrawText("PULSA 1, 2 o 3", 560, 575, 18, {200, 220, 230, 240});
         }
-        if (!touch::Enabled() && !vsActive && rewardStage == 0 && !stage1.IsMenu()) {
+        if (!touch::Enabled() && !vsActive && !betaActive && rewardStage == 0 && !stage1.IsMenu()) {
             DrawRectangle(985, 684, 290, 24, {5, 8, 10, 185});
             DrawText("CAMPANA 1-5  |  F1..F5 DEBUG", 993, 689, 11, {180, 200, 205, 210});
         }
@@ -297,6 +317,7 @@ int main() {
                        {offX, offY, windowWidth * screenScaleX, windowHeight * screenScale}, {0, 0}, 0, WHITE);
         EndDrawing();
     }
+    betaMode.Shutdown();
     UnloadRenderTexture(target);
     district_fury::AudioSystem::Get().Shutdown();
     district_fury::AssetManager::Get().UnloadAll();

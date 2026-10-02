@@ -81,3 +81,28 @@ Corregido en esta auditoria:
   (src/game/RivalAI.cpp). Es un Player completo: mismos movimientos, habilidades por paginas,
   transformacion, bloqueo y dash que cuando lo controla el jugador.
 - Verificado con all_modes_check: cada rival usa habilidades, golpea y recibe golpes.
+
+## MODO BETA (nuevosSprites)
+
+Opcion **MODO BETA** del menu principal (debajo de MODO VS). Es una experiencia aparte
+con el contenido de `nuevosSprites.zip`; no cambia Historia ni VS (los personajes BETA
+no aparecen en VS).
+
+- **Personajes (15):** heroe con 4 armas (Espadas del Caos, Cestus de Nemea, Cadena del
+  Rayo, Garras de Hades) y 11 enemigos (esqueleto, excavadora, momia con escudo,
+  elefante, ave sanadora, centauro, bruto de la bola, medusa y sus variantes rojas).
+  Cada cuadro se arma con las piezas originales (sin escalar ni deformar, 1.25 en
+  pantalla igual que el mapa), con sus cajas de cuerpo y de ataque originales.
+- **Escenarios (6):** cubierta del barco, montana nevada, cueva helada, camino y arena
+  del volcan, paso de la montana. Mapas de tiles originales + parallax + clima; la
+  franja caminable sale de la capa de colision.
+- **Modos:** OLEADAS (avanzar por el escenario, 4-5 oleadas con enemigo final) y
+  1 VS 1 contra cualquier personaje BETA manejado por RivalAI.
+- **Sonido:** sonidos por cuadro de golpes y habilidades, herido/muerte por personaje,
+  UI y musica (menu, barco, volcan, victoria, derrota) del paquete original.
+- **Efectos:** chispas de impacto, humo de muerte, almas; lluvia/rayos, nieve y ceniza.
+- Datos: `data/beta/` (generados por `tools/beta/*.py`), arte/sonido: `assets/beta/`.
+- Auditoria completa archivo por archivo: `docs/beta/AUDITORIA_BETA.md`.
+- Verificacion: `./build/beta_mode_check` (carga los 15, gana las oleadas de los 6
+  escenarios y dos 1 VS 1 sin invulnerabilidad).
+- Pendiente: jefes Titan, Poseidon y monstruo de tentaculos (arte en Spine 2.1).

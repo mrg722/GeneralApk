@@ -1,4 +1,5 @@
 #include "game/lab/KfReference.h"
+#include "game/beta/BetaCharacter.h"
 #include "core/Platform.h"
 #include <algorithm>
 #include <cmath>
@@ -291,9 +292,26 @@ constexpr KfRosterEntry kRoster[] = {
     {0, "RAYDER CLON", true, 120, 0.6f, 3},
     {1, "RAYDER CLON TRANSFORMADO", true, 130, 0.6f, 3},
     // El sprite 33 no es luchador (vendedor/puesto del escenario): excluido.
+    // ---- BETA (nuevosSprites): solo en el modo BETA; ver src/game/beta. ----
+    {-1, "GUERRERO (ESPADAS DEL CAOS)", true, 160, 1.0f, 0, "kratos_espadas"},
+    {-1, "GUERRERO (CESTUS DE NEMEA)", true, 160, 1.0f, 0, "kratos_cesto"},
+    {-1, "GUERRERO (CADENA DEL RAYO)", true, 160, 1.0f, 0, "kratos_rayo"},
+    {-1, "GUERRERO (GARRAS DE HADES)", true, 160, 1.0f, 0, "kratos_garras"},
+    {-1, "SOLDADO ESQUELETO", false, 60, 1.0f, 0, "esqueleto"},
+    {-1, "BESTIA EXCAVADORA", false, 70, 1.0f, 0, "excavador"},
+    {-1, "MOMIA CON ESCUDO", false, 80, 1.0f, 0, "momia_escudo"},
+    {-1, "BESTIA ELEFANTE", false, 120, 1.0f, 0, "bestia_elefante"},
+    {-1, "AVE SANADORA", false, 50, 1.0f, 0, "ave_sanadora"},
+    {-1, "CENTAURO", false, 220, 1.0f, 0, "centauro"},
+    {-1, "CENTAURO ROJO", false, 300, 1.0f, 0, "centauro_rojo"},
+    {-1, "BRUTO DE LA BOLA", false, 240, 1.0f, 0, "bruto_cadena"},
+    {-1, "BRUTO DE LA BOLA ROJO", false, 320, 1.0f, 0, "bruto_cadena_rojo"},
+    {-1, "MEDUSA", false, 200, 1.0f, 0, "medusa"},
+    {-1, "MEDUSA ROJA", false, 280, 1.0f, 0, "medusa_roja"},
 };
 
 KfReference Load(const KfRosterEntry& who) {
+    if (who.betaId) return LoadBetaCharacter(who.betaId);
     KfReference out;
     std::vector<unsigned char> data;
     for (const char* path : {"apk_reference/king_fighter_iii/bin/animation.bin", "../apk_reference/king_fighter_iii/bin/animation.bin",
@@ -561,6 +579,11 @@ KfReference Load(const KfRosterEntry& who) {
 }  // namespace
 
 int KfRosterCount() { return (int)(sizeof(kRoster) / sizeof(kRoster[0])); }
+int KfStableRosterCount() {
+    int n = 0;
+    while (n < KfRosterCount() && kRoster[n].betaId == nullptr) ++n;
+    return n;
+}
 
 const KfRosterEntry& KfRoster(int index) {
     return kRoster[(size_t)std::clamp(index, 0, KfRosterCount() - 1)];

@@ -3,6 +3,7 @@
 #include "rendering/SpriteFrame.h"
 #include "rendering/SpriteManifest.h"
 #include <algorithm>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -18,6 +19,8 @@ struct AnimationClip {
     std::vector<int> frames = {};
     // Duracion por cuadro de `frames` (asincrona). Vacio = frameDuration fijo.
     std::vector<float> durations = {};
+    // BETA: sonidos por cuadro del clip (indice en `frames`, clave del sonido).
+    std::vector<std::pair<int, std::string>> sounds = {};
 };
 
 class Animator {
@@ -36,6 +39,8 @@ public:
     // Clips cargados del manifiesto, indexados por nombre ("punch1", "hit_high"...).
     std::unordered_map<std::string, AnimationClip> namedClips;
     std::string currentClipName;
+    // BETA: imagenes originales de las piezas (compartidas entre copias del animador).
+    std::shared_ptr<const std::vector<Texture2D>> pieceTextures;
 
     Animator()
         : texture{0}, cols(1), rows(1), currentFrame(0), timer(0.0f),
@@ -143,10 +148,30 @@ public:
         }
     }
 
+    // BETA: arma el cuadro con sus piezas. Escala uniforme (no deforma) salvo
+    // que el llamador pida otra; espejo horizontal reflejando cada pieza.
+    void DrawPieces(const SpriteFrame& frame, Vector2 feet, float scaleX, float scaleY, bool flipX, Color tint,
+                    float angle = 0.0f) const {
+        if (!pieceTextures) return;
+        for (const FramePiece& p : frame.pieces) {
+            if (p.tex < 0 || p.tex >= static_cast<int>(pieceTextures->size())) continue;
+            const Texture2D& t = (*pieceTextures)[static_cast<std::size_t>(p.tex)];
+            if (t.id == 0) continue;
+            const bool fx = p.flipX != flipX;
+            const Rectangle src{p.src.x, p.src.y, fx ? -p.src.width : p.src.width, p.flipY ? -p.src.height : p.src.height};
+            const float w = p.src.width * scaleX, h = p.src.height * scaleY;
+            const float relX = flipX ? -(p.x + p.src.width) * scaleX : p.x * scaleX;
+            const float relY = p.y * scaleY;
+            // origen = pies: la rotacion (si hay) es alrededor de los pies.
+            DrawTexturePro(t, src, {feet.x, feet.y, w, h}, {-relX, -relY}, angle, tint);
+        }
+    }
+
     // Dibuja un frame concreto del atlas (sin tocar el estado de reproduccion).
     void DrawFrame(int frameIndex, Vector2 pivotPosition, float scale, bool flipX, Color tint = WHITE) const {
         if (texture.id == 0 || frames.empty()) return;
         const SpriteFrame& frame = frames[static_cast<std::size_t>(std::clamp(frameIndex, 0, static_cast<int>(frames.size()) - 1))];
+        if (!frame.pieces.empty()) { DrawPieces(frame, pivotPosition, scale, scale, flipX, tint); return; }
         const float width = frame.width * scale, height = frame.height * scale;
         const Rectangle source = {frame.source.x, frame.source.y, flipX ? -frame.source.width : frame.source.width, frame.source.height};
         const float px = flipX ? width - frame.pivotX * scale : frame.pivotX * scale;
@@ -180,6 +205,7 @@ public:
                     float angle = 0.0f) const {
         const SpriteFrame* frame = CurrentFrameData();
         if (!frame || texture.id == 0) { Draw(feetPosition, scaleY, flipX, tint); return; }
+        if (!frame->pieces.empty()) { DrawPieces(*frame, feetPosition, scaleX, scaleY, flipX, tint, angle); return; }
         const float width = frame->width * scaleX, height = frame->height * scaleY;
         if (width <= 0.0f || height <= 0.0f || frame->source.width <= 0.0f || frame->source.height <= 0.0f) return;
         const Rectangle source = {frame->source.x, frame->source.y, flipX ? -frame->source.width : frame->source.width,
@@ -200,6 +226,7 @@ public:
 
         if (!frames.empty()) {
             const SpriteFrame& frame = frames[static_cast<std::size_t>(safeFrame)];
+            if (!frame.pieces.empty()) { DrawPieces(frame, feetPosition, scale, scale, flipX, tint); return; }
             const float width = frame.width * scale;
             const float height = frame.height * scale;
             if (width <= 0.0f || height <= 0.0f || frame.source.width <= 0.0f || frame.source.height <= 0.0f) return;

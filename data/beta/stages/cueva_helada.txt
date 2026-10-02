@@ -1,0 +1,13 @@
+stage cueva_helada
+name CUEVA HELADA
+source mapdata/282.XML
+size 1440 576
+walk 384 480 0 1440
+sky 24 32 48
+music gate1music.ogg
+weather nieve
+chunk cueva_helada_0.png 0
+layer bg/Xueshanneibeijing.png 0.08 0 1 0
+layer bg/Xueshanneizhongjing_2.png 0.3 150 1 200
+layer bg/Xueshanneizhongjing_1.png 0.45 170 1 700
+layer bg/Xueshanneizhongjing_4.png 0.55 160 1 1100
