@@ -9,6 +9,7 @@
 #include "ui/TouchControls.h"
 #include <algorithm>
 #include <cmath>
+#include <sstream>
 
 namespace district_fury {
 namespace {
@@ -22,18 +23,25 @@ constexpr int kFieldCount = 4;
 // Indices dentro del bloque BETA (mismo orden que CharacterVisual / KfRoster).
 enum B { Espadas, Cestus, Rayo, Garras, Esqueleto, Excavador, Momia, Elefante, Ave, Centauro, CentauroRojo,
          Bruto, BrutoRojo, Medusa, MedusaRoja };
+// Jefes (valores negativos en las oleadas): Spine horneado, data/beta/bosses.
+enum { JefePoseidon = -1, JefeTentaculos = -2, JefeTitan = -3 };
+const char* kBossIds[] = {"jefe_poseidon", "jefe_tentaculos", "jefe_titan"};
+const char* kBossNames[] = {"POSEIDON", "MONSTRUO DE TENTACULOS", "TITAN"};
+constexpr int kBossCount = 3;
 
 // Oleadas por escenario: los enemigos que el juego original pone en esas zonas
 // (barco: no-muertos; montana: bestias y centauros; volcan: brutos y medusas).
-// La ultima oleada es el enemigo grande de la zona.
+// Luego el enemigo grande de la zona y, al final, el jefe (Poseidon en el barco,
+// el monstruo de tentaculos en la montana, el Titan en el volcan).
 const std::vector<std::vector<int>>& WavesFor(int stage) {
     static const std::vector<std::vector<std::vector<int>>> kWaves = {
-        {{Esqueleto, Esqueleto}, {Excavador, Esqueleto, Momia}, {Momia, Excavador, Esqueleto}, {Bruto}},
-        {{Esqueleto, Ave}, {Elefante, Esqueleto}, {Momia, Ave, Excavador}, {Centauro}},
-        {{Esqueleto, Excavador}, {Elefante, Ave}, {Centauro, Esqueleto}, {CentauroRojo}},
-        {{Excavador, Esqueleto}, {Elefante, Momia}, {Bruto, Esqueleto}, {Medusa}},
-        {{Momia, Excavador}, {BrutoRojo}, {Medusa, Esqueleto}, {MedusaRoja}},
-        {{Esqueleto, Ave}, {Elefante, Excavador}, {Momia, Esqueleto, Ave}, {Centauro, Elefante}, {CentauroRojo}},
+        {{Esqueleto, Esqueleto}, {Excavador, Esqueleto, Momia}, {Momia, Excavador, Esqueleto}, {Bruto}, {JefePoseidon}},
+        {{Esqueleto, Ave}, {Elefante, Esqueleto}, {Momia, Ave, Excavador}, {Centauro}, {JefeTentaculos}},
+        {{Esqueleto, Excavador}, {Elefante, Ave}, {Centauro, Esqueleto}, {CentauroRojo}, {JefeTentaculos}},
+        {{Excavador, Esqueleto}, {Elefante, Momia}, {Bruto, Esqueleto}, {Medusa}, {JefeTitan}},
+        {{Momia, Excavador}, {BrutoRojo}, {Medusa, Esqueleto}, {MedusaRoja}, {JefeTitan}},
+        {{Esqueleto, Ave}, {Elefante, Excavador}, {Momia, Esqueleto, Ave}, {Centauro, Elefante}, {CentauroRojo},
+         {JefeTentaculos}},
     };
     return kWaves[(size_t)std::clamp(stage, 0, kStageCount - 1)];
 }
@@ -94,6 +102,7 @@ int BetaMode::AliveEnemies() const {
     int n = 0;
     for (const auto& f : fighters)
         if (f->enemy && f->p.state != PlayerState::Defeat) ++n;
+    if (boss.active && boss.phase != 4) ++n;
     return n;
 }
 
@@ -127,13 +136,21 @@ void BetaMode::StartFight() {
     waveActive = false;
     banner = 0;
     time = 0;
+    boss = BossFight{};
     stage.Load(kStageIds[std::clamp(selStage, 0, kStageCount - 1)]);
     const float left = stage.Loaded() ? stage.WorldLeft() : 90.0f;
     AddFighter(CharIndex(selCharacter), false, left + 220.0f, 570.0f);
     cameraX = std::max(0.0f, left);
     lockLeft = stage.Loaded() ? stage.WorldLeft() + 40.0f : 120.0f;
     lockRight = stage.Loaded() ? std::min(stage.WorldRight(), kStageEndX) - 40.0f : 1160.0f;
-    if (selDuel) {
+    if (selMode == 2) {
+        // JEFE: pelea directa contra el jefe elegido en la primera pantalla.
+        lockLeft = cameraX + 60.0f;
+        lockRight = cameraX + 1220.0f;
+        waveCount = 1;
+        waveActive = SpawnBoss(kBossIds[std::clamp(selBoss, 0, kBossCount - 1)], lockRight);
+        bannerText = TextFormat("JEFE  //  %s", kBossNames[std::clamp(selBoss, 0, kBossCount - 1)]);
+    } else if (selMode == 1) {
         // 1 VS 1: el rival aparece enfrente, en la misma pantalla.
         Fighter& r = AddFighter(CharIndex(selRival), true, left + 900.0f, 570.0f);
         r.p.facing = Facing::Left;
@@ -157,6 +174,10 @@ void BetaMode::SpawnWave() {
     lockRight = std::min(std::min(stage.WorldRight(), kStageEndX) - 40.0f, cameraX + 1220.0f);
     const float ys[] = {560.0f, 520.0f, 605.0f, 540.0f};
     for (size_t i = 0; i < list.size(); ++i) {
+        if (list[i] < 0) {   // jefe
+            SpawnBoss(kBossIds[std::clamp(-list[i] - 1, 0, kBossCount - 1)], lockRight);
+            continue;
+        }
         // Llegan por los dos lados de la pantalla, como en el original.
         const bool fromLeft = (i % 2) == 1 && lockLeft + 200.0f < fighters[0]->p.position.x;
         const float x = fromLeft ? lockLeft + 30.0f : lockRight - 30.0f - (float)i * 40.0f;
@@ -165,7 +186,8 @@ void BetaMode::SpawnWave() {
         if (e.p.animator.HasClip("intro")) e.p.animator.PlayNamed("intro");
     }
     waveActive = true;
-    bannerText = wave + 1 == waveCount ? "ENEMIGO FINAL" : TextFormat("OLEADA %d / %d", wave + 1, waveCount);
+    bannerText = boss.active ? TextFormat("JEFE  //  %s", boss.name.c_str())
+               : wave + 2 == waveCount ? "ENEMIGO FINAL" : TextFormat("OLEADA %d / %d", wave + 1, waveCount);
     banner = 1.8f;
     PlaySound("sound44");
 }
@@ -192,7 +214,8 @@ void BetaMode::Update(float dt) {
             const int dir = (input::Pressed(KEY_RIGHT) || input::Pressed(KEY_D)) ? 1 : -1;
             if (cursor == 0) selCharacter = (selCharacter + dir + kBetaCount) % kBetaCount;
             else if (cursor == 1) selStage = (selStage + dir + kStageCount) % kStageCount;
-            else if (cursor == 2) selDuel = !selDuel;
+            else if (cursor == 2) selMode = (selMode + dir + 3) % 3;
+            else if (selMode == 2) selBoss = (selBoss + dir + kBossCount) % kBossCount;
             else selRival = (selRival + dir + kBetaCount) % kBetaCount;
             PlaySound(cursor == 0 ? "sound14" : "sound13");
         }
@@ -225,13 +248,14 @@ void BetaMode::UpdateFight(float dt) {
     if (hitstop > 0) { hitstop -= dt; return; }
 
     // Avance por el escenario: la oleada siguiente aparece al llegar a su zona.
-    if (!selDuel && !waveActive && wave < waveCount) {
+    if (selMode == 0 && !waveActive && wave < waveCount) {
         const float span = std::max(1.0f, std::min(stage.WorldRight(), kStageEndX) - stage.WorldLeft() - 1400.0f);
         const float trigger = stage.WorldLeft() + 500.0f + span * (waveCount > 1 ? (float)wave / (waveCount - 1) : 0.0f);
         if (hero.p.position.x >= trigger || wave == 0) SpawnWave();
     }
 
     for (auto& f : fighters) UpdateFighter(*f, dt);
+    UpdateBoss(dt);
 
     // Golpes: el jugador puede alcanzar a varios enemigos con el mismo golpe.
     for (size_t i = 1; i < fighters.size(); ++i) ResolveHits(hero, *fighters[i], 1.0f);
@@ -239,7 +263,7 @@ void BetaMode::UpdateFight(float dt) {
         for (size_t i = 1; i < fighters.size(); ++i)
             if (fighters[i]->lastHp != fighters[i]->p.hp) { hero.p.hasHit = true; break; }
     }
-    for (size_t i = 1; i < fighters.size(); ++i) ResolveHits(*fighters[i], hero, selDuel ? 1.0f : 0.55f);
+    for (size_t i = 1; i < fighters.size(); ++i) ResolveHits(*fighters[i], hero, selMode == 1 ? 1.0f : 0.55f);
     for (auto& f : fighters) PollSounds(*f);
 
     // Efectos.
@@ -260,7 +284,8 @@ void BetaMode::UpdateFight(float dt) {
         PlayMusic("music_003.ogg");
         return;
     }
-    if (waveActive && AliveEnemies() == 0) {
+    if (boss.active && boss.phase == 4 && boss.deadTime > 2.5f) boss.active = false;
+    if (waveActive && AliveEnemies() == 0 && !boss.active) {
         waveActive = false;
         ++wave;
         if (wave >= waveCount) {
@@ -407,6 +432,219 @@ void BetaMode::StopMusic() {
     musicName.clear();
 }
 
+
+// ---------------------------------------------------------------- jefes
+
+bool BetaMode::SpawnBoss(const std::string& id, float rightEdge) {
+    std::string text;
+    const std::string rel = "data/beta/bosses/" + id + ".txt";
+    for (const std::string& p : {rel, "../" + rel, "../../" + rel})
+        if (platform::LoadTextFile(p, text)) break;
+    if (text.empty()) return false;
+    BossFight b;
+    b.id = id;
+    std::string dir, file;
+    std::istringstream in(text);
+    std::string line;
+    auto& fxCache = FxCache();
+    auto fit = fxCache.find("fx_rango");
+    if (fit == fxCache.end()) fit = fxCache.emplace("fx_rango", LoadBetaCharacter("fx_rango")).first;
+    while (std::getline(in, line)) {
+        std::istringstream ls(line);
+        std::string tag;
+        ls >> tag;
+        if (tag == "name") std::getline(ls >> std::ws, b.name);
+        else if (tag == "spine") ls >> dir >> file >> b.scale;
+        else if (tag == "hp") { ls >> b.maxHp; b.hp = b.lastHp = b.maxHp; }
+        else if (tag == "body") {
+            float x0 = 0, y0 = 0, x1 = 0, y1 = 0;
+            ls >> x0 >> y0 >> x1 >> y1;
+            b.body = {x0, y0, x1 - x0, y1 - y0};
+        } else if (tag == "sound") {
+            std::string ev, snd;
+            ls >> ev >> snd;
+            b.sounds[ev] = snd;
+        } else if (tag == "clip") {
+            std::string c, anim;
+            int loop = 0;
+            ls >> c >> anim >> loop;
+            b.clips[c] = {anim, loop != 0};
+        } else if (tag == "attack") {
+            BossAttack at;
+            std::string fx;
+            ls >> at.clip >> at.warn >> at.warnScale >> at.reach >> at.hitTime >> fx >> at.sound >> at.damage;
+            const auto colon = fx.find(':');
+            at.fx = fx.substr(0, colon);
+            at.fxClip = colon == std::string::npos ? "a0" : fx.substr(colon + 1);
+            at.area = {0, -60, at.reach, 120};
+            // Area de golpe = union de las piezas del aviso (anim 99) con su escala.
+            if (fit->second.loaded) {
+                const auto cit = fit->second.templ.namedClips.find(at.warn);
+                if (cit != fit->second.templ.namedClips.end()) {
+                    float x0 = 1e9f, y0 = 1e9f, x1 = -1e9f, y1 = -1e9f;
+                    for (int fi : cit->second.frames) {
+                        if (fi < 0 || fi >= (int)fit->second.templ.frames.size()) continue;
+                        for (const FramePiece& pc : fit->second.templ.frames[(size_t)fi].pieces) {
+                            x0 = std::min(x0, pc.x); y0 = std::min(y0, pc.y);
+                            x1 = std::max(x1, pc.x + pc.src.width); y1 = std::max(y1, pc.y + pc.src.height);
+                        }
+                    }
+                    if (x1 > x0) at.area = {x0 * at.warnScale, y0 * at.warnScale, (x1 - x0) * at.warnScale, (y1 - y0) * at.warnScale};
+                }
+            }
+            b.attacks.push_back(at);
+        }
+    }
+    // Esqueleto compartido entre peleas (se carga una sola vez).
+    static std::map<std::string, std::shared_ptr<spine21::SkeletonData>> skeletons;
+    auto sit = skeletons.find(id);
+    if (sit == skeletons.end()) {
+        auto data = std::make_shared<spine21::SkeletonData>();
+        if (!data->Load(dir, file)) {
+            TraceLog(LOG_WARNING, "BETA: no cargo el Spine %s: %s", id.c_str(), data->error.c_str());
+            data.reset();
+        }
+        sit = skeletons.emplace(id, data).first;
+    }
+    if (!sit->second || b.attacks.empty()) return false;
+    b.skel.SetData(sit->second);
+    // Medidas de la pose de reposo: cuanto baja el dibujo bajo el origen y su ancho.
+    b.Play("idle");
+    const Rectangle bounds = b.skel.Bounds();
+    b.ground = std::max(0.0f, (bounds.y + bounds.height) * b.scale);
+    const float right = -bounds.x * b.scale;   // arte mirando a la izquierda: el cuerpo queda a la derecha... del frente
+    b.pos = {rightEdge - std::max(80.0f, (bounds.x + bounds.width) * b.scale * BetaStage::kScale) - 20.0f, 575.0f, 0};
+    (void)right;
+    if (!b.Play("intro")) b.Play("idle");
+    b.phase = 0;
+    b.facing = Facing::Left;
+    b.cooldown = 1.6f;
+    b.active = true;
+    boss = std::move(b);
+    PlaySound("sound45");
+    return true;
+}
+
+CombatBox BetaMode::BossHurtbox() const {
+    // Arte nativo mirando a la izquierda: la caja se refleja al mirar a la derecha.
+    const float k = BetaStage::kScale;
+    const Rectangle& b = boss.body;
+    const float feetY = boss.pos.y - boss.ground * k;
+    const float x0 = boss.facing == Facing::Left ? boss.pos.x + b.x * k : boss.pos.x - (b.x + b.width) * k;
+    return {x0, feetY + b.y * k, b.width * k, b.height * k};
+}
+
+void BetaMode::UpdateBoss(float dt) {
+    if (!boss.active) return;
+    Fighter& hero = *fighters[0];
+    boss.flash = std::max(0.0f, boss.flash - dt);
+    boss.skel.Update(dt);
+    if (boss.warnOn) boss.warnAnim.Update(dt);
+    const float k = BetaStage::kScale;
+    if (boss.phase == 4) {
+        boss.deadTime += dt;
+        if (boss.skel.Finished() && boss.clip != "down") boss.Play("down");
+        return;
+    }
+    // Golpes del heroe al jefe (misma linea de profundidad que en el resto del modo).
+    if (hero.p.AttackIsActive() && !hero.p.hasHit && std::fabs(hero.p.position.y - boss.pos.y) < 70.0f) {
+        Vector2 c{};
+        if (Overlap(hero.p.GetAttackHitbox(), BossHurtbox(), c)) {
+            hero.p.hasHit = true;
+            boss.hp -= std::max(1, hero.p.GetAttackDamage() + (hero.p.isRageMode ? 5 : 0));
+            boss.flash = 0.12f;
+            hitstop = 0.03f;
+            shake = 0.06f;
+            SpawnFx(hero.p.isRageMode ? "fx_impacto_oro" : "fx_impacto", TextFormat("a%d", GetRandomValue(0, 5)), c,
+                    hero.p.facing == Facing::Left);
+            const auto it = boss.sounds.find(boss.hp > 0 ? "hurt" : "die");
+            if (it != boss.sounds.end()) PlaySound(it->second);
+            if (boss.hp <= 0) {
+                boss.hp = 0;
+                boss.phase = 4;
+                boss.warnOn = false;
+                boss.Play("defeat");
+                SpawnFx("fx_humo_muerte", "a0", {boss.pos.x, boss.pos.y}, false);
+                SpawnFx("fx_alma_roja", "a0", {boss.pos.x, boss.pos.y - 120.0f}, false);
+                return;
+            }
+            // Solo se interrumpe si no esta atacando (los jefes tienen armadura al atacar).
+            if (boss.phase == 1 && boss.Play("hit")) boss.phase = 3;
+        }
+    }
+    if (boss.phase == 0 || boss.phase == 3) {
+        if (boss.skel.Finished() || boss.clip == "idle") { boss.phase = 1; boss.Play("idle"); }
+        return;
+    }
+    if (boss.phase == 1) {
+        boss.facing = hero.p.position.x < boss.pos.x ? Facing::Left : Facing::Right;
+        boss.cooldown -= dt;
+        if (boss.cooldown > 0.0f || hero.p.state == PlayerState::Defeat) return;
+        // Elige el ataque que alcanza al heroe; si ninguno, el de mas alcance.
+        const float dist = std::fabs(hero.p.position.x - boss.pos.x);
+        int pick = GetRandomValue(0, (int)boss.attacks.size() - 1);
+        if (boss.attacks[(size_t)pick].area.x * k + boss.attacks[(size_t)pick].area.width * k < dist) {
+            for (int i = 0; i < (int)boss.attacks.size(); ++i)
+                if ((boss.attacks[(size_t)i].area.x + boss.attacks[(size_t)i].area.width) >
+                    (boss.attacks[(size_t)pick].area.x + boss.attacks[(size_t)pick].area.width))
+                    pick = i;
+        }
+        boss.attack = pick;
+        const BossAttack& a = boss.attacks[(size_t)pick];
+        boss.Play(a.clip);
+        boss.struck = false;
+        auto& fxCache = FxCache();
+        const auto fit = fxCache.find("fx_rango");
+        boss.warnOn = fit != fxCache.end() && fit->second.loaded;
+        if (boss.warnOn) {
+            boss.warnAnim = fit->second.templ;
+            boss.warnOn = boss.warnAnim.PlayNamed(a.warn);
+            if (boss.warnOn) boss.warnAnim.currentClip.loop = true;
+        }
+        boss.phase = 2;
+        PlaySound("sound44");
+        return;
+    }
+    // Ataque: el golpe cae en el cuadro del evento Spine (attackEffect/skillEffect).
+    const BossAttack& a = boss.attacks[(size_t)std::clamp(boss.attack, 0, (int)boss.attacks.size() - 1)];
+    if (!boss.struck && boss.skel.Time() >= a.hitTime) {
+        boss.struck = true;
+        boss.warnOn = false;
+        const float dir = boss.facing == Facing::Left ? -1.0f : 1.0f;
+        const float rel = (hero.p.position.x - boss.pos.x) * dir;
+        const float depth = hero.p.position.y - boss.pos.y;
+        const bool inX = rel >= a.area.x * k && rel <= (a.area.x + a.area.width) * k;
+        const bool inY = depth >= a.area.y * k * 0.5f && depth <= (a.area.y + a.area.height) * k * 0.5f + 20.0f;
+        SpawnFx(a.fx, a.fxClip, {boss.pos.x + dir * (a.area.x + a.area.width * 0.5f) * k, boss.pos.y}, dir < 0);
+        PlaySound(a.sound);
+        shake = 0.18f;
+        if (inX && inY && hero.p.state != PlayerState::Defeat && hero.p.dashInvulnerability <= 0.0f) {
+            hero.p.TakeDamage(a.damage);
+            SpawnFx("fx_impacto_morado", "a0", {hero.p.position.x, hero.p.position.y - 90.0f}, dir < 0);
+        }
+    }
+    if (boss.skel.Finished()) {
+        boss.phase = 1;
+        boss.warnOn = false;
+        boss.Play("idle");
+        boss.cooldown = 0.6f + GetRandomValue(0, 100) / 100.0f;
+    }
+}
+
+void BetaMode::DrawBoss() const {
+    if (!boss.active) return;
+    const float k = BetaStage::kScale;
+    const bool flip = boss.facing == Facing::Right;   // arte nativo: mirando a la izquierda
+    if (boss.warnOn) {
+        const float ws = boss.attacks[(size_t)std::clamp(boss.attack, 0, (int)boss.attacks.size() - 1)].warnScale;
+        // El aviso del original apunta a +x: se refleja cuando el jefe mira a la izquierda.
+        boss.warnAnim.Draw({boss.pos.x, boss.pos.y}, k * ws, boss.facing == Facing::Left);
+    }
+    const unsigned char a = boss.phase == 4 && boss.deadTime > 1.6f ? (unsigned char)(255 * std::max(0.0f, 1.0f - (boss.deadTime - 1.6f))) : 255;
+    const Color tint = boss.flash > 0 ? Color{255, 170, 170, a} : Color{255, 255, 255, a};
+    boss.skel.Draw({boss.pos.x, boss.pos.y - boss.ground * k}, k * boss.scale, flip, tint);
+}
+
 // ---------------------------------------------------------------- dibujo
 
 void BetaMode::Draw() const {
@@ -429,17 +667,18 @@ void BetaMode::DrawSelection() const {
     DrawText("CONTENIDO DE NUEVOSSPRITES: PERSONAJES, ESCENARIOS, EFECTOS Y SONIDOS ORIGINALES", 640 -
              MeasureText("CONTENIDO DE NUEVOSSPRITES: PERSONAJES, ESCENARIOS, EFECTOS Y SONIDOS ORIGINALES", 13) / 2,
              114, 13, {170, 190, 200, 230});
-    const char* labels[kFieldCount] = {"PERSONAJE", "ESCENARIO", "MODO", "RIVAL (1 VS 1)"};
+    const char* labels[kFieldCount] = {"PERSONAJE", "ESCENARIO", "MODO", selMode == 2 ? "JEFE" : "RIVAL (1 VS 1)"};
     for (int i = 0; i < kFieldCount; ++i) {
         const int y = 150 + i * 46;
         const bool sel = cursor == i;
-        const bool dim = i == 3 && !selDuel;
+        const bool dim = i == 3 && selMode == 0;
         DrawRectangle(190, y, 560, 38, sel ? Color{34, 26, 18, 235} : Color{12, 14, 18, 210});
         DrawRectangleLines(190, y, 560, 38, sel ? Color{255, 200, 90, 220} : Color{80, 80, 90, 120});
         DrawText(labels[i], 208, y + 11, 16, sel ? Color{255, 215, 120, 255} : WHITE);
         const char* value = i == 0 ? GetCharacterVisual(CharIndex(selCharacter)).name
                           : i == 1 ? (shown.Loaded() ? shown.name.c_str() : kStageIds[selStage])
-                          : i == 2 ? (selDuel ? "1 VS 1 (CONTRA LA MAQUINA)" : "OLEADAS DE ENEMIGOS")
+                          : i == 2 ? (selMode == 1 ? "1 VS 1 (CONTRA LA MAQUINA)" : selMode == 2 ? "JEFE" : "OLEADAS + JEFE FINAL")
+                          : selMode == 2 ? kBossNames[selBoss]
                                    : GetCharacterVisual(CharIndex(selRival)).name;
         DrawText(TextFormat("<  %s  >", value), 380, y + 11, 15, dim ? Color{90, 95, 100, 150} : Color{220, 225, 230, 255});
     }
@@ -463,8 +702,9 @@ void BetaMode::DrawSelection() const {
     for (size_t i = 0; i < ref.abilityNames.size() && i < 6; ++i)
         DrawText(TextFormat("%d  %s", (int)i + 1, ref.abilityNames[i].c_str()), 200, 372 + (int)i * 22, 14,
                  {210, 220, 225, 240});
-    DrawText(selDuel ? "1 VS 1: el rival usa todos sus movimientos y habilidades."
-                     : "OLEADAS: avanza por el escenario y vence a cada grupo hasta el enemigo final.",
+    DrawText(selMode == 1   ? "1 VS 1: el rival usa todos sus movimientos y habilidades."
+             : selMode == 2 ? "JEFE: esquiva la zona roja del aviso y golpea al jefe entre sus ataques."
+                            : "OLEADAS: avanza por el escenario, vence a cada grupo y al jefe final.",
              190, 520, 13, {170, 190, 200, 230});
     DrawText(touch::Enabled() ? "OK INICIAR   ATRAS VOLVER AL MENU"
                               : "ARRIBA/ABAJO CAMPO   IZQ/DER CAMBIAR   ENTER/J INICIAR   ESC MENU",
@@ -486,7 +726,9 @@ void BetaMode::DrawFight() const {
     std::vector<const Fighter*> order;
     for (const auto& f : fighters) order.push_back(f.get());
     std::sort(order.begin(), order.end(), [](const Fighter* a, const Fighter* b) { return a->p.position.y < b->p.position.y; });
+    bool bossDrawn = false;
     for (const Fighter* f : order) {
+        if (!bossDrawn && f->p.position.y > boss.pos.y) { DrawBoss(); bossDrawn = true; }
         if (f->gone > 1.8f && ((int)(f->gone * 12) % 2) == 0) continue;   // parpadeo al desaparecer
         f->p.Draw();
         if (f->enemy && f->p.state != PlayerState::Defeat) {
@@ -497,6 +739,7 @@ void BetaMode::DrawFight() const {
                           {230, 60, 50, 255});
         }
     }
+    if (!bossDrawn) DrawBoss();
     for (const Fx& fx : effects) fx.anim.Draw(fx.pos, BetaStage::kScale, fx.flip);
     EndMode2D();
     stage.DrawWeather(cameraX, time);
@@ -529,7 +772,7 @@ void BetaMode::DrawHud() const {
     ui::DrawPlayerVitals(v);
     DrawRectangle(840, 16, 424, 70, {6, 8, 12, 210});
     DrawText(stage.name.c_str(), 856, 26, 16, {255, 215, 120, 255});
-    if (selDuel && fighters.size() > 1) {
+    if (selMode == 1 && fighters.size() > 1) {
         const Player& r = fighters[1]->p;
         DrawText(TextFormat("RIVAL: %s", GetCharacterVisual(fighters[1]->character).name), 856, 48, 12, WHITE);
         DrawRectangle(856, 66, 390, 10, {30, 12, 12, 255});
@@ -537,6 +780,12 @@ void BetaMode::DrawHud() const {
     } else {
         DrawText(TextFormat("OLEADA %d / %d    ENEMIGOS %d", std::min(wave + 1, waveCount), waveCount, AliveEnemies()),
                  856, 52, 13, WHITE);
+    }
+    if (boss.active) {
+        DrawRectangle(240, 640, 800, 40, {6, 8, 12, 215});
+        DrawText(boss.name.c_str(), 256, 646, 14, {255, 200, 90, 255});
+        DrawRectangle(256, 664, 768, 10, {40, 12, 12, 255});
+        DrawRectangle(256, 664, (int)(768.0f * std::max(0, boss.hp) / std::max(1, boss.maxHp)), 10, {220, 50, 40, 255});
     }
     if (!touch::Enabled())
         DrawText("J GOLPE  K PATADA  L ENERGIA  B BLOQUEO  SHIFT ESQUIVA  1-6 HABILIDADES  R REINICIAR  ESC SALIR",

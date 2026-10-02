@@ -1,0 +1,318 @@
+
+ZS_chushou.png
+size: 508,508
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+images/GX_shui_10
+  rotate: false
+  xy: 0, 219
+  size: 414, 141
+  orig: 415, 141
+  offset: 0, 0
+  index: -1
+images/GX_shui_11
+  rotate: false
+  xy: 0, 362
+  size: 418, 146
+  orig: 418, 146
+  offset: 0, 0
+  index: -1
+images/GX_shui_12
+  rotate: false
+  xy: 0, 78
+  size: 367, 139
+  orig: 368, 139
+  offset: 0, 0
+  index: -1
+images/GX_shui_2
+  rotate: true
+  xy: 270, 10
+  size: 66, 67
+  orig: 66, 67
+  offset: 0, 0
+  index: -1
+images/Li_zhua1
+  rotate: false
+  xy: 416, 238
+  size: 32, 34
+  orig: 32, 34
+  offset: 0, 0
+  index: -1
+images/Li_zhua2
+  rotate: false
+  xy: 396, 12
+  size: 16, 25
+  orig: 16, 25
+  offset: 0, 0
+  index: -1
+images/Li_zhua3
+  rotate: false
+  xy: 339, 55
+  size: 14, 21
+  orig: 14, 21
+  offset: 0, 0
+  index: -1
+images/Litui_2
+  rotate: true
+  xy: 101, 30
+  size: 46, 88
+  orig: 46, 88
+  offset: 0, 0
+  index: -1
+images/Qiandatui
+  rotate: true
+  xy: 339, 0
+  size: 37, 55
+  orig: 37, 55
+  offset: 0, 0
+  index: -1
+images/Qianzhua_2
+  rotate: true
+  xy: 191, 28
+  size: 48, 77
+  orig: 48, 77
+  offset: 0, 0
+  index: -1
+images/Shang_ci1
+  rotate: true
+  xy: 0, 28
+  size: 48, 99
+  orig: 48, 99
+  offset: 0, 0
+  index: -1
+images/Shang_ci2
+  rotate: false
+  xy: 420, 353
+  size: 84, 155
+  orig: 84, 155
+  offset: 0, 0
+  index: -1
+images/Tou_xia
+  rotate: false
+  xy: 416, 274
+  size: 63, 77
+  orig: 63, 77
+  offset: 0, 0
+  index: -1
+images/Xia_zhua2
+  rotate: true
+  xy: 0, 1
+  size: 25, 36
+  orig: 25, 36
+  offset: 0, 0
+  index: -1
+images/Xia_zhua3
+  rotate: false
+  xy: 481, 320
+  size: 20, 31
+  orig: 20, 31
+  offset: 0, 0
+  index: -1
+images/qianzhuB1
+  rotate: true
+  xy: 369, 39
+  size: 178, 139
+  orig: 248, 291
+  offset: 32, 113
+  index: -1
+
+ZS_chushou2.png
+size: 505,505
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+images/GX_shui_1
+  rotate: false
+  xy: 0, 21
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+images/GX_shui_7
+  rotate: false
+  xy: 134, 0
+  size: 232, 121
+  orig: 232, 122
+  offset: 0, 1
+  index: -1
+images/GX_shui_8
+  rotate: true
+  xy: 0, 87
+  size: 280, 132
+  orig: 281, 133
+  offset: 0, 1
+  index: -1
+images/GX_shui_9
+  rotate: false
+  xy: 0, 369
+  size: 336, 136
+  orig: 336, 138
+  offset: 0, 1
+  index: -1
+images/Shenti
+  rotate: false
+  xy: 134, 123
+  size: 174, 244
+  orig: 174, 244
+  offset: 0, 0
+  index: -1
+images/Tou_shang
+  rotate: true
+  xy: 368, 40
+  size: 118, 115
+  orig: 118, 115
+  offset: 0, 0
+  index: -1
+images/Xia_zhua1
+  rotate: false
+  xy: 66, 19
+  size: 58, 66
+  orig: 58, 66
+  offset: 0, 0
+  index: -1
+images/qianzhuA1
+  rotate: false
+  xy: 310, 160
+  size: 172, 189
+  orig: 172, 189
+  offset: 0, 0
+  index: -1
+images/zui (4)
+  rotate: false
+  xy: 338, 351
+  size: 151, 154
+  orig: 188, 196
+  offset: 12, 20
+  index: -1
+
+ZS_chushou3.png
+size: 508,508
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+images/GX_shui_4
+  rotate: true
+  xy: 372, 189
+  size: 164, 95
+  orig: 164, 97
+  offset: 0, 1
+  index: -1
+images/GX_shui_5
+  rotate: true
+  xy: 115, 169
+  size: 172, 102
+  orig: 172, 103
+  offset: 0, 1
+  index: -1
+images/GX_shui_6
+  rotate: true
+  xy: 0, 151
+  size: 190, 113
+  orig: 190, 114
+  offset: 0, 1
+  index: -1
+images/Litui
+  rotate: true
+  xy: 250, 67
+  size: 131, 104
+  orig: 131, 104
+  offset: 0, 0
+  index: -1
+images/Qianzhua
+  rotate: false
+  xy: 0, 343
+  size: 139, 165
+  orig: 139, 165
+  offset: 0, 0
+  index: -1
+images/Shang_ci3
+  rotate: false
+  xy: 155, 1
+  size: 93, 166
+  orig: 93, 166
+  offset: 0, 0
+  index: -1
+images/zui (10)
+  rotate: false
+  xy: 356, 36
+  size: 152, 151
+  orig: 188, 196
+  offset: 14, 25
+  index: -1
+images/zui (12)
+  rotate: false
+  xy: 141, 355
+  size: 151, 153
+  orig: 188, 196
+  offset: 15, 24
+  index: -1
+images/zui (14)
+  rotate: false
+  xy: 294, 355
+  size: 151, 153
+  orig: 188, 196
+  offset: 14, 23
+  index: -1
+images/zui (16)
+  rotate: false
+  xy: 219, 200
+  size: 151, 153
+  orig: 188, 196
+  offset: 13, 21
+  index: -1
+images/zui (18)
+  rotate: true
+  xy: 0, 0
+  size: 149, 153
+  orig: 188, 196
+  offset: 14, 20
+  index: -1
+
+ZS_chushou4.png
+size: 461,461
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+images/GX_shui_3
+  rotate: false
+  xy: 305, 359
+  size: 132, 102
+  orig: 133, 103
+  offset: 1, 0
+  index: -1
+images/zui
+  rotate: false
+  xy: 0, 0
+  size: 150, 151
+  orig: 188, 196
+  offset: 11, 18
+  index: -1
+images/zui (2)
+  rotate: false
+  xy: 153, 154
+  size: 150, 152
+  orig: 188, 196
+  offset: 12, 20
+  index: -1
+images/zui (20)
+  rotate: false
+  xy: 153, 308
+  size: 150, 153
+  orig: 188, 196
+  offset: 12, 18
+  index: -1
+images/zui (6)
+  rotate: false
+  xy: 0, 308
+  size: 151, 153
+  orig: 188, 196
+  offset: 13, 22
+  index: -1
+images/zui (8)
+  rotate: false
+  xy: 0, 153
+  size: 151, 153
+  orig: 188, 196
+  offset: 14, 23
+  index: -1

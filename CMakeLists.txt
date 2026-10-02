@@ -50,6 +50,7 @@ add_library(district_fury_core
     src/game/beta/BetaCharacter.cpp
     src/game/beta/BetaStage.cpp
     src/game/beta/BetaMode.cpp
+    src/game/beta/Spine21.cpp
     src/game/combat/BossDefinition.cpp
     src/game/combat/CombatWorld.cpp
     src/game/enemies/EnemyBrain.cpp

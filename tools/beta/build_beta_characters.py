@@ -267,6 +267,9 @@ FX = [
     ("fx_curacion", "LUZ DE CURACION", 52), ("fx_barco", "CLIMA DEL BARCO (LLUVIA/RAYOS/OLAS)", 61),
     ("fx_nieve", "NEVADA FUERTE", 53), ("fx_nieve_cueva", "NEVADA LIGERA", 54),
     ("fx_volcan", "LAVA Y FUEGO DEL VOLCAN", 49), ("fx_antorcha", "ANTORCHA", 66),
+    ("fx_rango", "AVISO DE AREA DE ATAQUE (JEFES Y ELITES)", 99),
+    ("fx_titan", "EFECTOS DEL TITAN", 44), ("fx_poseidon", "EFECTOS DE POSEIDON", 65),
+    ("fx_tentaculos", "EFECTOS DEL MONSTRUO DE TENTACULOS", 79),
     ("fx_alma_roja", "ALMA ROJA", 67), ("fx_alma_verde", "ALMA VERDE", 70), ("fx_alma_azul", "ALMA AZUL", 71),
 ]
 
@@ -285,7 +288,7 @@ def copy_images(ns):
     used = set()
     for f in (ROOT / "data/beta/characters").glob("*.txt"):
         for line in f.read_text(encoding="utf-8").splitlines():
-            if line.startswith("image "): used.add(int(line.split()[2]))
+            if line.startswith("image ") and line.split()[2].isdigit(): used.add(int(line.split()[2]))
     dst = ROOT / "assets/beta/actor"
     dst.mkdir(parents=True, exist_ok=True)
     for aid in sorted(used):

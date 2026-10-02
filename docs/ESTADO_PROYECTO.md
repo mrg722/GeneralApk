@@ -105,4 +105,6 @@ no aparecen en VS).
 - Auditoria completa archivo por archivo: `docs/beta/AUDITORIA_BETA.md`.
 - Verificacion: `./build/beta_mode_check` (carga los 15, gana las oleadas de los 6
   escenarios y dos 1 VS 1 sin invulnerabilidad).
-- Pendiente: jefes Titan, Poseidon y monstruo de tentaculos (arte en Spine 2.1).
+- **Jefes (Spine 2.1 en vivo, `src/game/beta/Spine21.cpp`):** Poseidon (barco), monstruo de
+  tentaculos (montana/cueva) y Titan (volcan) como jefe final de las oleadas o en el modo JEFE.
+  Avisan su area de ataque (anim 99) y golpean en el evento del Spine original.

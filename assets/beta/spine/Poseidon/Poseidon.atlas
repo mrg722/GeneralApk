@@ -1,0 +1,346 @@
+
+Poseidon.png
+size: 511,513
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+G_P_4
+  rotate: false
+  xy: 304, 13
+  size: 133, 98
+  orig: 133, 98
+  offset: 0, 0
+  index: -1
+G_S_4
+  rotate: false
+  xy: 2, 69
+  size: 145, 236
+  orig: 145, 236
+  offset: 0, 0
+  index: -1
+G_S_5
+  rotate: false
+  xy: 295, 113
+  size: 138, 235
+  orig: 138, 235
+  offset: 0, 0
+  index: -1
+G_S_6
+  rotate: false
+  xy: 149, 74
+  size: 144, 231
+  orig: 144, 231
+  offset: 0, 0
+  index: -1
+X_Baoquan
+  rotate: false
+  xy: 238, 8
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+X_Yxiaobi
+  rotate: false
+  xy: 2, 7
+  size: 103, 60
+  orig: 103, 60
+  offset: 0, 0
+  index: -1
+X_shoukai
+  rotate: false
+  xy: 435, 119
+  size: 70, 53
+  orig: 70, 53
+  offset: 0, 0
+  index: -1
+jiao_1
+  rotate: false
+  xy: 174, 5
+  size: 62, 67
+  orig: 62, 67
+  offset: 0, 0
+  index: -1
+jiao_2
+  rotate: false
+  xy: 107, 2
+  size: 65, 65
+  orig: 65, 65
+  offset: 0, 0
+  index: -1
+shou_z
+  rotate: false
+  xy: 435, 174
+  size: 63, 83
+  orig: 63, 83
+  offset: 0, 0
+  index: -1
+shou_z2
+  rotate: false
+  xy: 435, 259
+  size: 66, 109
+  orig: 66, 109
+  offset: 0, 0
+  index: -1
+tou
+  rotate: false
+  xy: 439, 34
+  size: 51, 83
+  orig: 51, 83
+  offset: 0, 0
+  index: -1
+wuqi
+  rotate: false
+  xy: 2, 307
+  size: 171, 204
+  orig: 171, 204
+  offset: 0, 0
+  index: -1
+xiong
+  rotate: false
+  xy: 339, 370
+  size: 170, 141
+  orig: 170, 141
+  offset: 0, 0
+  index: -1
+zisewuqiguangxiao
+  rotate: false
+  xy: 175, 350
+  size: 162, 161
+  orig: 162, 161
+  offset: 0, 0
+  index: -1
+
+Poseidon2.png
+size: 505,506
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+G_C_3
+  rotate: false
+  xy: 252, 40
+  size: 106, 233
+  orig: 106, 233
+  offset: 0, 0
+  index: -1
+G_C_4
+  rotate: false
+  xy: 2, 271
+  size: 107, 233
+  orig: 107, 233
+  offset: 0, 0
+  index: -1
+G_C_5
+  rotate: false
+  xy: 143, 40
+  size: 107, 233
+  orig: 107, 233
+  offset: 0, 0
+  index: -1
+G_C_7
+  rotate: false
+  xy: 251, 275
+  size: 107, 229
+  orig: 107, 229
+  offset: 0, 0
+  index: -1
+G_P_2
+  rotate: false
+  xy: 2, 32
+  size: 132, 96
+  orig: 132, 96
+  offset: 0, 0
+  index: -1
+G_P_3
+  rotate: false
+  xy: 360, 406
+  size: 131, 98
+  orig: 131, 98
+  offset: 0, 0
+  index: -1
+G_P_5
+  rotate: false
+  xy: 360, 309
+  size: 131, 95
+  orig: 131, 95
+  offset: 0, 0
+  index: -1
+G_P_6
+  rotate: false
+  xy: 360, 210
+  size: 130, 97
+  orig: 130, 97
+  offset: 0, 0
+  index: -1
+G_P_7
+  rotate: false
+  xy: 360, 113
+  size: 130, 95
+  orig: 130, 95
+  offset: 0, 0
+  index: -1
+G_S_1
+  rotate: false
+  xy: 2, 130
+  size: 139, 139
+  orig: 139, 139
+  offset: 0, 0
+  index: -1
+G_S_10
+  rotate: false
+  xy: 360, 2
+  size: 79, 109
+  orig: 79, 109
+  offset: 0, 0
+  index: -1
+G_S_3
+  rotate: false
+  xy: 111, 275
+  size: 138, 229
+  orig: 138, 229
+  offset: 0, 0
+  index: -1
+toufa1
+  rotate: false
+  xy: 441, 46
+  size: 62, 65
+  orig: 62, 65
+  offset: 0, 0
+  index: -1
+
+Poseidon3.png
+size: 511,508
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+G_C_1
+  rotate: false
+  xy: 111, 278
+  size: 105, 228
+  orig: 105, 228
+  offset: 0, 0
+  index: -1
+G_C_2
+  rotate: false
+  xy: 128, 53
+  size: 106, 223
+  orig: 106, 223
+  offset: 0, 0
+  index: -1
+G_C_6
+  rotate: false
+  xy: 2, 274
+  size: 107, 232
+  orig: 107, 232
+  offset: 0, 0
+  index: -1
+G_D_1
+  rotate: false
+  xy: 350, 2
+  size: 95, 94
+  orig: 95, 94
+  offset: 0, 0
+  index: -1
+G_P_8
+  rotate: false
+  xy: 340, 410
+  size: 126, 96
+  orig: 126, 96
+  offset: 0, 0
+  index: -1
+G_S_2
+  rotate: false
+  xy: 350, 98
+  size: 125, 126
+  orig: 125, 126
+  offset: 0, 0
+  index: -1
+G_S_7
+  rotate: false
+  xy: 218, 321
+  size: 120, 185
+  orig: 120, 185
+  offset: 0, 0
+  index: -1
+G_S_8
+  rotate: false
+  xy: 236, 15
+  size: 112, 164
+  orig: 112, 164
+  offset: 0, 0
+  index: -1
+G_S_9
+  rotate: false
+  xy: 340, 226
+  size: 125, 182
+  orig: 125, 182
+  offset: 0, 0
+  index: -1
+shenti
+  rotate: false
+  xy: 2, 44
+  size: 124, 228
+  orig: 124, 228
+  offset: 0, 0
+  index: -1
+shou_y
+  rotate: false
+  xy: 236, 181
+  size: 102, 138
+  orig: 102, 138
+  offset: 0, 0
+  index: -1
+toufa2
+  rotate: false
+  xy: 447, 31
+  size: 62, 65
+  orig: 62, 65
+  offset: 0, 0
+  index: -1
+
+Poseidon4.png
+size: 201,301
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+G_D_2
+  rotate: false
+  xy: 2, 98
+  size: 93, 94
+  orig: 93, 94
+  offset: 0, 0
+  index: -1
+G_D_3
+  rotate: false
+  xy: 106, 205
+  size: 93, 94
+  orig: 93, 94
+  offset: 0, 0
+  index: -1
+G_D_4
+  rotate: false
+  xy: 106, 110
+  size: 93, 93
+  orig: 93, 93
+  offset: 0, 0
+  index: -1
+G_D_5
+  rotate: false
+  xy: 97, 15
+  size: 93, 93
+  orig: 93, 93
+  offset: 0, 0
+  index: -1
+G_D_6
+  rotate: false
+  xy: 2, 2
+  size: 93, 94
+  orig: 93, 94
+  offset: 0, 0
+  index: -1
+G_P_1
+  rotate: false
+  xy: 2, 194
+  size: 102, 105
+  orig: 102, 105
+  offset: 0, 0
+  index: -1

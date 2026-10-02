@@ -1,0 +1,17 @@
+# BETA jefe POSEIDON (generado por tools/beta/build_beta_bosses.py)
+boss jefe_poseidon
+name POSEIDON
+spine assets/beta/spine/Poseidon Poseidon 1.0
+hp 650
+body -199 -264 2 95
+sound hurt sound59
+sound die sound60
+clip intro stand 0
+clip idle stand 1
+clip hit behit 0
+clip defeat die4 0
+clip down lay 1
+clip warn1 warningAttack 0
+clip warn2 warningSkill 0
+attack warn1 a8 0.8 280 1.4 fx_poseidon:a0 sound59 22
+attack warn2 a9 0.7 320 0.7 fx_poseidon:a2 sound60 28

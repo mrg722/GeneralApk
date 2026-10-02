@@ -11,6 +11,7 @@
 #include "raylib.h"
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <string>
 
 using namespace district_fury;
@@ -34,7 +35,15 @@ void Press(BetaMode& g, int key) {
 PlayerInput Bot(const BetaMode& g, const Player& p, int f) {
     PlayerInput in;
     const auto enemies = g.EnemiesForTest();
-    if (enemies.empty()) { in.moveX = 1.0f; return in; }
+    if (enemies.empty()) {
+        in.moveX = 1.0f;
+        if (g.BossActive() && std::fabs(g.BossX() - p.position.x) < 260.0f) {
+            in.moveX = 0.0f;
+            in.punch = (f % 14) == 0;
+            if ((f % 150) == 75) in.skill = (f / 150) % 3;
+        }
+        return in;
+    }
     const Player* t = enemies[0];
     for (const Player* e : enemies)
         if (std::fabs(e->position.x - p.position.x) < std::fabs(t->position.x - p.position.x)) t = e;
@@ -91,8 +100,9 @@ int main(int argc, char** argv) {
     BetaMode g;
     g.Init();
     for (int c = 0; c < 4; ++c) { Frame(g); Shot("beta_sel_" + std::to_string(c)); Press(g, KEY_RIGHT); }
+    const bool soloJefes = std::getenv("BETA_SOLO_JEFES") != nullptr;
     // 2) Oleadas en los 6 escenarios con las 4 armas del heroe.
-    for (int s = 0; s < 6; ++s) {
+    for (int s = 0; s < (soloJefes ? 0 : 6); ++s) {
         g.StartForTest(s % 4, s, false);
         if (!g.Stage().Loaded()) { std::printf("escenario %d NO CARGA\n", s); ++problems; continue; }
         problems += Play(g, "beta_oleadas_" + g.Stage().id, 240.0f, true);
@@ -103,6 +113,13 @@ int main(int argc, char** argv) {
     Play(g, "beta_duelo_medusa", 120.0f, false);
     g.StartForTest(9, 1, true, 1);
     Play(g, "beta_duelo_centauro_vs_cestus", 120.0f, false);
+    // 4) Jefes Spine en vivo (Poseidon, tentaculos, Titan).
+    for (int b = 0; b < 3; ++b) {
+        g.StartBossForTest(b, b == 2 ? 3 : b, b);
+        if (!g.BossActive()) { std::printf("jefe %d NO CARGA\n", b); ++problems; continue; }
+        problems += Play(g, std::string("beta_jefe_") + g.BossName(), 180.0f, true);
+        if (!g.Won()) ++problems;
+    }
     g.Shutdown();
     CloseWindow();
     std::printf("problemas: %d\n", problems);

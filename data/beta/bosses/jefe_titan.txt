@@ -1,0 +1,17 @@
+# BETA jefe TITAN (generado por tools/beta/build_beta_bosses.py)
+boss jefe_titan
+name TITAN
+spine assets/beta/spine/Titan Titan 0.44
+hp 700
+body -297 -265 296 166
+sound hurt sound56
+sound die sound55
+clip intro stand 0
+clip idle stand 1
+clip hit behit 0
+clip defeat die 0
+clip down lay 1
+clip warn1 warningAttack 0
+clip warn2 warningSkill 0
+attack warn1 a10 1.0 260 0.7666 fx_titan:a0 sound56 24
+attack warn2 a11 1.0 470 0.7666 fx_titan:a1 sound55 32

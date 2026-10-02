@@ -230,6 +230,18 @@ originales pieza por pieza (ver `tools/beta/`).
 ### NEVADA LIGERA (`fx_nieve_cueva`)
 - Clips (2): a0, idle
 
+### EFECTOS DE POSEIDON (`fx_poseidon`)
+- Clips (6): a0, a1, a2, a3, a4, idle
+
+### AVISO DE AREA DE ATAQUE (JEFES Y ELITES) (`fx_rango`)
+- Clips (15): a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, idle
+
+### EFECTOS DEL MONSTRUO DE TENTACULOS (`fx_tentaculos`)
+- Clips (5): a0, a1, a2, a3, idle
+
+### EFECTOS DEL TITAN (`fx_titan`)
+- Clips (5): a0, a1, a2, a3, idle
+
 ### LAVA Y FUEGO DEL VOLCAN (`fx_volcan`)
 - Clips (10): a0, a1, a2, a3, a4, a5, a6, a7, a8, idle
 
@@ -274,7 +286,7 @@ originales pieza por pieza (ver `tools/beta/`).
 
 ## Imagenes de piezas (actor/N.png)
 
-706 imagenes; 430 usadas por BETA (copiadas tal cual a `assets/beta/actor`).
+706 imagenes; 477 usadas por BETA (copiadas tal cual a `assets/beta/actor`).
 
 | Dueno (anim) | Imagenes | Usadas |
 |---|---|---|
@@ -305,7 +317,7 @@ originales pieza por pieza (ver `tools/beta/`).
 | 0, 1, 5, 7, 76, 86: Heroe arma 1 (Espadas del Caos) - basico; Heroe habilidad 1-1 (Espadas); Heroe arma 1 - intermedio 1 (salto, voltereta); Heroe arma 1 - intermedio 2; Hombre de la ciudad (rojo); Heroe habilidad 1-2 (Espadas, definitiva) | 1 (40..40) | 1 |
 | 36: Heroe arma 4 - intermedio 1 | 7 (41..158) | 0 |
 | 12: Capa frontal del mapa (oclusion) | 1 (42..42) | 0 |
-| 65: Jefe Poseidon - efectos de luz | 14 (47..99) | 0 |
+| 65: Jefe Poseidon - efectos de luz | 14 (47..99) | 14 |
 | 34: Heroe arma 4 (Garras de Hades) - basico | 22 (50..476) | 22 |
 | 8: Mecanismo activable (invertido) | 1 (54..54) | 0 |
 | 15: Monstruo de tentaculos (jefe, solo cajas) | 1 (59..59) | 0 |
@@ -317,10 +329,10 @@ originales pieza por pieza (ver `tools/beta/`).
 | 53: Efecto nieve (exterior) | 4 (100..103) | 4 |
 | 40: Heroe arma 4 - intermedio 2 | 5 (104..479) | 0 |
 | 90: NPC ataque con tiempo | 7 (105..485) | 0 |
-| 44: Jefe Titan - efectos de luz | 9 (107..469) | 0 |
+| 44: Jefe Titan - efectos de luz | 9 (107..469) | 9 |
 | 6: Portal | 2 (123..124) | 0 |
 | 45, 112: Medusa; Medusa roja | 28 (125..702) | 23 |
-| 99: Rangos de ataque (Medusa, Centauro, Bruto, Tentaculos, Poseidon, Titan) | 4 (129..311) | 0 |
+| 99: Rangos de ataque (Medusa, Centauro, Bruto, Tentaculos, Poseidon, Titan) | 4 (129..311) | 4 |
 | 36, 40: Heroe arma 4 - intermedio 1; Heroe arma 4 - intermedio 2 | 2 (131..514) | 1 |
 | 43: Mecanismo: caja roja (lado) | 6 (140..145) | 0 |
 | 26: Mecanismo: cuerda para deslizarse | 1 (150..150) | 0 |
@@ -337,7 +349,7 @@ originales pieza por pieza (ver `tools/beta/`).
 | 0, 7, 9, 16, 76, 85: Heroe arma 1 (Espadas del Caos) - basico; Heroe arma 1 - intermedio 2; Heroe arma 2 (Cestus de Nemea) - basico; Heroe arma 2 - intermedio 2; Hombre de la ciudad (rojo); Hombre de la ciudad (dorado) | 1 (165..165) | 1 |
 | 39, 111: Bruto de la bola y cadena; Bruto de la bola rojo | 42 (168..377) | 40 |
 | 61: Efectos exteriores del barco (lluvia, gotas, rayos, tornado, olas) | 14 (170..264) | 14 |
-| 19, 44: Mecanismo: caja que se rompe; Jefe Titan - efectos de luz | 5 (175..471) | 0 |
+| 19, 44: Mecanismo: caja que se rompe; Jefe Titan - efectos de luz | 5 (175..471) | 5 |
 | 46: Efecto de muerte de enemigo | 2 (179..180) | 2 |
 | 68, 90, 91: Efecto de muerte (humo); NPC ataque con tiempo; NPC guardian | 5 (181..185) | 5 |
 | 68: Efecto de muerte (humo) | 1 (186..186) | 1 |
@@ -389,7 +401,7 @@ originales pieza por pieza (ver `tools/beta/`).
 | 9, 13, 16: Heroe arma 2 (Cestus de Nemea) - basico; Heroe arma 2 - intermedio 1; Heroe arma 2 - intermedio 2 | 2 (411..412) | 0 |
 | 13, 16: Heroe arma 2 - intermedio 1; Heroe arma 2 - intermedio 2 | 1 (413..413) | 1 |
 | 9, 13, 16, 85, 87, 88: Heroe arma 2 (Cestus de Nemea) - basico; Heroe arma 2 - intermedio 1; Heroe arma 2 - intermedio 2; Hombre de la ciudad (dorado); Heroe habilidad 2-1 (Cestus); Heroe habilidad 2-2 (Cestus, definitiva) | 2 (414..495) | 2 |
-| 79: Monstruo de tentaculos - efectos | 15 (416..464) | 0 |
+| 79: Monstruo de tentaculos - efectos | 15 (416..464) | 15 |
 | 17, 32, 33, 84, 105, 106: Heroe arma 3 (Cadena del Rayo) - basico; Heroe arma 3 - intermedio 1; Heroe arma 3 - intermedio 2; Hombre de la ciudad (azul); Heroe habilidad 3-1 (Cadena del Rayo); Heroe habilidad 3-2 (Cadena del Rayo, definitiva) | 1 (455..455) | 1 |
 | 17, 84: Heroe arma 3 (Cadena del Rayo) - basico; Hombre de la ciudad (azul) | 1 (456..456) | 1 |
 | 34, 40: Heroe arma 4 (Garras de Hades) - basico; Heroe arma 4 - intermedio 2 | 1 (477..477) | 0 |
@@ -518,11 +530,11 @@ SnowOutGate = montana exterior, SnowInGate = cueva helada, FireOutGateBackRound 
 Niveles no usados: los de 22 filas (interior del barco 111/112/191/252, montana 212/241) son de
 plataformas verticales con mecanismos; los demas repiten los mismos tilesets que los 6 elegidos.
 
-## Spine (jefes y QTE) - PENDIENTE
+## Spine (jefes y QTE)
 
 - `spine/Titan`, `spine/Poseidon`, `spine/PoseidonBaby` (= monstruo de tentaculos, anim 15): Spine 2.1.27 con
   mallas y mallas con huesos. Sus cajas y tiempos estan en anim 51/64/15 (cuadros con imagen de relleno 597).
-  Para integrarlos sin deformar hay que hornear las animaciones Spine a cuadros (pendiente).
+  INTEGRADOS: el juego dibuja el Spine en vivo (src/game/beta/Spine21.cpp); QTE pendientes.
 - `ChainfattyQTE`, `medsuaQTE`, `RenMaQTE`, `PoseidonQTE`, `PoseidonBabyQTE`: cinematicas de remate (QTE).
 - `Menu/zhujue.json`: heroe animado del menu original.
 

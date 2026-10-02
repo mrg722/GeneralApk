@@ -15,7 +15,9 @@ KfReference LoadBetaCharacter(const std::string& id) {
         if (platform::LoadTextFile(p, text)) break;
     if (text.empty()) { out.error = "no se encontro " + rel; return out; }
 
-    std::vector<int> imageIds;
+    // Imagen de cada indice: "N" = assets/beta/actor/N.png; si no, ruta bajo
+    // assets/beta/ (jefes Spine horneados: "spine/jefe_titan_0").
+    std::vector<std::string> imagePaths;
     std::vector<SpriteFrame> frames;
     std::istringstream in(text);
     std::string line;
@@ -31,10 +33,13 @@ KfReference LoadBetaCharacter(const std::string& id) {
             ls >> cid >> kind >> out.maxHp;
             out.betaHero = kind == "hero";
         } else if (tag == "image") {
-            int idx = 0, actor = 0;
-            ls >> idx >> actor;
-            if (idx >= (int)imageIds.size()) imageIds.resize((size_t)idx + 1, -1);
-            imageIds[(size_t)idx] = actor;
+            int idx = 0;
+            std::string img;
+            ls >> idx >> img;
+            if (idx < 0 || img.empty()) continue;
+            if (idx >= (int)imagePaths.size()) imagePaths.resize((size_t)idx + 1);
+            const bool numeric = img.find_first_not_of("0123456789") == std::string::npos;
+            imagePaths[(size_t)idx] = numeric ? "assets/beta/actor/" + img + ".png" : "assets/beta/" + img + ".png";
         } else if (tag == "frame") {
             int idx = 0, n = 0;
             float b[4] = {}, a[4] = {};
@@ -109,11 +114,8 @@ KfReference LoadBetaCharacter(const std::string& id) {
     }
 
     auto textures = std::make_shared<std::vector<Texture2D>>();
-    for (int actor : imageIds) {
-        const Texture2D t = actor < 0 ? Texture2D{0}
-                                      : AssetManager::Get().GetTextureByPath("assets/beta/actor/" + std::to_string(actor) + ".png");
-        textures->push_back(t);
-    }
+    for (const std::string& path : imagePaths)
+        textures->push_back(path.empty() ? Texture2D{0} : AssetManager::Get().GetTextureByPath(path));
     Texture2D firstTex{0};
     for (const Texture2D& t : *textures)
         if (t.id != 0) { firstTex = t; break; }
