@@ -111,7 +111,7 @@ void BetaStage::DrawWeather(float cameraX, float time) const {
             float x = std::fmod(i * 113.0f - cameraX * 0.8f + std::sin(time + i) * 30.0f, 1300.0f);
             if (x < 0) x += 1300.0f;
             const float y = 740.0f - std::fmod(i * 47.0f + time * (35.0f + (i % 4) * 12.0f), 760.0f);
-            DrawCircleV({x - 10, y}, 1.5f + (i % 2), {255, 140 + (i % 3) * 30, 60, 170});
+            DrawCircleV({x - 10, y}, 1.5f + (i % 2), {255, (unsigned char)(140 + (i % 3) * 30), 60, 170});
         }
     }
 }
