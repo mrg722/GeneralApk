@@ -1,6 +1,6 @@
 # Auditoria BETA (nuevosSprites)
 
-Generado por `tools/beta/audit_beta.py`. Recorre todo el paquete `nuevosSprites.zip` y documenta
+Generado por `GowApk/tools/beta/audit_beta.py`. Recorre todo el paquete `nuevosSprites.zip` y documenta
 cada archivo: ARCHIVO -> TIPO -> PERSONAJE/ESCENARIO -> FUNCION -> ANIMACION -> HABILIDAD -> EFECTO -> SONIDO,
 y su estado en el MODO BETA. Nada se escalo ni se redibujo: personajes, efectos y mapas usan las imagenes
 originales pieza por pieza (ver `tools/beta/`).

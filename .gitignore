@@ -48,7 +48,13 @@ build_validate_cfg.txt
 build_validate_build.txt
 
 district_fury_save.dat
+district_fury_beta.dat
+district_fury_campaign.dat
 # Python cache
 __pycache__/
 *.py[cod]
 /build-android/
+
+# APKs compilados: se publican como GitHub Release, no se versionan en git.
+/dist/
+*.apk
