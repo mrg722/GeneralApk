@@ -63,6 +63,21 @@ void AudioSystem::Init() {
         {Sfx::Block, "combat_block", 0.8f}, {Sfx::Whoosh, "move_whoosh", 0.5f}, {Sfx::Land, "move_land", 0.6f},
         {Sfx::Jump, "move_jump", 0.6f}, {Sfx::FuryCharge, "fury_charge", 0.8f},
         {Sfx::UiConfirm, "ui_confirm", 0.6f}, {Sfx::UiCancel, "ui_cancel", 0.6f}, {Sfx::UiPause, "ui_pause", 0.6f},
+        // Rayder: sin sonido sintetizado previo; si el WAV no esta, el hueco
+        // queda vacio y Play() simplemente no suena (ver AssetExists arriba).
+        {Sfx::RayderGolpe1,       "rayder/golpe_1",        0.85f},
+        {Sfx::RayderGolpe2,       "rayder/golpe_2",        0.85f},
+        {Sfx::RayderGolpe3,       "rayder/golpe_3",        0.85f},
+        {Sfx::RayderPatada1,      "rayder/patada_1",       0.88f},
+        {Sfx::RayderPatada2,      "rayder/patada_2",       0.88f},
+        {Sfx::RayderPatada3,      "rayder/patada_3",       0.88f},
+        {Sfx::RayderImpactoFuerte,"rayder/impacto_fuerte", 0.95f},
+        {Sfx::RayderSilbido,      "rayder/silbido",        0.55f},
+        {Sfx::RayderCargaPoder,   "rayder/carga_poder",    0.75f},
+        {Sfx::RayderDisparoPoder, "rayder/disparo_poder",  0.80f},
+        {Sfx::RayderImpactoPoder, "rayder/impacto_poder",  0.90f},
+        {Sfx::RayderFuria,        "rayder/furia",          0.85f},
+        {Sfx::RayderEsquiva,      "rayder/esquiva",        0.70f},
     };
     for (const File& f : files) {
         std::vector<unsigned char> bytes;

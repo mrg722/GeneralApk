@@ -86,8 +86,19 @@ void Player::UpdateMotionFeel(float dt) {
     effects.erase(std::remove_if(effects.begin(), effects.end(), [](const Fx& e) { return e.t >= e.dur; }), effects.end());
     if (hasHit && !prevHasHit && state == PlayerState::Attack) {   // impacto: sonido segun el golpe
         const bool heavyHit = GetAttack(currentAttack).heavy || activeSkill >= 0;
-        AudioSystem::Get().Play(activeSkill >= 0 ? Sfx::EnergyImpact : heavyHit ? Sfx::HeavyHit
-                                : attackPhase == AttackPhase::Kick ? Sfx::Kick : Sfx::Punch);
+        if (IsRayder()) {
+            // Rayder: golpes y patadas propios, rotando sus 3 variantes por combo
+            // (docs/SONIDO_RAYDER.md); el remate pesado usa el impacto fuerte.
+            static const Sfx kGolpes[3] = {Sfx::RayderGolpe1, Sfx::RayderGolpe2, Sfx::RayderGolpe3};
+            static const Sfx kPatadas[3] = {Sfx::RayderPatada1, Sfx::RayderPatada2, Sfx::RayderPatada3};
+            const int variante = ((comboStep % 3) + 3) % 3;
+            AudioSystem::Get().Play(activeSkill >= 0 ? Sfx::RayderImpactoPoder
+                                    : heavyHit ? Sfx::RayderImpactoFuerte
+                                    : attackPhase == AttackPhase::Kick ? kPatadas[variante] : kGolpes[variante]);
+        } else {
+            AudioSystem::Get().Play(activeSkill >= 0 ? Sfx::EnergyImpact : heavyHit ? Sfx::HeavyHit
+                                    : attackPhase == AttackPhase::Kick ? Sfx::Kick : Sfx::Punch);
+        }
     }
     if (hasHit && !prevHasHit && state == PlayerState::Attack && !IsKfCharacter()) {
         const CombatBox b = GetAttackHitbox();

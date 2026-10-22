@@ -66,11 +66,21 @@ siendo distintos (camiseta sin mangas azul, jeans, cinta azul, pelo afro, frente
 la chaqueta y otro peinado de Rayder Cruz): son sprites nuevos a integrar, no un
 reemplazo del personaje.
 
+## Estado actual del registro
+
+El atlas y sus clips ya están en `data/sprite_manifest.json` (id `rayder_azul`,
+mismo grid/cell/pivot que `rayder_azul_clips.json`), así la herramienta de
+manifiesto lo reconoce y queda disponible para usarlo. **No** se tocó
+`CharacterVisual.cpp`: este set no es un personaje jugable todavía porque le
+faltan los clips base (`idle`, `walk`, `run`, `dash`, `block`, `hit_*`,
+`knockdown`, etc.) que un `Player` necesita para funcionar — solo trae golpes,
+patada, poderes y victoria. Complementa a Rayder (sus poderes/golpes quedan
+disponibles para usarlos más adelante), no lo reemplaza ni rompe nada existente.
+
 ## Lo que falta decidir
 
-- A qué personaje/skin se asigna este set (¿una variante de Rayder, o un
-  personaje nuevo?). No se tocó `CharacterVisual.cpp` ni `sprite_manifest.json`:
-  falta decidir el nombre y registrarlo.
+- A qué personaje/skin se asigna este set cuando tenga sus clips base (¿una
+  variante de Rayder, o un personaje nuevo?).
 - El combo de puñetazos es un apaño con cuadros prestados; si el usuario consigue
   la hoja 4 sin el velo azul pegado, se puede rehacer con puñetazos y volteretas
   reales.

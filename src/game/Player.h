@@ -125,6 +125,8 @@ public:
     bool IsTransformed() const { return transformTimer > 0.0f; }
     // Personaje extraido de la APK (sus clips traen su propio arte de poderes).
     bool IsKfCharacter() const;
+    // Rayder (el atlas rayder_kf, no sus clones): usa su propio set de golpes/poderes.
+    bool IsRayder() const;
     // Intenta lanzar la habilidad i ahora; false si esta en espera o no puede actuar.
     bool TryStartSkill(int i);
     // Escala de dibujo del sprite (la usa tambien la caja de golpe de las habilidades).

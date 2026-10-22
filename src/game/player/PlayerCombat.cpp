@@ -8,6 +8,11 @@ bool Player::IsKfCharacter() const {
     return cv.kfRoster >= 0 || cv.kfMoves;
 }
 
+bool Player::IsRayder() const {
+    const char* name = GetCharacterVisual(skin).name;
+    return name && std::string(name) == "RAYDER";
+}
+
 float Player::ClipSeconds(const char* clip) const { return animator.ClipSeconds(clip); }
 
 namespace {
@@ -172,6 +177,15 @@ void Player::BeginAttack(AttackId id) {
     }
 
     // Al lanzar: silbido del golpe (el impacto suena al conectar, ver PlayerDraw).
+    if (IsRayder()) {
+        switch (id) {
+            case AttackId::EnergyWave: AudioSystem::Get().Play(Sfx::RayderCargaPoder); break;
+            case AttackId::RageAttack: AudioSystem::Get().Play(Sfx::RayderFuria); break;
+            case AttackId::Finisher:   AudioSystem::Get().Play(Sfx::RayderDisparoPoder); break;
+            default:                   AudioSystem::Get().Play(Sfx::RayderSilbido); break;
+        }
+        return;
+    }
     switch (id) {
         case AttackId::EnergyWave: AudioSystem::Get().Play(Sfx::EnergyCharge); break;
         case AttackId::RageAttack: AudioSystem::Get().Play(Sfx::Rage); break;
@@ -226,7 +240,7 @@ void Player::HandleInput(float dt) {
         dashInvulnerability = 0.20f;
         dashCooldown = 0.38f * upgrades.dashCooldownScale;
         SetState(PlayerState::Dash);
-        AudioSystem::Get().Play(Sfx::Dash);
+        AudioSystem::Get().Play(IsRayder() ? Sfx::RayderEsquiva : Sfx::Dash);
         return;
     }
 
@@ -245,7 +259,7 @@ void Player::HandleInput(float dt) {
             rageState = RageState::Starting;
             rageStateTimer = kRageStartDuration;
             rageDrainAccumulator = 0;
-            AudioSystem::Get().Play(Sfx::Rage);
+            AudioSystem::Get().Play(IsRayder() ? Sfx::RayderFuria : Sfx::Rage);
             return;
         }
         if (rageState == RageState::Active &&

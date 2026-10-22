@@ -271,6 +271,21 @@
         120,
         112
       ]
+    },
+    "rayder_azul": {
+      "path": "assets/characters/rayder/rayder_azul_atlas.png",
+      "grid": [
+        10,
+        5
+      ],
+      "cell": [
+        270,
+        175
+      ],
+      "pivot": [
+        135,
+        162
+      ]
     }
   },
   "clips": {
@@ -3330,6 +3345,172 @@
           0.05,
           0.05,
           0.35
+        ],
+        "loop": false
+      }
+    },
+    "rayder_azul": {
+      "punch1": {
+        "frames": [
+          24,
+          26,
+          25
+        ],
+        "durations": [
+          0.07,
+          0.06,
+          0.08
+        ],
+        "loop": false
+      },
+      "punch2": {
+        "frames": [
+          25,
+          27,
+          28
+        ],
+        "durations": [
+          0.06,
+          0.06,
+          0.08
+        ],
+        "loop": false
+      },
+      "punch3": {
+        "frames": [
+          28,
+          29,
+          27
+        ],
+        "durations": [
+          0.07,
+          0.07,
+          0.09
+        ],
+        "loop": false
+      },
+      "kick": {
+        "frames": [
+          2,
+          3,
+          4,
+          5
+        ],
+        "durations": [
+          0.08,
+          0.06,
+          0.06,
+          0.09
+        ],
+        "loop": false
+      },
+      "dash_attack": {
+        "frames": [
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "durations": [
+          0.07,
+          0.06,
+          0.06,
+          0.06,
+          0.07,
+          0.09
+        ],
+        "loop": false
+      },
+      "energy": {
+        "frames": [
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39
+        ],
+        "durations": [
+          0.1,
+          0.1,
+          0.09,
+          0.08,
+          0.08,
+          0.08,
+          0.08,
+          0.09,
+          0.1
+        ],
+        "loop": false
+      },
+      "projectile": {
+        "frames": [
+          40,
+          41,
+          42,
+          43,
+          44,
+          45
+        ],
+        "durations": [
+          0.07,
+          0.06,
+          0.06,
+          0.08,
+          0.1,
+          0.12
+        ],
+        "loop": false
+      },
+      "rage_attack": {
+        "frames": [
+          12,
+          13,
+          14,
+          15,
+          16,
+          17
+        ],
+        "durations": [
+          0.07,
+          0.06,
+          0.06,
+          0.07,
+          0.07,
+          0.09
+        ],
+        "loop": false
+      },
+      "finisher": {
+        "frames": [
+          18,
+          19,
+          20,
+          21
+        ],
+        "durations": [
+          0.09,
+          0.07,
+          0.08,
+          0.12
+        ],
+        "loop": false
+      },
+      "victory": {
+        "frames": [
+          21,
+          22,
+          23
+        ],
+        "durations": [
+          0.12,
+          0.12,
+          0.12
         ],
         "loop": false
       }

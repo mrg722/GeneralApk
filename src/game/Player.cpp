@@ -193,7 +193,7 @@ void Player::UpdateTransformForm() {
     if (altAnimator.texture.id == 0) return;
     std::swap(animator, altAnimator);
     usingAlt = want;
-    if (want) AudioSystem::Get().Play(Sfx::Rage);   // cambio de forma
+    if (want) AudioSystem::Get().Play(IsRayder() ? Sfx::RayderFuria : Sfx::Rage);   // cambio de forma
     const char* clip = "idle";
     switch (state) {
         case PlayerState::Walk: clip = "walk"; break;

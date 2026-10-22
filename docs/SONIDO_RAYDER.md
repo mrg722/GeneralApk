@@ -102,9 +102,10 @@ escucha antes de dejarlos fijos.
 
 ---
 
-## 3. Cómo conectarlo en el juego
+## 3. Cómo está conectado en el juego
 
-> No se tocó nada de `src/`. Esto son instrucciones para hacer el cableado.
+> Ya cableado en `src/`. Lo que sigue documenta cómo quedó (3.1 y 3.2 aplicadas
+> tal cual; 3.3 y 3.4 siguen como propuesta, no implementadas).
 
 ### 3.1. Cargar los nuevos sonidos
 
@@ -153,24 +154,23 @@ aparte para multiplicarlo, no perderlo.
 
 ### 3.2. Rotar las variantes del combo
 
-Para que el combo no repita el mismo golpe, llevar un contador en quien dispara
-el ataque:
+Implementado en `Player::UpdateMotionFeel()` (`src/game/player/PlayerDraw.cpp`):
+al conectar un golpe, si `Player::IsRayder()` (nuevo helper que compara
+`GetCharacterVisual(skin).name == "RAYDER"`, en `PlayerCombat.cpp`) es
+verdadero, se elige `RayderGolpe{1,2,3}` o `RayderPatada{1,2,3}` rotando con
+`comboStep % 3` (el contador de combo que el jugador ya llevaba), en vez de
+`Sfx::Punch`/`Sfx::Kick`. Un golpe pesado o una habilidad usan
+`RayderImpactoFuerte`/`RayderImpactoPoder` en vez de `golpe_3`.
 
-```cpp
-// En el jugador / en el sistema de combate
-int pasoCombo = 0;  // 0, 1, 2
+También se conectó, siempre detrás de `IsRayder()` y sin tocar la rama
+original de los demás personajes:
 
-void GolpeDeRayder() {
-    static const Sfx variantes[3] = {
-        Sfx::RayderGolpe1, Sfx::RayderGolpe2, Sfx::RayderGolpe3
-    };
-    AudioSystem::Get().Play(variantes[pasoCombo % 3]);
-    ++pasoCombo;
-}
-```
-
-Lo mismo para las patadas. El tercer golpe del combo (el remate) usa
-`Sfx::RayderImpactoFuerte` en vez de `golpe_3`.
+- Al lanzar una habilidad (`Player::BeginAttack`, `PlayerCombat.cpp`):
+  `EnergyWave` → `RayderCargaPoder`, `RageAttack` → `RayderFuria`,
+  `Finisher` → `RayderDisparoPoder`, cualquier otro ataque → `RayderSilbido`.
+- Esquiva/dash (`Player::HandleInput`) → `RayderEsquiva`.
+- Activar FURIA y cambiar de forma/arma (`Player::HandleInput` y
+  `Player::UpdateTransformForm` en `Player.cpp`) → `RayderFuria`.
 
 ### 3.3. Que suene a izquierda o derecha según dónde esté el enemigo
 

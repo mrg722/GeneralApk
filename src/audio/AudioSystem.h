@@ -29,6 +29,12 @@ enum class Sfx {
     UiConfirm,
     UiCancel,
     UiPause,
+    // Rayder: golpes, patadas y poderes propios (docs/SONIDO_RAYDER.md).
+    RayderGolpe1, RayderGolpe2, RayderGolpe3,
+    RayderPatada1, RayderPatada2, RayderPatada3,
+    RayderImpactoFuerte, RayderSilbido,
+    RayderCargaPoder, RayderDisparoPoder, RayderImpactoPoder,
+    RayderFuria, RayderEsquiva,
     Count
 };
 
