@@ -228,7 +228,7 @@
       ]
     },
     "brakk_v2": {
-      "path": "assets/bosses/brakk/brakk_v2_atlas.png",
+      "path": "assets/bosses/brakk/brakk_v2_atlas_clean.png",
       "grid": [
         12,
         9

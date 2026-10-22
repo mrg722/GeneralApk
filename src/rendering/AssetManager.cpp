@@ -130,14 +130,14 @@ void AssetManager::LoadAll(){
     textures["bg_zona_quimica"]=LoadRequiredTexture("zona_quimica_clean",{"assets/backgrounds/zona_quimica_clean.png","../assets/backgrounds/zona_quimica_clean.png","../../assets/backgrounds/zona_quimica_clean.png"},TEXTURE_FILTER_POINT);
     textures["rayden_128"]=LoadRequiredTexture("rayden_128",{"assets/characters/rayden_128.png","../assets/characters/rayden_128.png","../../assets/characters/rayden_128.png"},TEXTURE_FILTER_POINT);
     textures["rayden_clean"]=LoadRequiredTexture("rayden_clean",{"assets/characters/rayden_clean.png","../assets/characters/rayden_clean.png","../../assets/characters/rayden_clean.png"},TEXTURE_FILTER_POINT);
-    textures["punk_clean"]=LoadEnemyTexture("punk_clean",{"assets/enemies/punk_clean.png","../assets/enemies/punk_clean.png","../../assets/enemies/punk_clean.png"});
+    textures["punk_clean"]=LoadEnemyTexture("punk_clean",{"assets/enemies/punk_clean2.png","../assets/enemies/punk_clean2.png","../../assets/enemies/punk_clean2.png"});
     textures["charger_clean"]=LoadEnemyTexture("charger_clean",{"assets/enemies/charger_clean.png","../assets/enemies/charger_clean.png","../../assets/enemies/charger_clean.png"});
     textures["brute_clean"]=LoadEnemyTexture("brute_clean",{"assets/enemies/brute_clean.png","../assets/enemies/brute_clean.png","../../assets/enemies/brute_clean.png"});
     textures["enforcer_clean"]=LoadEnemyTexture("enforcer_clean",{"assets/enemies/enforcer_clean.png","../assets/enemies/enforcer_clean.png","../../assets/enemies/enforcer_clean.png"});
     textures["chemical_soldier_clean"]=LoadEnemyTexture("chemical_soldier_clean",{"assets/enemies/chemical_soldier_clean.png","../assets/enemies/chemical_soldier_clean.png","../../assets/enemies/chemical_soldier_clean.png"});
-    textures["urban_ninja_clean"]=LoadEnemyTexture("urban_ninja_clean",{"assets/enemies/urban_ninja_clean.png","../assets/enemies/urban_ninja_clean.png","../../assets/enemies/urban_ninja_clean.png"});
+    textures["urban_ninja_clean"]=LoadEnemyTexture("urban_ninja_clean",{"assets/enemies/urban_ninja_clean2.png","../assets/enemies/urban_ninja_clean2.png","../../assets/enemies/urban_ninja_clean2.png"});
     textures["mutant_clean"]=LoadEnemyTexture("mutant_clean",{"assets/enemies/mutant_clean.png","../assets/enemies/mutant_clean.png","../../assets/enemies/mutant_clean.png"});
-    textures["armored_guard_clean"]=LoadEnemyTexture("armored_guard_clean",{"assets/enemies/armored_guard_clean.png","../assets/enemies/armored_guard_clean.png","../../assets/enemies/armored_guard_clean.png"});
+    textures["armored_guard_clean"]=LoadEnemyTexture("armored_guard_clean",{"assets/enemies/armored_guard_clean2.png","../assets/enemies/armored_guard_clean2.png","../../assets/enemies/armored_guard_clean2.png"});
     textures["menu_main_art"]=LoadRequiredTexture("menu_main_art",{"assets/ui/menu_main_art.png","../assets/ui/menu_main_art.png","../../assets/ui/menu_main_art.png"},TEXTURE_FILTER_BILINEAR);
     // DF-013.2 (19-09): 20 fondos de escenario (5 stages x 4). 256x144, se
     // dibujan x5 con filtro POINT (pixel perfect) y parallax — ver
