@@ -11,11 +11,10 @@
 namespace district_fury {
 namespace ui {
 
-// Los items del menu, de arriba hacia abajo (BETA se agrego tras MODO VS).
+// Los siete items visibles en el arte, de arriba hacia abajo.
 enum class MainMenuItem {
     NewGame = 0,
     VsMode,
-    Beta,
     Difficulty,
     Controls,
     Options,

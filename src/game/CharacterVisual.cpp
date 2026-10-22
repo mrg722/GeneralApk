@@ -40,7 +40,7 @@ const std::array<CharacterVisual, 37> kCharacters{{
     {"RAYDER CLON BETA",       nullptr, false, 0.75f, 0.0f, 0.0f, true, 115, 1.05f, 1.05f, nullptr, 13, 1.0f, nullptr, 14},
     // Rayder clon (rojo): formula del heroe KF + despiece propio a 3x (escala 1.5/3).
     {"RAYDER CLON",            nullptr, false, 0.50f, 0.0f, 0.0f, true, 120, 1.10f, 1.05f, nullptr, 15, 1.0f, nullptr, 16},
-    // ---- BETA (nuevosSprites): roster KF 17+ (data/beta/characters). Escala 1.25 en
+    // ---- Personajes por piezas: roster KF 17+ (Kratos en District, el resto en GowApk). Escala 1.25 en
     // pantalla (1.0417 x 1.2): la misma que el escenario (576 px de alto -> 720), sin deformar. ----
     {"GUERRERO (ESPADAS DEL CAOS)", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 160, 1.00f, 1.00f, nullptr, 17, 1.0f, nullptr, -1, false, true},
     {"GUERRERO (CESTUS DE NEMEA)", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 160, 1.00f, 1.00f, nullptr, 18, 1.0f, nullptr, -1, false, true},

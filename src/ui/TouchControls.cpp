@@ -70,9 +70,9 @@ const Button kReward[] = {
     {{760.0f, 640.0f}, 44.0f, KEY_THREE, "3", {230, 170, 60, 255}},
 };
 
-// MODO BETA: interfaz original del juego (assets/beta/ui, "@" = esa carpeta).
+// Controles originales del guerrero (assets/kratos/ui, "@" = esa carpeta).
 // Pociones: Z vida, X magia. Q cambia de arma (el icono es la siguiente).
-const Button kBeta[] = {
+const Button kWarrior[] = {
     {{1168.0f, 610.0f}, 70.0f, KEY_J, "GOLPE", {225, 55, 45, 255}, "@boton_ataque", true},
     {{890.0f, 662.0f}, 40.0f, KEY_SPACE, "FURIA", {255, 190, 60, 255}, "@boton_omega", true},
     {{1012.0f, 664.0f}, 40.0f, input::kVirtualSkill0 + 0, "1", {255, 120, 60, 255}, "@boton_hab1", true},
@@ -96,16 +96,16 @@ const Button* ButtonsFor(Context c, size_t& n) {
         case Context::Combat:    return Set(kCombat, n);
         case Context::EndScreen: return Set(kEnd, n);
         case Context::Reward:    return Set(kReward, n);
-        case Context::Beta:      return Set(kBeta, n);
+        case Context::Warrior:      return Set(kWarrior, n);
         default:                 return Set(kMenu, n);
     }
 }
 
-bool UsesStick(Context c) { return c == Context::Combat || c == Context::Beta; }
+bool UsesStick(Context c) { return c == Context::Combat || c == Context::Warrior; }
 
 Texture2D Art(const char* name) {
     if (!name || !IsWindowReady()) return Texture2D{};
-    if (name[0] == '@') return AssetManager::Get().GetTextureByPath(std::string("assets/beta/ui/") + (name + 1) + ".png");
+    if (name[0] == '@') return AssetManager::Get().GetTextureByPath(std::string("assets/kratos/ui/") + (name + 1) + ".png");
     return AssetManager::Get().GetTextureByPath(std::string("assets/ui/touch/") + name + ".png");
 }
 
@@ -137,7 +137,7 @@ void ApplyStick(Vector2 p, Context c) {
     const float nx = d.x / std::max(len, 1.0f), ny = d.y / std::max(len, 1.0f);
     const bool right = nx > 0.38f, left = nx < -0.38f, down = ny > 0.38f, up = ny < -0.38f;
     // Combate: WASD (movimiento y comandos). Menus: tambien flechas.
-    if (c == Context::Beta) c = Context::Combat;
+    if (c == Context::Warrior) c = Context::Combat;
     input::SetVirtual(KEY_D, right); input::SetVirtual(KEY_A, left);
     input::SetVirtual(KEY_S, down); input::SetVirtual(KEY_W, up);
     if (c != Context::Combat) {
@@ -188,7 +188,7 @@ void Update(Context context) {
 
 void Draw(Context context, const Player* player) {
     if (!gEnabled) return;
-    if (context == Context::Beta) {
+    if (context == Context::Warrior) {
         // Joystick original: base con flechas; la perilla dorada sigue al dedo.
         DrawArt("@flecha", {kStick.x + 128.0f, kStick.y}, 26.0f, {255, 255, 255, 220}, 1.0f);
         const Texture2D fl = Art("@flecha");
@@ -210,7 +210,7 @@ void Draw(Context context, const Player* player) {
     for (size_t i = 0; i < n; ++i) {
         const Button& b = buttons[i];
         if (b.key == input::kVirtualSkillPage && (!player || player->SkillPageCount() <= 1)) continue;
-        if (b.key == KEY_Q && context == Context::Beta) {
+        if (b.key == KEY_Q && context == Context::Warrior) {
             // Cambio de arma: solo con el guerrero; muestra el arma siguiente.
             const int w = player ? player->skin - FirstBetaCharacter() : -1;
             if (w < 0 || w > 3) continue;

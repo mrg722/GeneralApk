@@ -1,0 +1,247 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>frames</key>
+		<dict>
+			<key>image/Effect/Effect_chouzhen/logo1 .png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,0},{116,136}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{116,136}</string>
+			</dict>
+			<key>image/Effect/Effect_chouzhen/logo10.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{136,0},{116,136}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{116,136}</string>
+			</dict>
+			<key>image/Effect/Effect_chouzhen/logo11.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{272,0},{116,136}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{116,136}</string>
+			</dict>
+			<key>image/Effect/Effect_chouzhen/logo12.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,116},{116,136}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{116,136}</string>
+			</dict>
+			<key>image/Effect/Effect_chouzhen/logo13.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{136,116},{116,136}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{116,136}</string>
+			</dict>
+			<key>image/Effect/Effect_chouzhen/logo14.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{272,116},{116,136}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{116,136}</string>
+			</dict>
+			<key>image/Effect/Effect_chouzhen/logo15.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,232},{116,136}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{116,136}</string>
+			</dict>
+			<key>image/Effect/Effect_chouzhen/logo16.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{136,232},{116,136}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{116,136}</string>
+			</dict>
+			<key>image/Effect/Effect_chouzhen/logo17.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{272,232},{116,136}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{116,136}</string>
+			</dict>
+			<key>image/Effect/Effect_chouzhen/logo18.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,348},{116,136}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{116,136}</string>
+			</dict>
+			<key>image/Effect/Effect_chouzhen/logo19.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,484},{116,136}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{116,136}</string>
+			</dict>
+			<key>image/Effect/Effect_chouzhen/logo2.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,620},{116,136}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{116,136}</string>
+			</dict>
+			<key>image/Effect/Effect_chouzhen/logo20.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{116,348},{116,136}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{116,136}</string>
+			</dict>
+			<key>image/Effect/Effect_chouzhen/logo3.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{252,348},{116,136}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{116,136}</string>
+			</dict>
+			<key>image/Effect/Effect_chouzhen/logo4.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{116,464},{116,136}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{116,136}</string>
+			</dict>
+			<key>image/Effect/Effect_chouzhen/logo5.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{116,600},{116,136}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{116,136}</string>
+			</dict>
+			<key>image/Effect/Effect_chouzhen/logo6.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{232,464},{116,136}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{116,136}</string>
+			</dict>
+			<key>image/Effect/Effect_chouzhen/logo7.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{368,464},{116,136}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{116,136}</string>
+			</dict>
+			<key>image/Effect/Effect_chouzhen/logo8.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{232,580},{116,136}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{116,136}</string>
+			</dict>
+			<key>image/Effect/Effect_chouzhen/logo9.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{368,600},{116,136}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{116,136}</string>
+			</dict>
+		</dict>
+		<key>metadata</key>
+		<dict>
+			<key>format</key>
+			<integer>2</integer>
+			<key>textureFileName</key>
+			<string>atlas_logo_arranque.png</string>
+			<key>realTextureFileName</key>
+			<string>atlas_logo_arranque.png</string>
+			<key>size</key>
+			<string>{484,756}</string>
+		</dict>
+		<key>texture</key>
+		<dict>
+			<key>width</key>
+			<integer>484</integer>
+			<key>height</key>
+			<integer>756</integer>
+		</dict>
+	</dict>
+</plist>

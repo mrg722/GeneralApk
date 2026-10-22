@@ -48,10 +48,6 @@ add_library(district_fury_core
     src/game/combat/RayderCloneVisual.cpp
     src/game/RivalAI.cpp
     src/game/beta/BetaCharacter.cpp
-    src/game/beta/BetaStage.cpp
-    src/game/beta/BetaMode.cpp
-    src/game/beta/Spine21.cpp
-    src/game/beta/BetaHud.cpp
     src/game/combat/BossDefinition.cpp
     src/game/combat/CombatWorld.cpp
     src/game/enemies/EnemyBrain.cpp
@@ -84,17 +80,42 @@ add_library(district_fury_core
 target_include_directories(district_fury_core PUBLIC src)
 target_link_libraries(district_fury_core PUBLIC raylib)
 
+# GowApk: aplicacion aparte con el contenido del paquete original (personajes,
+# escenarios, jefes e interfaz propios). Comparte el motor, no la jugabilidad de
+# District Fury: son dos APK distintos.
+add_library(gow_apk_core
+    GowApk/src/BetaMode.cpp
+    GowApk/src/BetaStage.cpp
+    GowApk/src/BetaHud.cpp
+    GowApk/src/Spine21.cpp
+)
+target_include_directories(gow_apk_core PUBLIC GowApk/src)
+target_link_libraries(gow_apk_core PUBLIC district_fury_core)
+
+# En Android solo se compila UNA aplicacion por APK: la biblioteca tiene que
+# llamarse libmain.so. -DDF_APP=gow elige GowApk; por defecto, District Fury.
+set(DF_APP "district" CACHE STRING "Aplicacion a compilar para Android: district o gow")
+
 if(ANDROID)
     target_compile_definitions(district_fury_core PUBLIC PLATFORM_ANDROID)
     target_include_directories(district_fury_core PUBLIC ${ANDROID_NDK}/sources/android/native_app_glue)
     # NativeActivity carga "libmain.so"; raylib define android_main() y llama a main().
-    add_library(district_fury SHARED src/main.cpp)
-    set_target_properties(district_fury PROPERTIES OUTPUT_NAME main)
-    target_link_libraries(district_fury PRIVATE district_fury_core android log EGL GLESv2 OpenSLES m)
-    target_link_options(district_fury PRIVATE "-u" "ANativeActivity_onCreate")
+    if(DF_APP STREQUAL "gow")
+        add_library(gow_apk SHARED GowApk/src/main.cpp)
+        set_target_properties(gow_apk PROPERTIES OUTPUT_NAME main)
+        target_link_libraries(gow_apk PRIVATE gow_apk_core android log EGL GLESv2 OpenSLES m)
+        target_link_options(gow_apk PRIVATE "-u" "ANativeActivity_onCreate")
+    else()
+        add_library(district_fury SHARED src/main.cpp)
+        set_target_properties(district_fury PROPERTIES OUTPUT_NAME main)
+        target_link_libraries(district_fury PRIVATE district_fury_core android log EGL GLESv2 OpenSLES m)
+        target_link_options(district_fury PRIVATE "-u" "ANativeActivity_onCreate")
+    endif()
 else()
     add_executable(district_fury src/main.cpp)
     target_link_libraries(district_fury PRIVATE district_fury_core)
+    add_executable(gow_apk GowApk/src/main.cpp)
+    target_link_libraries(gow_apk PRIVATE gow_apk_core)
 endif()
 
 include(CTest)
@@ -136,9 +157,6 @@ if(BUILD_TESTING)
     add_executable(all_modes_check tests/AllModesCheck.cpp)
     target_link_libraries(all_modes_check PRIVATE district_fury_core)
 
-    add_executable(beta_mode_check tests/BetaModeCheck.cpp)
-    target_link_libraries(beta_mode_check PRIVATE district_fury_core)
-
     add_executable(vs_boss_visual_check tests/VsBossVisualCheck.cpp)
     target_link_libraries(vs_boss_visual_check PRIVATE district_fury_core)
 
@@ -146,6 +164,10 @@ if(BUILD_TESTING)
     target_link_libraries(sprite_manifest_tests PRIVATE district_fury_core)
     add_test(NAME sprite_manifest_tests COMMAND sprite_manifest_tests
              WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+    # Verificacion visual manual de GowApk (necesita ventana; no se registra en ctest).
+    add_executable(gow_check GowApk/src/GowCheck.cpp)
+    target_link_libraries(gow_check PRIVATE gow_apk_core)
 
     # Los tests usan assert(): en Release (CI) NDEBUG los apagaba y no
     # comprobaban nada. Se vuelven a encender solo en los tests.

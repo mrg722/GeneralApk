@@ -19,7 +19,7 @@ struct KfRosterEntry {
     int maxHp;
     float scale;         // escala de dibujo (los sprites de la APK miden ~65 px)
     int tint = 0;        // 0 = colores originales; 1 = copia con los colores de Rayder
-    const char* betaId = nullptr;   // BETA: data/beta/characters/<betaId>.txt (no animation.bin)
+    const char* betaId = nullptr;   // personaje por piezas: data/kratos o GowApk/data/characters
 };
 int KfRosterCount();
 // Personajes del roster que no son BETA (los que ve el Modo VS de siempre).
@@ -36,7 +36,7 @@ struct KfReference {
     std::vector<std::string> abilityClips;
     std::vector<std::string> abilityNames;
     float scale = 1.8f;                // el luchador mide ~65 px en la APK
-    // BETA (data/beta/characters): nombre, vida y sonidos por evento ("hurt", "die"...).
+    // Personaje por piezas: nombre, vida y sonidos por evento ("hurt", "die"...).
     bool beta = false;
     bool betaHero = false;
     std::string displayName;

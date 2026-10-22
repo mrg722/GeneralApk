@@ -6,17 +6,31 @@
 #include <sstream>
 
 namespace district_fury {
+namespace {
+
+// Los personajes por piezas viven en dos sitios: Kratos es compartido (lo usan
+// el Modo VS de District Fury y GowApk) y el resto del reparto solo existe en
+// GowApk. Devuelve la primera ruta que existe de verdad.
+std::string FirstExisting(const std::vector<std::string>& candidates) {
+    for (const std::string& c : candidates)
+        for (const std::string& p : {c, "../" + c, "../../" + c})
+            if (platform::AssetExists(p)) return c;
+    return candidates.empty() ? std::string{} : candidates.front();
+}
+
+}  // namespace
 
 KfReference LoadBetaCharacter(const std::string& id) {
     KfReference out;
     std::string text;
-    const std::string rel = "data/beta/characters/" + id + ".txt";
+    const std::string rel = FirstExisting({"data/kratos/" + id + ".txt",
+                                           "GowApk/data/characters/" + id + ".txt"});
     for (const std::string& p : {rel, "../" + rel, "../../" + rel})
         if (platform::LoadTextFile(p, text)) break;
     if (text.empty()) { out.error = "no se encontro " + rel; return out; }
 
-    // Imagen de cada indice: "N" = assets/beta/actor/N.png; si no, ruta bajo
-    // assets/beta/ (jefes Spine horneados: "spine/jefe_titan_0").
+    // Imagen de cada indice: "N" = una imagen suelta de actor; si no, una ruta
+    // dentro de los assets de GowApk (jefes Spine: "spine/Titan/Titan").
     std::vector<std::string> imagePaths;
     std::vector<SpriteFrame> frames;
     std::istringstream in(text);
@@ -39,7 +53,9 @@ KfReference LoadBetaCharacter(const std::string& id) {
             if (idx < 0 || img.empty()) continue;
             if (idx >= (int)imagePaths.size()) imagePaths.resize((size_t)idx + 1);
             const bool numeric = img.find_first_not_of("0123456789") == std::string::npos;
-            imagePaths[(size_t)idx] = numeric ? "assets/beta/actor/" + img + ".png" : "assets/beta/" + img + ".png";
+            imagePaths[(size_t)idx] =
+                numeric ? FirstExisting({"assets/kratos/actor/" + img + ".png", "GowApk/assets/actor/" + img + ".png"})
+                        : FirstExisting({"GowApk/assets/" + img + ".png", "assets/kratos/" + img + ".png"});
         } else if (tag == "frame") {
             int idx = 0, n = 0;
             float b[4] = {}, a[4] = {};
@@ -121,7 +137,7 @@ KfReference LoadBetaCharacter(const std::string& id) {
     Texture2D firstTex{0};
     for (const Texture2D& t : *textures)
         if (t.id != 0) { firstTex = t; break; }
-    if (firstTex.id == 0) { out.error = "no cargaron las imagenes de assets/beta/actor"; return out; }
+    if (firstTex.id == 0) { out.error = "no cargaron las imagenes de actor de " + id; return out; }
 
     auto clips = out.templ.namedClips;
     out.templ.Init(firstTex, 1, 1, true);

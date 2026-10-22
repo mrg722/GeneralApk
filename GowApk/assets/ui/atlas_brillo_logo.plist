@@ -1,0 +1,159 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>frames</key>
+		<dict>
+			<key>image/Effect/Effect_Logozhanshentexiao/lo_00.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,0},{316,400}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{316,400}</string>
+			</dict>
+			<key>image/Effect/Effect_Logozhanshentexiao/lo_01.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,400},{316,400}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{316,400}</string>
+			</dict>
+			<key>image/Effect/Effect_Logozhanshentexiao/lo_02.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{316,0},{316,400}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{316,400}</string>
+			</dict>
+			<key>image/Effect/Effect_Logozhanshentexiao/lo_03.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{316,400},{316,400}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{316,400}</string>
+			</dict>
+			<key>image/Effect/Effect_Logozhanshentexiao/lo_04.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{632,0},{316,400}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{316,400}</string>
+			</dict>
+			<key>image/Effect/Effect_Logozhanshentexiao/lo_05.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{632,400},{316,400}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{316,400}</string>
+			</dict>
+			<key>image/Effect/Effect_Logozhanshentexiao/lo_06.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{948,0},{316,400}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{316,400}</string>
+			</dict>
+			<key>image/Effect/Effect_Logozhanshentexiao/lo_07.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{948,400},{316,400}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{316,400}</string>
+			</dict>
+			<key>image/Effect/Effect_Logozhanshentexiao/lo_08.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{1264,0},{316,400}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{316,400}</string>
+			</dict>
+			<key>image/Effect/Effect_Logozhanshentexiao/lo_09.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{1664,0},{316,400}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{316,400}</string>
+			</dict>
+			<key>image/Effect/Effect_Logozhanshentexiao/lo_10.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{1264,316},{316,400}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<true />
+				<key>sourceSize</key>
+				<string>{316,400}</string>
+			</dict>
+			<key>image/Effect/Effect_Logozhanshentexiao/lo_11.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{1664,400},{316,400}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false />
+				<key>sourceSize</key>
+				<string>{316,400}</string>
+			</dict>
+		</dict>
+		<key>metadata</key>
+		<dict>
+			<key>format</key>
+			<integer>2</integer>
+			<key>textureFileName</key>
+			<string>atlas_brillo_logo.png</string>
+			<key>realTextureFileName</key>
+			<string>atlas_brillo_logo.png</string>
+			<key>size</key>
+			<string>{1980,800}</string>
+		</dict>
+		<key>texture</key>
+		<dict>
+			<key>width</key>
+			<integer>1980</integer>
+			<key>height</key>
+			<integer>800</integer>
+		</dict>
+	</dict>
+</plist>
