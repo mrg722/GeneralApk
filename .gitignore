@@ -58,3 +58,6 @@ __pycache__/
 # APKs compilados: se publican como GitHub Release, no se versionan en git.
 /dist/
 *.apk
+
+# Estado interno del harness (worktrees de agentes en segundo plano, etc.)
+/.claude/
