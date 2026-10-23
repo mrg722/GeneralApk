@@ -1,4 +1,4 @@
-# BETA: HUMO DE MUERTE (generado por tools/beta/build_beta_characters.py)
+# BETA: HUMO DE MUERTE (generado por GowApk/tools/beta/build_beta_characters.py)
 character fx_humo_muerte fx 0
 name HUMO DE MUERTE
 image 0 181

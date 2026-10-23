@@ -120,3 +120,33 @@ Para cada frame de cada clip, por cada pieza visible:
 - El archivo `data/<personaje>/<id>.txt` con los `frame`/`piece`/`clip`
   generados segun la matematica de la seccion 3.
 - 5 habilidades + sonidos, igual que Kratos.
+
+## 6. Como quedo RONIN (hojas completas, no rig)
+
+RONIN termino armado con **cuadros completos** de las hojas del usuario
+(no con piezas rotadas): cada cuadro del juego es la figura recortada +
+efectos encima como piezas aparte. Todo lo genera
+`tools/ronin/build_ronin.py` (reproducible):
+
+```
+python3 -I tools/ronin/build_ronin.py <carpeta_hojas> [--audit <carpeta>] [--dry]
+```
+
+- `<carpeta_hojas>`: `sheet_a/b/c.png`, `ki_carga_a/b.png`, `fx_ki.png`
+  (fondo negro), `fx_gold.png` y `manoespada_reposo/swing.png`.
+- Recorte por componente conectado; figuras que se tocan se separan con una
+  costura de costo minimo; borde semitransparente recoloreado con el pixel
+  de alfa >=128 mas cercano (quita el reborde claro).
+- Escala por fila de hoja: la guardia de esa fila mide 116 px (alto total)
+  y el ancho se multiplica por 0.93. Todo mira a la derecha
+  (`facesRightByDefault=true` en la ficha).
+- Pies: con los dos pies en el suelo, talon de atras + K; con un pie o en el
+  aire, centro del abdomen + T (K y T medidos en la guardia de la fila).
+- Cajas: cuerpo = cara->pies sin el pelo; ataque = puno/pie extendido delante
+  del torso, la espada/medialuna, o la extension visible del rayo/explosion.
+- Habilidades: ONDA DE KI (tambien special/energy; super/rage_attack usa la
+  version larga de `ki_carga_b`), ESPADA RAPIDA, TORMENTA, RAFAGA, RODILLAZO.
+- `--audit` deja una hoja por clip con cajas y un "papel cebolla" por clip
+  para ver que los pies no salten.
+- Pendiente de arte: recibir golpe, caer al suelo, levantarse, derrota y
+  victoria reusan poses parecidas (comentado en `data/kratos/ronin.txt`).

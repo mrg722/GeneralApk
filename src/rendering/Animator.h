@@ -164,10 +164,11 @@ public:
                 const Rectangle src{p.src.x, p.src.y, fx ? -p.src.width : p.src.width, fy ? -p.src.height : p.src.height};
                 const float bw = p.src.height * scaleX;          // ancho del cuadro girado
                 const float relX = flipX ? -(p.x * scaleX + bw) : p.x * scaleX;
-                const float relY = p.y * scaleY;
-                // girar -90 alrededor de la esquina: el rectangulo queda en [x, x+bw] x [y, y+ancho]
-                DrawTexturePro(t, src, {feet.x + relX, feet.y + relY + p.src.width * scaleY, p.src.width * scaleY, p.src.height * scaleX},
-                               {0, 0}, -90.0f + angle, tint);
+                const float relY = p.y * scaleY + p.src.width * scaleY;   // esquina que queda abajo-izquierda
+                // girar -90: el rectangulo queda en [x, x+bw] x [y, y+ancho]. El giro extra
+                // (angle) es alrededor de los pies, como el resto de las piezas: origen = R(90)*(-rel).
+                DrawTexturePro(t, src, {feet.x, feet.y, p.src.width * scaleY, p.src.height * scaleX},
+                               {relY, -relX}, -90.0f + angle, tint);
                 continue;
             }
             const bool fx = p.flipX != flipX;

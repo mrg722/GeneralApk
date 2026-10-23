@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Vista previa de un personaje BETA desde GowApk/data/characters/<id>.txt (sin el juego).
+"""Vista previa de un personaje BETA desde data/kratos/<id>.txt o GowApk/data/characters/<id>.txt (sin el juego).
 Uso: python3 GowApk/tools/beta/preview_beta.py <id> <salida.png> [clip ...]"""
 import sys
 from pathlib import Path
@@ -11,7 +11,10 @@ ROOT = Path(__file__).resolve().parents[3]
 def load(cid):
     d = {"images": {}, "frames": [], "clips": {}}
     cur = None
-    for line in (ROOT / "GowApk/data/characters" / f"{cid}.txt").read_text(encoding="utf-8").splitlines():
+    # Kratos vive en data/kratos/; enemigos y efectos en GowApk/data/characters/
+    path = next((d / f"{cid}.txt" for d in (ROOT / "data/kratos", ROOT / "GowApk/data/characters") if (d / f"{cid}.txt").exists()), None)
+    if path is None: sys.exit(f"no existe {cid}.txt en data/kratos/ ni en GowApk/data/characters/")
+    for line in path.read_text(encoding="utf-8").splitlines():
         t = line.split()
         if not t or t[0].startswith("#"): continue
         if t[0] == "image": d["images"][int(t[1])] = int(t[2])
@@ -27,7 +30,9 @@ def render(d, fid, cache):
     out = Image.new("RGBA", (900, 700), (0, 0, 0, 0)); ox, oy = 450, 600
     for gi, sx, sy, sw, sh, x, y, flip in fr["pieces"]:
         aid = d["images"][gi]
-        if aid not in cache: cache[aid] = Image.open(ROOT / "assets/kratos/actor" / f"{aid}.png").convert("RGBA")
+        if aid not in cache:
+            src = next(d / f"{aid}.png" for d in (ROOT / "assets/kratos/actor", ROOT / "GowApk/assets/actor") if (d / f"{aid}.png").exists())
+            cache[aid] = Image.open(src).convert("RGBA")
         p = cache[aid].crop((sx, sy, sx + sw, sy + sh))
         if flip & 1: p = p.transpose(Image.FLIP_LEFT_RIGHT)
         if flip & 2: p = p.transpose(Image.FLIP_TOP_BOTTOM)

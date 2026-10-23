@@ -1,4 +1,4 @@
-# BETA: ANTORCHA (generado por tools/beta/build_beta_characters.py)
+# BETA: ANTORCHA (generado por GowApk/tools/beta/build_beta_characters.py)
 character fx_antorcha fx 0
 name ANTORCHA
 image 0 14
