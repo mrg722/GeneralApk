@@ -1,4 +1,4 @@
-# BETA: CHISPA DE IMPACTO (generado por tools/beta/build_beta_characters.py)
+# BETA: CHISPA DE IMPACTO (generado por GowApk/tools/beta/build_beta_characters.py)
 character fx_impacto fx 0
 name CHISPA DE IMPACTO
 image 0 28

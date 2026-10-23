@@ -1,4 +1,4 @@
-# BETA: CHISPA DE IMPACTO DORADA (generado por tools/beta/build_beta_characters.py)
+# BETA: CHISPA DE IMPACTO DORADA (generado por GowApk/tools/beta/build_beta_characters.py)
 character fx_impacto_oro fx 0
 name CHISPA DE IMPACTO DORADA
 image 0 582

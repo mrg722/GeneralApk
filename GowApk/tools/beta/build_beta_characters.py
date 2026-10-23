@@ -8,7 +8,7 @@ arma al dibujar, igual que el juego original. Se conservan las cajas de golpe
 
 Salidas:
   assets/kratos/actor/N.png              imagenes originales usadas (copia exacta)
-  GowApk/data/characters/<id>.txt        cuadros, piezas, cajas, clips, habilidades, sonidos
+  GowApk/data/characters/<id>.txt        (enemigos/efectos; Kratos en data/kratos/<id>.txt) cuadros, piezas, cajas, clips, habilidades, sonidos
 Uso: python3 GowApk/tools/beta/build_beta_characters.py <carpeta nuevosSprites>
 """
 import shutil
@@ -17,7 +17,7 @@ from pathlib import Path
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from beta_anim import parse  # noqa: E402
+from beta_anim import parse, xform, game_flip  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[3]
 TICK = 1.0 / 30.0
@@ -108,8 +108,10 @@ class Builder:
             sx0, sy0 = max(0, m["x"]), max(0, m["y"])
             sx1, sy1 = min(iw, m["x"] + m["w"]), min(ih, m["y"] + m["h"])
             if sx1 <= sx0 or sy1 <= sy0: continue
-            flip = s.get("flip", 0) & 7
-            fx, fy, rot = flip & 1, (flip >> 1) & 1, (flip >> 2) & 1
+            # el flip del XML es una orientacion (0..7), no una mascara: se traduce a la
+            # mascara del juego (1 espejo X, 2 espejo Y, 4 girada 90 antihorario tras los espejos)
+            fx, fy, rot = xform(s.get("flip", 0))
+            flip = game_flip(s.get("flip", 0))
             # desplazamiento de la parte recortada dentro de la pieza (respetando el espejo)
             dx = (m["x"] + m["w"] - sx1) if fx else (sx0 - m["x"])
             dy = (m["y"] + m["h"] - sy1) if fy else (sy0 - m["y"])
@@ -158,7 +160,8 @@ class Builder:
                 return
 
     def write(self, name, hp, kind):
-        out = ROOT / "GowApk/data/characters" / f"{self.cid}.txt"
+        # Kratos (heroe) se comparte con District Fury y vive en data/kratos/
+        out = ROOT / ("data/kratos" if kind == "hero" else "GowApk/data/characters") / f"{self.cid}.txt"
         out.parent.mkdir(parents=True, exist_ok=True)
         L = [f"# BETA: {name} (generado por GowApk/tools/beta/build_beta_characters.py)",
              f"character {self.cid} {kind} {hp}", f"name {name}"]
@@ -288,15 +291,24 @@ def build_fx(ns, cid, name, anim_id):
 
 
 def copy_images(ns):
-    used = set()
-    for f in (ROOT / "GowApk/data/characters").glob("*.txt"):
-        for line in f.read_text(encoding="utf-8").splitlines():
-            if line.startswith("image ") and line.split()[2].isdigit(): used.add(int(line.split()[2]))
-    dst = ROOT / "assets/kratos/actor"
-    dst.mkdir(parents=True, exist_ok=True)
-    for aid in sorted(used):
-        shutil.copyfile(Path(ns) / "actor" / f"{aid}.png", dst / f"{aid}.png")
-    return len(used)
+    """Copia las imagenes de actor que falten (no pisa las del repo, que pueden estar optimizadas).
+    Kratos (data/kratos) -> assets/kratos/actor/; enemigos y efectos -> GowApk/assets/actor/
+    (el juego busca en ambas, ver BetaCharacter.cpp)."""
+    groups = [((ROOT / "data/kratos").glob("kratos_*.txt"), ROOT / "assets/kratos/actor"),
+              ((ROOT / "GowApk/data/characters").glob("*.txt"), ROOT / "GowApk/assets/actor")]
+    seen, copied = set(), 0
+    for files, dst in groups:
+        for f in files:
+            for line in f.read_text(encoding="utf-8").splitlines():
+                if not (line.startswith("image ") and line.split()[2].isdigit()): continue
+                aid = int(line.split()[2])
+                if aid in seen: continue
+                seen.add(aid)
+                if any((d / f"{aid}.png").exists() for d in (ROOT / "assets/kratos/actor", ROOT / "GowApk/assets/actor")): continue
+                dst.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(Path(ns) / "actor" / f"{aid}.png", dst / f"{aid}.png")
+                copied += 1
+    return copied
 
 
 def main():
@@ -307,7 +319,7 @@ def main():
         print("enemigo", build_enemy(ns, cid, name, aid, hp, behit, die).name)
     for cid, name, aid in FX:
         print("efecto", build_fx(ns, cid, name, aid).name)
-    print("imagenes copiadas:", copy_images(ns))
+    print("imagenes nuevas copiadas:", copy_images(ns))
 
 
 if __name__ == "__main__":

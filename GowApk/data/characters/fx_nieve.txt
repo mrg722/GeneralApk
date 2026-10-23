@@ -1,4 +1,4 @@
-# BETA: NEVADA FUERTE (generado por tools/beta/build_beta_characters.py)
+# BETA: NEVADA FUERTE (generado por GowApk/tools/beta/build_beta_characters.py)
 character fx_nieve fx 0
 name NEVADA FUERTE
 image 0 100

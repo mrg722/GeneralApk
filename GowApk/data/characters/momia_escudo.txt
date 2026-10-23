@@ -1,4 +1,4 @@
-# BETA: MOMIA CON ESCUDO (generado por tools/beta/build_beta_characters.py)
+# BETA: MOMIA CON ESCUDO (generado por GowApk/tools/beta/build_beta_characters.py)
 character momia_escudo enemy 80
 name MOMIA CON ESCUDO
 image 0 362
@@ -88,23 +88,23 @@ piece 2 18 325 92 30 -78 -122 0
 frame 38 4 -28 -124 32 5 0 0 0 0
 piece 2 125 291 86 124 -35 -109 0
 piece 3 0 0 174 144 69 -202 0
-piece 3 0 144 60 98 68 -61 3
-piece 3 60 149 48 118 -39 -34 3
+piece 3 0 144 60 98 68 -61 7
+piece 3 60 149 48 118 -39 -34 7
 frame 39 4 -28 -124 32 5 -28 -89 213 8
 piece 2 213 354 116 112 -47 -97 0
-piece 3 340 111 60 202 -29 -56 3
+piece 3 340 111 60 202 -29 -56 7
 piece 3 167 104 170 94 127 -145 0
 piece 3 174 4 174 96 57 -233 0
 frame 40 5 -28 -124 32 5 0 0 0 0
 piece 2 74 417 102 106 -18 -89 0
 piece 2 76 359 42 56 -53 -62 0
-piece 3 0 256 72 210 -16 -66 3
+piece 3 0 256 72 210 -16 -66 7
 piece 3 72 342 126 56 156 -122 0
 piece 3 130 199 210 128 87 -248 0
 frame 41 4 -28 -124 32 5 0 0 0 0
 piece 2 175 465 138 106 -53 -89 0
 piece 3 0 476 167 52 -2 -47 0
-piece 3 172 467 80 61 164 -113 1
+piece 3 172 467 80 61 164 -113 4
 piece 3 200 332 200 152 80 -257 0
 frame 42 2 -28 -124 32 5 0 0 0 0
 piece 2 78 530 80 28 -21 -14 0
@@ -115,13 +115,13 @@ frame 44 1 -28 -124 32 5 0 0 0 0
 piece 4 87 0 86 136 -22 -121 0
 frame 45 2 -28 -124 32 5 -28 -89 213 8
 piece 4 174 2 196 128 -24 -110 0
-piece 5 8 0 88 432 -156 -118 1
+piece 5 8 0 88 432 -156 -118 4
 frame 46 2 -28 -124 32 5 0 0 0 0
 piece 4 0 137 192 128 -20 -112 0
-piece 5 99 0 106 362 -46 -133 1
+piece 5 99 0 106 362 -46 -133 4
 frame 47 2 -28 -124 32 5 0 0 0 0
 piece 4 193 137 196 130 -20 -115 0
-piece 5 217 13 80 330 56 -113 1
+piece 5 217 13 80 330 56 -113 4
 frame 48 2 -28 -124 32 5 0 0 0 0
 piece 4 193 137 196 130 -20 -115 0
 piece 5 163 342 118 90 15 -102 0

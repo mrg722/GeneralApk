@@ -1,4 +1,4 @@
-# BETA: CHISPA DE IMPACTO AZUL (generado por tools/beta/build_beta_characters.py)
+# BETA: CHISPA DE IMPACTO AZUL (generado por GowApk/tools/beta/build_beta_characters.py)
 character fx_impacto_azul fx 0
 name CHISPA DE IMPACTO AZUL
 image 0 17

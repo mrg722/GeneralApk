@@ -1,4 +1,4 @@
-# BETA: HUMO DE ENEMIGO VENCIDO (generado por tools/beta/build_beta_characters.py)
+# BETA: HUMO DE ENEMIGO VENCIDO (generado por GowApk/tools/beta/build_beta_characters.py)
 character fx_humo_enemigo fx 0
 name HUMO DE ENEMIGO VENCIDO
 image 0 179
@@ -24,6 +24,6 @@ piece 1 0 315 234 146 -68 -112 0
 frame 9 1 -8 -16 8 0 0 0 0 0
 piece 1 0 462 216 138 -23 -113 0
 frame 10 1 -8 -16 8 0 0 0 0 0
-piece 1 272 0 128 230 -23 -98 1
+piece 1 272 0 128 230 -23 -98 4
 clip a0 0 11 0:0.0667 1:0.0667 2:0.0667 3:0.0667 4:0.0667 5:0.0667 6:0.0667 7:0.0667 8:0.0667 9:0.0333 10:0.0333
 clip idle 0 11 0:0.0667 1:0.0667 2:0.0667 3:0.0667 4:0.0667 5:0.0667 6:0.0667 7:0.0667 8:0.0667 9:0.0333 10:0.0333
