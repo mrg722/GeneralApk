@@ -1,4 +1,4 @@
-# BETA: LAVA Y FUEGO DEL VOLCAN (generado por tools/beta/build_beta_characters.py)
+# BETA: LAVA Y FUEGO DEL VOLCAN (generado por GowApk/tools/beta/build_beta_characters.py)
 character fx_volcan fx 0
 name LAVA Y FUEGO DEL VOLCAN
 image 0 189

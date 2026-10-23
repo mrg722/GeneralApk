@@ -1,4 +1,4 @@
-# BETA: ALMA AZUL (generado por tools/beta/build_beta_characters.py)
+# BETA: ALMA AZUL (generado por GowApk/tools/beta/build_beta_characters.py)
 character fx_alma_azul fx 0
 name ALMA AZUL
 image 0 27

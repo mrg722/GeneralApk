@@ -1,4 +1,4 @@
-# BETA: ALMA ROJA (generado por tools/beta/build_beta_characters.py)
+# BETA: ALMA ROJA (generado por GowApk/tools/beta/build_beta_characters.py)
 character fx_alma_roja fx 0
 name ALMA ROJA
 image 0 27

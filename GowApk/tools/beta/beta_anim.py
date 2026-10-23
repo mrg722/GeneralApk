@@ -12,7 +12,26 @@ import re
 from pathlib import Path
 from PIL import Image
 
-FLIPS = {0: (False, False), 1: (True, False), 2: (False, True), 3: (True, True)}
+# Atributo flip de <Sprite>: NO es una mascara de bits espejoX/espejoY/giro, es una
+# lista de 8 orientaciones. Deducido midiendo la continuidad de las costuras entre
+# copias de un mismo modulo (flip 0 vs flip N) en todos los anim/*.xml:
+#   0 normal, 1 girada 90 antihorario, 2 girada 180, 3 girada 90 horario (270),
+#   4 espejo horizontal, 5 espejo vertical  (6 y 7 no aparecen en los datos).
+# Se traduce a (espejoX, espejoY, giro90antihorario-despues-de-los-espejos), que es
+# lo que entiende el juego (mascara 1/2/4 de las lineas `piece` de los .txt).
+XFORMS = {0: (False, False, False), 1: (False, False, True), 2: (True, True, False), 3: (True, True, True),
+          4: (True, False, False), 5: (False, True, False), 6: (True, False, True), 7: (False, True, True)}
+
+
+def xform(flip):
+    """(espejoX, espejoY, giro90) del flip original del XML."""
+    return XFORMS.get(flip & 7, (False, False, False))
+
+
+def game_flip(flip):
+    """Mascara del juego (1 espejo X, 2 espejo Y, 4 girada 90 antihorario tras los espejos)."""
+    fx, fy, rot = xform(flip)
+    return (1 if fx else 0) | (2 if fy else 0) | (4 if rot else 0)
 
 
 def read_text(path):
@@ -62,11 +81,11 @@ class Composer:
         src = self.imgs.get(m["imageId"])
         if src is None or m["w"] <= 0 or m["h"] <= 0: return None
         p = src.crop((m["x"], m["y"], m["x"] + m["w"], m["y"] + m["h"]))
-        fx, fy = FLIPS.get(flip & 3, (False, False))
+        fx, fy, rot = xform(flip)
         if fx: p = p.transpose(Image.FLIP_LEFT_RIGHT)
         if fy: p = p.transpose(Image.FLIP_TOP_BOTTOM)
-        # bit 4: pieza girada 90 grados (antihorario), despues de los espejos
-        if flip & 4: p = p.transpose(Image.ROTATE_90)
+        # giro de 90 grados antihorario, despues de los espejos
+        if rot: p = p.transpose(Image.ROTATE_90)
         return p
 
     def frame(self, fid):

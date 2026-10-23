@@ -1,4 +1,4 @@
-# BETA: EFECTOS DE POSEIDON (generado por tools/beta/build_beta_characters.py)
+# BETA: EFECTOS DE POSEIDON (generado por GowApk/tools/beta/build_beta_characters.py)
 character fx_poseidon fx 0
 name EFECTOS DE POSEIDON
 image 0 47

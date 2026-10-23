@@ -1,4 +1,4 @@
-# BETA: CLIMA DEL BARCO (LLUVIA/RAYOS/OLAS) (generado por tools/beta/build_beta_characters.py)
+# BETA: CLIMA DEL BARCO (LLUVIA/RAYOS/OLAS) (generado por GowApk/tools/beta/build_beta_characters.py)
 character fx_barco fx 0
 name CLIMA DEL BARCO (LLUVIA/RAYOS/OLAS)
 image 0 214

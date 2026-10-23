@@ -1,4 +1,4 @@
-# BETA: SOLDADO ESQUELETO (generado por tools/beta/build_beta_characters.py)
+# BETA: SOLDADO ESQUELETO (generado por GowApk/tools/beta/build_beta_characters.py)
 character esqueleto enemy 60
 name SOLDADO ESQUELETO
 image 0 240
@@ -90,22 +90,22 @@ piece 4 196 0 108 140 -81 -124 0
 frame 40 4 -28 -124 32 5 0 0 0 0
 piece 4 304 0 80 138 -35 -113 0
 piece 3 0 0 174 144 70 -202 0
-piece 3 60 149 48 118 -39 -34 3
-piece 3 0 144 60 98 68 -61 3
+piece 3 60 149 48 118 -39 -34 7
+piece 3 0 144 60 98 68 -61 7
 frame 41 4 -28 -124 32 5 -28 -89 213 8
 piece 4 0 154 112 114 -48 -100 0
 piece 3 174 4 174 96 56 -233 0
 piece 3 167 104 170 94 126 -145 0
-piece 3 340 111 60 202 -30 -56 3
+piece 3 340 111 60 202 -30 -56 7
 frame 42 4 -28 -124 32 5 0 0 0 0
 piece 4 112 155 136 102 -55 -86 0
 piece 3 130 199 210 128 89 -247 0
 piece 3 72 342 126 56 158 -121 0
-piece 3 0 256 72 210 -14 -65 3
+piece 3 0 256 72 210 -14 -65 7
 frame 43 4 -28 -124 32 5 0 0 0 0
 piece 4 249 152 134 104 -55 -89 0
 piece 3 200 332 200 152 82 -257 0
-piece 3 172 467 80 61 166 -113 1
+piece 3 172 467 80 61 166 -113 4
 piece 3 0 476 167 52 0 -47 0
 frame 44 1 -28 -124 32 5 0 0 0 0
 piece 4 0 270 88 128 -25 -109 0
@@ -116,15 +116,15 @@ piece 4 177 270 86 128 -23 -115 0
 frame 47 3 -28 -124 32 5 -28 -89 213 8
 piece 4 0 399 98 110 -20 -95 0
 piece 4 267 275 100 34 73 -90 0
-piece 5 8 0 88 432 -153 -122 1
+piece 5 8 0 88 432 -153 -122 4
 frame 48 3 -28 -124 32 5 0 0 0 0
 piece 4 99 399 94 110 -21 -91 0
 piece 4 264 318 110 36 69 -88 0
-piece 5 99 0 106 362 -43 -135 1
+piece 5 99 0 106 362 -43 -135 4
 frame 49 3 -28 -124 32 5 0 0 0 0
 piece 4 194 399 116 108 -22 -90 0
 piece 4 266 357 96 38 89 -86 0
-piece 5 217 13 80 330 54 -118 1
+piece 5 217 13 80 330 54 -118 4
 frame 50 3 -28 -124 32 5 0 0 0 0
 piece 4 194 399 116 108 -22 -90 0
 piece 4 266 357 96 38 89 -86 0

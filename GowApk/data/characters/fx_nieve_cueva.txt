@@ -1,4 +1,4 @@
-# BETA: NEVADA LIGERA (generado por tools/beta/build_beta_characters.py)
+# BETA: NEVADA LIGERA (generado por GowApk/tools/beta/build_beta_characters.py)
 character fx_nieve_cueva fx 0
 name NEVADA LIGERA
 image 0 367
