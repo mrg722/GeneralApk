@@ -308,6 +308,10 @@ constexpr KfRosterEntry kRoster[] = {
     {-1, "BRUTO DE LA BOLA ROJO", false, 320, 1.0f, 0, "bruto_cadena_rojo"},
     {-1, "MEDUSA", false, 200, 1.0f, 0, "medusa"},
     {-1, "MEDUSA ROJA", false, 280, 1.0f, 0, "medusa_roja"},
+    // Personaje nuevo por piezas (Camino A, docs/PIEZAS_PERSONAJE_NUEVO.md):
+    // espadachin con habilidad de corte de energia. Ataques/patada aun
+    // reusan la misma pose de golpe (falta arte propio por movimiento).
+    {-1, "RONIN", true, 120, 1.0f, 0, "ronin"},
 };
 
 KfReference Load(const KfRosterEntry& who) {
