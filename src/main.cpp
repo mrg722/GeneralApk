@@ -72,6 +72,10 @@ int main() {
     district_fury::AssetManager::Get().LoadAll();
     district_fury::display::Load();
     district_fury::AudioSystem::Get().Init();
+    // Jingle de arranque: sonido TEMPORAL/placeholder (ver docs/INTRO_ARRANQUE.md),
+    // pendiente de reemplazar por musica definitiva. Suena UNA sola vez al abrir
+    // el juego, no en cada vuelta al menu (no se repite en el loop principal).
+    district_fury::AudioSystem::Get().Play(district_fury::Sfx::IntroArranque);
     district_fury::Stage1StoryGame stage1;
     district_fury::Stage2Game stage2;
     district_fury::Stage3Game stage3;

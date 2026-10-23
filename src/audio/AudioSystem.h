@@ -35,6 +35,9 @@ enum class Sfx {
     RayderImpactoFuerte, RayderSilbido,
     RayderCargaPoder, RayderDisparoPoder, RayderImpactoPoder,
     RayderFuria, RayderEsquiva,
+    // Jingle de arranque del juego (docs/INTRO_ARRANQUE.md).
+    // TEMPORAL/placeholder: pendiente de reemplazar por musica definitiva.
+    IntroArranque,
     Count
 };
 

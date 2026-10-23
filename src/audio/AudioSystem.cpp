@@ -78,6 +78,9 @@ void AudioSystem::Init() {
         {Sfx::RayderImpactoPoder, "rayder/impacto_poder",  0.90f},
         {Sfx::RayderFuria,        "rayder/furia",          0.85f},
         {Sfx::RayderEsquiva,      "rayder/esquiva",        0.70f},
+        // Jingle de arranque: TEMPORAL/placeholder, pendiente de reemplazar
+        // por musica definitiva (docs/INTRO_ARRANQUE.md).
+        {Sfx::IntroArranque,      "intro_arranque",        0.9f},
     };
     for (const File& f : files) {
         std::vector<unsigned char> bytes;
