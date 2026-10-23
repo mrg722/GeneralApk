@@ -212,7 +212,7 @@ void Draw(Context context, const Player* player) {
         if (b.key == input::kVirtualSkillPage && (!player || player->SkillPageCount() <= 1)) continue;
         if (b.key == KEY_Q && context == Context::Warrior) {
             // Cambio de arma: solo con el guerrero; muestra el arma siguiente.
-            const int w = player ? player->skin - FirstBetaCharacter() : -1;
+            const int w = player && WeaponGroupStart(player->skin) >= 0 ? player->skin - WeaponGroupStart(player->skin) : -1;
             if (w < 0 || w > 3) continue;
             const bool held = input::Down(KEY_Q);
             DrawCircleV(b.center, b.radius + 4.0f, {10, 8, 6, 170});

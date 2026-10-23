@@ -200,6 +200,33 @@ int main(int argc, char** argv) {
         if (vs.RivalRef().hp >= rivalStart || !hurt || rivalWeapons == 0) ++problems;
         me.scriptedInput = nullptr;
     }
+    // 6) RONIN-KRATOS en el Modo VS: su propio grupo de 4 armas (Q recorre solo
+    // sus armas y vuelve a Espadas), contra el guerrero IA.
+    {
+        SetRandomSeed(11);
+        VSMode vs;
+        vs.Init();
+        const int first = WeaponGroupFirst(1);
+        vs.StartRivalForTest(FirstBetaCharacter(), first);
+        Player& me = vs.PlayerRef();
+        PlayerInput pin;
+        me.scriptedInput = &pin;
+        int weapons = 0, outside = 0;
+        for (int f = 0; f < 60 * 12; ++f) {
+            pin = PlayerInput{};
+            pin.punch = (f % 20) == 0;
+            input::ClearNext();
+            if (f % 150 == 75 && weapons < 4) { input::SetVirtual(KEY_Q, true); ++weapons; }
+            input::Commit();
+            vs.Update(1.0f / 60.0f);
+            if (WeaponGroupStart(me.skin) != first) ++outside;
+            if (f == 300) { BeginDrawing(); ClearBackground(BLACK); vs.Draw(); EndDrawing(); Shot("vs_ronin_kratos"); }
+        }
+        std::printf("VS ronin-kratos: arma final %s, cambios jugador %d, fuera del grupo %d\n",
+                    GetCharacterVisual(me.skin).name, weapons, outside);
+        if (outside || me.skin != first || weapons != 4) ++problems;
+        me.scriptedInput = nullptr;
+    }
     g.Shutdown();
     CloseWindow();
     std::printf("problemas: %d\n", problems);

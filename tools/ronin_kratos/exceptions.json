@@ -1,0 +1,122 @@
+{
+ "_doc": "Correcciones manuales a la clasificacion automatica (no se tocan en el codigo). piece_class: 'hoja:sx,sy,sw,sh' -> body|weapon|fx. frames: '<arma>:<cuadro>' -> ajustes del segmentado de ese cuadro (ver rk_build.py).",
+ "piece_class": {
+  "245:205,239,48,70": "body",
+  "381:244,379,18,132": "body",
+  "379:357,87,20,42": "body",
+  "379:355,178,20,38": "body"
+ },
+ "frames": {
+  "espadas:43": {
+   "head_at": {
+    "center": [
+     26,
+     21
+    ],
+    "angles": [
+     35,
+     25,
+     45
+    ]
+   }
+  },
+  "espadas:44": {
+   "head_at": {
+    "center": [
+     44,
+     19
+    ],
+    "angles": [
+     20,
+     10,
+     30
+    ]
+   }
+  },
+  "espadas:48": {
+   "head_at": {
+    "center": [
+     36,
+     21
+    ],
+    "angles": [
+     0,
+     -10,
+     10
+    ]
+   }
+  }
+ },
+ "head_templates": [
+  {
+   "weapon": "espadas",
+   "frame": 0,
+   "box": [
+    60,
+    12,
+    72,
+    31
+   ]
+  },
+  {
+   "weapon": "espadas",
+   "frame": 16,
+   "box": [
+    75,
+    13,
+    88,
+    30
+   ]
+  },
+  {
+   "weapon": "espadas",
+   "frame": 80,
+   "box": [
+    84,
+    13,
+    96,
+    31
+   ]
+  },
+  {
+   "weapon": "espadas",
+   "frame": 10,
+   "box": [
+    64,
+    14,
+    75,
+    32
+   ]
+  },
+  {
+   "weapon": "espadas",
+   "frame": 67,
+   "box": [
+    32,
+    14,
+    44,
+    33
+   ]
+  },
+  {
+   "weapon": "espadas",
+   "frame": 42,
+   "box": [
+    44,
+    13,
+    55,
+    32
+   ]
+  },
+  {
+   "weapon": "espadas",
+   "frame": 262,
+   "box": [
+    51,
+    15,
+    63,
+    34
+   ]
+  }
+ ]
+}

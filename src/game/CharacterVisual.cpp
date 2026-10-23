@@ -8,7 +8,7 @@ namespace {
 
 // name, folder, uniformCanvas, scale, targetHeight, footInset,
 // facesRightByDefault, maxHp, damageMultiplier, speedMultiplier
-const std::array<CharacterVisual, 38> kCharacters{{
+const std::array<CharacterVisual, 42> kCharacters{{
     {"RAYDEN (ORIGINAL)", nullptr,           false, 1.00f,   0.0f, 0.0f, true,  100, 1.00f, 1.00f},
     {"CLON ANTIGUO (CHAQUETA)", "rayder_clone",    false, 1.00f, 118.0f, 0.0f, true,  110, 1.05f, 1.05f},
     // Brakk jugable con la hoja mejorada (atlas brakk_v2); las poses sueltas siguen en assets/bosses/brakk.
@@ -63,6 +63,13 @@ const std::array<CharacterVisual, 38> kCharacters{{
     {"BRUTO DE LA BOLA ROJO", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 320, 1.00f, 1.00f, nullptr, 29, 1.0f, nullptr, -1, false, true},
     {"MEDUSA", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 200, 1.00f, 1.00f, nullptr, 30, 1.0f, nullptr, -1, false, true},
     {"MEDUSA ROJA", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 280, 1.00f, 1.00f, nullptr, 31, 1.0f, nullptr, -1, false, true},
+    // RONIN-KRATOS (experimento, pintado de rojo): Kratos completo (cuadros, clips, habilidades,
+    // tiempos, cajas y sonidos de sus 4 armas) con el cuerpo de RONIN pegado pieza por pieza
+    // (tools/ronin_kratos/). Grupo de 4 armas propio: en el VS ocupa un lugar y cambia de arma con Q.
+    {"RONIN-KRATOS (ESPADAS DEL CAOS)", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 150, 1.00f, 1.00f, nullptr, 33, 1.0f, nullptr, -1, false, true},
+    {"RONIN-KRATOS (CESTUS DE NEMEA)", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 150, 1.00f, 1.00f, nullptr, 34, 1.0f, nullptr, -1, false, true},
+    {"RONIN-KRATOS (CADENA DEL RAYO)", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 150, 1.00f, 1.00f, nullptr, 35, 1.0f, nullptr, -1, false, true},
+    {"RONIN-KRATOS (GARRAS DE HADES)", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 150, 1.00f, 1.00f, nullptr, 36, 1.0f, nullptr, -1, false, true},
 }};
 
 }  // namespace
@@ -79,6 +86,23 @@ int FirstBetaCharacter() {
     return n;
 }
 int StableCharacterCount() { return FirstBetaCharacter(); }
+
+// Grupos de 4 armas (mismo luchador, 4 entradas seguidas en el orden Espadas,
+// Cestus, Rayo, Garras): el guerrero (las 4 primeras BETA) y RONIN-KRATOS.
+int WeaponGroupCount() { return 2; }
+int WeaponGroupFirst(int g) {
+    if (g <= 0) return FirstBetaCharacter();
+    for (int n = FirstBetaCharacter(); n + 3 < CharacterCount(); ++n)
+        if (std::string(kCharacters[static_cast<std::size_t>(n)].name).rfind("RONIN-KRATOS (", 0) == 0) return n;
+    return FirstBetaCharacter();
+}
+int WeaponGroupStart(int id) {
+    for (int g = 0; g < WeaponGroupCount(); ++g) {
+        const int first = WeaponGroupFirst(g);
+        if (id >= first && id < first + 4) return first;
+    }
+    return -1;
+}
 
 int CharacterCount() { return static_cast<int>(kCharacters.size()); }
 

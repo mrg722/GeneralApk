@@ -54,6 +54,12 @@ int CharacterCount();
 int StableCharacterCount();
 // Primer personaje BETA (indice en la lista) y cuantos hay.
 int FirstBetaCharacter();
+// Luchadores con 4 armas (4 entradas seguidas: Espadas, Cestus, Rayo, Garras):
+// grupo 0 = el guerrero (Kratos), grupo 1 = RONIN-KRATOS. WeaponGroupStart
+// devuelve la primera entrada del grupo de `id`, o -1 si no tiene armas.
+int WeaponGroupCount();
+int WeaponGroupFirst(int group);
+int WeaponGroupStart(int id);
 // Personajes elegibles en la historia (Rayden y Rayder).
 constexpr int kStoryCharacters[] = {0, 6};
 const CharacterVisual& GetCharacterVisual(int id);

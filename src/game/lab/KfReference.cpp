@@ -312,6 +312,12 @@ constexpr KfRosterEntry kRoster[] = {
     // espadachin con habilidad de corte de energia. Ataques/patada aun
     // reusan la misma pose de golpe (falta arte propio por movimiento).
     {-1, "RONIN", true, 120, 1.0f, 0, "ronin"},
+    // RONIN-KRATOS: copia de las 4 armas de Kratos con el cuerpo de RONIN
+    // (tools/ronin_kratos/rk_build.py -> data/kratos/ronin_kratos_<arma>.txt).
+    {-1, "RONIN-KRATOS (ESPADAS DEL CAOS)", true, 150, 1.0f, 0, "ronin_kratos_espadas"},
+    {-1, "RONIN-KRATOS (CESTUS DE NEMEA)", true, 150, 1.0f, 0, "ronin_kratos_cesto"},
+    {-1, "RONIN-KRATOS (CADENA DEL RAYO)", true, 150, 1.0f, 0, "ronin_kratos_rayo"},
+    {-1, "RONIN-KRATOS (GARRAS DE HADES)", true, 150, 1.0f, 0, "ronin_kratos_garras"},
 };
 
 KfReference Load(const KfRosterEntry& who) {

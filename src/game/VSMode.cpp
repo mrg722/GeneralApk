@@ -39,16 +39,27 @@ const char* kStage5Scenarios[] = {"CAMARA DEL CLON // PASILLO", "SALA DE CONTROL
                                   "CAMARA DEL CLON // ARENA FINAL"};
 const char* kEnemyNames[] = {"PUNK",        "BRUTE",  "CHARGER",      "ENFORCER", "CHEMICAL SOLDIER",
                              "URBAN NINJA", "MUTANT", "ARMORED GUARD"};
-// Personajes del VS: los de siempre + el guerrero BETA (Espadas del Caos; las
-// otras 3 armas se eligen dentro de la pelea).
-int VsCount() { return StableCharacterCount() + 1; }
-int VsChar(int slot) { return slot < StableCharacterCount() ? slot : FirstBetaCharacter(); }
-int VsSlot(int ch) { return ch < StableCharacterCount() ? ch : StableCharacterCount(); }
-bool IsWarrior(int ch) { const int w = ch - FirstBetaCharacter(); return w >= 0 && w < 4; }
+// Personajes del VS: los de siempre + un lugar por cada luchador de 4 armas
+// (el guerrero BETA y RONIN-KRATOS; entran con Espadas del Caos y las otras 3
+// armas se eligen dentro de la pelea).
+int VsCount() { return StableCharacterCount() + WeaponGroupCount(); }
+int VsChar(int slot) {
+    if (slot < StableCharacterCount()) return slot;
+    return WeaponGroupFirst(std::min(slot - StableCharacterCount(), WeaponGroupCount() - 1));
+}
+int VsSlot(int ch) {
+    if (ch < StableCharacterCount()) return ch;
+    const int start = WeaponGroupStart(ch);
+    for (int g = 0; g < WeaponGroupCount(); ++g)
+        if (WeaponGroupFirst(g) == start) return StableCharacterCount() + g;
+    return StableCharacterCount();
+}
+bool IsWarrior(int ch) { return WeaponGroupStart(ch) >= 0; }
 // Cambia el arma del guerrero conservando vida, energia, furia, posicion y direccion.
 void SwitchWarriorWeapon(Player& p) {
     if (!IsWarrior(p.skin)) return;
-    const int next = FirstBetaCharacter() + (p.skin - FirstBetaCharacter() + 1) % 4;
+    const int first = WeaponGroupStart(p.skin);
+    const int next = first + (p.skin - first + 1) % 4;
     const float hpRatio = (float)p.hp / std::max(1, p.maxHp);
     const int sp = p.sp, rage = p.rage;
     const Vector3D pos = p.position;
@@ -422,7 +433,7 @@ void VSMode::DrawSelection() const {
     DrawText(TextFormat("%d ENEMIGO%s", enemyCount, enemyCount == 1 ? "" : "S"), 600, y[2], 14,
              selectedBoss >= 0 ? Color{85, 95, 100, 130} : Color{190, 220, 230, 255});
     // Numero de personaje: deja claro que hay mas (KF incluidos) con < y >.
-    DrawText(TextFormat("%s   %d/%d", IsWarrior(selectedCharacter) ? "GUERRERO (4 ARMAS, Q CAMBIA)" : GetCharacterVisual(selectedCharacter).name, VsSlot(selectedCharacter) + 1, VsCount()),
+    DrawText(TextFormat("%s   %d/%d", IsWarrior(selectedCharacter) ? (WeaponGroupStart(selectedCharacter) == FirstBetaCharacter() ? "GUERRERO (4 ARMAS, Q CAMBIA)" : "RONIN-KRATOS (4 ARMAS, Q CAMBIA)") : GetCharacterVisual(selectedCharacter).name, VsSlot(selectedCharacter) + 1, VsCount()),
              600, y[3], 14, selectedCharacter == 1 ? Color{255, 160, 170, 255} : Color{190, 220, 230, 255});
     DrawText(kBossNames[selectedBoss + 1], 600, y[4], 14,
              selectedBoss >= 0 ? Color{255, 150, 150, 255} : Color{190, 220, 230, 255});
@@ -443,7 +454,7 @@ void VSMode::DrawSelection() const {
     if (rivalCharacter_ < 0)
         DrawText("NO (PELEA CONTRA ENEMIGOS)", 600, y[10], 14, {190, 220, 230, 255});
     else
-        DrawText(TextFormat("%s   %d/%d", IsWarrior(rivalCharacter_) ? "GUERRERO (CAMBIA DE ARMA)" : GetCharacterVisual(rivalCharacter_).name, VsSlot(rivalCharacter_) + 1, VsCount()),
+        DrawText(TextFormat("%s   %d/%d", IsWarrior(rivalCharacter_) ? (WeaponGroupStart(rivalCharacter_) == FirstBetaCharacter() ? "GUERRERO (CAMBIA DE ARMA)" : "RONIN-KRATOS (CAMBIA DE ARMA)") : GetCharacterVisual(rivalCharacter_).name, VsSlot(rivalCharacter_) + 1, VsCount()),
                  600, y[10], 14, {255, 200, 90, 255});
     if (selectedBoss >= 0)
         DrawText("BOSS ACTIVO: los campos de enemigos y el rival se ignoran (1 vs 1).", 335, 529, 12,
