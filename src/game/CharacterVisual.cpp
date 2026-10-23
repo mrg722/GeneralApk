@@ -64,10 +64,10 @@ const std::array<CharacterVisual, 42> kCharacters{{
     // RONIN-KRATOS (experimento, pintado de rojo): Kratos completo (cuadros, clips, habilidades,
     // tiempos, cajas y sonidos de sus 4 armas) con el cuerpo de RONIN pegado pieza por pieza
     // (tools/ronin_kratos/). Grupo de 4 armas propio: en el VS ocupa un lugar y cambia de arma con Q.
-    {"RONIN-KRATOS (ESPADAS DEL CAOS)", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 150, 1.00f, 1.00f, nullptr, 33, 1.0f, nullptr, -1, false, true},
-    {"RONIN-KRATOS (CESTUS DE NEMEA)", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 150, 1.00f, 1.00f, nullptr, 34, 1.0f, nullptr, -1, false, true},
-    {"RONIN-KRATOS (CADENA DEL RAYO)", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 150, 1.00f, 1.00f, nullptr, 35, 1.0f, nullptr, -1, false, true},
-    {"RONIN-KRATOS (GARRAS DE HADES)", nullptr, false, 1.0417f, 0.0f, 0.0f, true, 150, 1.00f, 1.00f, nullptr, 36, 1.0f, nullptr, -1, false, true},
+    {"RONIN-KRATOS (ESPADAS DEL CAOS)", nullptr, false, 0.96f, 0.0f, 0.0f, true, 150, 1.00f, 1.00f, nullptr, 33, 1.0f, nullptr, -1, false, true},
+    {"RONIN-KRATOS (CESTUS DE NEMEA)", nullptr, false, 0.96f, 0.0f, 0.0f, true, 150, 1.00f, 1.00f, nullptr, 34, 1.0f, nullptr, -1, false, true},
+    {"RONIN-KRATOS (CADENA DEL RAYO)", nullptr, false, 0.96f, 0.0f, 0.0f, true, 150, 1.00f, 1.00f, nullptr, 35, 1.0f, nullptr, -1, false, true},
+    {"RONIN-KRATOS (GARRAS DE HADES)", nullptr, false, 0.96f, 0.0f, 0.0f, true, 150, 1.00f, 1.00f, nullptr, 36, 1.0f, nullptr, -1, false, true},
 }};
 
 }  // namespace
