@@ -45,6 +45,42 @@
      10
     ]
    }
+  },
+  "espadas:92": {
+   "head_at": {
+    "center": [
+     61,
+     21
+    ],
+    "radius": 4
+   }
+  },
+  "espadas:243": {
+   "head_at": {
+    "center": [
+     46,
+     39
+    ],
+    "radius": 4
+   }
+  },
+  "espadas:114": {
+   "head_at": {
+    "center": [
+     46,
+     18
+    ],
+    "radius": 4
+   }
+  },
+  "espadas:89": {
+   "head_at": {
+    "center": [
+     78,
+     26
+    ],
+    "radius": 4
+   }
   }
  },
  "head_templates": [
@@ -117,6 +153,42 @@
     63,
     34
    ]
+  },
+  {
+   "weapon": "espadas",
+   "frame": 98,
+   "box": [
+    34,
+    11,
+    46,
+    24
+   ],
+   "_nota": "nuca (de espaldas)",
+   "cost": 1.0
+  },
+  {
+   "weapon": "espadas",
+   "frame": 200,
+   "box": [
+    61,
+    29,
+    74,
+    44
+   ],
+   "_nota": "nuca iluminada",
+   "cost": 1.0
+  },
+  {
+   "weapon": "espadas",
+   "frame": 192,
+   "box": [
+    33,
+    11,
+    46,
+    26
+   ],
+   "_nota": "cabeza envuelta en fuego",
+   "cost": 0.5
   }
  ]
 }
