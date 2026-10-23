@@ -162,6 +162,11 @@ def segment(can, fexc=None, tpls=None):
     U = max(upper or comps, key=lambda c: c[1])[0] if comps else 0
     Um = lab == U
     u_w = float(np.percentile(u[Um], 98.5)) if Um.any() else 0.45
+    if u_w > 0.5:
+        # la piel del torso se junto con la de un muslo (mano apoyada): cintura
+        # = la cintura tipica de Kratos de pie (ajustable por cuadro en exceptions.json)
+        u_w = 0.40
+        Um = Um & (u <= u_w + 0.02)
     u_w = fexc.get("waist", u_w)
     tp = xx * -down[1] + yy * down[0]          # coordenada perpendicular al eje
     torso_cols = Um & (u > u_w - 0.12) & (u <= u_w)
