@@ -462,6 +462,15 @@ void Player::TakeDamage(int damage) {
         return;
     }
 
+    // Habilidad/especial en curso: el golpe enemigo quita vida pero no la
+    // cancela (ni la derriba); la animacion sigue hasta su final.
+    if (state == PlayerState::Attack &&
+        (activeSkill >= 0 || currentAttack == AttackId::Skill || currentAttack == AttackId::EnergyWave ||
+         currentAttack == AttackId::RageAttack || currentAttack == AttackId::Finisher)) {
+        AudioSystem::Get().Play(Sfx::Hit);
+        return;
+    }
+
     // Golpes fuertes derriban: knockdown real en vez de un unico estado Hit.
     if (damage >= 28) {
         knockdownTimer = 0.85f;
