@@ -95,6 +95,15 @@ void Player::UpdateMotionFeel(float dt) {
             AudioSystem::Get().Play(activeSkill >= 0 ? Sfx::RayderImpactoPoder
                                     : heavyHit ? Sfx::RayderImpactoFuerte
                                     : attackPhase == AttackPhase::Kick ? kPatadas[variante] : kGolpes[variante]);
+        } else if (IsRonin()) {
+            // Ronin: punetazos propios rotando por combo, 2 patadas (normal y la
+            // voladora del remate) y el tajo de espada en los golpes de habilidad
+            // (docs/SONIDO_RAYDER.md describe el mismo patron, aplicado aqui a Ronin).
+            static const Sfx kGolpes[3] = {Sfx::RoninGolpe1, Sfx::RoninGolpe2, Sfx::RoninGolpe3};
+            const int variante = ((comboStep % 3) + 3) % 3;
+            AudioSystem::Get().Play(activeSkill >= 0 ? Sfx::RoninEspadaImpacto
+                                    : heavyHit ? (attackPhase == AttackPhase::Kick ? Sfx::RoninPatada2 : Sfx::RoninImpactoFuerte)
+                                    : attackPhase == AttackPhase::Kick ? Sfx::RoninPatada1 : kGolpes[variante]);
         } else {
             AudioSystem::Get().Play(activeSkill >= 0 ? Sfx::EnergyImpact : heavyHit ? Sfx::HeavyHit
                                     : attackPhase == AttackPhase::Kick ? Sfx::Kick : Sfx::Punch);

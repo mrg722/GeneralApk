@@ -78,6 +78,19 @@ void AudioSystem::Init() {
         {Sfx::RayderImpactoPoder, "rayder/impacto_poder",  0.90f},
         {Sfx::RayderFuria,        "rayder/furia",          0.85f},
         {Sfx::RayderEsquiva,      "rayder/esquiva",        0.70f},
+        // Ronin: igual que Rayder, sin sonido sintetizado previo; si el WAV
+        // no esta, el hueco queda vacio y Play() simplemente no suena.
+        {Sfx::RoninGolpe1,          "ronin/golpe_1",           0.85f},
+        {Sfx::RoninGolpe2,          "ronin/golpe_2",           0.85f},
+        {Sfx::RoninGolpe3,          "ronin/golpe_3",           0.85f},
+        {Sfx::RoninPatada1,         "ronin/patada_1",          0.88f},
+        {Sfx::RoninPatada2,         "ronin/patada_2",          0.90f},
+        {Sfx::RoninImpactoFuerte,   "ronin/impacto_fuerte",    0.95f},
+        {Sfx::RoninEspadaDesenvaine,"ronin/espada_desenvaine", 0.75f},
+        {Sfx::RoninEspadaTajo,      "ronin/espada_tajo",       0.80f},
+        {Sfx::RoninEspadaImpacto,   "ronin/espada_impacto",    0.90f},
+        {Sfx::RoninSalto,           "ronin/salto",             0.55f},
+        {Sfx::RoninAterrizaje,      "ronin/aterrizaje",        0.65f},
         // Jingle de arranque: TEMPORAL/placeholder, pendiente de reemplazar
         // por musica definitiva (docs/INTRO_ARRANQUE.md).
         {Sfx::IntroArranque,      "intro_arranque",        0.9f},

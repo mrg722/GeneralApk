@@ -13,6 +13,11 @@ bool Player::IsRayder() const {
     return name && std::string(name) == "RAYDER";
 }
 
+bool Player::IsRonin() const {
+    const char* name = GetCharacterVisual(skin).name;
+    return name && std::string(name) == "RONIN";
+}
+
 float Player::ClipSeconds(const char* clip) const { return animator.ClipSeconds(clip); }
 
 namespace {
@@ -185,6 +190,16 @@ void Player::BeginAttack(AttackId id) {
             default:                   AudioSystem::Get().Play(Sfx::RayderSilbido); break;
         }
         return;
+    } else if (IsRonin()) {
+        // Al lanzar: desenvainar para la onda/especial, tajo de energia para
+        // el super y el remate (docs pendientes, mismo patron que Rayder).
+        switch (id) {
+            case AttackId::EnergyWave: AudioSystem::Get().Play(Sfx::RoninEspadaDesenvaine); break;
+            case AttackId::RageAttack: AudioSystem::Get().Play(Sfx::RoninEspadaTajo); break;
+            case AttackId::Finisher:   AudioSystem::Get().Play(Sfx::RoninEspadaTajo); break;
+            default:                   AudioSystem::Get().Play(Sfx::Whoosh); break;
+        }
+        return;
     }
     switch (id) {
         case AttackId::EnergyWave: AudioSystem::Get().Play(Sfx::EnergyCharge); break;
@@ -240,6 +255,9 @@ void Player::HandleInput(float dt) {
         dashInvulnerability = 0.20f;
         dashCooldown = 0.38f * upgrades.dashCooldownScale;
         SetState(PlayerState::Dash);
+        // Ronin no tiene un sonido de esquiva propio en este paquete (su lista de
+        // encargo trae golpes/patadas/espada/salto/aterrizaje, no un dash dedicado);
+        // usa el Dash generico, igual que el resto del roster sin sonido propio.
         AudioSystem::Get().Play(IsRayder() ? Sfx::RayderEsquiva : Sfx::Dash);
         return;
     }

@@ -35,6 +35,13 @@ enum class Sfx {
     RayderImpactoFuerte, RayderSilbido,
     RayderCargaPoder, RayderDisparoPoder, RayderImpactoPoder,
     RayderFuria, RayderEsquiva,
+    // Ronin: punetazos, patadas y habilidad de espada propios (artista
+    // marcial a manos limpias + un tajo de espada), mismo patron que Rayder.
+    RoninGolpe1, RoninGolpe2, RoninGolpe3,
+    RoninPatada1, RoninPatada2,
+    RoninImpactoFuerte,
+    RoninEspadaDesenvaine, RoninEspadaTajo, RoninEspadaImpacto,
+    RoninSalto, RoninAterrizaje,
     // Jingle de arranque del juego (docs/INTRO_ARRANQUE.md).
     // TEMPORAL/placeholder: pendiente de reemplazar por musica definitiva.
     IntroArranque,

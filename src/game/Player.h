@@ -127,6 +127,8 @@ public:
     bool IsKfCharacter() const;
     // Rayder (el atlas rayder_kf, no sus clones): usa su propio set de golpes/poderes.
     bool IsRayder() const;
+    // Ronin (artista marcial con habilidad de espada): su propio set de golpes/espada.
+    bool IsRonin() const;
     // Intenta lanzar la habilidad i ahora; false si esta en espera o no puede actuar.
     bool TryStartSkill(int i);
     // Escala de dibujo del sprite (la usa tambien la caja de golpe de las habilidades).
