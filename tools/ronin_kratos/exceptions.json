@@ -21,6 +21,7 @@
    }
   },
   "espadas:44": {
+   "foot_min": 0.26,
    "head_at": {
     "center": [
      44,
@@ -164,7 +165,8 @@
     24
    ],
    "_nota": "nuca (de espaldas)",
-   "cost": 1.0
+   "cost": 1.0,
+   "back": true
   },
   {
    "weapon": "espadas",
@@ -176,7 +178,8 @@
     44
    ],
    "_nota": "nuca iluminada",
-   "cost": 1.0
+   "cost": 1.0,
+   "back": true
   },
   {
    "weapon": "espadas",

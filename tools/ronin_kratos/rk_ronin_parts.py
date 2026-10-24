@@ -126,6 +126,28 @@ def extract_head(px):
     return head[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
 
 
+def extract_back(head_side):
+    """Pelo trasero (sin cara): la mitad del perfil (turnaround) ANTES de que
+    empiece la piel de la cara, para las vistas de espaldas (antes se pegaba
+    la cara de frente aunque el personaje mirara para el otro lado)."""
+    px = head_side
+    m = mats(px)
+    a = px[..., 3] > 40
+    skin = m["skin"]
+    ys, xs = np.nonzero(skin)
+    cut = max(10, int(xs.min()) - 6) if len(xs) else px.shape[1] // 2
+    keep = a.copy()
+    keep[:, cut:] = False
+    lab, n = ndimage.label(keep)
+    if n > 1:
+        big = int(np.argmax(ndimage.sum(np.ones_like(lab), lab, range(1, n + 1)))) + 1
+        keep = lab == big
+    out = px.copy()
+    out[~keep] = 0
+    ys, xs = np.nonzero(keep)
+    return out[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+
+
 def face_box(head):
     m = mats(head)
     sk = m["skin"]
@@ -152,6 +174,7 @@ def build():
         heads[f] = extract_head(parts[f])
     side = parts["head_side"][:, ::-1].copy()          # turnaround mira a la izquierda -> derecha
     heads["side"] = side
+    heads["back"] = extract_back(side)
     return R, heads
 
 

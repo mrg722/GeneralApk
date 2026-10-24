@@ -37,7 +37,7 @@ def templates(compose_fn, exc):
         can = compose_fn(t["weapon"], t["frame"])
         x0, y0, x1, y1 = t["box"]
         crop = can[y0:y1 + 1, x0:x1 + 1].copy()
-        out.append(dict(img=crop, name=f"{t['weapon']}:{t['frame']}", facing_left=bool(t.get("facing_left", False)), cost=float(t.get("cost", 0.0))))
+        out.append(dict(img=crop, name=f"{t['weapon']}:{t['frame']}", facing_left=bool(t.get("facing_left", False)), cost=float(t.get("cost", 0.0)), back=bool(t.get("back", False))))
     _cache[key] = out
     return out
 
@@ -187,5 +187,6 @@ def _search(I, I2, A, u, umax, force, vars_, tpls, per_variant=1, ring_max=None,
             out.append(dict(score=float(sc), cx=float(xs.mean()) + ox, cy=float(ys.mean()) + oy,
                             w=float(tpls[v["t"]]["img"].shape[1] * v["sc"]), h=float(tpls[v["t"]]["img"].shape[0] * v["sc"]),
                             ang=float(v["ang"]), facing_left=v["mirror"], mpos=(int(y), int(x), mb), tpl=v["t"], sc=v["sc"],
-                            rc=float(rc[y, x]), u=float(uc[y, x]), gray=gray, tcost=tpls[v["t"]].get("cost", 0.0)))
+                            rc=float(rc[y, x]), u=float(uc[y, x]), gray=gray, tcost=tpls[v["t"]].get("cost", 0.0),
+                            back=bool(tpls[v["t"]].get("back", False))))
     return out
