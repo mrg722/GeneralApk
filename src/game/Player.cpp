@@ -41,6 +41,7 @@ void Player::Reset() {
     speedBuffTimer = 0;
     hitstunTimer = 0;
     knockdownTimer = 0;
+    abilityHitFlashTimer = 0;
 
     for (int i = 0; i < static_cast<int>(AttackId::Count); ++i) attackCooldowns[i] = 0.0f;
 
@@ -278,6 +279,7 @@ void Player::Update(float dt) {
     EnsurePlayerAnimator(animator, skin); UpdateTransformForm(); if(IsKeyPressed(KEY_F9)) animationDebug=!animationDebug; /* F9: F1-F5 cambian de stage */ animator.Update(dt); UpdateMotionFeel(dt);
 
     dashInvulnerability = std::max(0.0f, dashInvulnerability - dt);
+    abilityHitFlashTimer = std::max(0.0f, abilityHitFlashTimer - dt);
     dashCooldown = std::max(0.0f, dashCooldown - dt);
     damageBuffTimer = std::max(0.0f, damageBuffTimer - dt);
     speedBuffTimer = std::max(0.0f, speedBuffTimer - dt);
@@ -463,10 +465,18 @@ void Player::TakeDamage(int damage) {
     }
 
     // Habilidad/especial en curso: el golpe enemigo quita vida pero no la
-    // cancela (ni la derriba); la animacion sigue hasta su final.
+    // cancela (ni la derriba); la animacion sigue hasta su final. Aun asi
+    // debe notarse: tinte rojo breve y un empujon pequeno (no un knockback
+    // real, para no sacar al personaje de su propia animacion de ataque).
     if (state == PlayerState::Attack &&
         (activeSkill >= 0 || currentAttack == AttackId::Skill || currentAttack == AttackId::EnergyWave ||
          currentAttack == AttackId::RageAttack || currentAttack == AttackId::Finisher)) {
+        // Nota: en Attack la posicion la mueve el root motion del golpe, no
+        // velocity.x (el estado Attack no lo integra), por eso el retroceso
+        // se aplica aqui como un desplazamiento directo y pequeno.
+        abilityHitFlashTimer = 0.16f;
+        position.x += facing == Facing::Right ? -10.f : 10.f;
+        position.x = std::clamp(position.x, kStageStartX, kStageEndX - 90.f);
         AudioSystem::Get().Play(Sfx::Hit);
         return;
     }

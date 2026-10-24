@@ -227,6 +227,41 @@ int main(int argc, char** argv) {
         if (outside || me.skin != first || weapons != 4) ++problems;
         me.scriptedInput = nullptr;
     }
+    // 7) RONIN (personaje suelto, no el grupo de armas) como rival IA: debe
+    // cargar, atacar y poder recibir dano igual que cualquier otro rival.
+    {
+        int roninIdx = -1;
+        for (int i = 0; i < CharacterCount(); ++i)
+            if (std::string(GetCharacterVisual(i).name) == "RONIN") { roninIdx = i; break; }
+        if (roninIdx < 0) { std::printf("VS ronin: personaje RONIN no encontrado\n"); ++problems; }
+        else {
+            SetRandomSeed(12);
+            VSMode vs;
+            vs.Init();
+            vs.StartRivalForTest(roninIdx, FirstBetaCharacter());
+            Player& me = vs.PlayerRef();
+            PlayerInput pin;
+            me.scriptedInput = &pin;
+            const int rivalStart = vs.RivalRef().hp;
+            bool hurt = false;
+            for (int f = 0; f < 60 * 12; ++f) {
+                pin = PlayerInput{};
+                const float dx = vs.RivalRef().position.x - me.position.x;
+                pin.moveX = std::fabs(dx) > 120 ? (dx > 0 ? 1.0f : -1.0f) : 0.0f;
+                pin.punch = (f % 16) == 0;
+                input::ClearNext();
+                input::Commit();
+                vs.Update(1.0f / 60.0f);
+                if (me.hp < me.maxHp) hurt = true;
+                if (f == 300) { BeginDrawing(); ClearBackground(BLACK); vs.Draw(); EndDrawing(); Shot("vs_ronin_rival"); }
+            }
+            std::printf("VS ronin: rival %s, textura %s, rival %d->%d, jugador herido %s\n",
+                        GetCharacterVisual(vs.RivalRef().skin).name, vs.RivalRef().animator.texture.id != 0 ? "ok" : "FALTA",
+                        rivalStart, vs.RivalRef().hp, hurt ? "si" : "no");
+            if (vs.RivalRef().animator.texture.id == 0 || vs.RivalRef().hp >= rivalStart || !hurt) ++problems;
+            me.scriptedInput = nullptr;
+        }
+    }
     g.Shutdown();
     CloseWindow();
     std::printf("problemas: %d\n", problems);

@@ -92,6 +92,10 @@ public:
     // DF-013: hitstun / knockdown reales.
     float hitstunTimer;
     float knockdownTimer;
+    // Impacto leve al recibir un golpe mientras una habilidad esta en curso:
+    // no cancela la habilidad (ver TakeDamage), pero se nota (tinte rojo
+    // breve + empujon pequeno) en vez de no reaccionar nada.
+    float abilityHitFlashTimer;
 
     float attackCooldowns[static_cast<int>(AttackId::Count)];
 

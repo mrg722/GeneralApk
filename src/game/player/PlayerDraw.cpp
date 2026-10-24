@@ -227,6 +227,9 @@ void Player::Draw() const {
     else if (state == PlayerState::Block) spriteTint = {175, 220, 255, 255};
     else if (isRageMode) spriteTint = {255, 214, 188, 255};
     else if (damageBuffTimer > 0.0f) spriteTint = {255, 226, 190, 255};
+    // Impacto leve al recibir un golpe durante una habilidad: la habilidad
+    // sigue (no cambia de estado), pero igual se nota el golpe.
+    if (abilityHitFlashTimer > 0.0f) spriteTint = {255, 150, 150, 255};
     if (IsTransformed() && state != PlayerState::Hit) spriteTint = {255, 238, 170, 255};
 
     // DF-013.2: personajes adicionales (clon y bosses jugables en VS). El
