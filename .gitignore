@@ -15,6 +15,9 @@
 /.tooling/
 /.raylib-src/
 
+# hojas de verificacion / comparacion generadas por tools/ (no se comitean)
+/tools/rayder/out/
+
 # IDEs and editors
 /.vs/
 /.vscode/

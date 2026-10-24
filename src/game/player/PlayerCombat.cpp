@@ -9,8 +9,11 @@ bool Player::IsKfCharacter() const {
 }
 
 bool Player::IsRayder() const {
+    // Skin 6: se mostraba como "RAYDER", ahora renombrado a "MAX" para no
+    // confundirlo con Rayden Cruz (skin 0, rayden_128.png, otro personaje).
+    // El nombre de la funcion se deja igual (es el mismo atlas/moveset).
     const char* name = GetCharacterVisual(skin).name;
-    return name && std::string(name) == "RAYDER";
+    return name && std::string(name) == "MAX";
 }
 
 bool Player::IsRonin() const {

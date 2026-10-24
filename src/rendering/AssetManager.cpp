@@ -168,7 +168,7 @@ Texture2D AssetManager::GetTextureByPath(const std::string& relativePath){
     if(it!=textures.end())return it->second;
     // Arte en alta resolucion (hojas del usuario, efectos, botones, fondos): filtro
     // suave para que se vea limpio al escalar. El pixel art pequeno queda nitido.
-    const bool hiRes=relativePath.find("rayder_kf")!=std::string::npos||relativePath.find("clon_beta")!=std::string::npos||relativePath.find("brakk_v2")!=std::string::npos||
+    const bool hiRes=relativePath.find("characters/max/")!=std::string::npos||relativePath.find("clon_beta")!=std::string::npos||relativePath.find("brakk_v2")!=std::string::npos||
         relativePath.find("rayder_espalda")!=std::string::npos||relativePath.find("assets/fx/")!=std::string::npos||
         relativePath.find("assets/ui/")!=std::string::npos||relativePath.find("backgrounds/")!=std::string::npos||
         relativePath.find("assets/kratos/")!=std::string::npos||relativePath.find("GowApk/assets/")!=std::string::npos;
