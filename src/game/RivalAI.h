@@ -1,5 +1,6 @@
 #pragma once
 #include "game/Player.h"
+#include "game/RivalAIProfile.h"
 
 namespace district_fury {
 

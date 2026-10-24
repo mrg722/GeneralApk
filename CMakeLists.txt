@@ -47,6 +47,7 @@ add_library(district_fury_core
     src/game/combat/Boss.cpp
     src/game/combat/RayderCloneVisual.cpp
     src/game/RivalAI.cpp
+    src/game/RivalAIProfile.cpp
     src/game/beta/BetaCharacter.cpp
     src/game/combat/BossDefinition.cpp
     src/game/combat/CombatWorld.cpp
