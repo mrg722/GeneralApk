@@ -16,7 +16,7 @@ from scipy import ndimage
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "assets/characters/rayder/source/rayder_movimientos_kf_negro.jpg"
-OUT = ROOT / "assets/characters/rayder/rayder_kf_atlas.png"
+OUT = ROOT / "assets/characters/max/max_atlas.png"  # renombrado de "RAYDER" a "MAX"
 CW, CH = 270, 175          # celda
 PIVOT = (135, 168)         # pies
 SCALE = 1.0                # resolucion original de la hoja (el juego escala al dibujar)
