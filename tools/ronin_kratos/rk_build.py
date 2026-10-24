@@ -53,6 +53,7 @@ import rk_head  # noqa: E402
 PAD = 12
 HEAD_K = 1.0           # ancho de la cara de RONIN / ancho de la cabeza de Kratos (antes 1.30: cabezon)
 HEAD_OFF = (0.04, 0.16)  # centro de la cara de RONIN respecto del centro de la calva (anchos/altos), girado con ella
+HEAD_OFF_BACK = (0.0, 0.02)  # nuca: sin caida de barbilla, centrada sobre la calva
 HEAD_POS_TOL = 0.6     # suavizado de la cabeza: maximo corrimiento respecto del cuello de Kratos (px)
 HEAD_ANG_TOL = 8.0     # y del giro (grados)
 KRATOS_HEAD_W = 12.0   # ancho de la calva de Kratos (mediana de las plantillas; se recalcula en build)
@@ -358,8 +359,12 @@ def segment(can, fexc=None, tpls=None, cands=False):
     if (D > 0).any():
         Dz = np.where(D >= 0, D, 0)
         Dm = ndimage.maximum_filter(Dz, size=int(0.3 * Hb) | 1)
-        # el pie es el extremo LEJANO de la pierna (la punta de la falda, a ~0.25, no)
-        foot = lower & (D >= 0) & (D >= Dm - flen) & (Dm >= FOOT_MIN * Hb) & (D >= (FOOT_MIN - 0.07) * Hb)
+        # el pie es el extremo LEJANO de la pierna (la punta de la falda, a ~0.25, no);
+        # en una pierna muy doblada/escorzada (patada, golpe recibido) el camino
+        # geodesico hasta el tobillo es corto aunque SI sea el pie: se puede bajar
+        # el umbral por cuadro (exceptions.json "foot_min")
+        foot_min = fexc.get("foot_min", FOOT_MIN)
+        foot = lower & (D >= 0) & (D >= Dm - flen) & (Dm >= foot_min * Hb) & (D >= (foot_min - 0.07) * Hb)
         # sin rayas: el pie es una sola mancha (empeine + dedos)
         foot = ndimage.binary_closing(foot, iterations=2) & lower
     if fexc.get("no_feet"):
@@ -575,10 +580,19 @@ def head_source(heads, which):
     """Cabeza fuente de RONIN (alta resolucion), premultiplicada, y su centro de cara."""
     if which not in _head_cache:
         hd = heads[which]
-        (fx0, fy0, fx1, fy1), (fcx, fcy) = rk_ronin_parts.face_box(hd)
+        if which == "back":
+            # sin cara (pelo solo): el "ancho de cara" equivalente es el ancho
+            # del bulto de pelo y el centro es su centroide (no hay piel que ubicar)
+            am = hd[..., 3] > 40
+            ys, xs = np.nonzero(am)
+            fcx, fcy = float(xs.mean()), float(ys.mean())
+            fw = float(xs.max() - xs.min() + 1)
+        else:
+            (fx0, fy0, fx1, fy1), (fcx, fcy) = rk_ronin_parts.face_box(hd)
+            fw = fx1 - fx0 + 1
         a = hd[..., 3:4].astype(np.float32) / 255
         pm = np.dstack([hd[..., :3].astype(np.float32) * a, a[..., 0]])
-        _head_cache[which] = (pm, (fcx, fcy), fx1 - fx0 + 1)
+        _head_cache[which] = (pm, (fcx, fcy), fw)
     return _head_cache[which]
 
 
@@ -651,7 +665,7 @@ def analyze(cf, fi, body_keys, exc, wname, tpls):
     for c in info["head_cands"]:
         c["ox"], c["oy"] = c["cx"] + off[0], c["cy"] + off[1]      # en coordenadas del origen
     return dict(can=can, placed=placed, labels=labels, info=info, off=off, fexc=fexc, head=None,
-                which=fexc.get("head", "r4_c2"), key=f"{wname}:{fi}")
+                which=fexc.get("head"), key=f"{wname}:{fi}")
 
 
 def set_head(a, cand, tpls):
@@ -670,6 +684,10 @@ def set_head(a, cand, tpls):
     a["labels"][mask & np.isin(a["labels"], [SHIRT, HAND, SASH])] = HEAD
     fl = bool(a["fexc"]["facing_left"]) if "facing_left" in a["fexc"] else c["facing_left"]
     a["head"] = dict(x=c["cx"] + a["off"][0], y=c["cy"] + a["off"][1], ang=c["ang"], w=c["w"], h=c["h"], facing_left=fl)
+    if a.get("which") is None:
+        # sin override manual: nuca de Kratos (de espaldas) -> pelo trasero de RONIN,
+        # cualquier otra plantilla -> cara de frente (evita que se vea la cara al reves)
+        a["which"] = "back" if c.get("back") else "r4_c2"
 
 
 def _unary(c, best):
@@ -892,7 +910,8 @@ def render_frame(a, R, heads, shirt, ranges, head):
     if head is not None:
         k = head["k"]
         t = math.radians(head["ang"])
-        ox, oy = HEAD_OFF[0] * head["w"] * (-1 if head["facing_left"] else 1), HEAD_OFF[1] * head["h"]
+        hoff = HEAD_OFF_BACK if a["which"] == "back" else HEAD_OFF
+        ox, oy = hoff[0] * head["w"] * (-1 if head["facing_left"] else 1), hoff[1] * head["h"]
         tx = head["x"] - a["off"][0] + ox * math.cos(t) + oy * math.sin(t)
         ty = head["y"] - a["off"][1] - ox * math.sin(t) + oy * math.cos(t)
         spr = render_head(heads, a["which"], k, head["ang"], head["facing_left"], tx, ty)
