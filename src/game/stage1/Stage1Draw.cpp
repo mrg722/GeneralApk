@@ -299,30 +299,8 @@ void Stage1StoryGame::DrawControls() const {
 }
 
 void Stage1StoryGame::DrawOptions() const {
-    DrawRectangle(0, 0, 1280, 720, {4, 7, 11, 255});
-    Texture2D art = AssetManager::Get().GetTexture("menu_main_art");
-    if (art.id)
-        DrawTexturePro(art, {0, 0, (float)art.width, (float)art.height}, {0, 0, 1280, 720}, {0, 0}, 0,
-                       {255, 255, 255, 60});
-    DrawRectangle(0, 0, 1280, 720, {3, 7, 12, 190});
-    DrawText("OPCIONES", 520, 110, 48, WHITE);
-    const bool muted = AudioSystem::Get().IsMuted();
-    const Color hi{255, 214, 72, 255}, lo{200, 220, 230, 255};
-    if (optionsCursor == 0) DrawRectangle(430, 258, 520, 48, {30, 50, 70, 200});
-    DrawText("SONIDO", 470, 270, 26, optionsCursor == 0 ? hi : lo);
-    DrawText(muted ? "DESACTIVADO" : "ACTIVADO", 700, 270, 26,
-             muted ? Color{255, 110, 100, 255} : Color{110, 240, 160, 255});
-    if (optionsCursor == 1) DrawRectangle(430, 318, 520, 48, {30, 50, 70, 200});
-    DrawText("ANCHO DE PANTALLA", 470, 330, 26, optionsCursor == 1 ? hi : lo);
-    DrawText(TextFormat("< %d%% >", display::WidthPercent()), 790, 330, 26, {110, 240, 160, 255});
-    const bool t = touch::Enabled();
-    DrawText(t ? "CRUCETA ARRIBA/ABAJO: ELEGIR   IZQ/DER: CAMBIAR   OK: ALTERNAR"
-               : "W/S ELEGIR   A/D CAMBIAR   ENTER/J ALTERNAR",
-             t ? 330 : 420, 395, 18, {150, 190, 200, 230});
-    DrawText("ANCHO: si tu celular es muy alargado y todo se ve ancho, bajalo (solo cambia lo horizontal).",
-             200, 430, 16, {150, 175, 185, 220});
-    DrawText(TextFormat("DIFICULTAD ACTUAL: %s", DifficultyText()), 440, 470, 18, {150, 190, 200, 230});
-    DrawText(t ? "ATRAS - VOLVER" : "ESC - VOLVER", 540, 520, 20, {180, 195, 200, 220});
+    ui::DrawOptionsMenu(AssetManager::Get().GetTexture("menu_main_art"), optionsCursor, DifficultyText(),
+                        touch::Enabled());
 }
 
 void Stage1StoryGame::DrawCredits() const {

@@ -257,18 +257,7 @@ void Stage1StoryGame::Update(float dt) {
         return;
     }
     if (flow == StoryFlow::Options) {
-        if (input::Pressed(KEY_UP) || input::Pressed(KEY_W)) optionsCursor = (optionsCursor + 1) % 2;
-        if (input::Pressed(KEY_DOWN) || input::Pressed(KEY_S)) optionsCursor = (optionsCursor + 1) % 2;
-        const int dir = (input::Pressed(KEY_RIGHT) || input::Pressed(KEY_D)) ? 1
-                      : (input::Pressed(KEY_LEFT) || input::Pressed(KEY_A)) ? -1 : 0;
-        if (optionsCursor == 0 && (dir != 0 || input::Pressed(KEY_ENTER) || input::Pressed(KEY_J)))
-            AudioSystem::Get().SetMuted(!AudioSystem::Get().IsMuted());
-        if (optionsCursor == 1 && dir != 0)
-            display::SetWidthPercent(display::WidthPercent() + dir * display::kWidthStep);
-        if (optionsCursor == 1 && (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J)))
-            display::SetWidthPercent(display::WidthPercent() <= display::kMinWidthPercent ? display::kMaxWidthPercent
-                                     : display::WidthPercent() - display::kWidthStep);
-        if (input::Pressed(KEY_ESCAPE)) flow = StoryFlow::Menu;
+        if (ui::UpdateOptionsMenu(optionsCursor)) flow = StoryFlow::Menu;   // F1.10: MUSICA/EFECTOS/AMBIENTE
         return;
     }
     if (flow == StoryFlow::Credits) {
