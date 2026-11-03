@@ -30,5 +30,19 @@ constexpr int kMainMenuItemCount = static_cast<int>(MainMenuItem::Count);
 // junto a DIFICULTAD cuando esta seleccionado.
 void DrawMainMenuArt(Texture2D art, int selectedIndex, const char* difficultyLabel);
 
+// OPCIONES (F1.10): SONIDO (mute global), MUSICA, EFECTOS, AMBIENTE (0-100 %,
+// paso 10) y ANCHO DE PANTALLA. Los volumenes van a los buses de AudioSystem y
+// se guardan solos (audio_settings.txt); el ancho, en display_settings.txt.
+// Suenan los eventos de UI (UiNavigate/UiConfirm/UiCancel).
+enum class OptionsRow { Sound = 0, Music, Effects, Ambient, ScreenWidth, Count };
+constexpr int kOptionsRowCount = static_cast<int>(OptionsRow::Count);
+
+// Lee la entrada de un frame (arriba/abajo elige, izq/der cambia, ENTER alterna,
+// ESC sale). Devuelve true si se pidio volver al menu.
+bool UpdateOptionsMenu(int& cursor);
+// Dibuja la pantalla completa. `art` = fondo del menu (puede ser id 0);
+// `difficultyLabel` se muestra como informacion (puede ser nullptr).
+void DrawOptionsMenu(Texture2D art, int cursor, const char* difficultyLabel, bool touchHints);
+
 }  // namespace ui
 }  // namespace district_fury

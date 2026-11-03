@@ -175,6 +175,7 @@ void VSMode::Update(float dt) {
     dt = std::min(dt, .033f);
     if (flow == VSFlow::Select) {
         if (input::Pressed(KEY_ESCAPE)) {
+            EmitSimpleEvent(GameEventType::UiCancel);
             exitRequested = true;
             return;
         }
@@ -209,17 +210,22 @@ void VSMode::Update(float dt) {
             }
         }
         if (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J)) {
-            EmitSimpleEvent(GameEventType::UiConfirm, cursor);
+            {   // F1.10: confirmar con el luchador elegido (skin) -> ui_select_char
+                GameEvent ui; ui.type = GameEventType::UiConfirm; ui.value = cursor; ui.skin = selectedCharacter;
+                EmitGameEvent(ui);
+            }
             StartFight();
         }
         return;
     }
     if (input::Pressed(KEY_ESCAPE)) {
+        EmitSimpleEvent(GameEventType::UiCancel);
         flow = VSFlow::Select;
         enemies.clear();
         return;
     }
     if (input::Pressed(KEY_R)) {
+        EmitSimpleEvent(GameEventType::UiConfirm);
         ResetFight();
         return;
     }
@@ -233,7 +239,7 @@ void VSMode::Update(float dt) {
         }
     }
     if (playerDefeated || (selectedBoss >= 0 && boss.IsDefeated()) || RivalDefeated()) {
-        if (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J)) ResetFight();
+        if (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J)) { EmitSimpleEvent(GameEventType::UiConfirm); ResetFight(); }
         return;
     }
     if (input::Pressed(KEY_Q) && IsWarrior(player.skin) && player.state != PlayerState::Defeat) {

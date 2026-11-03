@@ -140,7 +140,15 @@ int main() {
                                     : activeStage == 4 ? df::GameMode::Stage4
                                     : activeStage == 5 ? df::GameMode::Stage5
                                                        : df::GameMode::Stage1;
-            if (mode != lastMode) { df::EmitModeEnter(mode); lastMode = mode; }
+            if (mode != lastMode) {
+                df::EmitModeEnter(mode);
+                if (mode == df::GameMode::Reward) df::EmitSimpleEvent(df::GameEventType::UiOpen);   // F1.10
+                lastMode = mode;
+            }
+            // F1.10: paneo por la camara del Stage 1 (los demas modos no la exponen:
+            // el audio usa la X del jugador).
+            if (mode == df::GameMode::Stage1) df::AudioSystem::Get().SetListenerX(stage1.CameraX());
+            else df::AudioSystem::Get().ClearListener();
             const bool cleared = !vsActive && rewardStage == 0 &&
                                  (activeStage == 1 ? stage1.StageCleared() : activeStage == 2 ? stage2.StageCleared()
                                   : activeStage == 3 ? stage3.StageCleared() : activeStage == 4 ? stage4.StageCleared()
@@ -201,6 +209,7 @@ int main() {
                              : district_fury::input::Pressed(KEY_THREE) ? 2
                                                                         : -1;
                 if (choice >= 0) {
+                    district_fury::EmitSimpleEvent(district_fury::GameEventType::UiConfirm, choice);   // F1.10
                     auto& campaign = district_fury::Campaign::Get();
                     campaign.ApplyReward(rewardStage, choice);
                     const int next = rewardStage + 1;
