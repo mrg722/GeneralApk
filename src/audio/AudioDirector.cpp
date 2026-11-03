@@ -412,8 +412,10 @@ bool CueFor(const GameEvent& e, SoundCue& out) {
             c.pitch = e.value >= 30 ? 1.12f : e.value >= 20 ? 1.06f : 1.0f;   // solo al caer al legado
             break;
         case GameEventType::Telegraph:
+            // Se carga como Move (-16 st50); -6 dB lo deja en -22, el nivel que trae
+            // telegraph_1 de F1.11 (12 dB bajo los golpes).
             c = Base(e, "telegraph", Sfx::Ui, SoundCat::Move, kPrioMove);
-            c.gainDb = -12.0f;
+            c.gainDb = -6.0f;
             c.pitchJitter = 0.0f;
             break;
         case GameEventType::UiNavigate: c = Base(e, nullptr, Sfx::Ui, SoundCat::Ui, kPrioUi); break;
