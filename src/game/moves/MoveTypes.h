@@ -116,6 +116,8 @@ enum MoveCaps : unsigned {
 // no cambia su dibujo.
 enum class FeelLevel { None, Light, Full };
 
+struct CancelRule;   // F0.4: cancelaciones en datos (definida al final del archivo)
+
 // Moveset de un personaje. Las cadenas y los botones de habilidad se guardan como
 // ids (int); 0 = hueco. Los valores por defecto de las cadenas los pone F0.4
 // (chainJ = Punch1, Punch2, PunchHook, Punch3; chainK = Kick, Kick2, Kick3) cuando
@@ -131,6 +133,58 @@ struct MoveSet {
     const MoveOverride* overrides = nullptr; int overrideCount = 0;
     MoveVisual hit, knockdown, getup, victory, jumpRise, jumpFall, walk, block;
     float jumpVz = 720;
+    // ---- F0.4 ----
+    // Reglas de cancelacion propias (se prueban ANTES de la tabla generica de
+    // player/PlayerCommon.h; replaceCancels = solo las propias).
+    const CancelRule* cancels = nullptr; int cancelCount = 0;
+    bool replaceCancels = false;
+    float walkSpeedScale = 1;   // multiplica la velocidad de caminar (y la carrera x1.45)
+};
+
+// ---- F0.4: contrato de combate de los MoveSet (lo leen Player y MovesetTests) ----
+//
+// Cadenas: chainJ[0..chainJCount-1] / chainK[0..chainKCount-1]. Una cadena con su
+// primer eslabon en 0 usa la de por defecto (J: Punch1, Punch2, PunchHook, Punch3;
+// K: Kick, Kick2, Kick3). Un eslabon que no se puede usar (requiresOverride sin
+// override, o enabled=false) corta la cadena ahi.
+// skillSlots[0..4]: todos en 0 = EnergyWave, Uppercut, RageAttack, DashAttack,
+// Finisher (no-KF). Un hueco en 0 = el de por defecto de ese boton.
+// Habilitacion de un ataque (MoveEnabled): override.enabled manda; sin override,
+// los ids con requiresOverride (Signature1-3, Chain5-6, Fase 2) estan apagados y
+// el resto depende de caps (CapCommandNormals: >J >K <J <K; CapSweep: vK, Stomp;
+// CapLauncher: J J K, vJ; CapSpecials: DP/QCB/QCF+K; CapAir/CapJump: salto y
+// aereos; CapRun / CapBackDash). Lo no habilitado cae al movimiento base (V2).
+
+// Fuentes/destinos especiales de una CancelRule (ademas de un AttackId > 0).
+enum CancelToken : int {
+    kCancelAnyNormal = -1,    // from: normal de suelo (cadenas, de comando, dash)
+    kCancelChainJ = -2,       // from: cualquier eslabon J; to: siguiente eslabon J (ultimo -> nada, B12)
+    kCancelChainK = -3,       // from: cualquier eslabon K; to: siguiente eslabon K
+    kCancelChainJ1 = -4,      // from: 1er eslabon J
+    kCancelChainJ2 = -5,      // from: 2o eslabon J (J J K)
+    kCancelSpecialMove = -6,  // from: especial o signature
+    kCancelChainJStart = -7,  // to: 1er eslabon J (K J reinicia)
+    kCancelChainKStart = -8,  // to: 1er eslabon K
+    kCancelRequested = -9,    // to: lo que pide la entrada (comando especial o direccion)
+    kCancelTurnChainJ2 = -10, // to: girar y seguir con el 2o eslabon J (<J J)
+    kCancelAnyAttack = -11,   // from: cualquier ataque
+    kCancelAir = -12,         // from: ataque aereo
+};
+// Comando de una regla: static_cast<int>(InputCommand) (Punch 0, Kick 1, ...) o
+// kCmdAnySpecial = cualquier comando especial (onda, shoryu, huracan, ...).
+constexpr int kCmdAnySpecial = -1;
+// Direccion RELATIVA al facing al pulsar (V2). Neutral = sin horizontal ni abajo.
+enum class CancelDir { Any, Neutral, Fwd, Back, Down };
+// Desde `from`, el comando `cmd` con direccion `dir` cancela en `to` si el golpe
+// conecto (onHit) o fallo (onWhiff). Ventana: en hit desde startup + 1 f (o
+// AttackDef::cancelFrom), en fallo desde la recuperacion. Gana la primera que
+// cumple; to = 0 bloquea explicitamente.
+struct CancelRule {
+    int from = kCancelAnyAttack;
+    int cmd = 0;
+    CancelDir dir = CancelDir::Any;
+    bool onHit = true, onWhiff = true;
+    int to = 0;
 };
 
 }  // namespace district_fury

@@ -14,7 +14,16 @@ const MoveSet& GetMoveSet(int skin);
 // Override del ataque `id` (static_cast<int>(AttackId)) o nullptr si no hay.
 const MoveOverride* FindOverride(const MoveSet& set, int id);
 // MoveSet generico (el que devuelve GetMoveSet cuando ningun bloque responde).
+// F0.4: trae las cadenas por defecto (J: Punch1, Punch2, PunchHook, Punch3;
+// K: Kick, Kick2, Kick3) y los botones 1-5 por defecto.
 const MoveSet& GenericMoveSet();
+// F0.4: rellena los huecos de un MoveSet con los valores por defecto (cadena J/K
+// con el primer eslabon en 0, botones de habilidad en 0). Player lo aplica a su
+// copia del MoveSet; un bloque puede llamarlo al construir el suyo.
+void FillDefaultChains(MoveSet& m);
+// Boton de habilidad i (0..4) por defecto: EnergyWave, Uppercut, RageAttack,
+// DashAttack, Finisher (como int de AttackId).
+int DefaultSkillSlot(int i);
 
 const MoveSet* MovesetFor_TitanX(int skin);         // F1.1: skins 4 y 5
 const MoveSet* MovesetFor_CloneGrinder(int skin);   // F1.2: skins 1 y 3

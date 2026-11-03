@@ -3,6 +3,7 @@
 #include "game/Player.h"
 #include "ui/TouchControls.h"
 #include <cassert>
+#include <cmath>
 #include <cstdio>
 
 using namespace district_fury;
@@ -63,13 +64,14 @@ int main() {
     p.Update(1.0f / 60.0f);
     assert(p.currentAttack != AttackId::EnergyWave || p.state != PlayerState::Attack);
 
-    // Habilidad 2 (GANCHO) -> gancho ascendente (Punch3).
+    // Habilidad 2 (GANCHO) -> gancho ascendente. F0.4: MoveSet.skillSlots[1] por
+    // defecto = Uppercut (el GANCHO ASCENDENTE nuevo; antes salia el REMATE Punch3).
     Player q;
     touch::Update(touch::Context::Combat);
     touch::InjectTouchForTest({965, 568});
     touch::Update(touch::Context::Combat);
     q.Update(1.0f / 60.0f);
-    assert(q.currentAttack == AttackId::Punch3);
+    assert(q.currentAttack == AttackId::Uppercut);
 
     // ESPECIAL: el especial por boton (energia), como antes la ONDA.
     Player e;
@@ -86,6 +88,33 @@ int main() {
     touch::Update(touch::Context::Combat);
     t.Update(1.0f / 60.0f);
     assert(t.IsTransformed() && t.activeSkill == Player::kSkillCount - 1);
+
+    // F0.4: boton SALTO en (1160, 512) r30 -> tecla virtual 409 (teclado I). No
+    // solapa GOLPE (1170,615 r62), PATADA (1057,574 r40), la habilidad 6
+    // (1152,406 r30) ni ESPECIAL (1245,485 r28); un toque en su centro solo marca SALTO.
+    {
+        auto apart = [](float ax, float ay, float ar, float bx, float by, float br) {
+            const float dx = ax - bx, dy = ay - by;
+            return std::sqrt(dx * dx + dy * dy) > ar + br;
+        };
+        assert(apart(1160, 512, 30, 1170, 615, 62));
+        assert(apart(1160, 512, 30, 1057, 574, 40));
+        assert(apart(1160, 512, 30, 1152, 406, 30));
+        assert(apart(1160, 512, 30, 1245, 485, 28));
+        touch::Update(touch::Context::Combat);
+        touch::InjectTouchForTest({1160, 512});
+        touch::Update(touch::Context::Combat);
+        assert(input::Pressed(input::kVirtualJump) && !input::Down(KEY_J) && !input::Down(KEY_K));
+        touch::InjectTouchForTest({1170, 615});
+        touch::Update(touch::Context::Combat);
+        assert(input::Down(KEY_J) && !input::Down(input::kVirtualJump));
+        Player j;
+        touch::Update(touch::Context::Combat);
+        touch::InjectTouchForTest({1160, 512});
+        touch::Update(touch::Context::Combat);
+        j.Update(1.0f / 60.0f);
+        assert(j.state == PlayerState::Jump && j.position.z > 0.0f);
+    }
 
     // Desactivado: los toques no hacen nada.
     touch::SetEnabled(false);

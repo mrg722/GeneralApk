@@ -32,11 +32,13 @@ constexpr float kStickRadius = 105.0f;
 constexpr float kStickZone = 300.0f;      // radio de captura del toque
 Vector2 gKnob = kStick;
 
-// Combate estilo King Fighter: GOLPE grande abajo a la derecha y las 6
+// Combate estilo King Fighter: GOLPE grande abajo a la derecha, SALTO encima y las 6
 // habilidades en arco alrededor (cada una con su espera de 15 s).
 const Button kCombat[] = {
     {{1170.0f, 615.0f}, 62.0f, KEY_J, "GOLPE", {225, 55, 45, 255}, "golpe", true},
     {{1057.0f, 574.0f}, 40.0f, KEY_K, "PATADA", {230, 140, 40, 255}, "estallido_rojo"},
+    // F0.4: salto (teclado I). Entre GOLPE y la habilidad 6, sin solaparlos.
+    {{1160.0f, 512.0f}, 30.0f, input::kVirtualJump, "SALTO", {120, 220, 255, 255}},
     {{961.0f, 633.0f}, 30.0f, input::kVirtualSkill0 + 0, "1", {60, 170, 255, 255}, "espiral_azul"},
     {{965.0f, 568.0f}, 30.0f, input::kVirtualSkill0 + 1, "2", {150, 110, 255, 255}, "puno_azul"},
     {{990.0f, 507.0f}, 30.0f, input::kVirtualSkill0 + 2, "3", {60, 220, 160, 255}, "mira_verde"},

@@ -53,6 +53,15 @@ void Player::Reset() {
     for (float& cd : skillCooldown) cd = 0.0f;
     abilityCooldown.clear(); skillPage = 0;
     activeSkill = -1; clipDriven = false; multiHitTimer = 0.0f; transformTimer = 0.0f;
+    // F0.4
+    victoryTimer = 0.0f; jumpCancelTimer = 0.0f; lastHitTargetX = 0.0f; airAttacks = 0;
+    chainLinkJ = chainLinkK = -1;
+    walkVelX = walkVelY = 0.0f; running = false; tapTimer = 0.0f; lastTapDir = 0; prevHoriz = 0;
+    dashDir = 1; dashSpeed = 700.0f; stepCount = 0;
+    attackHitsDone = 0; armorAbsorbed = 0; projectileShots = 0; projectileClock = 0.0f; rootAppliedX = 0.0f;
+    stompTargetAhead = false;
+    attackClipName.clear(); attackClipOrigin = ClipOrigin::Historic;
+    effectiveId_ = AttackId::Count;
     inputEnabled = true;
     debugInvulnerable = false;
     animator = Animator{};
@@ -71,8 +80,6 @@ void Player::ApplyUpgrades(const PlayerUpgrades& newUpgrades) {
     rage = std::min(rage, maxRage);
 }
 
-const AttackDef& Player::CurrentAttackDef() const { return GetAttack(currentAttack); }
-
 const char* Player::RageStateName() const {
     switch (rageState) {
         case RageState::Starting: return "FURIA // ACTIVANDO";
@@ -90,6 +97,7 @@ void Player::SetState(PlayerState next) {
     // B09: el dash tiene su propia velocidad; no arrastra empujes anteriores.
     if (state == PlayerState::Dash || state == PlayerState::Defeat) velocity.x = 0.0f;
     if (state != PlayerState::Attack) { attackPhase = AttackPhase::None; activeSkill = -1; clipDriven = false; }
+    if (state != PlayerState::Walk && state != PlayerState::Idle) { walkVelX = walkVelY = 0.0f; running = false; }
     if (state == PlayerState::Hit || state == PlayerState::GuardBreak ||
         state == PlayerState::Knockdown || state == PlayerState::Defeat ||
         state == PlayerState::Airborne) {
@@ -100,9 +108,16 @@ void Player::SetState(PlayerState next) {
     // rango de indices historico.
     auto named = [&](const char* clip) { return animator.PlayNamed(clip); };
     switch (state) {
+        case PlayerState::Jump:
+            // Salto propio (F0.4): clip de salto si existe; si no, una pose de
+            // impulso (dash). Nunca la de derribado (airborne).
+            if (named("jump") || named("jump_rise") || named("air") || named("dash")) break;
+            animator.Play(normalized ? AnimationClip{14, 14, 0.08f, false} : AnimationClip{0, 4, 0.08f, false});
+            break;
+        case PlayerState::Victory:
+            if (named("victory")) break;
+            [[fallthrough]];
         case PlayerState::Idle:
-        case PlayerState::Jump:      // F0.1: reservados, nadie entra todavia (F0.4);
-        case PlayerState::Victory:   // mientras tanto se tratan como Idle.
             if (named("idle")) break;
             animator.Play(normalized ? AnimationClip{0, 3, 0.12f, true}
                                      : AnimationClip{0, 4, 0.12f, true});
@@ -214,6 +229,8 @@ void Player::UpdateTransformForm() {
         case PlayerState::Knockdown: clip = "knockdown"; break;
         case PlayerState::Airborne: clip = "airborne"; break;
         case PlayerState::Defeat: clip = "defeat"; break;
+        case PlayerState::Jump: clip = animator.HasClip("jump") ? "jump" : "dash"; break;
+        case PlayerState::Victory: clip = animator.HasClip("victory") ? "victory" : "idle"; break;
         default: break;
     }
     if (!animator.PlayNamed(clip)) animator.PlayNamed("idle");
@@ -262,13 +279,15 @@ void Player::UpdateRage(float dt) {
 }
 
 bool Player::CanAct() const {
+    // Jump: en el aire solo se atacan aereos (no camina ni bloquea); Victory: nada.
     return state != PlayerState::Defeat && state != PlayerState::GuardBreak &&
            state != PlayerState::Knockdown && state != PlayerState::Hit &&
            state != PlayerState::Attack && state != PlayerState::Recovery &&
-           state != PlayerState::Airborne;
+           state != PlayerState::Airborne && state != PlayerState::Jump && state != PlayerState::Victory;
 }
 
 bool Player::IsKnockedDown() const {
+    // Jump NO es derribo (B22): Airborne sigue siendo "derribado en el aire".
     return state == PlayerState::Knockdown || state == PlayerState::Airborne;
 }
 
@@ -286,6 +305,17 @@ float Player::GetMoveSpeed() const {
 
 void Player::Update(float dt) {
     EnsurePlayerAnimator(animator, skin); UpdateTransformForm(); if(IsKeyPressed(KEY_F9)) animationDebug=!animationDebug; /* F9: F1-F5 cambian de stage */ animator.Update(dt); UpdateMotionFeel(dt);
+    // F0.4: Footstep en cada cruce de walkPhase por 0 y pi (peso 3 si es grande).
+    {
+        const int steps = static_cast<int>(std::floor(walkPhase / 3.14159265f));
+        if (steps != stepCount) {
+            if (state == PlayerState::Walk)
+                EmitPlayerEvent(*this, GameEventType::Footstep, false, running ? 1 : 0, AttackId::None,
+                                BodyHeight() / kStandardBodyHeight >= 1.4f ? 3 : 1);
+            stepCount = steps;
+        }
+    }
+    jumpCancelTimer = std::max(0.0f, jumpCancelTimer - dt);
 
     dashInvulnerability = std::max(0.0f, dashInvulnerability - dt);
     abilityHitFlashTimer = std::max(0.0f, abilityHitFlashTimer - dt);
@@ -321,17 +351,33 @@ void Player::Update(float dt) {
         comboCount = 0;
         comboStep = 0;
         chainAttack = AttackId::None;
+        chainLinkJ = chainLinkK = -1;
         if (state != PlayerState::Attack) currentAttack = AttackId::None;
     }
 
-    // Altura (launch/knockdown): gravedad simple sobre position.z.
-    if (position.z > 0.0f || velocity.z != 0.0f) {
+    // Altura (launch/knockdown): gravedad simple sobre position.z. El salto y los
+    // aereos (F0.4) usan su propia gravedad (UpdateJump / UpdateAttackMotion).
+    const bool ownGravity = state == PlayerState::Jump || (state == PlayerState::Attack && (CurrentAttackDef().air ||
+                            CurrentAttackDef().root.dz != 0.0f));
+    if (!ownGravity && (position.z > 0.0f || velocity.z != 0.0f)) {
         velocity.z -= 1500.0f * dt;
         position.z += velocity.z * dt;
         if (position.z <= 0.0f) { position.z = 0.0f; velocity.z = 0.0f; }
     }
 
     if (state == PlayerState::Defeat) return;
+
+    if (state == PlayerState::Victory) {
+        // No actua ni recibe golpes; 1.6 s y vuelve a Idle.
+        velocity = {0, 0, 0};
+        if ((victoryTimer -= dt) <= 0.0f) { victoryTimer = 0.0f; SetState(PlayerState::Idle); }
+        return;
+    }
+
+    if (state == PlayerState::Jump) {
+        UpdateJump(dt);
+        return;
+    }
 
     if (state == PlayerState::Airborne) {
         DampedStep(position.x, velocity.x, 0.94f, dt);   // B11: por dt, no por frame
@@ -381,31 +427,71 @@ void Player::Update(float dt) {
 
     if (state == PlayerState::Dash) {
         dashTimer -= dt;
-        position.x += (facing == Facing::Right ? 1.f : -1.f) * 700.f * dt;
+        position.x += (facing == Facing::Right ? 1.f : -1.f) * static_cast<float>(dashDir) * dashSpeed * dt;
         position.x = std::clamp(position.x, kStageStartX, kStageEndX - 90.f);
-        // DASH ATTACK: J durante el dash.
+        // DASH ATTACK: J durante el dash; F0.4: K = DESLIZAMIENTO (DashKick).
         const InputBuffer::Entry* queued = inputBuffer.Peek();
-        if (inputEnabled && queued && queued->command == InputCommand::Punch &&
-            attackCooldowns[static_cast<int>(AttackId::DashAttack)] <= 0.0f) {
-            InputCommand consumed;
-            inputBuffer.Pop(consumed);
-            BeginAttack(AttackId::DashAttack);
-            return;
+        if (inputEnabled && queued && dashDir > 0) {
+            if (queued->command == InputCommand::Punch &&
+                attackCooldowns[static_cast<int>(AttackId::DashAttack)] <= 0.0f) {
+                InputCommand consumed;
+                inputBuffer.Pop(consumed);
+                BeginAttack(AttackId::DashAttack);
+                chainLinkJ = chainLinkK = -1;
+                return;
+            }
+            if (queued->command == InputCommand::Kick && MoveEnabled(AttackId::DashKick) &&
+                attackCooldowns[static_cast<int>(AttackId::DashKick)] <= 0.0f) {
+                InputCommand consumed;
+                inputBuffer.Pop(consumed);
+                BeginAttack(AttackId::DashKick);
+                chainLinkJ = chainLinkK = -1;
+                return;
+            }
         }
         if (dashTimer <= 0) SetState(PlayerState::Idle);
         return;
     }
 
     if (state == PlayerState::Attack) {
+        const AttackDef& def = CurrentAttackDef();
         const float previousAttackElapsed=attackElapsed; attackPrevElapsed=attackElapsed; attackElapsed+=dt; stateTimer-=dt;
-        if(!attackImpactTriggered&&previousAttackElapsed<GetAttack(currentAttack).startup&&attackElapsed>=GetAttack(currentAttack).startup)attackImpactTriggered=true;
-        const AttackDef& def = GetAttack(currentAttack);
+        if(!attackImpactTriggered&&previousAttackElapsed<def.startup&&attackElapsed>=def.startup)attackImpactTriggered=true;
         // B01: el proyectil sale UNA vez por activacion (projectileFired solo lo
         // reinicia BeginAttack); el stage lo recoge con ConsumeProjectileEvent().
+        // F0.4: ProjectileSpec.count > 1 = un disparo mas cada `interval` s.
         if (def.spawnsProjectile && !projectileFired && attackElapsed >= def.startup) {
             projectileFired = true;
             projectilePending = true;
+            projectileShots = 1;
+            projectileClock = 0.0f;
             energyReleased = true;   // legado: ya no se usa para disparar
+        } else if (projectileFired && !projectilePending) {
+            const ProjectileSpec spec = CurrentProjectile();
+            if (projectileShots < spec.count && (projectileClock += dt) >= spec.interval) {
+                projectileClock = 0.0f;
+                projectilePending = true;
+                ++projectileShots;
+            }
+        }
+        // Root motion de datos, salto propio de los aereos, aterrizaje.
+        UpdateAttackMotion(dt, def);
+        if (state != PlayerState::Attack) return;
+        // Persecucion tras un lanzador que conecto: SALTO / J / K en 10 f.
+        if (inputEnabled && jumpCancelTimer > 0.0f && def.jumpCancel && attackConnected) {
+            const InputBuffer::Entry* q = inputBuffer.Peek();
+            const bool jk = q && (q->command == InputCommand::Punch || q->command == InputCommand::Kick);
+            if ((frameInput.jump || jk) && StartJump(true)) {
+                if (jk) { InputCommand c; inputBuffer.Pop(c); }
+                return;
+            }
+        }
+        // Super desde un especial (furia activa): Espacio cancela en RageAttack.
+        if (inputEnabled && frameInput.rage && rageState == RageState::Active && AttackIsSpecialMove(currentAttack) &&
+            InCancelWindow() && attackCooldowns[static_cast<int>(AttackId::RageAttack)] <= 0.0f) {
+            BeginAttack(AttackId::RageAttack);
+            chainLinkJ = chainLinkK = -1;
+            return;
         }
         if (clipDriven && (multiHitTimer -= dt) <= 0.0f) {
             hasHit = false;   // la animacion larga vuelve a golpear
@@ -414,7 +500,8 @@ void Player::Update(float dt) {
         }
         if (!clipDriven && def.multiHitInterval > 0.0f && (multiHitClock += dt) >= def.multiHitInterval) {
             multiHitClock = 0.0f;
-            hitTargets.clear();   // golpe multiple controlado
+            // golpe multiple controlado (F0.4: como mucho hitCount golpes; hitCount 1 = sin limite, como F0.2)
+            if (def.hitCount <= 1 || attackHitsDone + 1 < def.hitCount) { hitTargets.clear(); ++attackHitsDone; }
         }
         // Animation cancel: con un comando valido en el buffer y el ataque en su
         // ventana final, se corta el winddown y se encadena el siguiente golpe.
@@ -428,6 +515,8 @@ void Player::Update(float dt) {
     if (state == PlayerState::Recovery) {
         // Recuperacion fisica obligatoria: sin moverse ni empezar ataques
         // hasta que termine. Lo pulsado durante este tiempo queda en el buffer.
+        // Persecucion: tambien en la recuperacion del lanzador que conecto.
+        if (inputEnabled && jumpCancelTimer > 0.0f && frameInput.jump && StartJump(true)) return;
         recoveryTimer -= dt;
         if (recoveryTimer <= 0.0f) {
             recoveryTimer = 0.0f;
@@ -487,7 +576,74 @@ void Player::MarkHit(std::uintptr_t id) {
 bool Player::InAttackStartup() const {
     if (state != PlayerState::Attack) return false;
     if (clipDriven) return attackElapsed < attackDuration * 0.12f;
-    return attackElapsed < GetAttack(currentAttack).startup;
+    return attackElapsed < CurrentAttackDef().startup;
+}
+
+// ---------------------------------------------------------------------------
+// F0.4: salto, aereos y root motion de datos
+// ---------------------------------------------------------------------------
+
+void Player::FinishLanding(float recovery) {
+    position.z = 0.0f;
+    velocity.z = 0.0f;
+    velocity.x = 0.0f;
+    airAttacks = 0;
+    SetState(PlayerState::Recovery);
+    recoveryTimer = std::max(InputBuffer::kFrameSeconds, recovery);
+}
+
+void Player::UpdateJump(float dt) {
+    // Control aereo 60 % de caminar; el carril no cambia en el aire (V9).
+    const float target = frameInput.moveX * GetMoveSpeed() * 0.6f;
+    velocity.x += (target - velocity.x) * (1.0f - std::exp(-6.0f * dt));
+    if (frameInput.moveX > 0.5f) facing = Facing::Right;
+    else if (frameInput.moveX < -0.5f) facing = Facing::Left;
+    position.x = std::clamp(position.x + velocity.x * dt, kStageStartX, kStageEndX - 90.f);
+    velocity.z -= (velocity.z > 0.0f ? kJumpRiseGravity : kJumpFallGravity) * dt;
+    position.z += velocity.z * dt;
+    if (position.z <= 0.0f) { FinishLanding(4.0f / 60.0f); return; }   // aterrizaje 4 f
+    // Aereos: J/K del buffer.
+    if (inputEnabled) TryStartBufferedAttack(false);
+}
+
+void Player::UpdateAttackMotion(float dt, const AttackDef& def) {
+    const float dir = facing == Facing::Right ? 1.0f : -1.0f;
+    const float total = std::max(1e-4f, AttackTotalDuration(def));
+    const float s = BodyHeight() / kStandardBodyHeight;
+    // Root motion de datos (RootCurve): x real, frena x0.3 al conectar.
+    if (!clipDriven && def.root.dx != 0.0f) {
+        const float span = std::max(1e-4f, def.root.t1 - def.root.t0);
+        const float u = std::clamp((attackElapsed / total - def.root.t0) / span, 0.0f, 1.0f);
+        const float target = def.root.dx * s * CombatEase(def.root.ease, u);
+        float delta = target - rootAppliedX;
+        rootAppliedX = target;
+        if (attackConnected && def.root.slowOnHit) delta *= 0.3f;
+        position.x = std::clamp(position.x + dir * delta, kStageStartX, kStageEndX - 90.f);
+    }
+    if (def.air) {
+        // Aereo: sigue la parabola del salto (DiveKick: picada a 45 grados, 700 px/s).
+        if (currentAttack == AttackId::DiveKick &&
+            attackElapsed >= def.startup && attackElapsed <= def.startup + def.active) {
+            velocity.x = dir * 700.0f * 0.7071f;
+            velocity.z = -700.0f * 0.7071f;
+        } else {
+            velocity.z -= (velocity.z > 0.0f ? kJumpRiseGravity : kJumpFallGravity) * dt;
+        }
+        position.x = std::clamp(position.x + velocity.x * dt, kStageStartX, kStageEndX - 90.f);
+        position.z += velocity.z * dt;
+        if (position.z <= 0.0f) FinishLanding(def.landRecovery > 0.0f ? def.landRecovery : 4.0f / 60.0f);
+        return;
+    }
+    if (!clipDriven && def.root.dz != 0.0f) {
+        // Salto propio del golpe (Uppercut hop 10, Shoryu 90): sin(pi u') en [t0, t1].
+        const float span = std::max(1e-4f, def.root.t1 - def.root.t0);
+        const float u = std::clamp((attackElapsed / total - def.root.t0) / span, 0.0f, 1.0f);
+        const float up = (attackElapsed / total) <= def.root.t1 ? std::sin(3.14159265f * CombatEase(def.root.ease, u) * 0.5f)
+                                                                : 1.0f - std::clamp((attackElapsed / total - def.root.t1) /
+                                                                                    std::max(1e-4f, 1.0f - def.root.t1), 0.0f, 1.0f);
+        position.z = std::max(0.0f, def.root.dz * s * up);
+        velocity.z = 0.0f;
+    }
 }
 
 bool Player::ConsumeProjectileEvent() {
@@ -512,7 +668,7 @@ void Player::TakeDamage(int damage) {
 
 HitResult Player::ApplyHit(const HitInfo& info) {
     const int damage = info.damage;
-    if (damage <= 0 || state == PlayerState::Defeat) return HitResult::Ignored;
+    if (damage <= 0 || state == PlayerState::Defeat || state == PlayerState::Victory) return HitResult::Ignored;
     if (debugInvulnerable || dashInvulnerability > 0) return HitResult::Ignored;
     const float dir = info.dirX >= 0.0f ? 1.0f : -1.0f;   // hacia donde empuja el golpe
 
@@ -561,9 +717,17 @@ HitResult Player::ApplyHit(const HitInfo& info) {
             armored = true;
         } else if (currentAttack == AttackId::Skill || currentAttack == AttackId::EnergyWave ||
                    currentAttack == AttackId::RageAttack || currentAttack == AttackId::Finisher) {
-            const AttackDef& def = GetAttack(currentAttack);
+            const AttackDef& def = CurrentAttackDef();
             armored = clipDriven ? attackElapsed <= attackDuration * 0.92f
                                  : attackElapsed <= def.startup + def.active;
+        } else if (!clipDriven) {
+            // F0.4: ventana de armadura de datos (armorFrom..armorTo, armorHits golpes).
+            const AttackDef& def = CurrentAttackDef();
+            if (def.armorFrom >= 0.0f && attackElapsed >= def.armorFrom && attackElapsed <= def.armorTo &&
+                (def.armorHits <= 0 || armorAbsorbed < def.armorHits)) {
+                armored = true;
+                ++armorAbsorbed;
+            }
         }
     }
     if (armored) {
@@ -577,8 +741,9 @@ HitResult Player::ApplyHit(const HitInfo& info) {
     }
 
     // Derribo por propiedad del golpe (B17): el envoltorio TakeDamage(int)
-    // conserva el umbral historico de dano >= 28.
-    if (info.knockdown) {
+    // conserva el umbral historico de dano >= 28. F0.4: golpeado en el aire
+    // (salto o aereo) siempre cae derribado.
+    if (info.knockdown || position.z > 1.0f) {
         knockdownTimer = 0.85f;
         velocity.x = dir * 260.f;   // en la direccion del golpe (B10)
         velocity.z = 380.f;

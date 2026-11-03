@@ -123,9 +123,12 @@ void TestSpecialCommands() {
     Feed(p, in, {down, down, downFwd, downFwd, fwdPunch});
     assert(p.state == PlayerState::Attack && p.currentAttack == AttackId::EnergyWave);
 
-    Player q;   // adelante, abajo, abajo-adelante + K -> Punch3 (remate/uppercut)
+    // F0.4: DP + K ahora es el SHORYU (RisingUppercut, id nuevo) en vez del
+    // REMATE (Punch3): el plan maestro le da su propio movimiento (BRIEF F0.4,
+    // tarea 11). Los KF con su clip conservan DP + K = Punch3 (MoveSet legado).
+    Player q;   // adelante, abajo, abajo-adelante + K -> RisingUppercut
     Feed(q, in, {fwd, fwd, down, down, downFwdKick});
-    assert(q.state == PlayerState::Attack && q.currentAttack == AttackId::Punch3);
+    assert(q.state == PlayerState::Attack && q.currentAttack == AttackId::RisingUppercut);
 
     Player r;   // special cancel: Punch1 -> Onda de Energia en la ventana
     r.QueueCommand(InputCommand::Punch);

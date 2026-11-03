@@ -64,9 +64,11 @@ static void TestMoveRegistry() {
 }
 
 static void TestHistoricIds() {
-    static_assert(static_cast<int>(AttackId::Count) == 10, "AttackId::Count debe seguir en 10");
-    assert(static_cast<int>(AttackId::Count) == 10);
+    // F0.4 agrego los 31 ids de V1 al final (Count = 41); los historicos 0-9 no se mueven.
+    static_assert(static_cast<int>(AttackId::Count) == 41, "AttackId::Count = 41 tras F0.4");
+    assert(static_cast<int>(AttackId::Count) == 41);
     assert(static_cast<int>(AttackId::Skill) == 9);
+    assert(static_cast<int>(AttackId::PunchHook) == 10 && static_cast<int>(AttackId::Chain6) == 40);
     // Estados nuevos al final, sin mover los historicos.
     assert(static_cast<int>(PlayerState::Airborne) == 10);
     assert(static_cast<int>(PlayerState::Jump) == 11 && static_cast<int>(PlayerState::Victory) == 12);
