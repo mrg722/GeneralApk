@@ -94,6 +94,8 @@ void Player::SetState(PlayerState next) {
     auto named = [&](const char* clip) { return animator.PlayNamed(clip); };
     switch (state) {
         case PlayerState::Idle:
+        case PlayerState::Jump:      // F0.1: reservados, nadie entra todavia (F0.4);
+        case PlayerState::Victory:   // mientras tanto se tratan como Idle.
             if (named("idle")) break;
             animator.Play(normalized ? AnimationClip{0, 3, 0.12f, true}
                                      : AnimationClip{0, 4, 0.12f, true});

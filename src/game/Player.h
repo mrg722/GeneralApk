@@ -4,13 +4,16 @@
 #include "game/combat/AttackData.h"
 #include "rendering/Animator.h"
 #include "game/combat/AttackAnimation.h"
+#include "game/player/PlayerVisualState.h"
 #include <vector>
 
 namespace district_fury {
 
 // Recovery va al final para no alterar los valores historicos. PlayerState::Attack
 // se conserva (los stages lo consultan); el detalle vive en AttackPhase.
-enum class PlayerState { Idle, Walk, Dash, Attack, Block, Hit, GuardBreak, Knockdown, Defeat, Recovery, Airborne };
+// Jump y Victory (F0.1, plan maestro): reservados al final; nadie entra todavia
+// (F0.4 implementa el salto y la victoria). Donde un switch los ve, valen Idle.
+enum class PlayerState { Idle, Walk, Dash, Attack, Block, Hit, GuardBreak, Knockdown, Defeat, Recovery, Airborne, Jump, Victory };
 
 // Entrada de un frame. Por defecto se lee del teclado (WASD, Shift, B, J, K, L,
 // Espacio); tests, bots y repeticiones pueden inyectar una propia.
@@ -21,6 +24,7 @@ struct PlayerInput {
     bool specialWave = false, specialRise = false;
     int skill = -1;   // habilidad pulsada este frame (0..5), -1 = ninguna
     bool skillPage = false;   // pasar a la siguiente pagina de habilidades
+    bool jump = false;        // salto (F0.4: tecla I / boton SALTO); todavia nadie lo lee
 };
 
 // Sub-estado de la FSM mientras state == Attack.
@@ -153,6 +157,9 @@ public:
     float landTimer{0.0f};
     Facing lastFacing{Facing::Right};
     PlayerState lastState{PlayerState::Idle};
+    // Estado SOLO de dibujo (estelas, fase visual): lo llena F0.3. mutable porque
+    // Draw() es const y lo actualiza al dibujar.
+    mutable PlayerVisualState visual;
 
     // Efectos de poder (assets/fx/efectos_azules.png, rejilla 8x5): chispa al
     // conectar, estallido al transformarse. Solo nuestros personajes (los KF
