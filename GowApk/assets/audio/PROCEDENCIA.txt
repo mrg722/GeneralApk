@@ -1,0 +1,92 @@
+PROCEDENCIA del audio del modo BETA (GowApk/assets/audio)
+
+Todo el audio de esta carpeta es ORIGINAL: sintetizado por codigo con
+tools/audio/genera_beta_audio.py (genera_beta_audio v1), sin muestras externas,
+sin transcribir melodias existentes y sin IA de audio. Reemplaza (mismos
+nombres) al audio extraido del juego original que habia antes (con copyright).
+Codificacion: OGG Vorbis -q:a 3, ffmpeg bitexact, semilla = crc32(nombre).
+Comprobar: python3 tools/audio/genera_beta_audio.py --verificar
+
+nombre.ogg | md5 | duracion | uso | receta
+sound1.ogg | eb6297ca4febf63eef8ce016ea0a6154 | 0.41 s | sin referencia en codigo/datos (variante generica) | sfx: golpe ligero
+sound2.ogg | f25fefe79599189ca85c807881b8c1a2 | 0.32 s | UI volver/cancelar (ESC) | sfx: ui lira 2 notas descendentes
+sound3.ogg | a566e57c6d3936ea17ab441b282b79d4 | 0.73 s | RONIN-KRATOS rayo: golpe electrico | sfx: descarga electrica + golpe
+sound4.ogg | c408c472d76303d5347e36c76a158332 | 0.24 s | RONIN-KRATOS garras: zarpazo | sfx: 3 cortes agudos + cuerpo
+sound5.ogg | 89ea059441527ab87d96e8db91ec96e1 | 0.45 s | sin referencia en codigo/datos (variante generica) | sfx: golpe medio
+sound6.ogg | 8417ce21b8a3f7babae2bc4a42e55fb7 | 1.02 s | pocion (vida/magia) | sfx: burbujas + arpegio de lira
+sound7.ogg | 602a85990c26051510e32b7c585d46b7 | 0.19 s | sin referencia en codigo/datos (variante generica) | sfx: whoosh corto
+sound8.ogg | cfb171441bf2aadd70c1705f28c82ccc | 0.41 s | sin referencia en codigo/datos (variante generica) | sfx: golpe ligero 2
+sound9.ogg | f5165d2acd6a78e93b165d636ab58b13 | 0.49 s | sin referencia en codigo/datos (variante generica) | sfx: corte ligero
+sound10.ogg | 588174df6cad4c47eb58faacf7de9290 | 0.51 s | sin referencia en codigo/datos (variante generica) | sfx: golpe pesado
+sound11.ogg | 861c3b0c143c2dd99a1344a3e2a6b5f7 | 1.11 s | sin referencia en codigo/datos (variante generica) | sfx: estallido
+sound12.ogg | a0640e12253c7c028c20b5ca10033aae | 0.37 s | sin referencia en codigo/datos (variante generica) | sfx: whoosh largo
+sound13.ogg | abecf802aab52009c07de2cb33003ba6 | 0.06 s | UI mover cursor | sfx: ui tono 1320 Hz 60 ms
+sound14.ogg | 08d477edf55a4c9cce6739b51c875f07 | 0.47 s | UI confirmar / heroe entra | sfx: ui lira 3 notas ascendentes
+sound15.ogg | 46b7c8efe0c0e40ed63ba0985a8d3e7f | 0.60 s | sin referencia en codigo/datos (variante generica) | sfx: metal choca
+sound16.ogg | 3cd9ce61ddcb1e10fd4735ce738174dc | 0.50 s | sin referencia en codigo/datos (variante generica) | sfx: energia corta
+sound17.ogg | a1077604ae4fb2cafbc8e437260a9596 | 0.18 s | sin referencia en codigo/datos (variante generica) | sfx: pisada
+sound18.ogg | ccdde809b5be57a37c9c9c232c476ad0 | 0.20 s | sin referencia en codigo/datos (variante generica) | sfx: pisada 2
+sound19.ogg | b34960cd41ff47678b5d9b4a281100e9 | 0.51 s | sin referencia en codigo/datos (variante generica) | sfx: corte medio
+sound20.ogg | 024c37ec91087a417efc26de7053472e | 1.68 s | sin referencia en codigo/datos (variante generica) | sfx: rugido bestia
+sound21.ogg | 5b2627b07c6b9b5d1a9b7173daa5f857 | 0.30 s | sin referencia en codigo/datos (variante generica) | sfx: voz herida
+sound22.ogg | 58ec56848c7a0069a09ddfa1c5faa640 | 0.47 s | sin referencia en codigo/datos (variante generica) | sfx: golpe medio 2
+sound23.ogg | a02570b1b964c0a8f8c9d93f098f8273 | 0.28 s | sin referencia en codigo/datos (variante generica) | sfx: whoosh medio
+sound24.ogg | e558a8050c9ac312441c3a38738ae36b | 3.16 s | gong de inicio de pelea / aviso QTE | sfx: gong 110 Hz 2.2 s
+sound25.ogg | bd6e67688e61ad3076cad349aa673d15 | 1.50 s | inicio de QTE | sfx: sting: whoosh + taiko + coro
+sound26.ogg | 5bc99332039f4640f706f5dc951495b5 | 1.11 s | sin referencia en codigo/datos (variante generica) | sfx: estallido grave
+sound27.ogg | d90701809bd7ed54ceb3d0344d92590e | 0.24 s | sin referencia en codigo/datos (variante generica) | sfx: garra
+sound28.ogg | bc8dac71fd960851e35592f37447c4f0 | 0.51 s | sin referencia en codigo/datos (variante generica) | sfx: golpe pesado 2
+sound29.ogg | 95c2a05e4356afcb9ddb81046c2cdae7 | 0.69 s | sin referencia en codigo/datos (variante generica) | sfx: rayo
+sound30.ogg | 5a6fe5e347e0459bccd06e36b25ca447 | 0.08 s | sin referencia en codigo/datos (variante generica) | sfx: ui tono
+sound31.ogg | fbd2c2cf8a634351b1c2b0bb54b24d1f | 0.97 s | medusa herida | sfx: siseo + chillido corto
+sound32.ogg | e1226f77a696b348cc1a998288200792 | 1.50 s | medusa muere | sfx: siseo + chillido largo
+sound33.ogg | 57807ca115ed3692e717181bb4bd482c | 0.31 s | sin referencia en codigo/datos (variante generica) | sfx: cadena
+sound34.ogg | 4ccdf8aea217a9b2cc2bea1056269951 | 1.10 s | Kratos muere | sfx: voz grave 'o' cayendo 1.1 s
+sound35.ogg | d08588b0a592d2aff140b87451748a6e | 0.90 s | sin referencia en codigo/datos (variante generica) | sfx: energia larga
+sound36.ogg | 291d386f8e7d391f9002a832246ac794 | 0.32 s | Kratos herido | sfx: voz 'a' corta 0.32 s
+sound37.ogg | 3e87c0fd47270ab3c480ada72bb396de | 1.40 s | furia / super (inicio) | sfx: rugido 95 Hz + energia
+sound38.ogg | d97a01a2248184bfc8258f0e7a72795f | 1.15 s | impacto de magia (habilidad) | sfx: estallido de energia
+sound39.ogg | cc3be60b86433cca5f6c3b71d304bf4c | 0.90 s | centauro herido | sfx: relincho corto
+sound40.ogg | 2ca6dc7e5fefb3ca046b52faab3a1117 | 1.26 s | centauro muere | sfx: relincho largo que cae
+sound41.ogg | 11789247569b126f8d643852f59b3598 | 0.54 s | sin referencia en codigo/datos (variante generica) | sfx: corte fuerte
+sound42.ogg | d126804cac057f2e5444b66cb5acb88d | 0.32 s | sin referencia en codigo/datos (variante generica) | sfx: huesos
+sound43.ogg | 23bd1f99bbd6fdcee940074a738ef9c6 | 0.90 s | sin referencia en codigo/datos (variante generica) | sfx: voz muere
+sound44.ogg | 35990b07d9b09fd7ce3ae75f1f78a52f | 2.09 s | inicio de oleada / fase 2 del jefe | sfx: cuerno de quinta 147 Hz
+sound45.ogg | 9ba017004899fc198959cf3724a6c609 | 2.60 s | aparece el jefe | sfx: cuerno grave + rugido + taiko
+sound46.ogg | 22a30272b432eab5d5fae6ed8729ac34 | 2.66 s | sin referencia en codigo/datos (variante generica) | sfx: gong agudo
+sound47.ogg | a3b1c5cbd0a2f720ea471769a9eac6b7 | 0.43 s | sin referencia en codigo/datos (variante generica) | sfx: golpe ligero 3
+sound48.ogg | 832a61fa62ec25cecbfccd03b2fdfbb3 | 1.80 s | victoria / remate | sfx: fanfarria mayor + gong
+sound49.ogg | 5bb8a77ef0eb198da2398a8e0fd614b4 | 1.66 s | sin referencia en codigo/datos (variante generica) | sfx: cuerno corto
+sound50.ogg | 80f93249ca7b753696af193934897fe1 | 0.37 s | sin referencia en codigo/datos (variante generica) | sfx: ui lira
+sound51.ogg | f818fe4ca250941f492b860ec64a92cf | 2.17 s | tentaculos muere / ataque 2 | sfx: rugido humedo 55 Hz 1.6 s
+sound52.ogg | f4c515250aed96e2ba712a867354247a | 1.52 s | tentaculos herido / ataque 1 | sfx: rugido 65 Hz 0.8 s
+sound53.ogg | e62da56cde322059215027b5268e5574 | 0.32 s | sin referencia en codigo/datos (variante generica) | sfx: whoosh grave
+sound54.ogg | d5726f30edc3a20d92c941a472c39f46 | 0.24 s | sin referencia en codigo/datos (variante generica) | sfx: golpe sordo
+sound55.ogg | 44697fe9e2f816601622606b784818ea | 2.33 s | titan muere / ataque 2 | sfx: rugido 45 Hz + estallido
+sound56.ogg | 6db68aa57b90a978debc2f1d0335f861 | 1.61 s | titan herido / ataque 1 | sfx: rugido 60 Hz 0.9 s
+sound57.ogg | f06b01a46a3a146226498a57600526ae | 1.20 s | sin referencia en codigo/datos (variante generica) | sfx: estallido brillante
+sound58.ogg | df08733cd2ea54917f05bb117d0b3896 | 0.54 s | sin referencia en codigo/datos (variante generica) | sfx: corte metal
+sound59.ogg | c20d628df2db03322af164e1eb4fb5de | 1.59 s | poseidon herido / ataque 1 | sfx: rugido 80 Hz + ola
+sound60.ogg | 164c69031e1aeb87e26f66b821707b6a | 2.31 s | poseidon muere / ataque 2 | sfx: rugido 70 Hz + ola larga
+sound61.ogg | 4801c9f03beb4c4a0f6987fa1a274ea5 | 0.53 s | espadas tajo 1 / QTE acierto | sfx: corte ligero metal 2.6 kHz
+sound62.ogg | b52be58102e509baefbbec6c85203903 | 0.52 s | espadas tajo 2 | sfx: corte medio metal 2.3 kHz
+sound63.ogg | 694c3cc9fcd0cc8411c3635b4b77b9c9 | 0.52 s | espadas tajo 3 / ataque en carrera | sfx: corte fuerte metal 2.0 kHz
+sound64.ogg | 909b4997ffbb4bfcc96ed3c66e8f5ca8 | 0.54 s | golpe pesado / patada / remate | sfx: golpe pesado con sub
+sound65.ogg | f0287be1396113168c48d4249372b1b6 | 0.70 s | carga de energia (habilidades) | sfx: energia FM 150->900 Hz
+sound66.ogg | 991d621d622ffce1b60772c767c08954 | 0.95 s | no-muerto muere (esqueleto/excavador/momia/ave) | sfx: huesos + gemido grave
+sound67.ogg | 4bd89adb037441993b40cf1ed6457742 | 0.19 s | no-muerto herido | sfx: huesos breves
+sound68.ogg | eacc1997344f746ee535f60a1508165c | 0.40 s | bruto/bestia herido | sfx: gruñido aspero 85 Hz
+sound69.ogg | 97ec7659003c30ea5b97623a999e1ebb | 1.75 s | bruto/bestia muere | sfx: rugido 70 Hz 1.1 s
+sound70.ogg | c5865a49c6ca02b5bbeab7c08be1c79c | 0.24 s | dash / salto | sfx: whoosh 400->2200 Hz
+sound71.ogg | 3b11177d047d151beb99600b85f9cb10 | 0.50 s | sin referencia en codigo/datos (variante generica) | sfx: energia aguda
+sound72.ogg | 072ec150042b96b9df0377f3ba19d34d | 0.45 s | sin referencia en codigo/datos (variante generica) | sfx: golpe medio 3
+sound73.ogg | bd0def4e4b65b71eaa09415a3faebcc5 | 0.46 s | cesto puñetazo 1 | sfx: golpe medio brillante
+sound74.ogg | aa197bf61dd193633e8600e4354cdf58 | 0.48 s | cesto puñetazo 3 / carrera | sfx: golpe fuerte + metal grave
+sound75.ogg | 6da719ba600f13e9a5cd5a1c5243e385 | 0.31 s | cadenas de las espadas | sfx: whoosh + eslabones metalicos
+menu.ogg | ed02a89eff4c560ab864f0fcdda21ab6 | 40.00 s | menu de seleccion (bucle) | musica: D frigio 72 bpm 12 compases: drone de quinta, coro aah, lira KS, aulos, taiko
+gate1music.ogg | 467757c3fe3297b3517839ba8d3f2524 | 30.00 s | escenarios gate1 (bucle) | musica: E frigio 96 bpm 12 compases: taiko + tof en corcheas, coro, lira, aulos
+gate2music.ogg | 86e0a37ad7eef10a4e7a5881c0d366c1 | 30.00 s | escenarios gate2 / volcan (bucle) | musica: B frigio 120 bpm 15 compases: taiko sincopado, lira pulsada, aulos 2 oct
+gameCG.ogg | aad046911a7ae478db87d479eb1cca28 | 17.00 s | cinematica de historia | musica: C frigio libre 17 s: coro creciente, taikos, lira, aulos, gong
+music_001.ogg | 7e7cb66c6fdbca62fce003f1e5db6740 | 35.00 s | pieza extra (sin uso hoy) | musica: F# frigio 82.3 bpm 12 compases: drone, coro, lira, aulos, taiko
+music_002.ogg | 349040f8d97119fd47c6239082a612eb | 8.00 s | victoria (una vez) | musica: E frigio dominante 8 s: taikos, cuerno, coro mayor, arpegio de lira, gong
+music_003.ogg | 36ed5803f64274cfc5ef4be5f9d98f52 | 7.00 s | derrota (una vez) | musica: A frigio 7 s: aulos descendente, coro oscuro, taiko, gong

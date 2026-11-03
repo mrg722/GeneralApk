@@ -1,4 +1,5 @@
 #pragma once
+#include "audio/AudioSystem.h"
 #include "game/Player.h"
 #include "game/RivalAI.h"
 #include "BetaStage.h"
@@ -13,7 +14,8 @@
 namespace district_fury {
 
 // MODO BETA: experiencia jugable aparte con el contenido de nuevosSprites
-// (personajes, efectos, escenarios, sonidos y musica originales). Reutiliza
+// (personajes, efectos y escenarios originales; el audio es sintetizado, ver
+// GowApk/assets/audio/PROCEDENCIA.txt). Reutiliza
 // Player (movimientos, habilidades por paginas, cajas de golpe por cuadro) y
 // RivalAI (enemigos y rival manejados por la maquina); no toca los otros modos.
 class BetaMode {
@@ -213,7 +215,7 @@ private:
     void CheckQteTriggers();
     void PollSounds(Fighter& f);
     void SpawnFx(const std::string& id, const std::string& clip, Vector2 pos, bool flip);
-    void PlaySound(const std::string& name);
+    void PlaySound(const std::string& name, Bus bus = Bus::Sfx);   // volumen = bus x master
     void PlayMusic(const std::string& file);
     void StopMusic();
 

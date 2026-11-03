@@ -12,10 +12,33 @@
 #include "ui/TouchControls.h"
 #include <algorithm>
 #include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <sstream>
 
 namespace district_fury {
 namespace {
+
+// Registro de depuracion del audio BETA (activar con BETA_AUDIO_LOG=1): la
+// primera vez que se pide cada sonido imprime de donde sale y si se decodifica;
+// al salir, un resumen. Sirve tambien sin dispositivo de audio (gow_check).
+struct BetaAudioLog {
+    bool on = std::getenv("BETA_AUDIO_LOG") != nullptr;
+    std::map<std::string, int> requests;
+    int duplicates = 0;
+    int missing = 0;
+};
+BetaAudioLog& AudioLog() {
+    static BetaAudioLog log;
+    return log;
+}
+
+// Ganancia de un bus por el master (F1.10 implementa los buses; hoy valen 1).
+float BusGain(Bus bus) {
+    const AudioSystem& audio = AudioSystem::Get();
+    return audio.BusVolume(bus) * audio.BusVolume(Bus::Master);
+}
+constexpr float kBetaMusicLevel = 0.55f;
 
 // Escenarios (GowApk/data/stages) en el orden del selector.
 const char* kStageIds[] = {"barco", "nieve", "cueva_helada", "volcan", "arena_volcan", "nieve_larga"};
@@ -141,6 +164,13 @@ void BetaMode::Init() {
 }
 
 void BetaMode::Shutdown() {
+    const BetaAudioLog& log = AudioLog();
+    if (log.on) {
+        int shots = 0;
+        for (const auto& r : log.requests) shots += r.second;
+        std::printf("[audio-beta] resumen: %zu sonidos distintos, %d disparos, %d duplicados evitados, faltan/mudos %d\n",
+                    log.requests.size(), shots, log.duplicates, log.missing);
+    }
     StopMusic();
     fighters.clear();
     effects.clear();
@@ -263,17 +293,18 @@ void BetaMode::Update(float dt) {
         if (AudioSystem::Get().IsMuted()) PauseMusicStream(music);
         else {
             if (!IsMusicStreamPlaying(music)) ResumeMusicStream(music);
+            SetMusicVolume(music, kBetaMusicLevel * BusGain(Bus::Music));
             UpdateMusicStream(music);
         }
     }
     if (flow == Flow::Select) {
         if (input::Pressed(KEY_ESCAPE)) {
-            PlaySound("sound2");
+            PlaySound("sound2", Bus::Ui);
             exitRequested = true;
             return;
         }
-        if (input::Pressed(KEY_UP) || input::Pressed(KEY_W)) { cursor = (cursor + kFieldCount - 1) % kFieldCount; PlaySound("sound13"); }
-        if (input::Pressed(KEY_DOWN) || input::Pressed(KEY_S)) { cursor = (cursor + 1) % kFieldCount; PlaySound("sound13"); }
+        if (input::Pressed(KEY_UP) || input::Pressed(KEY_W)) { cursor = (cursor + kFieldCount - 1) % kFieldCount; PlaySound("sound13", Bus::Ui); }
+        if (input::Pressed(KEY_DOWN) || input::Pressed(KEY_S)) { cursor = (cursor + 1) % kFieldCount; PlaySound("sound13", Bus::Ui); }
         if (input::Pressed(KEY_LEFT) || input::Pressed(KEY_RIGHT) || input::Pressed(KEY_A) || input::Pressed(KEY_D)) {
             const int dir = (input::Pressed(KEY_RIGHT) || input::Pressed(KEY_D)) ? 1 : -1;
             if (cursor == 0) selCharacter = (selCharacter + dir + kBetaCount) % kBetaCount;
@@ -281,7 +312,7 @@ void BetaMode::Update(float dt) {
             else if (cursor == 2) selMode = (selMode + dir + 4) % 4;
             else if (selMode == 2) selBoss = (selBoss + dir + kBossCount) % kBossCount;
             else selRival = (selRival + dir + kBetaCount) % kBetaCount;
-            PlaySound(cursor == 0 ? "sound14" : "sound13");
+            PlaySound(cursor == 0 ? "sound14" : "sound13", Bus::Ui);
         }
         if (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J)) {
             if (selMode == 3) StartStory();
@@ -307,7 +338,7 @@ void BetaMode::Update(float dt) {
         return;
     }
     if (input::Pressed(KEY_ESCAPE)) {
-        PlaySound("sound2");
+        PlaySound("sound2", Bus::Ui);
         flow = Flow::Select;
         fighters.clear();
         effects.clear();
@@ -459,20 +490,29 @@ void BetaMode::ResolveHits(Fighter& a, Fighter& t, float damageScale) {
 void BetaMode::PollSounds(Fighter& f) {
     const Animator& an = f.p.animator;
     const std::size_t idx = an.CurrentClipFrameIndex();
+    // Un mismo sonido en el mismo cuadro del mismo personaje suena 1 vez (los
+    // data/kratos/*.txt repiten cada clipsound y "hit" + "hurt" coinciden).
+    std::vector<const std::string*> played;
+    auto once = [&](const std::string& name) {
+        for (const std::string* p : played)
+            if (*p == name) { ++AudioLog().duplicates; return; }
+        played.push_back(&name);
+        PlaySound(name);
+    };
     if (an.currentClipName != f.lastClip || idx != f.lastFrame) {
-        // Sonidos de cuadro (golpes de arma, habilidades) del juego original.
+        // Sonidos de cuadro (golpes de arma, habilidades).
         for (const auto& s : an.currentClip.sounds)
-            if ((std::size_t)s.first == idx) PlaySound(s.second);
+            if ((std::size_t)s.first == idx) once(s.second);
         f.lastClip = an.currentClipName;
         f.lastFrame = idx;
     }
     if (f.p.hp < f.lastHp) {
         if (f.p.state == PlayerState::Defeat) {
             const auto it = f.sounds.find("die");
-            if (it != f.sounds.end()) PlaySound(it->second);
+            if (it != f.sounds.end()) once(it->second);
         } else {
             const auto it = f.sounds.find("hurt");
-            if (it != f.sounds.end()) PlaySound(it->second);
+            if (it != f.sounds.end()) once(it->second);
         }
     }
     if (f.p.state == PlayerState::Defeat && !f.deathFx) {
@@ -514,9 +554,25 @@ void BetaMode::UpdateCamera(float dt) {
     cameraX += (target - cameraX) * std::min(1.0f, dt * 6.0f);
 }
 
-void BetaMode::PlaySound(const std::string& name) {
+void BetaMode::PlaySound(const std::string& name, Bus bus) {
     AudioSystem& audio = AudioSystem::Get();
-    if (!audio.IsReady() || audio.IsMuted() || name.empty()) return;
+    if (name.empty()) return;
+    BetaAudioLog& log = AudioLog();
+    if (log.on && log.requests[name]++ == 0) {
+        // Primera vez: comprueba el archivo aunque no haya dispositivo de audio.
+        const std::string path = FindAsset("GowApk/assets/audio/" + name + ".ogg");
+        std::vector<unsigned char> bytes;
+        float seconds = 0.0f;
+        if (!path.empty() && platform::LoadBinaryFile(path, bytes) && !bytes.empty()) {
+            Wave w = LoadWaveFromMemory(".ogg", bytes.data(), (int)bytes.size());
+            if (w.frameCount > 0 && w.sampleRate > 0) seconds = (float)w.frameCount / (float)w.sampleRate;
+            UnloadWave(w);
+        }
+        if (seconds <= 0.05f) ++log.missing;
+        std::printf("[audio-beta] %s -> %s %s (%.2f s)\n", name.c_str(), path.empty() ? "(no encontrado)" : path.c_str(),
+                    seconds > 0.05f ? "OK" : "FALTA/MUDO", seconds);
+    }
+    if (!audio.IsReady() || audio.IsMuted()) return;
     auto it = soundCache.find(name);
     if (it == soundCache.end()) {
         Sound snd{};
@@ -531,7 +587,10 @@ void BetaMode::PlaySound(const std::string& name) {
         }
         it = soundCache.emplace(name, snd).first;
     }
-    if (it->second.frameCount > 0) ::PlaySound(it->second);
+    if (it->second.frameCount > 0) {
+        SetSoundVolume(it->second, BusGain(bus));
+        ::PlaySound(it->second);
+    }
 }
 
 void BetaMode::PlayMusic(const std::string& file) {
@@ -544,7 +603,7 @@ void BetaMode::PlayMusic(const std::string& file) {
     if (music.frameCount == 0) return;
     // Victoria/derrota suenan una vez; el resto en bucle.
     music.looping = file != "music_002.ogg" && file != "music_003.ogg";
-    SetMusicVolume(music, 0.55f);
+    SetMusicVolume(music, kBetaMusicLevel * BusGain(Bus::Music));
     PlayMusicStream(music);
     musicReady = true;
     musicName = file;
