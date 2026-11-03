@@ -233,6 +233,11 @@ private:
     void UpdateRage(float dt);
     void HandleInput(float dt);
     void DrawRageAura(Vector2 screen, float scale) const;
+    // Cuerpo del personaje, partido de Draw (F0.1). DrawPoseBody (PlayerPoseDraw.cpp):
+    // poses sueltas de assets/bosses/; devuelve false si este personaje no las usa o
+    // falta la textura. DrawAtlasBody (PlayerAtlasDraw.cpp): atlas del Animator.
+    bool DrawPoseBody(Vector2 p, float scale, Color spriteTint) const;
+    void DrawAtlasBody(Vector2 p, float scale, float spriteScale, Color spriteTint) const;
     void UpdateMotionFeel(float dt);
     void UpdateTransformForm();
     void DrawAnimationDebug(Vector2 screen) const;
