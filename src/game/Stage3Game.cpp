@@ -183,6 +183,7 @@ void Stage3Game::DefeatBoss() {
     arenaLocked = false;
     stageComplete = true;
     flow = Flow::Clear;
+    player.EnterVictory();   // F0.4: pose de victoria al vencer al jefe
     score += 5000 + maxCombo * 50;
     SpawnImpact(boss.pos, {80, 220, 255, 255}, true);
 }

@@ -356,6 +356,7 @@ void Player::PlayAttackClip(AttackId id) {
     const int start = animator.normalizedAtlas ? r.cleanStart : r.legacyStart;
     const int end = animator.normalizedAtlas ? r.cleanEnd : r.legacyEnd;
     animator.Play({start, end, r.frameTime, false});
+    animator.currentClipName.clear();   // ya no es el clip con nombre anterior (p. ej. idle)
     if (origin != ClipOrigin::Pose && origin != ClipOrigin::Override) attackClipName = "indices";
 }
 

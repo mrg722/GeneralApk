@@ -233,6 +233,8 @@ void VSMode::Update(float dt) {
         }
     }
     if (playerDefeated || (selectedBoss >= 0 && boss.IsDefeated()) || RivalDefeated()) {
+        // F0.4: el ganador de la ronda queda en su pose de victoria.
+        if (!playerDefeated && player.state != PlayerState::Victory && player.state != PlayerState::Defeat) player.EnterVictory();
         if (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J)) ResetFight();
         return;
     }

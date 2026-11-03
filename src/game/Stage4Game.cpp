@@ -333,6 +333,7 @@ void Stage4Game::DefeatBoss() {
     boss.defeated = true;
     boss.attack = BossAttack::None;
     flow = Flow::Clear;
+    player.EnterVictory();   // F0.4: pose de victoria al vencer al jefe
     SpawnImpact(boss.pos, {140, 255, 160, 255}, true);
     shake = .5f;
 }
