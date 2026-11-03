@@ -1,7 +1,9 @@
 #include "game/CharacterVisual.h"
 #include "game/Player.h"
+#include "game/visual/PoseTables.h"
 #include <array>
 #include <cmath>
+#include <cstring>
 
 namespace district_fury {
 namespace {
@@ -112,74 +114,28 @@ const CharacterVisual& GetCharacterVisual(int id) {
     return kCharacters[static_cast<std::size_t>(id)];
 }
 
+// Solo despacha: cada tabla de poses vive en src/game/visual/Poses_*.cpp (F0.1).
 const char* CharacterPose(int id, PlayerState state, AttackType attack, bool rage, double time) {
     if (state == PlayerState::Airborne) state = PlayerState::Knockdown;
-    const int idleCycle = static_cast<int>(time * (state == PlayerState::Walk ? 9.0 : 3.2)) % 4;
     switch (id) {
-        case 1:  // Rayden clon — usa SOLO poses existentes del atlas del clon.
-            // La mejora es de secuenciacion/timing, no crea arte nuevo.
-            if (state == PlayerState::Defeat) return "death";
-            if (state == PlayerState::Hit || state == PlayerState::Knockdown || state == PlayerState::GuardBreak) return "hurt";
-            if (state == PlayerState::Block) return "ready";
-            if (state == PlayerState::Dash) return "dash";
-            if (state == PlayerState::Attack) {
-                const float phase = std::fmod(static_cast<float>(time), 0.56f);
-                if (attack == AttackType::Energy) {
-                    return phase < 0.16f ? "ready" : phase < 0.40f ? "release_orb" : "idle2";
-                }
-                if (attack == AttackType::Kick) {
-                    return phase < 0.10f ? "ready" : phase < 0.32f ? "kick" : "idle3";
-                }
-                return phase < 0.09f ? "ready" : phase < 0.28f ? "punch" : phase < 0.44f ? "idle2" : "idle1";
-            }
-            if (state == PlayerState::Walk) {
-                const int walkCycle = static_cast<int>(time * 9.0) % 4;
-                return walkCycle == 0 ? "idle1" : walkCycle == 1 ? "idle2" : walkCycle == 2 ? "idle3" : "idle4";
-            }
-            return idleCycle == 0 ? "idle1" : idleCycle == 1 ? "idle2" : idleCycle == 2 ? "idle3" : "idle4";
-        case 2:  // Brakk
-            if (state == PlayerState::Defeat) return "death";
-            if (state == PlayerState::Hit || state == PlayerState::Knockdown || state == PlayerState::GuardBreak) return "hurt";
-            if (state == PlayerState::Dash) return "charge";
-            if (state == PlayerState::Attack) {
-                if (attack == AttackType::Energy) return "chain_throw";
-                if (rage) return "fury";
-                return attack == AttackType::Kick ? "heavy" : "basic";
-            }
-            if (state == PlayerState::Walk) return "walk";
-            return "idle";
-        case 3:  // Grinder
-            if (state == PlayerState::Defeat) return "death";
-            if (state == PlayerState::Hit || state == PlayerState::Knockdown || state == PlayerState::GuardBreak) return "hurt";
-            if (state == PlayerState::Dash) return "ram";
-            if (state == PlayerState::Attack) {
-                if (attack == AttackType::Energy || rage) return "overdrive";
-                return attack == AttackType::Kick ? "slam" : "saw";
-            }
-            return "idle";
-        case 4:  // Titan-X
-            if (state == PlayerState::Defeat) return "death";
-            if (state == PlayerState::Hit || state == PlayerState::Knockdown || state == PlayerState::GuardBreak) return "recoil";
-            if (state == PlayerState::Dash) return "lean";
-            if (state == PlayerState::Attack) {
-                if (attack == AttackType::Energy) return "shoot_orb";
-                if (attack == AttackType::Kick) return "uppercut";
-                return rage ? "slam" : "punch1";
-            }
-            return idleCycle == 0 ? "idle1" : idleCycle == 1 ? "idle2" : idleCycle == 2 ? "idle3" : "idle4";
-        case 5:  // Titan-X Mejorado
-            if (state == PlayerState::Defeat) return "death";
-            if (state == PlayerState::Hit || state == PlayerState::Knockdown || state == PlayerState::GuardBreak) return "cannon_aim";
-            if (state == PlayerState::Dash) return "dash";
-            if (state == PlayerState::Attack) {
-                if (attack == AttackType::Energy) return "shoot_orb";
-                if (rage) return "rage_aura";
-                return attack == AttackType::Kick ? "slam" : "charge_orb";
-            }
-            return idleCycle == 0 ? "idle1" : idleCycle == 1 ? "idle2" : idleCycle == 2 ? "idle3" : "idle4";
-        default:
-            return "idle1";
+        case 1:  return PoseClone(state, attack, rage, time);         // Rayden clon
+        case 2:  return PoseBrakkLegacy(state, attack, rage, time);   // Brakk
+        case 3:  return PoseGrinder(state, attack, rage, time);       // Grinder
+        case 4:  return PoseTitanX(state, attack, rage, time);        // Titan-X
+        case 5:  return PoseTitanXM(state, attack, rage, time);       // Titan-X Mejorado
+        default: return "idle1";
     }
+}
+
+bool PoseFacesRight(const char* folder, const char* pose) {
+    int r = PoseFacesRightCloneGrinder(folder, pose);
+    if (r < 0) r = PoseFacesRightBrakk(folder, pose);
+    if (r < 0) r = PoseFacesRightTitanX(folder, pose);
+    if (r >= 0) return r != 0;
+    if (folder != nullptr)
+        for (const CharacterVisual& cv : kCharacters)
+            if (cv.folder != nullptr && std::strcmp(cv.folder, folder) == 0) return cv.facesRightByDefault;
+    return true;
 }
 
 }  // namespace district_fury

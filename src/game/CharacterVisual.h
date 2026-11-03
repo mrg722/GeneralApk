@@ -65,7 +65,8 @@ constexpr int kStoryCharacters[] = {0, 6};
 const CharacterVisual& GetCharacterVisual(int id);
 // Nombre sin el parentesis ("RAYDEN (ORIGINAL)" -> "RAYDEN") para paneles angostos.
 std::string ShortCharacterName(int id);
-// Devuelve la pose del set para el estado actual del jugador.
+// Devuelve la pose del set para el estado actual del jugador. Solo despacha por
+// id a las tablas de src/game/visual/PoseTables.h (Poses_*.cpp, una por bloque).
 const char* CharacterPose(int id, PlayerState state, AttackType attack, bool rage, double time);
 
 }  // namespace district_fury
