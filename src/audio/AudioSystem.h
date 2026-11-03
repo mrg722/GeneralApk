@@ -48,8 +48,13 @@ enum class Sfx {
     Count
 };
 
+// Buses de mezcla (contrato F0.1; F1.10 implementa el volumen por bus).
+enum class Bus { Master, Sfx, Ui, Voice, Music, Ambient };
+
 class AudioSystem {
 public:
+    // Volumen del bus (0..1). Hoy siempre 1: no cambia la mezcla actual.
+    float BusVolume(Bus) const { return 1.0f; }
     static AudioSystem& Get();
     void Init();
     void Shutdown();
