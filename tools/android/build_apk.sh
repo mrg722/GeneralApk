@@ -48,6 +48,8 @@ if [ "$APP" = district ]; then
   cp -r "$ROOT/assets" "$ROOT/data" "$STAGE/assets/"
   # hojas originales y pruebas: solo sirven para las herramientas, no van al APK
   find "$STAGE/assets" -type d -name source -prune -exec rm -rf {} +
+  # Audio con copyright del juego original que ningun codigo carga: no va al APK.
+  rm -rf "$STAGE/assets/assets/kratos/audio"
   rm -rf "$STAGE/assets/assets/backgrounds/beta" \
          "$STAGE/assets/assets/characters/rayder/kf_clone/canva" \
          "$STAGE/assets/assets/characters/rayder/kf_clone/canva_sin_mangas" \
@@ -63,6 +65,7 @@ else
   mkdir -p "$STAGE/assets/GowApk" "$STAGE/assets/assets" "$STAGE/assets/data"
   cp -r "$ROOT/GowApk/assets" "$ROOT/GowApk/data" "$STAGE/assets/GowApk/"
   cp -r "$ROOT/assets/kratos" "$STAGE/assets/assets/"
+  rm -rf "$STAGE/assets/assets/kratos/audio"   # audio con copyright sin uso: fuera del APK
   cp -r "$ROOT/assets/audio"  "$STAGE/assets/assets/"
   cp -r "$ROOT/data/kratos"   "$STAGE/assets/data/"
   find "$STAGE/assets" -type d -name source -prune -exec rm -rf {} +

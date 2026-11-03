@@ -123,8 +123,9 @@ public:
     // DF-013: usado por la pantalla de OPCIONES del menu principal (se guarda).
     void SetMuted(bool value);
     bool IsMuted() const { return muted; }
-    // Modo BETA: usa los sonidos originales de nuevosSprites, asi que apaga los
-    // efectos genericos del juego y la lluvia ambiente mientras esta activo.
+    // Modo BETA: usa su propio audio sintetizado (GowApk/assets/audio, ver
+    // PROCEDENCIA.txt), asi que apaga los efectos genericos del juego y la
+    // lluvia ambiente mientras esta activo.
     void SetBetaAudio(bool value) { betaAudio = value; }
     bool BetaAudio() const { return betaAudio; }
     // Cada frame desde main: director de eventos, ducking, musica y ambiente.
