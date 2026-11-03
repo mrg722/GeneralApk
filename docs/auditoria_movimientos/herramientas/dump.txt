@@ -1,0 +1,1468 @@
+
+### 0 RAYDEN (ORIGINAL) kf=-1 beta=0 atlas=- frames=24
+  airborne     n= 2 t=0.42s pivY[126..126] idleY=126 dup:{}
+  block        n= 1 t=0.10s pivY[126..126] idleY=126 dup:{}
+  dash         n= 1 t=0.08s pivY[126..126] idleY=126 dup:{}
+  dash_attack  n= 2 t=0.38s pivY[126..126] idleY=126 dup:{}
+  defeat       n= 2 t=0.22s pivY[126..126] idleY=126 dup:{}
+  energy       n= 1 t=0.55s pivY[126..126] idleY=126 dup:{}
+  finisher     n= 2 t=0.66s pivY[126..126] idleY=126 dup:{}
+  getup        n= 2 t=0.32s pivY[126..126] idleY=126 dup:{}
+  hit_high     n= 1 t=0.13s pivY[126..126] idleY=126 dup:{}
+  hit_low      n= 1 t=0.13s pivY[126..126] idleY=126 dup:{}
+  idle         n= 4 t=0.48s pivY[126..126] idleY=126 dup:{}
+  kick         n= 2 t=0.42s pivY[126..126] idleY=126 dup:{}
+  knockdown    n= 1 t=0.10s pivY[126..126] idleY=126 dup:{}
+  punch1       n= 2 t=0.30s pivY[126..126] idleY=126 dup:{}
+  punch2       n= 1 t=0.30s pivY[126..126] idleY=126 dup:{}
+  punch3       n= 2 t=0.42s pivY[126..126] idleY=126 dup:{}
+  rage_attack  n= 2 t=0.55s pivY[126..126] idleY=126 dup:{}
+  recovery     n= 1 t=0.10s pivY[126..126] idleY=126 dup:{}
+  walk         n= 4 t=0.42s pivY[126..126] idleY=126 dup:{}
+
+### 1 CLON ANTIGUO (CHAQUETA) kf=-1 beta=0 atlas=- frames=24
+(poses sueltas)
+
+### 2 BRAKK kf=-1 beta=0 atlas=brakk_v2 frames=108
+  airborne     n= 2 t=0.37s pivY[168..168] idleY=168 dup:{}
+  block        n= 2 t=0.24s pivY[168..168] idleY=168 dup:{}
+  chain        n= 8 t=0.60s pivY[168..168] idleY=168 dup:{}
+  chain_throw  n= 7 t=0.59s pivY[168..168] idleY=168 dup:{}
+  charge       n= 4 t=0.24s pivY[168..168] idleY=168 dup:{run,}
+  dash         n= 2 t=0.13s pivY[168..168] idleY=168 dup:{}
+  dash_attack  n= 2 t=0.38s pivY[168..168] idleY=168 dup:{}
+  defeat       n= 5 t=0.99s pivY[168..168] idleY=168 dup:{}
+  energy       n= 3 t=0.52s pivY[168..168] idleY=168 dup:{}
+  explosive    n= 4 t=0.36s pivY[168..168] idleY=168 dup:{}
+  finisher     n= 3 t=0.66s pivY[168..168] idleY=168 dup:{}
+  fury         n= 4 t=0.40s pivY[168..168] idleY=168 dup:{transform,}
+  getup        n= 2 t=0.30s pivY[168..168] idleY=168 dup:{}
+  hit          n= 2 t=0.16s pivY[168..168] idleY=168 dup:{}
+  hit_high     n= 1 t=0.12s pivY[168..168] idleY=168 dup:{}
+  hit_low      n= 1 t=0.12s pivY[168..168] idleY=168 dup:{}
+  idle         n= 8 t=0.96s pivY[168..168] idleY=168 dup:{}
+  kick         n= 3 t=0.38s pivY[168..168] idleY=168 dup:{}
+  knockdown    n= 1 t=0.10s pivY[168..168] idleY=168 dup:{}
+  punch1       n= 3 t=0.28s pivY[168..168] idleY=168 dup:{}
+  punch2       n= 3 t=0.28s pivY[168..168] idleY=168 dup:{}
+  punch3       n= 4 t=0.40s pivY[168..168] idleY=168 dup:{}
+  rage_attack  n= 3 t=0.55s pivY[168..168] idleY=168 dup:{}
+  recovery     n= 1 t=0.10s pivY[168..168] idleY=168 dup:{}
+  run          n= 4 t=0.28s pivY[168..168] idleY=168 dup:{charge,}
+  smash        n= 7 t=0.73s pivY[168..168] idleY=168 dup:{}
+  transform    n= 4 t=0.64s pivY[168..168] idleY=168 dup:{fury,}
+  victory      n= 2 t=0.85s pivY[168..168] idleY=168 dup:{}
+  walk         n= 5 t=0.55s pivY[168..168] idleY=168 dup:{}
+
+### 3 GRINDER kf=-1 beta=0 atlas=- frames=24
+(poses sueltas)
+
+### 4 TITAN-X kf=-1 beta=0 atlas=- frames=24
+(poses sueltas)
+
+### 5 TITAN-X MEJORADO kf=-1 beta=0 atlas=- frames=24
+(poses sueltas)
+
+### 6 MAX kf=-1 beta=0 atlas=max frames=308
+  airborne     n= 2 t=0.37s pivY[168..168] idleY=168 dup:{}
+  block        n= 2 t=0.20s pivY[168..168] idleY=168 dup:{}
+  dash         n= 5 t=0.22s pivY[168..168] idleY=168 dup:{}
+  dash_attack  n= 4 t=0.38s pivY[168..168] idleY=168 dup:{}
+  defeat       n= 5 t=0.77s pivY[168..168] idleY=168 dup:{}
+  energy       n= 7 t=0.56s pivY[168..168] idleY=168 dup:{}
+  finisher     n= 6 t=0.63s pivY[168..168] idleY=168 dup:{}
+  getup        n= 7 t=0.58s pivY[168..168] idleY=168 dup:{}
+  hit_high     n= 3 t=0.15s pivY[168..168] idleY=168 dup:{}
+  hit_low      n= 3 t=0.15s pivY[168..168] idleY=168 dup:{}
+  idle         n= 6 t=0.66s pivY[168..168] idleY=168 dup:{}
+  kick         n= 6 t=0.41s pivY[168..168] idleY=168 dup:{}
+  knockdown    n= 4 t=0.39s pivY[168..168] idleY=168 dup:{}
+  landing      n= 4 t=0.20s pivY[168..168] idleY=168 dup:{}
+  projectile   n= 5 t=0.30s pivY[168..168] idleY=168 dup:{}
+  punch1       n= 4 t=0.26s pivY[168..168] idleY=168 dup:{}
+  punch2       n= 4 t=0.29s pivY[168..168] idleY=168 dup:{}
+  punch3       n= 5 t=0.41s pivY[168..168] idleY=168 dup:{}
+  rage_attack  n= 9 t=0.83s pivY[168..168] idleY=168 dup:{}
+  recovery     n= 1 t=0.10s pivY[168..168] idleY=168 dup:{}
+  run          n= 7 t=0.35s pivY[168..168] idleY=168 dup:{}
+  transform    n=12 t=1.13s pivY[168..168] idleY=168 dup:{}
+  turn         n= 2 t=0.12s pivY[168..168] idleY=168 dup:{}
+  victory      n= 2 t=0.90s pivY[168..168] idleY=168 dup:{}
+  walk         n= 6 t=0.51s pivY[168..168] idleY=168 dup:{}
+
+### 7 KF HEROE (PELO BLANCO) kf=0 beta=0 atlas=- frames=458
+abilities 23: SOMBRAS ESTALLIDO PILAR LLAMARADA FENIX TORNADO BARRIDA CIRCULO FUEGO ERUPCION MEDIA LUNA TAJO INFIERNO SUPER DESPERTAR VOLTERETA GIRO RODADA PATADA AEREA CAIDA TORBELLINO MORTAL CONTRA SALTO TIGRE
+  ab0          n=35 t=2.15s pivY[36..140] idleY=55 dup:{skill1,}
+  ab1          n=35 t=2.70s pivY[36..102] idleY=55 dup:{skill2,}
+  ab10         n=20 t=1.45s pivY[36..113] idleY=55 dup:{}
+  ab11         n=40 t=2.50s pivY[42..132] idleY=55 dup:{}
+  ab12         n=42 t=2.65s pivY[34..79] idleY=55 dup:{rage_attack,super,}
+  ab13         n=38 t=3.80s pivY[39..70] idleY=55 dup:{}
+  ab14         n=11 t=0.55s pivY[36..102] idleY=55 dup:{}
+  ab15         n= 8 t=0.45s pivY[35..100] idleY=55 dup:{}
+  ab16         n=12 t=0.60s pivY[36..102] idleY=55 dup:{}
+  ab17         n=20 t=1.15s pivY[26..127] idleY=55 dup:{}
+  ab18         n=16 t=0.95s pivY[55..106] idleY=55 dup:{}
+  ab19         n=27 t=1.35s pivY[36..106] idleY=55 dup:{}
+  ab2          n=36 t=2.65s pivY[28..182] idleY=55 dup:{skill3,}
+  ab20         n=11 t=0.70s pivY[32..83] idleY=55 dup:{}
+  ab21         n=11 t=1.20s pivY[57..102] idleY=55 dup:{}
+  ab22         n=18 t=1.05s pivY[26..115] idleY=55 dup:{}
+  ab3          n=35 t=2.45s pivY[40..132] idleY=55 dup:{skill4,}
+  ab4          n=47 t=2.70s pivY[36..143] idleY=55 dup:{skill5,}
+  ab5          n=43 t=3.35s pivY[27..94] idleY=55 dup:{}
+  ab6          n=18 t=1.20s pivY[27..57] idleY=55 dup:{}
+  ab7          n= 5 t=0.25s pivY[28..28] idleY=55 dup:{}
+  ab8          n=16 t=1.20s pivY[28..182] idleY=55 dup:{}
+  ab9          n=17 t=1.85s pivY[36..113] idleY=55 dup:{}
+  air          n= 9 t=1.05s pivY[16..76] idleY=55 dup:{airborne,}
+  airborne     n= 9 t=1.05s pivY[16..76] idleY=55 dup:{air,}
+  atk1         n= 7 t=0.50s pivY[45..55] idleY=55 dup:{punch1,}
+  atk2         n=15 t=1.00s pivY[39..64] idleY=55 dup:{punch2,}
+  atk3         n=15 t=1.30s pivY[40..61] idleY=55 dup:{punch3,}
+  atk4         n=20 t=1.95s pivY[36..113] idleY=55 dup:{kick,}
+  block        n= 1 t=0.05s pivY[53..53] idleY=55 dup:{recovery,}
+  dash         n=12 t=0.60s pivY[43..58] idleY=55 dup:{dash_attack,}
+  dash_attack  n=12 t=0.60s pivY[43..58] idleY=55 dup:{dash,}
+  defeat       n=15 t=2.95s pivY[8..53] idleY=55 dup:{}
+  energy       n=18 t=1.40s pivY[41..94] idleY=55 dup:{finisher,special,}
+  finisher     n=18 t=1.40s pivY[41..94] idleY=55 dup:{energy,special,}
+  getup        n= 5 t=0.40s pivY[11..50] idleY=55 dup:{}
+  hit          n= 5 t=0.45s pivY[49..79] idleY=55 dup:{hit_high,hit_low,}
+  hit_high     n= 5 t=0.45s pivY[49..79] idleY=55 dup:{hit,hit_low,}
+  hit_low      n= 5 t=0.45s pivY[49..79] idleY=55 dup:{hit,hit_high,}
+  idle         n= 4 t=0.50s pivY[53..55] idleY=55 dup:{}
+  kick         n=20 t=1.95s pivY[36..113] idleY=55 dup:{atk4,}
+  knockdown    n=15 t=1.15s pivY[10..88] idleY=55 dup:{}
+  punch1       n= 7 t=0.50s pivY[45..55] idleY=55 dup:{atk1,}
+  punch2       n=15 t=1.00s pivY[39..64] idleY=55 dup:{atk2,}
+  punch3       n=15 t=1.30s pivY[40..61] idleY=55 dup:{atk3,}
+  rage_attack  n=42 t=2.65s pivY[34..79] idleY=55 dup:{ab12,super,}
+  recovery     n= 1 t=0.05s pivY[53..53] idleY=55 dup:{block,}
+  run          n= 8 t=0.40s pivY[44..53] idleY=55 dup:{}
+  skill1       n=35 t=2.15s pivY[36..140] idleY=55 dup:{ab0,}
+  skill2       n=35 t=2.70s pivY[36..102] idleY=55 dup:{ab1,}
+  skill3       n=36 t=2.65s pivY[28..182] idleY=55 dup:{ab2,}
+  skill4       n=35 t=2.45s pivY[40..132] idleY=55 dup:{ab3,}
+  skill5       n=47 t=2.70s pivY[36..143] idleY=55 dup:{ab4,}
+  special      n=18 t=1.40s pivY[41..94] idleY=55 dup:{energy,finisher,}
+  super        n=42 t=2.65s pivY[34..79] idleY=55 dup:{ab12,rage_attack,}
+  transform    n=19 t=1.25s pivY[39..58] idleY=55 dup:{}
+  walk         n= 8 t=0.40s pivY[44..53] idleY=55 dup:{}
+
+### 8 KF HEROINA (PELIRROJA) kf=1 beta=0 atlas=- frames=421
+abilities 11: SOMBRAS ESTALLIDO PILAR LLAMARADA FENIX ERUPCION SUPER VOLTERETA GIRO RODADA PATADA AEREA
+  ab0          n=49 t=3.60s pivY[45..176] idleY=56 dup:{skill1,}
+  ab1          n=46 t=3.05s pivY[39..89] idleY=56 dup:{skill2,}
+  ab10         n=13 t=1.15s pivY[40..123] idleY=56 dup:{}
+  ab2          n=46 t=2.95s pivY[37..105] idleY=56 dup:{skill3,}
+  ab3          n=59 t=4.30s pivY[31..88] idleY=56 dup:{skill4,}
+  ab4          n=48 t=2.95s pivY[37..123] idleY=56 dup:{skill5,}
+  ab5          n=11 t=0.95s pivY[37..123] idleY=56 dup:{}
+  ab6          n=42 t=2.50s pivY[36..123] idleY=56 dup:{rage_attack,super,}
+  ab7          n=12 t=0.80s pivY[37..89] idleY=56 dup:{ab9,}
+  ab8          n=14 t=0.70s pivY[37..123] idleY=56 dup:{}
+  ab9          n=12 t=0.80s pivY[37..89] idleY=56 dup:{ab7,}
+  air          n=11 t=0.90s pivY[6..56] idleY=56 dup:{airborne,}
+  airborne     n=11 t=0.90s pivY[6..56] idleY=56 dup:{air,}
+  atk1         n=11 t=0.80s pivY[56..64] idleY=56 dup:{punch1,}
+  atk2         n=13 t=0.80s pivY[48..67] idleY=56 dup:{punch2,}
+  atk3         n=22 t=1.50s pivY[39..85] idleY=56 dup:{punch3,}
+  atk4         n=20 t=1.40s pivY[57..88] idleY=56 dup:{kick,}
+  block        n= 1 t=0.05s pivY[41..41] idleY=56 dup:{recovery,}
+  dash         n= 9 t=0.50s pivY[37..55] idleY=56 dup:{dash_attack,}
+  dash_attack  n= 9 t=0.50s pivY[37..55] idleY=56 dup:{dash,}
+  defeat       n=16 t=1.30s pivY[13..55] idleY=56 dup:{}
+  energy       n=22 t=1.55s pivY[39..123] idleY=56 dup:{finisher,special,}
+  finisher     n=22 t=1.55s pivY[39..123] idleY=56 dup:{energy,special,}
+  getup        n= 5 t=0.45s pivY[21..54] idleY=56 dup:{}
+  hit          n= 5 t=0.40s pivY[63..81] idleY=56 dup:{hit_high,hit_low,}
+  hit_high     n= 5 t=0.40s pivY[63..81] idleY=56 dup:{hit,hit_low,}
+  hit_low      n= 5 t=0.40s pivY[63..81] idleY=56 dup:{hit,hit_high,}
+  idle         n= 4 t=0.60s pivY[54..56] idleY=56 dup:{}
+  kick         n=20 t=1.40s pivY[57..88] idleY=56 dup:{atk4,}
+  knockdown    n=14 t=1.15s pivY[10..79] idleY=56 dup:{}
+  punch1       n=11 t=0.80s pivY[56..64] idleY=56 dup:{atk1,}
+  punch2       n=13 t=0.80s pivY[48..67] idleY=56 dup:{atk2,}
+  punch3       n=22 t=1.50s pivY[39..85] idleY=56 dup:{atk3,}
+  rage_attack  n=42 t=2.50s pivY[36..123] idleY=56 dup:{ab6,super,}
+  recovery     n= 1 t=0.05s pivY[41..41] idleY=56 dup:{block,}
+  run          n= 8 t=0.40s pivY[45..47] idleY=56 dup:{}
+  skill1       n=49 t=3.60s pivY[45..176] idleY=56 dup:{ab0,}
+  skill2       n=46 t=3.05s pivY[39..89] idleY=56 dup:{ab1,}
+  skill3       n=46 t=2.95s pivY[37..105] idleY=56 dup:{ab2,}
+  skill4       n=59 t=4.30s pivY[31..88] idleY=56 dup:{ab3,}
+  skill5       n=48 t=2.95s pivY[37..123] idleY=56 dup:{ab4,}
+  special      n=22 t=1.55s pivY[39..123] idleY=56 dup:{energy,finisher,}
+  super        n=42 t=2.50s pivY[36..123] idleY=56 dup:{ab6,rage_attack,}
+  transform    n=13 t=0.80s pivY[57..89] idleY=56 dup:{}
+  walk         n= 8 t=0.40s pivY[45..47] idleY=56 dup:{}
+
+### 9 KF MATON kf=2 beta=0 atlas=- frames=63
+abilities 3: SOMBRAS TECNICA TECNICA
+  ab0          n= 7 t=0.65s pivY[23..53] idleY=56 dup:{getup,}
+  ab1          n=10 t=0.65s pivY[32..101] idleY=56 dup:{atk1,punch1,skill1,skill3,skill5,}
+  ab2          n= 6 t=0.55s pivY[47..61] idleY=56 dup:{atk2,punch2,skill2,skill4,}
+  air          n=11 t=1.00s pivY[26..81] idleY=56 dup:{airborne,}
+  airborne     n=11 t=1.00s pivY[26..81] idleY=56 dup:{air,}
+  atk1         n=10 t=0.65s pivY[32..101] idleY=56 dup:{ab1,punch1,skill1,skill3,skill5,}
+  atk2         n= 6 t=0.55s pivY[47..61] idleY=56 dup:{ab2,punch2,skill2,skill4,}
+  atk3         n= 1 t=0.05s pivY[56..56] idleY=56 dup:{atk4,kick,punch3,rage_attack,}
+  atk4         n= 1 t=0.05s pivY[56..56] idleY=56 dup:{atk3,kick,punch3,rage_attack,}
+  block        n= 4 t=0.40s =IDLE pivY[54..56] idleY=56 dup:{idle,recovery,}
+  dash         n= 8 t=0.80s pivY[58..60] idleY=56 dup:{dash_attack,run,walk,}
+  dash_attack  n= 8 t=0.80s pivY[58..60] idleY=56 dup:{dash,run,walk,}
+  defeat       n=13 t=1.15s pivY[26..77] idleY=56 dup:{}
+  energy       n= 1 t=0.05s pivY[58..58] idleY=56 dup:{finisher,special,}
+  finisher     n= 1 t=0.05s pivY[58..58] idleY=56 dup:{energy,special,}
+  getup        n= 7 t=0.65s pivY[23..53] idleY=56 dup:{ab0,}
+  hit          n= 4 t=0.60s pivY[64..69] idleY=56 dup:{hit_high,}
+  hit_high     n= 4 t=0.60s pivY[64..69] idleY=56 dup:{hit,}
+  hit_low      n= 5 t=0.45s pivY[57..77] idleY=56 dup:{}
+  idle         n= 4 t=0.40s pivY[54..56] idleY=56 dup:{block,recovery,}
+  kick         n= 1 t=0.05s pivY[56..56] idleY=56 dup:{atk3,atk4,punch3,rage_attack,}
+  knockdown    n= 8 t=0.75s pivY[31..81] idleY=56 dup:{}
+  punch1       n=10 t=0.65s pivY[32..101] idleY=56 dup:{ab1,atk1,skill1,skill3,skill5,}
+  punch2       n= 6 t=0.55s pivY[47..61] idleY=56 dup:{ab2,atk2,skill2,skill4,}
+  punch3       n= 1 t=0.05s pivY[56..56] idleY=56 dup:{atk3,atk4,kick,rage_attack,}
+  rage_attack  n= 1 t=0.05s pivY[56..56] idleY=56 dup:{atk3,atk4,kick,punch3,}
+  recovery     n= 4 t=0.40s =IDLE pivY[54..56] idleY=56 dup:{block,idle,}
+  run          n= 8 t=0.80s pivY[58..60] idleY=56 dup:{dash,dash_attack,walk,}
+  skill1       n=10 t=0.65s pivY[32..101] idleY=56 dup:{ab1,atk1,punch1,skill3,skill5,}
+  skill2       n= 6 t=0.55s pivY[47..61] idleY=56 dup:{ab2,atk2,punch2,skill4,}
+  skill3       n=10 t=0.65s pivY[32..101] idleY=56 dup:{ab1,atk1,punch1,skill1,skill5,}
+  skill4       n= 6 t=0.55s pivY[47..61] idleY=56 dup:{ab2,atk2,punch2,skill2,}
+  skill5       n=10 t=0.65s pivY[32..101] idleY=56 dup:{ab1,atk1,punch1,skill1,skill3,}
+  special      n= 1 t=0.05s pivY[58..58] idleY=56 dup:{energy,finisher,}
+  walk         n= 8 t=0.80s pivY[58..60] idleY=56 dup:{dash,dash_attack,run,}
+
+### 10 KF NAVAJERA kf=3 beta=0 atlas=- frames=76
+abilities 5: SOMBRAS TECNICA TECNICA TECNICA TECNICA
+  ab0          n=10 t=0.65s pivY[22..48] idleY=51 dup:{getup,}
+  ab1          n= 6 t=0.45s pivY[49..52] idleY=51 dup:{ab4,atk1,atk4,kick,punch1,rage_attack,skill1,skill4,skill5,}
+  ab2          n=12 t=0.70s pivY[41..52] idleY=51 dup:{ab3,atk2,atk3,punch2,punch3,skill2,skill3,}
+  ab3          n=12 t=0.65s pivY[41..52] idleY=51 dup:{ab2,atk2,atk3,punch2,punch3,skill2,skill3,}
+  ab4          n= 6 t=0.45s pivY[49..52] idleY=51 dup:{ab1,atk1,atk4,kick,punch1,rage_attack,skill1,skill4,skill5,}
+  air          n=15 t=1.00s pivY[17..87] idleY=51 dup:{airborne,}
+  airborne     n=15 t=1.00s pivY[17..87] idleY=51 dup:{air,}
+  atk1         n= 6 t=0.45s pivY[49..52] idleY=51 dup:{ab1,ab4,atk4,kick,punch1,rage_attack,skill1,skill4,skill5,}
+  atk2         n=12 t=0.70s pivY[41..52] idleY=51 dup:{ab2,ab3,atk3,punch2,punch3,skill2,skill3,}
+  atk3         n=12 t=0.65s pivY[41..52] idleY=51 dup:{ab2,ab3,atk2,punch2,punch3,skill2,skill3,}
+  atk4         n= 6 t=0.45s pivY[49..52] idleY=51 dup:{ab1,ab4,atk1,kick,punch1,rage_attack,skill1,skill4,skill5,}
+  block        n= 4 t=0.60s =IDLE pivY[49..51] idleY=51 dup:{idle,recovery,}
+  dash         n= 8 t=0.40s pivY[50..52] idleY=51 dup:{dash_attack,run,walk,}
+  dash_attack  n= 8 t=0.40s pivY[50..52] idleY=51 dup:{dash,run,walk,}
+  defeat       n=10 t=1.25s pivY[8..71] idleY=51 dup:{}
+  energy       n= 1 t=0.05s pivY[49..49] idleY=51 dup:{finisher,special,}
+  finisher     n= 1 t=0.05s pivY[49..49] idleY=51 dup:{energy,special,}
+  getup        n=10 t=0.65s pivY[22..48] idleY=51 dup:{ab0,}
+  hit          n= 4 t=0.30s pivY[64..72] idleY=51 dup:{hit_high,}
+  hit_high     n= 4 t=0.30s pivY[64..72] idleY=51 dup:{hit,}
+  hit_low      n= 5 t=0.50s pivY[45..72] idleY=51 dup:{}
+  idle         n= 4 t=0.60s pivY[49..51] idleY=51 dup:{block,recovery,}
+  kick         n= 6 t=0.45s pivY[49..52] idleY=51 dup:{ab1,ab4,atk1,atk4,punch1,rage_attack,skill1,skill4,skill5,}
+  knockdown    n= 8 t=0.80s pivY[37..55] idleY=51 dup:{}
+  punch1       n= 6 t=0.45s pivY[49..52] idleY=51 dup:{ab1,ab4,atk1,atk4,kick,rage_attack,skill1,skill4,skill5,}
+  punch2       n=12 t=0.70s pivY[41..52] idleY=51 dup:{ab2,ab3,atk2,atk3,punch3,skill2,skill3,}
+  punch3       n=12 t=0.65s pivY[41..52] idleY=51 dup:{ab2,ab3,atk2,atk3,punch2,skill2,skill3,}
+  rage_attack  n= 6 t=0.45s pivY[49..52] idleY=51 dup:{ab1,ab4,atk1,atk4,kick,punch1,skill1,skill4,skill5,}
+  recovery     n= 4 t=0.60s =IDLE pivY[49..51] idleY=51 dup:{block,idle,}
+  run          n= 8 t=0.40s pivY[50..52] idleY=51 dup:{dash,dash_attack,walk,}
+  skill1       n= 6 t=0.45s pivY[49..52] idleY=51 dup:{ab1,ab4,atk1,atk4,kick,punch1,rage_attack,skill4,skill5,}
+  skill2       n=12 t=0.70s pivY[41..52] idleY=51 dup:{ab2,ab3,atk2,atk3,punch2,punch3,skill3,}
+  skill3       n=12 t=0.65s pivY[41..52] idleY=51 dup:{ab2,ab3,atk2,atk3,punch2,punch3,skill2,}
+  skill4       n= 6 t=0.45s pivY[49..52] idleY=51 dup:{ab1,ab4,atk1,atk4,kick,punch1,rage_attack,skill1,skill5,}
+  skill5       n= 6 t=0.45s pivY[49..52] idleY=51 dup:{ab1,ab4,atk1,atk4,kick,punch1,rage_attack,skill1,skill4,}
+  special      n= 1 t=0.05s pivY[49..49] idleY=51 dup:{energy,finisher,}
+  walk         n= 8 t=0.80s pivY[50..52] idleY=51 dup:{dash,dash_attack,run,}
+
+### 11 KF SOLDADO kf=4 beta=0 atlas=- frames=76
+abilities 6: SOMBRAS TECNICA TECNICA TECNICA TECNICA TECNICA
+  ab0          n= 8 t=0.80s pivY[16..62] idleY=61 dup:{getup,}
+  ab1          n= 9 t=0.75s pivY[50..84] idleY=61 dup:{atk1,punch1,skill1,}
+  ab2          n= 7 t=0.70s pivY[58..63] idleY=61 dup:{ab4,atk2,atk4,kick,punch2,rage_attack,skill2,skill4,}
+  ab3          n= 9 t=0.90s pivY[55..67] idleY=61 dup:{atk3,punch3,skill3,}
+  ab4          n= 7 t=0.60s pivY[58..63] idleY=61 dup:{ab2,atk2,atk4,kick,punch2,rage_attack,skill2,skill4,}
+  ab5          n= 4 t=0.20s pivY[21..56] idleY=61 dup:{skill5,}
+  air          n= 9 t=1.00s pivY[16..80] idleY=61 dup:{airborne,}
+  airborne     n= 9 t=1.00s pivY[16..80] idleY=61 dup:{air,}
+  atk1         n= 9 t=0.75s pivY[50..84] idleY=61 dup:{ab1,punch1,skill1,}
+  atk2         n= 7 t=0.70s pivY[58..63] idleY=61 dup:{ab2,ab4,atk4,kick,punch2,rage_attack,skill2,skill4,}
+  atk3         n= 9 t=0.90s pivY[55..67] idleY=61 dup:{ab3,punch3,skill3,}
+  atk4         n= 7 t=0.60s pivY[58..63] idleY=61 dup:{ab2,ab4,atk2,kick,punch2,rage_attack,skill2,skill4,}
+  block        n= 4 t=0.45s =IDLE pivY[59..61] idleY=61 dup:{idle,recovery,}
+  dash         n= 8 t=0.80s pivY[61..63] idleY=61 dup:{dash_attack,run,walk,}
+  dash_attack  n= 8 t=0.80s pivY[61..63] idleY=61 dup:{dash,run,walk,}
+  defeat       n= 9 t=1.20s pivY[14..80] idleY=61 dup:{}
+  energy       n= 1 t=0.05s pivY[60..60] idleY=61 dup:{finisher,special,}
+  finisher     n= 1 t=0.05s pivY[60..60] idleY=61 dup:{energy,special,}
+  getup        n= 8 t=0.80s pivY[16..62] idleY=61 dup:{ab0,}
+  hit          n= 4 t=0.40s pivY[70..74] idleY=61 dup:{hit_high,}
+  hit_high     n= 4 t=0.40s pivY[70..74] idleY=61 dup:{hit,}
+  hit_low      n= 6 t=0.50s pivY[62..82] idleY=61 dup:{}
+  idle         n= 4 t=0.45s pivY[59..61] idleY=61 dup:{block,recovery,}
+  kick         n= 7 t=0.60s pivY[58..63] idleY=61 dup:{ab2,ab4,atk2,atk4,punch2,rage_attack,skill2,skill4,}
+  knockdown    n=10 t=0.75s pivY[21..76] idleY=61 dup:{}
+  punch1       n= 9 t=0.75s pivY[50..84] idleY=61 dup:{ab1,atk1,skill1,}
+  punch2       n= 7 t=0.70s pivY[58..63] idleY=61 dup:{ab2,ab4,atk2,atk4,kick,rage_attack,skill2,skill4,}
+  punch3       n= 9 t=0.90s pivY[55..67] idleY=61 dup:{ab3,atk3,skill3,}
+  rage_attack  n= 7 t=0.60s pivY[58..63] idleY=61 dup:{ab2,ab4,atk2,atk4,kick,punch2,skill2,skill4,}
+  recovery     n= 4 t=0.45s =IDLE pivY[59..61] idleY=61 dup:{block,idle,}
+  run          n= 8 t=0.80s pivY[61..63] idleY=61 dup:{dash,dash_attack,walk,}
+  skill1       n= 9 t=0.75s pivY[50..84] idleY=61 dup:{ab1,atk1,punch1,}
+  skill2       n= 7 t=0.70s pivY[58..63] idleY=61 dup:{ab2,ab4,atk2,atk4,kick,punch2,rage_attack,skill4,}
+  skill3       n= 9 t=0.90s pivY[55..67] idleY=61 dup:{ab3,atk3,punch3,}
+  skill4       n= 7 t=0.60s pivY[58..63] idleY=61 dup:{ab2,ab4,atk2,atk4,kick,punch2,rage_attack,skill2,}
+  skill5       n= 4 t=0.20s pivY[21..56] idleY=61 dup:{ab5,}
+  special      n= 1 t=0.05s pivY[60..60] idleY=61 dup:{energy,finisher,}
+  walk         n= 8 t=0.80s pivY[61..63] idleY=61 dup:{dash,dash_attack,run,}
+
+### 12 KF RUBIA kf=5 beta=0 atlas=- frames=60
+abilities 6: SOMBRAS FENIX TECNICA TECNICA TECNICA TECNICA
+  ab0          n= 7 t=0.60s pivY[14..53] idleY=53 dup:{getup,}
+  ab1          n= 6 t=1.95s pivY[10..26] idleY=53 dup:{skill5,}
+  ab2          n= 7 t=0.75s pivY[46..70] idleY=53 dup:{atk1,punch1,skill1,}
+  ab3          n= 5 t=0.45s pivY[49..52] idleY=53 dup:{ab5,atk2,atk4,kick,punch2,rage_attack,skill2,skill4,}
+  ab4          n= 7 t=0.70s pivY[46..70] idleY=53 dup:{atk3,punch3,skill3,}
+  ab5          n= 5 t=0.45s pivY[49..52] idleY=53 dup:{ab3,atk2,atk4,kick,punch2,rage_attack,skill2,skill4,}
+  air          n= 9 t=0.85s pivY[11..66] idleY=53 dup:{airborne,}
+  airborne     n= 9 t=0.85s pivY[11..66] idleY=53 dup:{air,}
+  atk1         n= 7 t=0.75s pivY[46..70] idleY=53 dup:{ab2,punch1,skill1,}
+  atk2         n= 5 t=0.45s pivY[49..52] idleY=53 dup:{ab3,ab5,atk4,kick,punch2,rage_attack,skill2,skill4,}
+  atk3         n= 7 t=0.70s pivY[46..70] idleY=53 dup:{ab4,punch3,skill3,}
+  atk4         n= 5 t=0.45s pivY[49..52] idleY=53 dup:{ab3,ab5,atk2,kick,punch2,rage_attack,skill2,skill4,}
+  block        n= 4 t=0.40s =IDLE pivY[51..53] idleY=53 dup:{idle,recovery,}
+  dash         n= 8 t=0.80s pivY[53..55] idleY=53 dup:{dash_attack,run,walk,}
+  dash_attack  n= 8 t=0.80s pivY[53..55] idleY=53 dup:{dash,run,walk,}
+  defeat       n= 7 t=1.65s pivY[14..71] idleY=53 dup:{}
+  energy       n= 1 t=0.05s pivY[53..53] idleY=53 dup:{finisher,special,}
+  finisher     n= 1 t=0.05s pivY[53..53] idleY=53 dup:{energy,special,}
+  getup        n= 7 t=0.60s pivY[14..53] idleY=53 dup:{ab0,}
+  hit          n= 4 t=0.40s pivY[69..76] idleY=53 dup:{hit_high,}
+  hit_high     n= 4 t=0.40s pivY[69..76] idleY=53 dup:{hit,}
+  hit_low      n= 3 t=0.30s pivY[59..60] idleY=53 dup:{}
+  idle         n= 4 t=0.40s pivY[51..53] idleY=53 dup:{block,recovery,}
+  kick         n= 5 t=0.45s pivY[49..52] idleY=53 dup:{ab3,ab5,atk2,atk4,punch2,rage_attack,skill2,skill4,}
+  knockdown    n= 8 t=0.75s pivY[16..79] idleY=53 dup:{}
+  punch1       n= 7 t=0.75s pivY[46..70] idleY=53 dup:{ab2,atk1,skill1,}
+  punch2       n= 5 t=0.45s pivY[49..52] idleY=53 dup:{ab3,ab5,atk2,atk4,kick,rage_attack,skill2,skill4,}
+  punch3       n= 7 t=0.70s pivY[46..70] idleY=53 dup:{ab4,atk3,skill3,}
+  rage_attack  n= 5 t=0.45s pivY[49..52] idleY=53 dup:{ab3,ab5,atk2,atk4,kick,punch2,skill2,skill4,}
+  recovery     n= 4 t=0.40s =IDLE pivY[51..53] idleY=53 dup:{block,idle,}
+  run          n= 8 t=0.80s pivY[53..55] idleY=53 dup:{dash,dash_attack,walk,}
+  skill1       n= 7 t=0.75s pivY[46..70] idleY=53 dup:{ab2,atk1,punch1,}
+  skill2       n= 5 t=0.45s pivY[49..52] idleY=53 dup:{ab3,ab5,atk2,atk4,kick,punch2,rage_attack,skill4,}
+  skill3       n= 7 t=0.70s pivY[46..70] idleY=53 dup:{ab4,atk3,punch3,}
+  skill4       n= 5 t=0.45s pivY[49..52] idleY=53 dup:{ab3,ab5,atk2,atk4,kick,punch2,rage_attack,skill2,}
+  skill5       n= 6 t=1.95s pivY[10..26] idleY=53 dup:{ab1,}
+  special      n= 1 t=0.05s pivY[53..53] idleY=53 dup:{energy,finisher,}
+  walk         n= 8 t=0.80s pivY[53..55] idleY=53 dup:{dash,dash_attack,run,}
+
+### 13 KF GORRA kf=6 beta=0 atlas=- frames=69
+abilities 6: SOMBRAS TECNICA TECNICA TECNICA TECNICA TECNICA
+  ab0          n= 6 t=0.50s pivY[13..48] idleY=52 dup:{getup,}
+  ab1          n= 6 t=0.50s pivY[51..58] idleY=52 dup:{ab3,atk1,atk3,punch1,punch3,skill1,skill3,}
+  ab2          n= 7 t=0.70s pivY[50..71] idleY=52 dup:{atk2,punch2,skill2,}
+  ab3          n= 6 t=0.50s pivY[51..58] idleY=52 dup:{ab1,atk1,atk3,punch1,punch3,skill1,skill3,}
+  ab4          n= 6 t=0.60s pivY[50..71] idleY=52 dup:{atk4,kick,rage_attack,skill4,}
+  ab5          n= 7 t=1.25s pivY[11..27] idleY=52 dup:{skill5,}
+  air          n= 9 t=0.85s pivY[11..66] idleY=52 dup:{airborne,}
+  airborne     n= 9 t=0.85s pivY[11..66] idleY=52 dup:{air,}
+  atk1         n= 6 t=0.50s pivY[51..58] idleY=52 dup:{ab1,ab3,atk3,punch1,punch3,skill1,skill3,}
+  atk2         n= 7 t=0.70s pivY[50..71] idleY=52 dup:{ab2,punch2,skill2,}
+  atk3         n= 6 t=0.50s pivY[51..58] idleY=52 dup:{ab1,ab3,atk1,punch1,punch3,skill1,skill3,}
+  atk4         n= 6 t=0.60s pivY[50..71] idleY=52 dup:{ab4,kick,rage_attack,skill4,}
+  block        n= 4 t=0.40s =IDLE pivY[50..52] idleY=52 dup:{idle,recovery,}
+  dash         n= 8 t=0.80s pivY[52..54] idleY=52 dup:{dash_attack,run,}
+  dash_attack  n= 8 t=0.80s pivY[52..54] idleY=52 dup:{dash,run,}
+  defeat       n=11 t=1.45s pivY[15..82] idleY=52 dup:{}
+  energy       n= 1 t=0.05s pivY[52..52] idleY=52 dup:{finisher,special,}
+  finisher     n= 1 t=0.05s pivY[52..52] idleY=52 dup:{energy,special,}
+  getup        n= 6 t=0.50s pivY[13..48] idleY=52 dup:{ab0,}
+  hit          n= 4 t=0.40s pivY[68..77] idleY=52 dup:{hit_high,}
+  hit_high     n= 4 t=0.40s pivY[68..77] idleY=52 dup:{hit,}
+  hit_low      n= 5 t=0.50s pivY[54..81] idleY=52 dup:{}
+  idle         n= 4 t=0.40s pivY[50..52] idleY=52 dup:{block,recovery,}
+  kick         n= 6 t=0.60s pivY[50..71] idleY=52 dup:{ab4,atk4,rage_attack,skill4,}
+  knockdown    n=10 t=0.75s pivY[12..57] idleY=52 dup:{}
+  punch1       n= 6 t=0.50s pivY[51..58] idleY=52 dup:{ab1,ab3,atk1,atk3,punch3,skill1,skill3,}
+  punch2       n= 7 t=0.70s pivY[50..71] idleY=52 dup:{ab2,atk2,skill2,}
+  punch3       n= 6 t=0.50s pivY[51..58] idleY=52 dup:{ab1,ab3,atk1,atk3,punch1,skill1,skill3,}
+  rage_attack  n= 6 t=0.60s pivY[50..71] idleY=52 dup:{ab4,atk4,kick,skill4,}
+  recovery     n= 4 t=0.40s =IDLE pivY[50..52] idleY=52 dup:{block,idle,}
+  run          n= 8 t=0.80s pivY[52..54] idleY=52 dup:{dash,dash_attack,}
+  skill1       n= 6 t=0.50s pivY[51..58] idleY=52 dup:{ab1,ab3,atk1,atk3,punch1,punch3,skill3,}
+  skill2       n= 7 t=0.70s pivY[50..71] idleY=52 dup:{ab2,atk2,punch2,}
+  skill3       n= 6 t=0.50s pivY[51..58] idleY=52 dup:{ab1,ab3,atk1,atk3,punch1,punch3,skill1,}
+  skill4       n= 6 t=0.60s pivY[50..71] idleY=52 dup:{ab4,atk4,kick,rage_attack,}
+  skill5       n= 7 t=1.25s pivY[11..27] idleY=52 dup:{ab5,}
+  special      n= 1 t=0.05s pivY[52..52] idleY=52 dup:{energy,finisher,}
+  walk         n= 8 t=0.75s pivY[52..54] idleY=52 dup:{}
+
+### 14 KF PELEADOR kf=7 beta=0 atlas=- frames=96
+abilities 6: SOMBRAS TECNICA TECNICA TECNICA TECNICA TECNICA
+  ab0          n= 8 t=0.60s pivY[26..52] idleY=58 dup:{getup,}
+  ab1          n=11 t=0.90s pivY[57..75] idleY=58 dup:{atk1,punch1,skill1,}
+  ab2          n=10 t=1.00s pivY[57..75] idleY=58 dup:{atk2,punch2,skill2,}
+  ab3          n=15 t=1.20s pivY[57..77] idleY=58 dup:{ab4,atk3,atk4,kick,punch3,rage_attack,skill3,skill4,}
+  ab4          n=15 t=1.25s pivY[57..77] idleY=58 dup:{ab3,atk3,atk4,kick,punch3,rage_attack,skill3,skill4,}
+  ab5          n=20 t=1.65s pivY[59..72] idleY=58 dup:{energy,finisher,skill5,special,}
+  air          n=12 t=1.00s pivY[9..90] idleY=58 dup:{airborne,}
+  airborne     n=12 t=1.00s pivY[9..90] idleY=58 dup:{air,}
+  atk1         n=11 t=0.90s pivY[57..75] idleY=58 dup:{ab1,punch1,skill1,}
+  atk2         n=10 t=1.00s pivY[57..75] idleY=58 dup:{ab2,punch2,skill2,}
+  atk3         n=15 t=1.20s pivY[57..77] idleY=58 dup:{ab3,ab4,atk4,kick,punch3,rage_attack,skill3,skill4,}
+  atk4         n=15 t=1.25s pivY[57..77] idleY=58 dup:{ab3,ab4,atk3,kick,punch3,rage_attack,skill3,skill4,}
+  block        n= 4 t=0.70s =IDLE pivY[56..58] idleY=58 dup:{idle,recovery,}
+  dash         n= 8 t=0.80s pivY[61..63] idleY=58 dup:{dash_attack,run,walk,}
+  dash_attack  n= 8 t=0.80s pivY[61..63] idleY=58 dup:{dash,run,walk,}
+  defeat       n=13 t=1.65s pivY[15..71] idleY=58 dup:{}
+  energy       n=20 t=1.65s pivY[59..72] idleY=58 dup:{ab5,finisher,skill5,special,}
+  finisher     n=20 t=1.65s pivY[59..72] idleY=58 dup:{ab5,energy,skill5,special,}
+  getup        n= 8 t=0.60s pivY[26..52] idleY=58 dup:{ab0,}
+  hit          n= 5 t=0.35s pivY[58..68] idleY=58 dup:{hit_high,}
+  hit_high     n= 5 t=0.35s pivY[58..68] idleY=58 dup:{hit,}
+  hit_low      n= 6 t=0.40s pivY[55..74] idleY=58 dup:{}
+  idle         n= 4 t=0.70s pivY[56..58] idleY=58 dup:{block,recovery,}
+  kick         n=15 t=1.25s pivY[57..77] idleY=58 dup:{ab3,ab4,atk3,atk4,punch3,rage_attack,skill3,skill4,}
+  knockdown    n= 9 t=0.80s pivY[39..70] idleY=58 dup:{}
+  punch1       n=11 t=0.90s pivY[57..75] idleY=58 dup:{ab1,atk1,skill1,}
+  punch2       n=10 t=1.00s pivY[57..75] idleY=58 dup:{ab2,atk2,skill2,}
+  punch3       n=15 t=1.20s pivY[57..77] idleY=58 dup:{ab3,ab4,atk3,atk4,kick,rage_attack,skill3,skill4,}
+  rage_attack  n=15 t=1.25s pivY[57..77] idleY=58 dup:{ab3,ab4,atk3,atk4,kick,punch3,skill3,skill4,}
+  recovery     n= 4 t=0.70s =IDLE pivY[56..58] idleY=58 dup:{block,idle,}
+  run          n= 8 t=0.80s pivY[61..63] idleY=58 dup:{dash,dash_attack,walk,}
+  skill1       n=11 t=0.90s pivY[57..75] idleY=58 dup:{ab1,atk1,punch1,}
+  skill2       n=10 t=1.00s pivY[57..75] idleY=58 dup:{ab2,atk2,punch2,}
+  skill3       n=15 t=1.20s pivY[57..77] idleY=58 dup:{ab3,ab4,atk3,atk4,kick,punch3,rage_attack,skill4,}
+  skill4       n=15 t=1.25s pivY[57..77] idleY=58 dup:{ab3,ab4,atk3,atk4,kick,punch3,rage_attack,skill3,}
+  skill5       n=20 t=1.65s pivY[59..72] idleY=58 dup:{ab5,energy,finisher,special,}
+  special      n=20 t=1.65s pivY[59..72] idleY=58 dup:{ab5,energy,finisher,skill5,}
+  walk         n= 8 t=0.80s pivY[61..63] idleY=58 dup:{dash,dash_attack,run,}
+
+### 15 KF CUCHILLERO kf=8 beta=0 atlas=- frames=86
+abilities 5: SOMBRAS TECNICA TECNICA TECNICA TECNICA
+  ab0          n= 5 t=0.45s pivY[15..52] idleY=53 dup:{getup,}
+  ab1          n= 8 t=0.60s pivY[53..57] idleY=53 dup:{atk1,punch1,skill1,skill5,}
+  ab2          n= 7 t=0.60s pivY[37..64] idleY=53 dup:{ab4,atk2,atk4,kick,punch2,rage_attack,skill2,skill4,}
+  ab3          n= 9 t=0.70s pivY[53..57] idleY=53 dup:{atk3,punch3,skill3,}
+  ab4          n= 7 t=0.70s pivY[37..64] idleY=53 dup:{ab2,atk2,atk4,kick,punch2,rage_attack,skill2,skill4,}
+  air          n=16 t=1.00s pivY[6..60] idleY=53 dup:{airborne,}
+  airborne     n=16 t=1.00s pivY[6..60] idleY=53 dup:{air,}
+  atk1         n= 8 t=0.60s pivY[53..57] idleY=53 dup:{ab1,punch1,skill1,skill5,}
+  atk2         n= 7 t=0.60s pivY[37..64] idleY=53 dup:{ab2,ab4,atk4,kick,punch2,rage_attack,skill2,skill4,}
+  atk3         n= 9 t=0.70s pivY[53..57] idleY=53 dup:{ab3,punch3,skill3,}
+  atk4         n= 7 t=0.70s pivY[37..64] idleY=53 dup:{ab2,ab4,atk2,kick,punch2,rage_attack,skill2,skill4,}
+  block        n= 4 t=0.40s =IDLE pivY[51..53] idleY=53 dup:{idle,recovery,}
+  dash         n= 8 t=0.40s pivY[52..54] idleY=53 dup:{dash_attack,run,}
+  dash_attack  n= 8 t=0.40s pivY[52..54] idleY=53 dup:{dash,run,}
+  defeat       n=14 t=1.45s pivY[14..68] idleY=53 dup:{}
+  energy       n= 1 t=0.05s pivY[51..51] idleY=53 dup:{finisher,special,}
+  finisher     n= 1 t=0.05s pivY[51..51] idleY=53 dup:{energy,special,}
+  getup        n= 5 t=0.45s pivY[15..52] idleY=53 dup:{ab0,}
+  hit          n= 4 t=0.40s pivY[60..64] idleY=53 dup:{hit_high,}
+  hit_high     n= 4 t=0.40s pivY[60..64] idleY=53 dup:{hit,}
+  hit_low      n= 6 t=0.55s pivY[45..76] idleY=53 dup:{}
+  idle         n= 4 t=0.40s pivY[51..53] idleY=53 dup:{block,recovery,}
+  kick         n= 7 t=0.70s pivY[37..64] idleY=53 dup:{ab2,ab4,atk2,atk4,punch2,rage_attack,skill2,skill4,}
+  knockdown    n= 9 t=0.75s pivY[28..80] idleY=53 dup:{}
+  punch1       n= 8 t=0.60s pivY[53..57] idleY=53 dup:{ab1,atk1,skill1,skill5,}
+  punch2       n= 7 t=0.60s pivY[37..64] idleY=53 dup:{ab2,ab4,atk2,atk4,kick,rage_attack,skill2,skill4,}
+  punch3       n= 9 t=0.70s pivY[53..57] idleY=53 dup:{ab3,atk3,skill3,}
+  rage_attack  n= 7 t=0.70s pivY[37..64] idleY=53 dup:{ab2,ab4,atk2,atk4,kick,punch2,skill2,skill4,}
+  recovery     n= 4 t=0.40s =IDLE pivY[51..53] idleY=53 dup:{block,idle,}
+  run          n= 8 t=0.40s pivY[52..54] idleY=53 dup:{dash,dash_attack,}
+  skill1       n= 8 t=0.60s pivY[53..57] idleY=53 dup:{ab1,atk1,punch1,skill5,}
+  skill2       n= 7 t=0.60s pivY[37..64] idleY=53 dup:{ab2,ab4,atk2,atk4,kick,punch2,rage_attack,skill4,}
+  skill3       n= 9 t=0.70s pivY[53..57] idleY=53 dup:{ab3,atk3,punch3,}
+  skill4       n= 7 t=0.70s pivY[37..64] idleY=53 dup:{ab2,ab4,atk2,atk4,kick,punch2,rage_attack,skill2,}
+  skill5       n= 8 t=0.60s pivY[53..57] idleY=53 dup:{ab1,atk1,punch1,skill1,}
+  special      n= 1 t=0.05s pivY[51..51] idleY=53 dup:{energy,finisher,}
+  walk         n= 8 t=0.90s pivY[52..54] idleY=53 dup:{}
+
+### 16 KF JEFE GARRA kf=9 beta=0 atlas=- frames=101
+abilities 5: TECNICA TECNICA TECNICA TECNICA TECNICA
+  ab0          n= 9 t=0.65s pivY[66..81] idleY=77 dup:{atk1,punch1,skill1,}
+  ab1          n=22 t=1.40s pivY[63..121] idleY=77 dup:{atk2,punch2,skill2,}
+  ab2          n=15 t=1.20s pivY[67..141] idleY=77 dup:{atk3,punch3,skill3,}
+  ab3          n=14 t=1.15s pivY[66..94] idleY=77 dup:{atk4,kick,rage_attack,skill4,}
+  ab4          n= 8 t=0.45s pivY[63..114] idleY=77 dup:{energy,finisher,skill5,special,}
+  air          n= 4 t=0.40s pivY[74..75] idleY=77 dup:{airborne,}
+  airborne     n= 4 t=0.40s pivY[74..75] idleY=77 dup:{air,}
+  atk1         n= 9 t=0.65s pivY[66..81] idleY=77 dup:{ab0,punch1,skill1,}
+  atk2         n=22 t=1.40s pivY[63..121] idleY=77 dup:{ab1,punch2,skill2,}
+  atk3         n=15 t=1.20s pivY[67..141] idleY=77 dup:{ab2,punch3,skill3,}
+  atk4         n=14 t=1.15s pivY[66..94] idleY=77 dup:{ab3,kick,rage_attack,skill4,}
+  block        n= 4 t=0.50s =IDLE pivY[75..77] idleY=77 dup:{idle,recovery,}
+  dash         n= 8 t=0.80s pivY[78..80] idleY=77 dup:{dash_attack,run,walk,}
+  dash_attack  n= 8 t=0.80s pivY[78..80] idleY=77 dup:{dash,run,walk,}
+  defeat       n=13 t=1.55s pivY[44..119] idleY=77 dup:{}
+  energy       n= 8 t=0.45s pivY[63..114] idleY=77 dup:{ab4,finisher,skill5,special,}
+  finisher     n= 8 t=0.45s pivY[63..114] idleY=77 dup:{ab4,energy,skill5,special,}
+  getup        n= 1 t=0.05s pivY[77..77] idleY=77 dup:{}
+  hit          n= 4 t=0.60s pivY[87..95] idleY=77 dup:{hit_high,}
+  hit_high     n= 4 t=0.60s pivY[87..95] idleY=77 dup:{hit,}
+  hit_low      n= 4 t=0.40s pivY[74..75] idleY=77 dup:{}
+  idle         n= 4 t=0.50s pivY[75..77] idleY=77 dup:{block,recovery,}
+  kick         n=14 t=1.15s pivY[66..94] idleY=77 dup:{ab3,atk4,rage_attack,skill4,}
+  knockdown    n= 4 t=0.40s pivY[83..83] idleY=77 dup:{}
+  punch1       n= 9 t=0.65s pivY[66..81] idleY=77 dup:{ab0,atk1,skill1,}
+  punch2       n=22 t=1.40s pivY[63..121] idleY=77 dup:{ab1,atk2,skill2,}
+  punch3       n=15 t=1.20s pivY[67..141] idleY=77 dup:{ab2,atk3,skill3,}
+  rage_attack  n=14 t=1.15s pivY[66..94] idleY=77 dup:{ab3,atk4,kick,skill4,}
+  recovery     n= 4 t=0.50s =IDLE pivY[75..77] idleY=77 dup:{block,idle,}
+  run          n= 8 t=0.80s pivY[78..80] idleY=77 dup:{dash,dash_attack,walk,}
+  skill1       n= 9 t=0.65s pivY[66..81] idleY=77 dup:{ab0,atk1,punch1,}
+  skill2       n=22 t=1.40s pivY[63..121] idleY=77 dup:{ab1,atk2,punch2,}
+  skill3       n=15 t=1.20s pivY[67..141] idleY=77 dup:{ab2,atk3,punch3,}
+  skill4       n=14 t=1.15s pivY[66..94] idleY=77 dup:{ab3,atk4,kick,rage_attack,}
+  skill5       n= 8 t=0.45s pivY[63..114] idleY=77 dup:{ab4,energy,finisher,special,}
+  special      n= 8 t=0.45s pivY[63..114] idleY=77 dup:{ab4,energy,finisher,skill5,}
+  walk         n= 8 t=0.80s pivY[78..80] idleY=77 dup:{dash,dash_attack,run,}
+
+### 17 KF BUFONA kf=10 beta=0 atlas=- frames=90
+abilities 6: BARRIDA TECNICA TECNICA TECNICA TECNICA TECNICA
+  ab0          n=18 t=1.80s pivY[53..86] idleY=67 dup:{}
+  ab1          n=12 t=0.90s pivY[53..87] idleY=67 dup:{atk1,punch1,skill1,}
+  ab2          n=13 t=1.05s pivY[56..107] idleY=67 dup:{atk2,punch2,skill2,}
+  ab3          n= 7 t=0.70s pivY[49..59] idleY=67 dup:{atk3,punch3,skill3,}
+  ab4          n=14 t=1.05s pivY[53..132] idleY=67 dup:{atk4,kick,rage_attack,skill4,}
+  ab5          n=13 t=0.80s pivY[56..132] idleY=67 dup:{energy,finisher,skill5,special,}
+  air          n= 3 t=0.30s pivY[57..57] idleY=67 dup:{airborne,}
+  airborne     n= 3 t=0.30s pivY[57..57] idleY=67 dup:{air,}
+  atk1         n=12 t=0.90s pivY[53..87] idleY=67 dup:{ab1,punch1,skill1,}
+  atk2         n=13 t=1.05s pivY[56..107] idleY=67 dup:{ab2,punch2,skill2,}
+  atk3         n= 7 t=0.70s pivY[49..59] idleY=67 dup:{ab3,punch3,skill3,}
+  atk4         n=14 t=1.05s pivY[53..132] idleY=67 dup:{ab4,kick,rage_attack,skill4,}
+  block        n= 4 t=0.40s =IDLE pivY[64..67] idleY=67 dup:{idle,recovery,}
+  dash         n= 8 t=0.40s pivY[55..56] idleY=67 dup:{dash_attack,run,walk,}
+  dash_attack  n= 8 t=0.40s pivY[55..56] idleY=67 dup:{dash,run,walk,}
+  defeat       n=11 t=0.65s pivY[21..100] idleY=67 dup:{}
+  energy       n=13 t=0.80s pivY[56..132] idleY=67 dup:{ab5,finisher,skill5,special,}
+  finisher     n=13 t=0.80s pivY[56..132] idleY=67 dup:{ab5,energy,skill5,special,}
+  getup        n= 1 t=0.05s pivY[67..67] idleY=67 dup:{}
+  hit          n= 4 t=0.60s pivY[69..81] idleY=67 dup:{hit_high,}
+  hit_high     n= 4 t=0.60s pivY[69..81] idleY=67 dup:{hit,}
+  hit_low      n= 3 t=0.30s pivY[57..67] idleY=67 dup:{}
+  idle         n= 4 t=0.40s pivY[64..67] idleY=67 dup:{block,recovery,}
+  kick         n=14 t=1.05s pivY[53..132] idleY=67 dup:{ab4,atk4,rage_attack,skill4,}
+  knockdown    n= 3 t=0.30s pivY[67..67] idleY=67 dup:{}
+  punch1       n=12 t=0.90s pivY[53..87] idleY=67 dup:{ab1,atk1,skill1,}
+  punch2       n=13 t=1.05s pivY[56..107] idleY=67 dup:{ab2,atk2,skill2,}
+  punch3       n= 7 t=0.70s pivY[49..59] idleY=67 dup:{ab3,atk3,skill3,}
+  rage_attack  n=14 t=1.05s pivY[53..132] idleY=67 dup:{ab4,atk4,kick,skill4,}
+  recovery     n= 4 t=0.40s =IDLE pivY[64..67] idleY=67 dup:{block,idle,}
+  run          n= 8 t=0.40s pivY[55..56] idleY=67 dup:{dash,dash_attack,walk,}
+  skill1       n=12 t=0.90s pivY[53..87] idleY=67 dup:{ab1,atk1,punch1,}
+  skill2       n=13 t=1.05s pivY[56..107] idleY=67 dup:{ab2,atk2,punch2,}
+  skill3       n= 7 t=0.70s pivY[49..59] idleY=67 dup:{ab3,atk3,punch3,}
+  skill4       n=14 t=1.05s pivY[53..132] idleY=67 dup:{ab4,atk4,kick,rage_attack,}
+  skill5       n=13 t=0.80s pivY[56..132] idleY=67 dup:{ab5,energy,finisher,special,}
+  special      n=13 t=0.80s pivY[56..132] idleY=67 dup:{ab5,energy,finisher,skill5,}
+  walk         n= 8 t=0.40s pivY[55..56] idleY=67 dup:{dash,dash_attack,run,}
+
+### 18 KF HEROE TRANSFORMADO kf=11 beta=0 atlas=- frames=144
+abilities 4: COMBO 3 VOLTERETA ESPECIAL TECNICA
+  ab0          n=25 t=1.65s pivY[35..110] idleY=53 dup:{atk3,punch3,skill2,}
+  ab1          n=24 t=1.55s pivY[36..77] idleY=53 dup:{atk4,kick,skill1,}
+  ab2          n=30 t=1.50s pivY[38..92] idleY=53 dup:{energy,finisher,skill3,special,}
+  ab3          n= 8 t=0.60s pivY[56..58] idleY=53 dup:{}
+  air          n= 4 t=0.30s pivY[53..70] idleY=53 dup:{airborne,}
+  airborne     n= 4 t=0.30s pivY[53..70] idleY=53 dup:{air,}
+  atk1         n=13 t=0.65s pivY[34..92] idleY=53 dup:{punch1,}
+  atk2         n= 7 t=0.45s pivY[35..92] idleY=53 dup:{punch2,}
+  atk3         n=25 t=1.65s pivY[35..110] idleY=53 dup:{ab0,punch3,skill2,}
+  atk4         n=24 t=1.55s pivY[36..77] idleY=53 dup:{ab1,kick,skill1,}
+  block        n= 4 t=0.20s pivY[53..70] idleY=53 dup:{recovery,}
+  dash         n= 7 t=0.55s pivY[36..56] idleY=53 dup:{dash_attack,skill4,}
+  dash_attack  n= 7 t=0.55s pivY[36..56] idleY=53 dup:{dash,skill4,}
+  defeat       n=13 t=1.65s pivY[8..53] idleY=53 dup:{}
+  energy       n=30 t=1.50s pivY[38..92] idleY=53 dup:{ab2,finisher,skill3,special,}
+  finisher     n=30 t=1.50s pivY[38..92] idleY=53 dup:{ab2,energy,skill3,special,}
+  getup        n= 1 t=0.05s pivY[65..65] idleY=53 dup:{}
+  hit          n= 4 t=0.30s pivY[53..70] idleY=53 dup:{hit_high,hit_low,}
+  hit_high     n= 4 t=0.30s pivY[53..70] idleY=53 dup:{hit,hit_low,}
+  hit_low      n= 4 t=0.30s pivY[53..70] idleY=53 dup:{hit,hit_high,}
+  idle         n= 4 t=0.70s pivY[49..70] idleY=53 dup:{rage_attack,}
+  kick         n=24 t=1.55s pivY[36..77] idleY=53 dup:{ab1,atk4,skill1,}
+  knockdown    n= 4 t=0.30s pivY[53..70] idleY=53 dup:{}
+  punch1       n=13 t=0.65s pivY[34..92] idleY=53 dup:{atk1,}
+  punch2       n= 7 t=0.45s pivY[35..92] idleY=53 dup:{atk2,}
+  punch3       n=25 t=1.65s pivY[35..110] idleY=53 dup:{ab0,atk3,skill2,}
+  rage_attack  n= 4 t=0.70s =IDLE pivY[49..70] idleY=53 dup:{idle,}
+  recovery     n= 4 t=0.20s pivY[53..70] idleY=53 dup:{block,}
+  run          n= 8 t=0.60s pivY[42..46] idleY=53 dup:{}
+  skill1       n=24 t=1.55s pivY[36..77] idleY=53 dup:{ab1,atk4,kick,}
+  skill2       n=25 t=1.65s pivY[35..110] idleY=53 dup:{ab0,atk3,punch3,}
+  skill3       n=30 t=1.50s pivY[38..92] idleY=53 dup:{ab2,energy,finisher,special,}
+  skill4       n= 7 t=0.55s pivY[36..56] idleY=53 dup:{dash,dash_attack,}
+  skill5       n= 7 t=0.55s pivY[36..84] idleY=53 dup:{}
+  special      n=30 t=1.50s pivY[38..92] idleY=53 dup:{ab2,energy,finisher,skill3,}
+  transform    n= 4 t=0.40s pivY[56..58] idleY=53 dup:{}
+  walk         n= 8 t=0.60s pivY[42..46] idleY=53 dup:{}
+
+### 19 KF HEROINA TRANSFORMADA kf=12 beta=0 atlas=- frames=79
+abilities 4: VOLTERETA COMBO 3 VOLTERETA ESPECIAL
+  ab0          n= 8 t=0.55s pivY[38..80] idleY=58 dup:{skill5,}
+  ab1          n=24 t=1.25s pivY[39..156] idleY=58 dup:{atk3,punch3,skill2,}
+  ab2          n=30 t=1.50s pivY[45..72] idleY=58 dup:{atk4,kick,skill1,}
+  ab3          n=30 t=1.50s pivY[45..72] idleY=58 dup:{energy,finisher,skill3,special,}
+  air          n= 1 t=0.05s pivY[58..58] idleY=58 dup:{airborne,knockdown,}
+  airborne     n= 1 t=0.05s pivY[58..58] idleY=58 dup:{air,knockdown,}
+  atk1         n=13 t=0.65s pivY[45..72] idleY=58 dup:{punch1,}
+  atk2         n=16 t=0.80s pivY[40..103] idleY=58 dup:{punch2,}
+  atk3         n=24 t=1.25s pivY[39..156] idleY=58 dup:{ab1,punch3,skill2,}
+  atk4         n=30 t=1.50s pivY[45..72] idleY=58 dup:{ab2,kick,skill1,}
+  block        n= 1 t=0.05s pivY[65..65] idleY=58 dup:{getup,rage_attack,recovery,super,}
+  dash         n= 9 t=0.45s pivY[37..55] idleY=58 dup:{dash_attack,skill4,}
+  dash_attack  n= 9 t=0.45s pivY[37..55] idleY=58 dup:{dash,skill4,}
+  defeat       n= 4 t=0.60s =IDLE pivY[56..70] idleY=58 dup:{hit,hit_high,hit_low,idle,}
+  energy       n=30 t=1.50s pivY[45..72] idleY=58 dup:{ab3,finisher,skill3,special,}
+  finisher     n=30 t=1.50s pivY[45..72] idleY=58 dup:{ab3,energy,skill3,special,}
+  getup        n= 1 t=0.05s pivY[65..65] idleY=58 dup:{block,rage_attack,recovery,super,}
+  hit          n= 4 t=0.20s =IDLE pivY[56..70] idleY=58 dup:{defeat,hit_high,hit_low,idle,}
+  hit_high     n= 4 t=0.20s =IDLE pivY[56..70] idleY=58 dup:{defeat,hit,hit_low,idle,}
+  hit_low      n= 4 t=0.20s =IDLE pivY[56..70] idleY=58 dup:{defeat,hit,hit_high,idle,}
+  idle         n= 4 t=0.60s pivY[56..70] idleY=58 dup:{defeat,hit,hit_high,hit_low,}
+  kick         n=30 t=1.50s pivY[45..72] idleY=58 dup:{ab2,atk4,skill1,}
+  knockdown    n= 1 t=0.05s pivY[58..58] idleY=58 dup:{air,airborne,}
+  punch1       n=13 t=0.65s pivY[45..72] idleY=58 dup:{atk1,}
+  punch2       n=16 t=0.80s pivY[40..103] idleY=58 dup:{atk2,}
+  punch3       n=24 t=1.25s pivY[39..156] idleY=58 dup:{ab1,atk3,skill2,}
+  rage_attack  n= 1 t=0.05s pivY[65..65] idleY=58 dup:{block,getup,recovery,super,}
+  recovery     n= 1 t=0.05s pivY[65..65] idleY=58 dup:{block,getup,rage_attack,super,}
+  run          n= 8 t=0.40s pivY[46..51] idleY=58 dup:{walk,}
+  skill1       n=30 t=1.50s pivY[45..72] idleY=58 dup:{ab2,atk4,kick,}
+  skill2       n=24 t=1.25s pivY[39..156] idleY=58 dup:{ab1,atk3,punch3,}
+  skill3       n=30 t=1.50s pivY[45..72] idleY=58 dup:{ab3,energy,finisher,special,}
+  skill4       n= 9 t=0.45s pivY[37..55] idleY=58 dup:{dash,dash_attack,}
+  skill5       n= 8 t=0.40s pivY[38..80] idleY=58 dup:{ab0,}
+  special      n=30 t=1.50s pivY[45..72] idleY=58 dup:{ab3,energy,finisher,skill3,}
+  super        n= 1 t=0.05s pivY[65..65] idleY=58 dup:{block,getup,rage_attack,recovery,}
+  walk         n= 8 t=0.40s pivY[46..51] idleY=58 dup:{run,}
+
+### 20 RAYDER CLON BETA kf=13 beta=0 atlas=- frames=458
+abilities 23: SOMBRAS ESTALLIDO PILAR LLAMARADA FENIX TORNADO BARRIDA CIRCULO FUEGO ERUPCION MEDIA LUNA TAJO INFIERNO SUPER DESPERTAR VOLTERETA GIRO RODADA PATADA AEREA CAIDA TORBELLINO MORTAL CONTRA SALTO TIGRE
+  ab0          n=35 t=2.15s pivY[72..280] idleY=110 dup:{skill1,}
+  ab1          n=35 t=2.70s pivY[72..204] idleY=110 dup:{skill2,}
+  ab10         n=20 t=1.45s pivY[72..226] idleY=110 dup:{}
+  ab11         n=40 t=2.50s pivY[84..264] idleY=110 dup:{}
+  ab12         n=42 t=2.65s pivY[68..158] idleY=110 dup:{rage_attack,super,}
+  ab13         n=38 t=3.80s pivY[78..140] idleY=110 dup:{}
+  ab14         n=11 t=0.55s pivY[72..204] idleY=110 dup:{}
+  ab15         n= 8 t=0.45s pivY[70..200] idleY=110 dup:{}
+  ab16         n=12 t=0.60s pivY[72..204] idleY=110 dup:{}
+  ab17         n=20 t=1.15s pivY[52..254] idleY=110 dup:{}
+  ab18         n=16 t=0.95s pivY[110..212] idleY=110 dup:{}
+  ab19         n=27 t=1.35s pivY[72..212] idleY=110 dup:{}
+  ab2          n=36 t=2.65s pivY[56..364] idleY=110 dup:{skill3,}
+  ab20         n=11 t=0.70s pivY[64..166] idleY=110 dup:{}
+  ab21         n=11 t=1.20s pivY[114..204] idleY=110 dup:{}
+  ab22         n=18 t=1.05s pivY[52..230] idleY=110 dup:{}
+  ab3          n=35 t=2.45s pivY[80..264] idleY=110 dup:{skill4,}
+  ab4          n=47 t=2.70s pivY[72..286] idleY=110 dup:{skill5,}
+  ab5          n=43 t=3.35s pivY[54..188] idleY=110 dup:{}
+  ab6          n=18 t=1.20s pivY[54..114] idleY=110 dup:{}
+  ab7          n= 5 t=0.25s pivY[56..56] idleY=110 dup:{}
+  ab8          n=16 t=1.20s pivY[56..364] idleY=110 dup:{}
+  ab9          n=17 t=1.85s pivY[72..226] idleY=110 dup:{}
+  air          n= 9 t=1.05s pivY[32..152] idleY=110 dup:{airborne,}
+  airborne     n= 9 t=1.05s pivY[32..152] idleY=110 dup:{air,}
+  atk1         n= 7 t=0.50s pivY[90..110] idleY=110 dup:{punch1,}
+  atk2         n=15 t=1.00s pivY[78..128] idleY=110 dup:{punch2,}
+  atk3         n=15 t=1.30s pivY[80..122] idleY=110 dup:{punch3,}
+  atk4         n=20 t=1.95s pivY[72..226] idleY=110 dup:{kick,}
+  block        n= 1 t=0.05s pivY[106..106] idleY=110 dup:{recovery,}
+  dash         n=12 t=0.60s pivY[86..116] idleY=110 dup:{dash_attack,}
+  dash_attack  n=12 t=0.60s pivY[86..116] idleY=110 dup:{dash,}
+  defeat       n=15 t=2.95s pivY[16..106] idleY=110 dup:{}
+  energy       n=18 t=1.40s pivY[82..188] idleY=110 dup:{finisher,special,}
+  finisher     n=18 t=1.40s pivY[82..188] idleY=110 dup:{energy,special,}
+  getup        n= 5 t=0.40s pivY[22..100] idleY=110 dup:{}
+  hit          n= 5 t=0.45s pivY[98..158] idleY=110 dup:{hit_high,hit_low,}
+  hit_high     n= 5 t=0.45s pivY[98..158] idleY=110 dup:{hit,hit_low,}
+  hit_low      n= 5 t=0.45s pivY[98..158] idleY=110 dup:{hit,hit_high,}
+  idle         n= 4 t=0.50s pivY[106..110] idleY=110 dup:{}
+  kick         n=20 t=1.95s pivY[72..226] idleY=110 dup:{atk4,}
+  knockdown    n=15 t=1.15s pivY[20..176] idleY=110 dup:{}
+  punch1       n= 7 t=0.50s pivY[90..110] idleY=110 dup:{atk1,}
+  punch2       n=15 t=1.00s pivY[78..128] idleY=110 dup:{atk2,}
+  punch3       n=15 t=1.30s pivY[80..122] idleY=110 dup:{atk3,}
+  rage_attack  n=42 t=2.65s pivY[68..158] idleY=110 dup:{ab12,super,}
+  recovery     n= 1 t=0.05s pivY[106..106] idleY=110 dup:{block,}
+  run          n= 8 t=0.40s pivY[88..106] idleY=110 dup:{}
+  skill1       n=35 t=2.15s pivY[72..280] idleY=110 dup:{ab0,}
+  skill2       n=35 t=2.70s pivY[72..204] idleY=110 dup:{ab1,}
+  skill3       n=36 t=2.65s pivY[56..364] idleY=110 dup:{ab2,}
+  skill4       n=35 t=2.45s pivY[80..264] idleY=110 dup:{ab3,}
+  skill5       n=47 t=2.70s pivY[72..286] idleY=110 dup:{ab4,}
+  special      n=18 t=1.40s pivY[82..188] idleY=110 dup:{energy,finisher,}
+  super        n=42 t=2.65s pivY[68..158] idleY=110 dup:{ab12,rage_attack,}
+  transform    n=19 t=1.25s pivY[78..116] idleY=110 dup:{}
+  walk         n= 8 t=0.40s pivY[88..106] idleY=110 dup:{}
+
+### 21 RAYDER CLON kf=15 beta=0 atlas=- frames=458
+abilities 23: SOMBRAS ESTALLIDO PILAR LLAMARADA FENIX TORNADO BARRIDA CIRCULO FUEGO ERUPCION MEDIA LUNA TAJO INFIERNO SUPER DESPERTAR VOLTERETA GIRO RODADA PATADA AEREA CAIDA TORBELLINO MORTAL CONTRA SALTO TIGRE
+  ab0          n=35 t=2.15s pivY[110..420] idleY=167 dup:{skill1,}
+  ab1          n=35 t=2.70s pivY[105..303] idleY=167 dup:{skill2,}
+  ab10         n=20 t=1.45s pivY[110..339] idleY=167 dup:{}
+  ab11         n=40 t=2.50s pivY[128..393] idleY=167 dup:{}
+  ab12         n=42 t=2.65s pivY[104..234] idleY=167 dup:{rage_attack,super,}
+  ab13         n=38 t=3.80s pivY[119..210] idleY=167 dup:{}
+  ab14         n=11 t=0.55s pivY[110..309] idleY=167 dup:{}
+  ab15         n= 8 t=0.45s pivY[107..303] idleY=167 dup:{}
+  ab16         n=12 t=0.60s pivY[110..309] idleY=167 dup:{}
+  ab17         n=20 t=1.15s pivY[76..381] idleY=167 dup:{}
+  ab18         n=16 t=0.95s pivY[167..324] idleY=167 dup:{}
+  ab19         n=27 t=1.35s pivY[110..324] idleY=167 dup:{}
+  ab2          n=36 t=2.65s pivY[84..546] idleY=167 dup:{skill3,}
+  ab20         n=11 t=0.70s pivY[98..251] idleY=167 dup:{}
+  ab21         n=11 t=1.20s pivY[173..309] idleY=167 dup:{}
+  ab22         n=18 t=1.05s pivY[76..345] idleY=167 dup:{}
+  ab3          n=35 t=2.45s pivY[117..393] idleY=167 dup:{skill4,}
+  ab4          n=47 t=2.70s pivY[110..429] idleY=167 dup:{skill5,}
+  ab5          n=43 t=3.35s pivY[83..282] idleY=167 dup:{}
+  ab6          n=18 t=1.20s pivY[83..171] idleY=167 dup:{}
+  ab7          n= 5 t=0.25s pivY[84..84] idleY=167 dup:{}
+  ab8          n=16 t=1.20s pivY[84..546] idleY=167 dup:{}
+  ab9          n=17 t=1.85s pivY[110..339] idleY=167 dup:{}
+  air          n= 9 t=1.05s pivY[50..233] idleY=167 dup:{airborne,}
+  airborne     n= 9 t=1.05s pivY[50..233] idleY=167 dup:{air,}
+  atk1         n= 7 t=0.50s pivY[137..167] idleY=167 dup:{punch1,}
+  atk2         n=15 t=1.00s pivY[120..193] idleY=167 dup:{punch2,}
+  atk3         n=15 t=1.30s pivY[122..185] idleY=167 dup:{punch3,}
+  atk4         n=20 t=1.95s pivY[110..339] idleY=167 dup:{kick,}
+  block        n= 1 t=0.05s pivY[161..161] idleY=167 dup:{recovery,}
+  dash         n=12 t=0.60s pivY[131..176] idleY=167 dup:{dash_attack,}
+  dash_attack  n=12 t=0.60s pivY[131..176] idleY=167 dup:{dash,}
+  defeat       n=15 t=2.95s pivY[27..161] idleY=167 dup:{}
+  energy       n=18 t=1.40s pivY[120..282] idleY=167 dup:{finisher,special,}
+  finisher     n=18 t=1.40s pivY[120..282] idleY=167 dup:{energy,special,}
+  getup        n= 5 t=0.40s pivY[38..152] idleY=167 dup:{}
+  hit          n= 5 t=0.45s pivY[149..237] idleY=167 dup:{hit_high,hit_low,}
+  hit_high     n= 5 t=0.45s pivY[149..237] idleY=167 dup:{hit,hit_low,}
+  hit_low      n= 5 t=0.45s pivY[149..237] idleY=167 dup:{hit,hit_high,}
+  idle         n= 4 t=0.50s pivY[161..167] idleY=167 dup:{}
+  kick         n=20 t=1.95s pivY[110..339] idleY=167 dup:{atk4,}
+  knockdown    n=15 t=1.15s pivY[33..264] idleY=167 dup:{}
+  punch1       n= 7 t=0.50s pivY[137..167] idleY=167 dup:{atk1,}
+  punch2       n=15 t=1.00s pivY[120..193] idleY=167 dup:{atk2,}
+  punch3       n=15 t=1.30s pivY[122..185] idleY=167 dup:{atk3,}
+  rage_attack  n=42 t=2.65s pivY[104..234] idleY=167 dup:{ab12,super,}
+  recovery     n= 1 t=0.05s pivY[161..161] idleY=167 dup:{block,}
+  run          n= 8 t=0.40s pivY[134..160] idleY=167 dup:{}
+  skill1       n=35 t=2.15s pivY[110..420] idleY=167 dup:{ab0,}
+  skill2       n=35 t=2.70s pivY[105..303] idleY=167 dup:{ab1,}
+  skill3       n=36 t=2.65s pivY[84..546] idleY=167 dup:{ab2,}
+  skill4       n=35 t=2.45s pivY[117..393] idleY=167 dup:{ab3,}
+  skill5       n=47 t=2.70s pivY[110..429] idleY=167 dup:{ab4,}
+  special      n=18 t=1.40s pivY[120..282] idleY=167 dup:{energy,finisher,}
+  super        n=42 t=2.65s pivY[104..234] idleY=167 dup:{ab12,rage_attack,}
+  transform    n=19 t=1.25s pivY[119..176] idleY=167 dup:{}
+  walk         n= 8 t=0.40s pivY[134..160] idleY=167 dup:{}
+
+### 22 RONIN kf=32 beta=0 atlas=- frames=150
+abilities 5: ONDA DE KI ESPADA RAPIDA TORMENTA RAFAGA RODILLAZO
+  ab0          n=27 t=1.42s pivY[93..162] idleY=101 dup:{energy,special,}
+  ab1          n= 5 t=0.39s pivY[99..100] idleY=101 dup:{}
+  ab2          n=15 t=1.04s pivY[85..103] idleY=101 dup:{}
+  ab3          n=11 t=0.65s pivY[88..102] idleY=101 dup:{}
+  ab4          n= 6 t=0.48s pivY[86..119] idleY=101 dup:{}
+  air          n= 1 t=0.12s pivY[103..103] idleY=101 dup:{}
+  airborne     n= 1 t=0.12s pivY[97..97] idleY=101 dup:{}
+  block        n= 1 t=0.20s pivY[101..101] idleY=101 dup:{}
+  dash         n= 3 t=0.19s pivY[87..88] idleY=101 dup:{}
+  dash_attack  n= 5 t=0.38s pivY[94..102] idleY=101 dup:{}
+  defeat       n= 1 t=0.40s pivY[80..80] idleY=101 dup:{}
+  energy       n=27 t=1.42s pivY[93..162] idleY=101 dup:{ab0,special,}
+  finisher     n= 5 t=0.45s pivY[80..128] idleY=101 dup:{}
+  getup        n= 3 t=0.32s pivY[80..99] idleY=101 dup:{}
+  hit          n= 1 t=0.14s pivY[116..116] idleY=101 dup:{hit_high,}
+  hit_high     n= 1 t=0.14s pivY[116..116] idleY=101 dup:{hit,}
+  hit_low      n= 1 t=0.14s pivY[102..102] idleY=101 dup:{}
+  idle         n= 6 t=0.96s pivY[97..101] idleY=101 dup:{}
+  jump         n= 5 t=0.45s pivY[87..117] idleY=101 dup:{}
+  kick         n= 5 t=0.38s pivY[100..102] idleY=101 dup:{}
+  knockdown    n= 1 t=0.20s pivY[80..80] idleY=101 dup:{}
+  punch1       n= 5 t=0.30s pivY[98..101] idleY=101 dup:{}
+  punch2       n= 5 t=0.31s pivY[96..100] idleY=101 dup:{}
+  punch3       n= 3 t=0.28s pivY[101..103] idleY=101 dup:{}
+  rage_attack  n=34 t=2.00s pivY[97..164] idleY=101 dup:{super,}
+  recovery     n= 1 t=0.10s pivY[101..101] idleY=101 dup:{}
+  run          n= 6 t=0.42s pivY[99..103] idleY=101 dup:{walk,}
+  special      n=27 t=1.42s pivY[93..162] idleY=101 dup:{ab0,energy,}
+  super        n=34 t=2.00s pivY[97..164] idleY=101 dup:{rage_attack,}
+  victory      n= 3 t=0.60s pivY[104..104] idleY=101 dup:{}
+  walk         n= 6 t=0.60s pivY[99..103] idleY=101 dup:{run,}
+
+### 23 GUERRERO (ESPADAS DEL CAOS) kf=17 beta=1 atlas=- frames=264
+abilities 5: HABILIDAD A HABILIDAD B HABILIDAD C COMBO DE HABILIDAD 1 COMBO DE HABILIDAD 2
+  ab0          n=22 t=1.43s pivY[89..321] idleY=93 dup:{energy,}
+  ab1          n=46 t=3.73s pivY[92..420] idleY=93 dup:{special,}
+  ab2          n=76 t=5.57s pivY[93..617] idleY=93 dup:{rage_attack,super,}
+  ab3          n=10 t=0.83s pivY[227..321] idleY=93 dup:{}
+  ab4          n=67 t=4.97s pivY[154..617] idleY=93 dup:{}
+  air          n= 6 t=0.60s pivY[109..137] idleY=93 dup:{airborne,hit,hit_high,hit_low,recovery,}
+  airborne     n= 6 t=0.60s pivY[109..137] idleY=93 dup:{air,hit,hit_high,hit_low,recovery,}
+  atk1         n= 7 t=0.47s pivY[81..95] idleY=93 dup:{punch1,}
+  atk2         n= 6 t=0.37s pivY[77..95] idleY=93 dup:{punch2,}
+  atk3         n=22 t=1.53s pivY[85..298] idleY=93 dup:{dash_attack,punch3,}
+  atk4         n=14 t=1.00s pivY[90..179] idleY=93 dup:{finisher,kick,}
+  block        n= 1 t=0.03s pivY[93..93] idleY=93 dup:{}
+  dash         n=12 t=0.57s pivY[70..93] idleY=93 dup:{}
+  dash_attack  n=22 t=1.53s pivY[85..298] idleY=93 dup:{atk3,punch3,}
+  defeat       n=18 t=1.77s pivY[27..126] idleY=93 dup:{}
+  energy       n=22 t=1.43s pivY[89..321] idleY=93 dup:{ab0,}
+  finisher     n=14 t=1.00s pivY[90..179] idleY=93 dup:{atk4,kick,}
+  getup        n=12 t=0.83s pivY[27..290] idleY=93 dup:{}
+  hit          n= 6 t=0.43s pivY[109..137] idleY=93 dup:{air,airborne,hit_high,hit_low,recovery,}
+  hit_high     n= 6 t=0.43s pivY[109..137] idleY=93 dup:{air,airborne,hit,hit_low,recovery,}
+  hit_low      n= 6 t=0.43s pivY[109..137] idleY=93 dup:{air,airborne,hit,hit_high,recovery,}
+  idle         n=13 t=0.87s pivY[88..93] idleY=93 dup:{}
+  jump         n= 9 t=0.37s pivY[121..122] idleY=93 dup:{}
+  kick         n=14 t=1.00s pivY[90..179] idleY=93 dup:{atk4,finisher,}
+  knockdown    n= 8 t=0.53s pivY[27..111] idleY=93 dup:{}
+  punch1       n= 7 t=0.47s pivY[81..95] idleY=93 dup:{atk1,}
+  punch2       n= 6 t=0.37s pivY[77..95] idleY=93 dup:{atk2,}
+  punch3       n=22 t=1.53s pivY[85..298] idleY=93 dup:{atk3,dash_attack,}
+  rage_attack  n=76 t=5.57s pivY[93..617] idleY=93 dup:{ab2,super,}
+  recovery     n= 6 t=0.43s pivY[109..137] idleY=93 dup:{air,airborne,hit,hit_high,hit_low,}
+  run          n=16 t=0.53s pivY[102..112] idleY=93 dup:{walk,}
+  special      n=46 t=3.73s pivY[92..420] idleY=93 dup:{ab1,}
+  super        n=76 t=5.57s pivY[93..617] idleY=93 dup:{ab2,rage_attack,}
+  victory      n=12 t=0.80s pivY[119..124] idleY=93 dup:{}
+  walk         n=16 t=0.53s pivY[102..112] idleY=93 dup:{run,}
+
+### 24 GUERRERO (CESTUS DE NEMEA) kf=18 beta=1 atlas=- frames=272
+abilities 5: HABILIDAD A HABILIDAD B HABILIDAD C COMBO DE HABILIDAD 1 COMBO DE HABILIDAD 2
+  ab0          n=22 t=1.27s pivY[97..321] idleY=113 dup:{energy,}
+  ab1          n=46 t=3.73s pivY[101..420] idleY=113 dup:{special,}
+  ab2          n=75 t=5.50s pivY[95..617] idleY=113 dup:{rage_attack,super,}
+  ab3          n=10 t=0.83s pivY[227..321] idleY=113 dup:{}
+  ab4          n=67 t=4.97s pivY[154..617] idleY=113 dup:{}
+  air          n= 6 t=0.60s pivY[119..133] idleY=113 dup:{airborne,hit,hit_high,hit_low,recovery,}
+  airborne     n= 6 t=0.60s pivY[119..133] idleY=113 dup:{air,hit,hit_high,hit_low,recovery,}
+  atk1         n=11 t=0.57s pivY[106..173] idleY=113 dup:{punch1,}
+  atk2         n= 5 t=0.23s pivY[102..143] idleY=113 dup:{punch2,}
+  atk3         n=11 t=0.53s pivY[131..189] idleY=113 dup:{dash_attack,punch3,}
+  atk4         n=16 t=0.97s pivY[147..253] idleY=113 dup:{finisher,kick,}
+  block        n= 1 t=0.03s pivY[113..113] idleY=113 dup:{}
+  dash         n=12 t=0.57s pivY[59..93] idleY=113 dup:{}
+  dash_attack  n=11 t=0.53s pivY[131..189] idleY=113 dup:{atk3,punch3,}
+  defeat       n=18 t=1.77s pivY[31..126] idleY=113 dup:{}
+  energy       n=22 t=1.27s pivY[97..321] idleY=113 dup:{ab0,}
+  finisher     n=16 t=0.97s pivY[147..253] idleY=113 dup:{atk4,kick,}
+  getup        n=12 t=0.83s pivY[31..290] idleY=113 dup:{}
+  hit          n= 6 t=0.43s pivY[119..133] idleY=113 dup:{air,airborne,hit_high,hit_low,recovery,}
+  hit_high     n= 6 t=0.43s pivY[119..133] idleY=113 dup:{air,airborne,hit,hit_low,recovery,}
+  hit_low      n= 6 t=0.43s pivY[119..133] idleY=113 dup:{air,airborne,hit,hit_high,recovery,}
+  idle         n=13 t=0.87s pivY[97..116] idleY=113 dup:{}
+  jump         n= 9 t=0.37s pivY[121..122] idleY=113 dup:{}
+  kick         n=16 t=0.97s pivY[147..253] idleY=113 dup:{atk4,finisher,}
+  knockdown    n= 8 t=0.53s pivY[31..111] idleY=113 dup:{}
+  punch1       n=11 t=0.57s pivY[106..173] idleY=113 dup:{atk1,}
+  punch2       n= 5 t=0.23s pivY[102..143] idleY=113 dup:{atk2,}
+  punch3       n=11 t=0.53s pivY[131..189] idleY=113 dup:{atk3,dash_attack,}
+  rage_attack  n=75 t=5.50s pivY[95..617] idleY=113 dup:{ab2,super,}
+  recovery     n= 6 t=0.43s pivY[119..133] idleY=113 dup:{air,airborne,hit,hit_high,hit_low,}
+  run          n=16 t=0.53s pivY[106..126] idleY=113 dup:{walk,}
+  special      n=46 t=3.73s pivY[101..420] idleY=113 dup:{ab1,}
+  super        n=75 t=5.50s pivY[95..617] idleY=113 dup:{ab2,rage_attack,}
+  victory      n=12 t=0.80s pivY[119..124] idleY=113 dup:{}
+  walk         n=16 t=0.53s pivY[106..126] idleY=113 dup:{run,}
+
+### 25 GUERRERO (CADENA DEL RAYO) kf=19 beta=1 atlas=- frames=264
+abilities 5: HABILIDAD A HABILIDAD B HABILIDAD C COMBO DE HABILIDAD 1 COMBO DE HABILIDAD 2
+  ab0          n=22 t=1.27s pivY[95..321] idleY=96 dup:{energy,}
+  ab1          n=46 t=3.73s pivY[106..420] idleY=96 dup:{special,}
+  ab2          n=76 t=5.57s pivY[92..617] idleY=96 dup:{rage_attack,super,}
+  ab3          n=10 t=0.83s pivY[227..321] idleY=96 dup:{}
+  ab4          n=67 t=4.97s pivY[154..617] idleY=96 dup:{}
+  air          n= 6 t=0.60s pivY[109..134] idleY=96 dup:{airborne,hit,hit_high,hit_low,recovery,}
+  airborne     n= 6 t=0.60s pivY[109..134] idleY=96 dup:{air,hit,hit_high,hit_low,recovery,}
+  atk1         n= 7 t=0.53s pivY[81..102] idleY=96 dup:{punch1,}
+  atk2         n= 6 t=0.47s pivY[74..95] idleY=96 dup:{punch2,}
+  atk3         n=22 t=1.67s pivY[85..294] idleY=96 dup:{dash_attack,punch3,}
+  atk4         n=14 t=0.93s pivY[90..179] idleY=96 dup:{finisher,kick,}
+  block        n= 1 t=0.03s pivY[96..96] idleY=96 dup:{}
+  dash         n=12 t=0.57s pivY[70..93] idleY=96 dup:{}
+  dash_attack  n=22 t=1.67s pivY[85..294] idleY=96 dup:{atk3,punch3,}
+  defeat       n=18 t=1.77s pivY[26..122] idleY=96 dup:{}
+  energy       n=22 t=1.27s pivY[95..321] idleY=96 dup:{ab0,}
+  finisher     n=14 t=0.93s pivY[90..179] idleY=96 dup:{atk4,kick,}
+  getup        n=12 t=0.83s pivY[27..290] idleY=96 dup:{}
+  hit          n= 6 t=0.43s pivY[109..134] idleY=96 dup:{air,airborne,hit_high,hit_low,recovery,}
+  hit_high     n= 6 t=0.43s pivY[109..134] idleY=96 dup:{air,airborne,hit,hit_low,recovery,}
+  hit_low      n= 6 t=0.43s pivY[109..134] idleY=96 dup:{air,airborne,hit,hit_high,recovery,}
+  idle         n=13 t=0.87s pivY[90..104] idleY=96 dup:{}
+  jump         n= 9 t=0.37s pivY[120..121] idleY=96 dup:{}
+  kick         n=14 t=0.93s pivY[90..179] idleY=96 dup:{atk4,finisher,}
+  knockdown    n= 8 t=0.53s pivY[26..111] idleY=96 dup:{}
+  punch1       n= 7 t=0.53s pivY[81..102] idleY=96 dup:{atk1,}
+  punch2       n= 6 t=0.47s pivY[74..95] idleY=96 dup:{atk2,}
+  punch3       n=22 t=1.67s pivY[85..294] idleY=96 dup:{atk3,dash_attack,}
+  rage_attack  n=76 t=5.57s pivY[92..617] idleY=96 dup:{ab2,super,}
+  recovery     n= 6 t=0.43s pivY[109..134] idleY=96 dup:{air,airborne,hit,hit_high,hit_low,}
+  run          n=16 t=0.53s pivY[102..112] idleY=96 dup:{walk,}
+  special      n=46 t=3.73s pivY[106..420] idleY=96 dup:{ab1,}
+  super        n=76 t=5.57s pivY[92..617] idleY=96 dup:{ab2,rage_attack,}
+  victory      n=12 t=0.80s pivY[119..124] idleY=96 dup:{}
+  walk         n=16 t=0.53s pivY[102..112] idleY=96 dup:{run,}
+
+### 26 GUERRERO (GARRAS DE HADES) kf=20 beta=1 atlas=- frames=263
+abilities 5: HABILIDAD A HABILIDAD B HABILIDAD C COMBO DE HABILIDAD 1 COMBO DE HABILIDAD 2
+  ab0          n=22 t=1.27s pivY[95..321] idleY=104 dup:{energy,}
+  ab1          n=46 t=3.73s pivY[93..420] idleY=104 dup:{special,}
+  ab2          n=76 t=5.57s pivY[92..617] idleY=104 dup:{rage_attack,super,}
+  ab3          n=10 t=0.83s pivY[227..321] idleY=104 dup:{}
+  ab4          n=67 t=4.97s pivY[154..617] idleY=104 dup:{}
+  air          n= 6 t=0.60s pivY[109..134] idleY=104 dup:{airborne,hit,hit_high,hit_low,recovery,}
+  airborne     n= 6 t=0.60s pivY[109..134] idleY=104 dup:{air,hit,hit_high,hit_low,recovery,}
+  atk1         n= 7 t=0.53s pivY[81..106] idleY=104 dup:{punch1,}
+  atk2         n= 6 t=0.47s pivY[81..110] idleY=104 dup:{punch2,}
+  atk3         n=22 t=1.67s pivY[85..303] idleY=104 dup:{dash_attack,punch3,}
+  atk4         n=14 t=0.93s pivY[99..179] idleY=104 dup:{finisher,kick,}
+  block        n= 1 t=0.03s pivY[104..104] idleY=104 dup:{}
+  dash         n=12 t=0.40s pivY[70..93] idleY=104 dup:{}
+  dash_attack  n=22 t=1.67s pivY[85..303] idleY=104 dup:{atk3,punch3,}
+  defeat       n=18 t=1.77s pivY[27..122] idleY=104 dup:{}
+  energy       n=22 t=1.27s pivY[95..321] idleY=104 dup:{ab0,}
+  finisher     n=14 t=0.93s pivY[99..179] idleY=104 dup:{atk4,kick,}
+  getup        n=12 t=0.83s pivY[27..290] idleY=104 dup:{}
+  hit          n= 6 t=0.43s pivY[109..134] idleY=104 dup:{air,airborne,hit_high,hit_low,recovery,}
+  hit_high     n= 6 t=0.43s pivY[109..134] idleY=104 dup:{air,airborne,hit,hit_low,recovery,}
+  hit_low      n= 6 t=0.43s pivY[109..134] idleY=104 dup:{air,airborne,hit,hit_high,recovery,}
+  idle         n=13 t=0.87s pivY[88..104] idleY=104 dup:{}
+  jump         n= 9 t=0.37s pivY[122..123] idleY=104 dup:{}
+  kick         n=14 t=0.93s pivY[99..179] idleY=104 dup:{atk4,finisher,}
+  knockdown    n= 8 t=0.53s pivY[27..113] idleY=104 dup:{}
+  punch1       n= 7 t=0.53s pivY[81..106] idleY=104 dup:{atk1,}
+  punch2       n= 6 t=0.47s pivY[81..110] idleY=104 dup:{atk2,}
+  punch3       n=22 t=1.67s pivY[85..303] idleY=104 dup:{atk3,dash_attack,}
+  rage_attack  n=76 t=5.57s pivY[92..617] idleY=104 dup:{ab2,super,}
+  recovery     n= 6 t=0.43s pivY[109..134] idleY=104 dup:{air,airborne,hit,hit_high,hit_low,}
+  run          n=16 t=0.53s pivY[104..116] idleY=104 dup:{walk,}
+  special      n=46 t=3.73s pivY[93..420] idleY=104 dup:{ab1,}
+  super        n=76 t=5.57s pivY[92..617] idleY=104 dup:{ab2,rage_attack,}
+  victory      n=12 t=0.80s pivY[119..124] idleY=104 dup:{}
+  walk         n=16 t=0.53s pivY[104..116] idleY=104 dup:{run,}
+
+### 27 SOLDADO ESQUELETO kf=21 beta=1 atlas=- frames=51
+abilities 3: ATAQUE ATAQUE 2 ATAQUE A DISTANCIA
+  air          n= 6 t=0.37s pivY[109..114] idleY=113 dup:{airborne,}
+  airborne     n= 6 t=0.37s pivY[109..114] idleY=113 dup:{air,}
+  atk1         n=17 t=1.37s pivY[85..257] idleY=113 dup:{atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  atk2         n=17 t=1.37s pivY[85..257] idleY=113 dup:{atk1,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  atk3         n=17 t=1.37s pivY[85..257] idleY=113 dup:{atk1,atk2,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  atk4         n=17 t=1.37s pivY[85..257] idleY=113 dup:{atk1,atk2,atk3,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  block        n= 6 t=0.40s =IDLE pivY[109..113] idleY=113 dup:{idle,}
+  dash         n= 8 t=0.53s pivY[113..115] idleY=113 dup:{run,walk,}
+  dash_attack  n=17 t=1.37s pivY[85..257] idleY=113 dup:{atk1,atk2,atk3,atk4,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  defeat       n= 3 t=0.10s pivY[34..34] idleY=113 dup:{}
+  energy       n= 3 t=0.10s pivY[113..113] idleY=113 dup:{}
+  finisher     n=17 t=1.37s pivY[85..257] idleY=113 dup:{atk1,atk2,atk3,atk4,dash_attack,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  getup        n= 5 t=0.50s pivY[81..113] idleY=113 dup:{}
+  hit          n= 8 t=0.53s pivY[103..120] idleY=113 dup:{hit_high,hit_low,recovery,}
+  hit_high     n= 8 t=0.53s pivY[103..120] idleY=113 dup:{hit,hit_low,recovery,}
+  hit_low      n= 8 t=0.53s pivY[103..120] idleY=113 dup:{hit,hit_high,recovery,}
+  idle         n= 6 t=0.40s pivY[109..113] idleY=113 dup:{block,}
+  intro        n= 1 t=0.03s pivY[14..14] idleY=113 dup:{}
+  kick         n=17 t=1.37s pivY[85..257] idleY=113 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,punch1,punch2,punch3,rage_attack,special,super,}
+  knockdown    n= 8 t=0.27s pivY[34..139] idleY=113 dup:{}
+  projectile   n= 1 t=0.03s pivY[113..113] idleY=113 dup:{}
+  punch1       n=17 t=1.37s pivY[85..257] idleY=113 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch2,punch3,rage_attack,special,super,}
+  punch2       n=17 t=1.37s pivY[85..257] idleY=113 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch3,rage_attack,special,super,}
+  punch3       n=17 t=1.37s pivY[85..257] idleY=113 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,rage_attack,special,super,}
+  rage_attack  n=17 t=1.37s pivY[85..257] idleY=113 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,special,super,}
+  recovery     n= 8 t=0.53s pivY[103..120] idleY=113 dup:{hit,hit_high,hit_low,}
+  run          n= 8 t=0.53s pivY[113..115] idleY=113 dup:{dash,walk,}
+  special      n=17 t=1.37s pivY[85..257] idleY=113 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,super,}
+  super        n=17 t=1.37s pivY[85..257] idleY=113 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,}
+  victory      n= 6 t=0.40s pivY[109..113] idleY=113 dup:{}
+  walk         n= 8 t=0.53s pivY[113..115] idleY=113 dup:{dash,run,}
+
+### 28 BESTIA EXCAVADORA kf=22 beta=1 atlas=- frames=65
+abilities 3: ATAQUE ATAQUE 2 ATAQUE A DISTANCIA
+  air          n= 1 t=0.03s pivY[140..140] idleY=132 dup:{airborne,}
+  airborne     n= 1 t=0.03s pivY[140..140] idleY=132 dup:{air,}
+  atk1         n=24 t=1.90s pivY[125..200] idleY=132 dup:{atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  atk2         n=24 t=1.90s pivY[125..200] idleY=132 dup:{atk1,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  atk3         n=24 t=1.90s pivY[125..200] idleY=132 dup:{atk1,atk2,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  atk4         n=24 t=1.90s pivY[125..200] idleY=132 dup:{atk1,atk2,atk3,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  block        n= 7 t=0.47s =IDLE pivY[131..134] idleY=132 dup:{idle,victory,}
+  dash         n= 6 t=0.40s pivY[107..112] idleY=132 dup:{run,walk,}
+  dash_attack  n=24 t=1.90s pivY[125..200] idleY=132 dup:{atk1,atk2,atk3,atk4,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  defeat       n= 3 t=0.10s pivY[32..32] idleY=132 dup:{}
+  energy       n= 3 t=0.10s pivY[132..132] idleY=132 dup:{}
+  finisher     n=24 t=1.90s pivY[125..200] idleY=132 dup:{atk1,atk2,atk3,atk4,dash_attack,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  getup        n= 9 t=0.60s pivY[25..132] idleY=132 dup:{intro,}
+  hit          n=10 t=0.67s pivY[114..134] idleY=132 dup:{hit_high,hit_low,recovery,}
+  hit_high     n=10 t=0.67s pivY[114..134] idleY=132 dup:{hit,hit_low,recovery,}
+  hit_low      n=10 t=0.67s pivY[114..134] idleY=132 dup:{hit,hit_high,recovery,}
+  idle         n= 7 t=0.47s pivY[131..134] idleY=132 dup:{block,victory,}
+  intro        n= 9 t=0.60s pivY[25..132] idleY=132 dup:{getup,}
+  kick         n=24 t=1.90s pivY[125..200] idleY=132 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,punch1,punch2,punch3,rage_attack,special,super,}
+  knockdown    n=15 t=1.00s pivY[32..140] idleY=132 dup:{}
+  projectile   n= 1 t=0.03s pivY[132..132] idleY=132 dup:{}
+  punch1       n=24 t=1.90s pivY[125..200] idleY=132 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch2,punch3,rage_attack,special,super,}
+  punch2       n=24 t=1.90s pivY[125..200] idleY=132 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch3,rage_attack,special,super,}
+  punch3       n=24 t=1.90s pivY[125..200] idleY=132 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,rage_attack,special,super,}
+  rage_attack  n=24 t=1.90s pivY[125..200] idleY=132 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,special,super,}
+  recovery     n=10 t=0.67s pivY[114..134] idleY=132 dup:{hit,hit_high,hit_low,}
+  run          n= 6 t=0.40s pivY[107..112] idleY=132 dup:{dash,walk,}
+  special      n=24 t=1.90s pivY[125..200] idleY=132 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,super,}
+  super        n=24 t=1.90s pivY[125..200] idleY=132 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,}
+  victory      n= 7 t=0.47s =IDLE pivY[131..134] idleY=132 dup:{block,idle,}
+  walk         n= 6 t=0.40s pivY[107..112] idleY=132 dup:{dash,run,}
+
+### 29 MOMIA CON ESCUDO kf=23 beta=1 atlas=- frames=49
+abilities 3: ATAQUE ATAQUE 2 ATAQUE A DISTANCIA
+  air          n= 1 t=0.03s pivY[116..116] idleY=112 dup:{airborne,}
+  airborne     n= 1 t=0.03s pivY[116..116] idleY=112 dup:{air,}
+  atk1         n=17 t=1.40s pivY[84..257] idleY=112 dup:{atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  atk2         n=17 t=1.40s pivY[84..257] idleY=112 dup:{atk1,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  atk3         n=17 t=1.40s pivY[84..257] idleY=112 dup:{atk1,atk2,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  atk4         n=17 t=1.40s pivY[84..257] idleY=112 dup:{atk1,atk2,atk3,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  block        n= 6 t=0.40s =IDLE pivY[110..112] idleY=112 dup:{idle,victory,}
+  dash         n= 8 t=0.53s pivY[118..122] idleY=112 dup:{run,walk,}
+  dash_attack  n=17 t=1.40s pivY[84..257] idleY=112 dup:{atk1,atk2,atk3,atk4,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  defeat       n= 3 t=0.30s pivY[35..35] idleY=112 dup:{}
+  energy       n= 3 t=0.10s pivY[112..112] idleY=112 dup:{}
+  finisher     n=17 t=1.40s pivY[84..257] idleY=112 dup:{atk1,atk2,atk3,atk4,dash_attack,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  getup        n= 5 t=0.43s pivY[79..112] idleY=112 dup:{}
+  hit          n= 8 t=0.53s pivY[113..128] idleY=112 dup:{hit_high,hit_low,recovery,}
+  hit_high     n= 8 t=0.53s pivY[113..128] idleY=112 dup:{hit,hit_low,recovery,}
+  hit_low      n= 8 t=0.53s pivY[113..128] idleY=112 dup:{hit,hit_high,recovery,}
+  idle         n= 6 t=0.40s pivY[110..112] idleY=112 dup:{block,victory,}
+  intro        n= 1 t=0.03s pivY[9..9] idleY=112 dup:{}
+  kick         n=17 t=1.40s pivY[84..257] idleY=112 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,punch1,punch2,punch3,rage_attack,special,super,}
+  knockdown    n= 8 t=0.27s pivY[35..147] idleY=112 dup:{}
+  projectile   n= 1 t=0.03s pivY[112..112] idleY=112 dup:{}
+  punch1       n=17 t=1.40s pivY[84..257] idleY=112 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch2,punch3,rage_attack,special,super,}
+  punch2       n=17 t=1.40s pivY[84..257] idleY=112 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch3,rage_attack,special,super,}
+  punch3       n=17 t=1.40s pivY[84..257] idleY=112 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,rage_attack,special,super,}
+  rage_attack  n=17 t=1.40s pivY[84..257] idleY=112 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,special,super,}
+  recovery     n= 8 t=0.53s pivY[113..128] idleY=112 dup:{hit,hit_high,hit_low,}
+  run          n= 8 t=0.53s pivY[118..122] idleY=112 dup:{dash,walk,}
+  special      n=17 t=1.40s pivY[84..257] idleY=112 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,super,}
+  super        n=17 t=1.40s pivY[84..257] idleY=112 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,}
+  victory      n= 6 t=0.40s =IDLE pivY[110..112] idleY=112 dup:{block,idle,}
+  walk         n= 8 t=0.53s pivY[118..122] idleY=112 dup:{dash,run,}
+
+### 30 BESTIA ELEFANTE kf=24 beta=1 atlas=- frames=71
+abilities 3: ATAQUE ATAQUE 2 TECNICA
+  air          n= 1 t=0.03s pivY[173..173] idleY=144 dup:{airborne,}
+  airborne     n= 1 t=0.03s pivY[173..173] idleY=144 dup:{air,}
+  atk1         n=36 t=2.43s pivY[124..335] idleY=144 dup:{atk2,atk3,atk4,kick,punch1,punch2,punch3,}
+  atk2         n=36 t=2.43s pivY[124..335] idleY=144 dup:{atk1,atk3,atk4,kick,punch1,punch2,punch3,}
+  atk3         n=36 t=2.43s pivY[124..335] idleY=144 dup:{atk1,atk2,atk4,kick,punch1,punch2,punch3,}
+  atk4         n=36 t=2.43s pivY[124..335] idleY=144 dup:{atk1,atk2,atk3,kick,punch1,punch2,punch3,}
+  block        n= 7 t=0.47s =IDLE pivY[140..144] idleY=144 dup:{idle,victory,}
+  dash         n=14 t=0.93s pivY[142..151] idleY=144 dup:{run,walk,}
+  dash_attack  n= 3 t=0.10s pivY[144..144] idleY=144 dup:{energy,finisher,rage_attack,special,super,}
+  defeat       n= 3 t=0.30s pivY[79..79] idleY=144 dup:{}
+  energy       n= 3 t=0.10s pivY[144..144] idleY=144 dup:{dash_attack,finisher,rage_attack,special,super,}
+  finisher     n= 3 t=0.10s pivY[144..144] idleY=144 dup:{dash_attack,energy,rage_attack,special,super,}
+  getup        n= 6 t=0.40s pivY[99..148] idleY=144 dup:{}
+  hit          n= 9 t=0.60s pivY[140..155] idleY=144 dup:{hit_high,hit_low,recovery,}
+  hit_high     n= 9 t=0.60s pivY[140..155] idleY=144 dup:{hit,hit_low,recovery,}
+  hit_low      n= 9 t=0.60s pivY[140..155] idleY=144 dup:{hit,hit_high,recovery,}
+  idle         n= 7 t=0.47s pivY[140..144] idleY=144 dup:{block,victory,}
+  intro        n= 1 t=0.03s pivY[36..36] idleY=144 dup:{}
+  kick         n=36 t=2.43s pivY[124..335] idleY=144 dup:{atk1,atk2,atk3,atk4,punch1,punch2,punch3,}
+  knockdown    n=10 t=0.67s pivY[79..187] idleY=144 dup:{}
+  punch1       n=36 t=2.43s pivY[124..335] idleY=144 dup:{atk1,atk2,atk3,atk4,kick,punch2,punch3,}
+  punch2       n=36 t=2.43s pivY[124..335] idleY=144 dup:{atk1,atk2,atk3,atk4,kick,punch1,punch3,}
+  punch3       n=36 t=2.43s pivY[124..335] idleY=144 dup:{atk1,atk2,atk3,atk4,kick,punch1,punch2,}
+  rage_attack  n= 3 t=0.10s pivY[144..144] idleY=144 dup:{dash_attack,energy,finisher,special,super,}
+  recovery     n= 9 t=0.60s pivY[140..155] idleY=144 dup:{hit,hit_high,hit_low,}
+  run          n=14 t=0.93s pivY[142..151] idleY=144 dup:{dash,walk,}
+  special      n= 3 t=0.10s pivY[144..144] idleY=144 dup:{dash_attack,energy,finisher,rage_attack,super,}
+  super        n= 3 t=0.10s pivY[144..144] idleY=144 dup:{dash_attack,energy,finisher,rage_attack,special,}
+  victory      n= 7 t=0.47s =IDLE pivY[140..144] idleY=144 dup:{block,idle,}
+  walk         n=14 t=0.93s pivY[142..151] idleY=144 dup:{dash,run,}
+
+### 31 AVE SANADORA kf=25 beta=1 atlas=- frames=68
+abilities 3: ATAQUE ATAQUE 2 TECNICA
+  air          n= 1 t=0.03s pivY[195..195] idleY=205 dup:{airborne,}
+  airborne     n= 1 t=0.03s pivY[195..195] idleY=205 dup:{air,}
+  atk1         n=33 t=2.13s pivY[167..195] idleY=205 dup:{atk2,atk3,atk4,kick,punch1,punch2,punch3,}
+  atk2         n=33 t=2.13s pivY[167..195] idleY=205 dup:{atk1,atk3,atk4,kick,punch1,punch2,punch3,}
+  atk3         n=33 t=2.13s pivY[167..195] idleY=205 dup:{atk1,atk2,atk4,kick,punch1,punch2,punch3,}
+  atk4         n=33 t=2.13s pivY[167..195] idleY=205 dup:{atk1,atk2,atk3,kick,punch1,punch2,punch3,}
+  block        n=12 t=0.80s =IDLE pivY[136..206] idleY=205 dup:{idle,victory,}
+  dash         n=11 t=0.37s pivY[138..212] idleY=205 dup:{run,walk,}
+  dash_attack  n= 2 t=0.10s pivY[162..202] idleY=205 dup:{energy,finisher,rage_attack,special,super,}
+  defeat       n= 3 t=0.30s pivY[32..32] idleY=205 dup:{}
+  energy       n= 2 t=0.10s pivY[162..202] idleY=205 dup:{dash_attack,finisher,rage_attack,special,super,}
+  finisher     n= 2 t=0.10s pivY[162..202] idleY=205 dup:{dash_attack,energy,rage_attack,special,super,}
+  getup        n= 9 t=0.60s pivY[52..140] idleY=205 dup:{}
+  hit          n= 9 t=0.60s pivY[132..202] idleY=205 dup:{hit_high,hit_low,recovery,}
+  hit_high     n= 9 t=0.60s pivY[132..202] idleY=205 dup:{hit,hit_low,recovery,}
+  hit_low      n= 9 t=0.60s pivY[132..202] idleY=205 dup:{hit,hit_high,recovery,}
+  idle         n=12 t=0.80s pivY[136..206] idleY=205 dup:{block,victory,}
+  intro        n= 7 t=0.47s pivY[12..178] idleY=205 dup:{}
+  kick         n=33 t=2.13s pivY[167..195] idleY=205 dup:{atk1,atk2,atk3,atk4,punch1,punch2,punch3,}
+  knockdown    n=17 t=0.57s pivY[32..212] idleY=205 dup:{}
+  punch1       n=33 t=2.13s pivY[167..195] idleY=205 dup:{atk1,atk2,atk3,atk4,kick,punch2,punch3,}
+  punch2       n=33 t=2.13s pivY[167..195] idleY=205 dup:{atk1,atk2,atk3,atk4,kick,punch1,punch3,}
+  punch3       n=33 t=2.13s pivY[167..195] idleY=205 dup:{atk1,atk2,atk3,atk4,kick,punch1,punch2,}
+  rage_attack  n= 2 t=0.10s pivY[162..202] idleY=205 dup:{dash_attack,energy,finisher,special,super,}
+  recovery     n= 9 t=0.60s pivY[132..202] idleY=205 dup:{hit,hit_high,hit_low,}
+  run          n=11 t=0.37s pivY[138..212] idleY=205 dup:{dash,walk,}
+  special      n= 2 t=0.10s pivY[162..202] idleY=205 dup:{dash_attack,energy,finisher,rage_attack,super,}
+  super        n= 2 t=0.10s pivY[162..202] idleY=205 dup:{dash_attack,energy,finisher,rage_attack,special,}
+  victory      n=12 t=0.80s =IDLE pivY[136..206] idleY=205 dup:{block,idle,}
+  walk         n=11 t=0.37s pivY[138..212] idleY=205 dup:{dash,run,}
+
+### 32 CENTAURO kf=26 beta=1 atlas=- frames=98
+abilities 3: ATAQUE ATAQUE 2 TECNICA
+  air          n=10 t=0.67s pivY[186..257] idleY=225 dup:{airborne,hit,hit_high,hit_low,recovery,}
+  airborne     n=10 t=0.67s pivY[186..257] idleY=225 dup:{air,hit,hit_high,hit_low,recovery,}
+  atk1         n=25 t=1.77s pivY[200..400] idleY=225 dup:{atk2,atk3,atk4,kick,punch1,punch2,punch3,}
+  atk2         n=25 t=1.77s pivY[200..400] idleY=225 dup:{atk1,atk3,atk4,kick,punch1,punch2,punch3,}
+  atk3         n=25 t=1.77s pivY[200..400] idleY=225 dup:{atk1,atk2,atk4,kick,punch1,punch2,punch3,}
+  atk4         n=25 t=1.77s pivY[200..400] idleY=225 dup:{atk1,atk2,atk3,kick,punch1,punch2,punch3,}
+  block        n=12 t=0.80s =IDLE pivY[207..225] idleY=225 dup:{idle,victory,}
+  dash         n= 8 t=0.80s pivY[217..242] idleY=225 dup:{run,walk,}
+  dash_attack  n=22 t=1.70s pivY[193..384] idleY=225 dup:{energy,finisher,rage_attack,special,super,}
+  defeat       n= 3 t=0.30s pivY[91..91] idleY=225 dup:{}
+  energy       n=22 t=1.70s pivY[193..384] idleY=225 dup:{dash_attack,finisher,rage_attack,special,super,}
+  finisher     n=22 t=1.70s pivY[193..384] idleY=225 dup:{dash_attack,energy,rage_attack,special,super,}
+  getup        n=12 t=0.80s pivY[91..284] idleY=225 dup:{}
+  hit          n=10 t=0.67s pivY[186..257] idleY=225 dup:{air,airborne,hit_high,hit_low,recovery,}
+  hit_high     n=10 t=0.67s pivY[186..257] idleY=225 dup:{air,airborne,hit,hit_low,recovery,}
+  hit_low      n=10 t=0.67s pivY[186..257] idleY=225 dup:{air,airborne,hit,hit_high,recovery,}
+  idle         n=12 t=0.80s pivY[207..225] idleY=225 dup:{block,victory,}
+  intro        n= 1 t=0.03s pivY[17..17] idleY=225 dup:{}
+  kick         n=25 t=1.77s pivY[200..400] idleY=225 dup:{atk1,atk2,atk3,atk4,punch1,punch2,punch3,}
+  knockdown    n=12 t=0.60s pivY[91..265] idleY=225 dup:{}
+  punch1       n=25 t=1.77s pivY[200..400] idleY=225 dup:{atk1,atk2,atk3,atk4,kick,punch2,punch3,}
+  punch2       n=25 t=1.77s pivY[200..400] idleY=225 dup:{atk1,atk2,atk3,atk4,kick,punch1,punch3,}
+  punch3       n=25 t=1.77s pivY[200..400] idleY=225 dup:{atk1,atk2,atk3,atk4,kick,punch1,punch2,}
+  rage_attack  n=22 t=1.70s pivY[193..384] idleY=225 dup:{dash_attack,energy,finisher,special,super,}
+  recovery     n=10 t=0.67s pivY[186..257] idleY=225 dup:{air,airborne,hit,hit_high,hit_low,}
+  run          n= 8 t=0.80s pivY[217..242] idleY=225 dup:{dash,walk,}
+  special      n=22 t=1.70s pivY[193..384] idleY=225 dup:{dash_attack,energy,finisher,rage_attack,super,}
+  super        n=22 t=1.70s pivY[193..384] idleY=225 dup:{dash_attack,energy,finisher,rage_attack,special,}
+  victory      n=12 t=0.80s =IDLE pivY[207..225] idleY=225 dup:{block,idle,}
+  walk         n= 8 t=0.80s pivY[217..242] idleY=225 dup:{dash,run,}
+
+### 33 CENTAURO ROJO kf=27 beta=1 atlas=- frames=98
+abilities 3: ATAQUE ATAQUE 2 TECNICA
+  air          n=10 t=0.67s pivY[186..257] idleY=225 dup:{airborne,hit,hit_high,hit_low,recovery,}
+  airborne     n=10 t=0.67s pivY[186..257] idleY=225 dup:{air,hit,hit_high,hit_low,recovery,}
+  atk1         n=25 t=1.77s pivY[200..400] idleY=225 dup:{atk2,atk3,atk4,kick,punch1,punch2,punch3,}
+  atk2         n=25 t=1.77s pivY[200..400] idleY=225 dup:{atk1,atk3,atk4,kick,punch1,punch2,punch3,}
+  atk3         n=25 t=1.77s pivY[200..400] idleY=225 dup:{atk1,atk2,atk4,kick,punch1,punch2,punch3,}
+  atk4         n=25 t=1.77s pivY[200..400] idleY=225 dup:{atk1,atk2,atk3,kick,punch1,punch2,punch3,}
+  block        n=12 t=0.50s =IDLE pivY[207..225] idleY=225 dup:{idle,victory,}
+  dash         n= 8 t=0.80s pivY[217..242] idleY=225 dup:{run,walk,}
+  dash_attack  n=22 t=1.70s pivY[193..384] idleY=225 dup:{energy,finisher,rage_attack,special,super,}
+  defeat       n= 3 t=0.30s pivY[91..91] idleY=225 dup:{}
+  energy       n=22 t=1.70s pivY[193..384] idleY=225 dup:{dash_attack,finisher,rage_attack,special,super,}
+  finisher     n=22 t=1.70s pivY[193..384] idleY=225 dup:{dash_attack,energy,rage_attack,special,super,}
+  getup        n=12 t=0.80s pivY[91..284] idleY=225 dup:{}
+  hit          n=10 t=0.67s pivY[186..257] idleY=225 dup:{air,airborne,hit_high,hit_low,recovery,}
+  hit_high     n=10 t=0.67s pivY[186..257] idleY=225 dup:{air,airborne,hit,hit_low,recovery,}
+  hit_low      n=10 t=0.67s pivY[186..257] idleY=225 dup:{air,airborne,hit,hit_high,recovery,}
+  idle         n=12 t=0.50s pivY[207..225] idleY=225 dup:{block,victory,}
+  intro        n= 1 t=0.03s pivY[17..17] idleY=225 dup:{}
+  kick         n=25 t=1.77s pivY[200..400] idleY=225 dup:{atk1,atk2,atk3,atk4,punch1,punch2,punch3,}
+  knockdown    n=12 t=0.40s pivY[91..265] idleY=225 dup:{}
+  punch1       n=25 t=1.77s pivY[200..400] idleY=225 dup:{atk1,atk2,atk3,atk4,kick,punch2,punch3,}
+  punch2       n=25 t=1.77s pivY[200..400] idleY=225 dup:{atk1,atk2,atk3,atk4,kick,punch1,punch3,}
+  punch3       n=25 t=1.77s pivY[200..400] idleY=225 dup:{atk1,atk2,atk3,atk4,kick,punch1,punch2,}
+  rage_attack  n=22 t=1.70s pivY[193..384] idleY=225 dup:{dash_attack,energy,finisher,special,super,}
+  recovery     n=10 t=0.67s pivY[186..257] idleY=225 dup:{air,airborne,hit,hit_high,hit_low,}
+  run          n= 8 t=0.80s pivY[217..242] idleY=225 dup:{dash,walk,}
+  special      n=22 t=1.70s pivY[193..384] idleY=225 dup:{dash_attack,energy,finisher,rage_attack,super,}
+  super        n=22 t=1.70s pivY[193..384] idleY=225 dup:{dash_attack,energy,finisher,rage_attack,special,}
+  victory      n=12 t=0.80s =IDLE pivY[207..225] idleY=225 dup:{block,idle,}
+  walk         n= 8 t=0.80s pivY[217..242] idleY=225 dup:{dash,run,}
+
+### 34 BRUTO DE LA BOLA kf=28 beta=1 atlas=- frames=116
+abilities 3: ATAQUE ATAQUE 2 ATAQUE A DISTANCIA
+  air          n=13 t=0.77s pivY[169..208] idleY=180 dup:{airborne,hit,hit_high,hit_low,recovery,}
+  airborne     n=13 t=0.77s pivY[169..208] idleY=180 dup:{air,hit,hit_high,hit_low,recovery,}
+  atk1         n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  atk2         n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  atk3         n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  atk4         n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk3,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  block        n=18 t=0.90s =IDLE pivY[167..180] idleY=180 dup:{idle,victory,}
+  dash         n=12 t=0.80s pivY[179..187] idleY=180 dup:{run,walk,}
+  dash_attack  n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk3,atk4,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  defeat       n= 3 t=0.30s pivY[112..112] idleY=180 dup:{}
+  energy       n=51 t=2.67s pivY[179..342] idleY=180 dup:{}
+  finisher     n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk3,atk4,dash_attack,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  getup        n= 7 t=0.70s pivY[144..177] idleY=180 dup:{}
+  hit          n=13 t=0.77s pivY[169..208] idleY=180 dup:{air,airborne,hit_high,hit_low,recovery,}
+  hit_high     n=13 t=0.77s pivY[169..208] idleY=180 dup:{air,airborne,hit,hit_low,recovery,}
+  hit_low      n=13 t=0.77s pivY[169..208] idleY=180 dup:{air,airborne,hit,hit_high,recovery,}
+  idle         n=18 t=0.90s pivY[167..180] idleY=180 dup:{block,victory,}
+  intro        n= 1 t=0.03s pivY[42..42] idleY=180 dup:{}
+  kick         n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,punch1,punch2,punch3,rage_attack,special,super,}
+  knockdown    n=16 t=0.53s pivY[112..264] idleY=180 dup:{}
+  projectile   n= 1 t=0.03s pivY[179..179] idleY=180 dup:{}
+  punch1       n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch2,punch3,rage_attack,special,super,}
+  punch2       n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch3,rage_attack,special,super,}
+  punch3       n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,rage_attack,special,super,}
+  rage_attack  n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,special,super,}
+  recovery     n=13 t=0.77s pivY[169..208] idleY=180 dup:{air,airborne,hit,hit_high,hit_low,}
+  run          n=12 t=0.80s pivY[179..187] idleY=180 dup:{dash,walk,}
+  special      n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,super,}
+  super        n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,}
+  victory      n=18 t=0.97s =IDLE pivY[167..180] idleY=180 dup:{block,idle,}
+  walk         n=12 t=0.80s pivY[179..187] idleY=180 dup:{dash,run,}
+
+### 35 BRUTO DE LA BOLA ROJO kf=29 beta=1 atlas=- frames=114
+abilities 3: ATAQUE ATAQUE 2 ATAQUE A DISTANCIA
+  air          n=13 t=0.77s pivY[169..208] idleY=180 dup:{airborne,hit,hit_high,hit_low,recovery,}
+  airborne     n=13 t=0.77s pivY[169..208] idleY=180 dup:{air,hit,hit_high,hit_low,recovery,}
+  atk1         n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  atk2         n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  atk3         n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  atk4         n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk3,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  block        n=18 t=0.90s =IDLE pivY[167..180] idleY=180 dup:{idle,victory,}
+  dash         n=12 t=0.80s pivY[179..187] idleY=180 dup:{run,walk,}
+  dash_attack  n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk3,atk4,finisher,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  defeat       n= 3 t=0.30s pivY[112..112] idleY=180 dup:{}
+  energy       n=51 t=2.67s pivY[179..342] idleY=180 dup:{}
+  finisher     n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk3,atk4,dash_attack,kick,punch1,punch2,punch3,rage_attack,special,super,}
+  getup        n= 7 t=0.70s pivY[144..177] idleY=180 dup:{}
+  hit          n=13 t=0.77s pivY[169..208] idleY=180 dup:{air,airborne,hit_high,hit_low,recovery,}
+  hit_high     n=13 t=0.77s pivY[169..208] idleY=180 dup:{air,airborne,hit,hit_low,recovery,}
+  hit_low      n=13 t=0.77s pivY[169..208] idleY=180 dup:{air,airborne,hit,hit_high,recovery,}
+  idle         n=18 t=0.90s pivY[167..180] idleY=180 dup:{block,victory,}
+  intro        n= 1 t=0.03s pivY[42..42] idleY=180 dup:{}
+  kick         n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,punch1,punch2,punch3,rage_attack,special,super,}
+  knockdown    n=16 t=0.53s pivY[112..264] idleY=180 dup:{}
+  projectile   n= 1 t=0.03s pivY[179..179] idleY=180 dup:{}
+  punch1       n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch2,punch3,rage_attack,special,super,}
+  punch2       n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch3,rage_attack,special,super,}
+  punch3       n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,rage_attack,special,super,}
+  rage_attack  n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,special,super,}
+  recovery     n=13 t=0.77s pivY[169..208] idleY=180 dup:{air,airborne,hit,hit_high,hit_low,}
+  run          n=12 t=0.80s pivY[179..187] idleY=180 dup:{dash,walk,}
+  special      n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,super,}
+  super        n=24 t=2.00s pivY[140..280] idleY=180 dup:{atk1,atk2,atk3,atk4,dash_attack,finisher,kick,punch1,punch2,punch3,rage_attack,special,}
+  victory      n=18 t=0.97s =IDLE pivY[167..180] idleY=180 dup:{block,idle,}
+  walk         n=12 t=0.80s pivY[179..187] idleY=180 dup:{dash,run,}
+
+### 36 MEDUSA kf=30 beta=1 atlas=- frames=65
+abilities 2: ATAQUE ATAQUE 2
+  air          n= 1 t=0.03s pivY[225..225] idleY=205 dup:{airborne,}
+  airborne     n= 1 t=0.03s pivY[225..225] idleY=205 dup:{air,}
+  atk1         n=14 t=1.07s pivY[112..205] idleY=205 dup:{atk2,punch1,punch2,}
+  atk2         n=14 t=1.07s pivY[112..205] idleY=205 dup:{atk1,punch1,punch2,}
+  atk3         n=15 t=1.20s pivY[128..236] idleY=205 dup:{atk4,dash_attack,energy,finisher,kick,punch3,rage_attack,special,super,}
+  atk4         n=15 t=1.20s pivY[128..236] idleY=205 dup:{atk3,dash_attack,energy,finisher,kick,punch3,rage_attack,special,super,}
+  block        n=12 t=0.50s =IDLE pivY[191..207] idleY=205 dup:{idle,victory,}
+  dash         n= 8 t=0.80s pivY[191..214] idleY=205 dup:{run,walk,}
+  dash_attack  n=15 t=1.20s pivY[128..236] idleY=205 dup:{atk3,atk4,energy,finisher,kick,punch3,rage_attack,special,super,}
+  defeat       n= 3 t=0.30s pivY[59..59] idleY=205 dup:{}
+  energy       n=15 t=1.20s pivY[128..236] idleY=205 dup:{atk3,atk4,dash_attack,finisher,kick,punch3,rage_attack,special,super,}
+  finisher     n=15 t=1.20s pivY[128..236] idleY=205 dup:{atk3,atk4,dash_attack,energy,kick,punch3,rage_attack,special,super,}
+  getup        n= 7 t=0.47s pivY[65..213] idleY=205 dup:{}
+  hit          n= 8 t=0.53s pivY[169..226] idleY=205 dup:{hit_high,hit_low,recovery,}
+  hit_high     n= 8 t=0.53s pivY[169..226] idleY=205 dup:{hit,hit_low,recovery,}
+  hit_low      n= 8 t=0.53s pivY[169..226] idleY=205 dup:{hit,hit_high,recovery,}
+  idle         n=12 t=0.50s pivY[191..207] idleY=205 dup:{block,victory,}
+  intro        n= 1 t=0.03s pivY[-0..0] idleY=205 dup:{}
+  kick         n=15 t=1.20s pivY[128..236] idleY=205 dup:{atk3,atk4,dash_attack,energy,finisher,punch3,rage_attack,special,super,}
+  knockdown    n= 8 t=0.27s pivY[59..226] idleY=205 dup:{}
+  punch1       n=14 t=1.07s pivY[112..205] idleY=205 dup:{atk1,atk2,punch2,}
+  punch2       n=14 t=1.07s pivY[112..205] idleY=205 dup:{atk1,atk2,punch1,}
+  punch3       n=15 t=1.20s pivY[128..236] idleY=205 dup:{atk3,atk4,dash_attack,energy,finisher,kick,rage_attack,special,super,}
+  rage_attack  n=15 t=1.20s pivY[128..236] idleY=205 dup:{atk3,atk4,dash_attack,energy,finisher,kick,punch3,special,super,}
+  recovery     n= 8 t=0.53s pivY[169..226] idleY=205 dup:{hit,hit_high,hit_low,}
+  run          n= 8 t=0.80s pivY[191..214] idleY=205 dup:{dash,walk,}
+  special      n=15 t=1.20s pivY[128..236] idleY=205 dup:{atk3,atk4,dash_attack,energy,finisher,kick,punch3,rage_attack,super,}
+  super        n=15 t=1.20s pivY[128..236] idleY=205 dup:{atk3,atk4,dash_attack,energy,finisher,kick,punch3,rage_attack,special,}
+  victory      n=12 t=0.80s =IDLE pivY[191..207] idleY=205 dup:{block,idle,}
+  walk         n= 8 t=0.80s pivY[191..214] idleY=205 dup:{dash,run,}
+
+### 37 MEDUSA ROJA kf=31 beta=1 atlas=- frames=68
+abilities 2: ATAQUE ATAQUE 2
+  air          n= 1 t=0.03s pivY[225..225] idleY=205 dup:{airborne,}
+  airborne     n= 1 t=0.03s pivY[225..225] idleY=205 dup:{air,}
+  atk1         n=14 t=1.07s pivY[112..205] idleY=205 dup:{atk2,punch1,punch2,}
+  atk2         n=14 t=1.07s pivY[112..205] idleY=205 dup:{atk1,punch1,punch2,}
+  atk3         n=15 t=1.13s pivY[128..236] idleY=205 dup:{atk4,dash_attack,energy,finisher,kick,punch3,rage_attack,special,super,}
+  atk4         n=15 t=1.13s pivY[128..236] idleY=205 dup:{atk3,dash_attack,energy,finisher,kick,punch3,rage_attack,special,super,}
+  block        n=12 t=0.50s =IDLE pivY[191..207] idleY=205 dup:{idle,victory,}
+  dash         n= 8 t=0.80s pivY[191..214] idleY=205 dup:{run,walk,}
+  dash_attack  n=15 t=1.13s pivY[128..236] idleY=205 dup:{atk3,atk4,energy,finisher,kick,punch3,rage_attack,special,super,}
+  defeat       n= 3 t=0.30s pivY[59..59] idleY=205 dup:{}
+  energy       n=15 t=1.13s pivY[128..236] idleY=205 dup:{atk3,atk4,dash_attack,finisher,kick,punch3,rage_attack,special,super,}
+  finisher     n=15 t=1.13s pivY[128..236] idleY=205 dup:{atk3,atk4,dash_attack,energy,kick,punch3,rage_attack,special,super,}
+  getup        n= 7 t=0.47s pivY[65..213] idleY=205 dup:{}
+  hit          n= 8 t=0.53s pivY[169..226] idleY=205 dup:{hit_high,hit_low,recovery,}
+  hit_high     n= 8 t=0.53s pivY[169..226] idleY=205 dup:{hit,hit_low,recovery,}
+  hit_low      n= 8 t=0.53s pivY[169..226] idleY=205 dup:{hit,hit_high,recovery,}
+  idle         n=12 t=0.50s pivY[191..207] idleY=205 dup:{block,victory,}
+  intro        n= 1 t=0.03s pivY[-0..0] idleY=205 dup:{}
+  kick         n=15 t=1.13s pivY[128..236] idleY=205 dup:{atk3,atk4,dash_attack,energy,finisher,punch3,rage_attack,special,super,}
+  knockdown    n= 8 t=0.27s pivY[59..226] idleY=205 dup:{}
+  punch1       n=14 t=1.07s pivY[112..205] idleY=205 dup:{atk1,atk2,punch2,}
+  punch2       n=14 t=1.07s pivY[112..205] idleY=205 dup:{atk1,atk2,punch1,}
+  punch3       n=15 t=1.13s pivY[128..236] idleY=205 dup:{atk3,atk4,dash_attack,energy,finisher,kick,rage_attack,special,super,}
+  rage_attack  n=15 t=1.13s pivY[128..236] idleY=205 dup:{atk3,atk4,dash_attack,energy,finisher,kick,punch3,special,super,}
+  recovery     n= 8 t=0.53s pivY[169..226] idleY=205 dup:{hit,hit_high,hit_low,}
+  run          n= 8 t=0.80s pivY[191..214] idleY=205 dup:{dash,walk,}
+  special      n=15 t=1.13s pivY[128..236] idleY=205 dup:{atk3,atk4,dash_attack,energy,finisher,kick,punch3,rage_attack,super,}
+  super        n=15 t=1.13s pivY[128..236] idleY=205 dup:{atk3,atk4,dash_attack,energy,finisher,kick,punch3,rage_attack,special,}
+  victory      n=12 t=0.80s =IDLE pivY[191..207] idleY=205 dup:{block,idle,}
+  walk         n= 8 t=0.80s pivY[191..214] idleY=205 dup:{dash,run,}
+
+### 38 RONIN-KRATOS (ESPADAS DEL CAOS) kf=33 beta=1 atlas=- frames=264
+abilities 5: HABILIDAD A HABILIDAD B HABILIDAD C COMBO DE HABILIDAD 1 COMBO DE HABILIDAD 2
+  ab0          n=22 t=1.43s pivY[101..321] idleY=105 dup:{energy,}
+  ab1          n=46 t=3.73s pivY[104..420] idleY=105 dup:{special,}
+  ab2          n=76 t=5.57s pivY[103..617] idleY=105 dup:{rage_attack,super,}
+  ab3          n=10 t=0.83s pivY[227..321] idleY=105 dup:{}
+  ab4          n=67 t=4.97s pivY[154..617] idleY=105 dup:{}
+  air          n= 6 t=0.60s pivY[121..141] idleY=105 dup:{airborne,hit,hit_high,hit_low,recovery,}
+  airborne     n= 6 t=0.60s pivY[121..141] idleY=105 dup:{air,hit,hit_high,hit_low,recovery,}
+  atk1         n= 7 t=0.47s pivY[88..98] idleY=105 dup:{punch1,}
+  atk2         n= 6 t=0.37s pivY[84..107] idleY=105 dup:{punch2,}
+  atk3         n=22 t=1.53s pivY[97..298] idleY=105 dup:{dash_attack,punch3,}
+  atk4         n=14 t=1.00s pivY[102..179] idleY=105 dup:{finisher,kick,}
+  block        n= 1 t=0.03s pivY[105..105] idleY=105 dup:{}
+  dash         n=12 t=0.57s pivY[71..105] idleY=105 dup:{}
+  dash_attack  n=22 t=1.53s pivY[97..298] idleY=105 dup:{atk3,punch3,}
+  defeat       n=18 t=1.77s pivY[38..138] idleY=105 dup:{}
+  energy       n=22 t=1.43s pivY[101..321] idleY=105 dup:{ab0,}
+  finisher     n=14 t=1.00s pivY[102..179] idleY=105 dup:{atk4,kick,}
+  getup        n=12 t=0.83s pivY[39..290] idleY=105 dup:{}
+  hit          n= 6 t=0.43s pivY[121..141] idleY=105 dup:{air,airborne,hit_high,hit_low,recovery,}
+  hit_high     n= 6 t=0.43s pivY[121..141] idleY=105 dup:{air,airborne,hit,hit_low,recovery,}
+  hit_low      n= 6 t=0.43s pivY[121..141] idleY=105 dup:{air,airborne,hit,hit_high,recovery,}
+  idle         n=13 t=0.87s pivY[100..105] idleY=105 dup:{}
+  jump         n= 9 t=0.37s pivY[122..123] idleY=105 dup:{}
+  kick         n=14 t=1.00s pivY[102..179] idleY=105 dup:{atk4,finisher,}
+  knockdown    n= 8 t=0.53s pivY[38..119] idleY=105 dup:{}
+  punch1       n= 7 t=0.47s pivY[88..98] idleY=105 dup:{atk1,}
+  punch2       n= 6 t=0.37s pivY[84..107] idleY=105 dup:{atk2,}
+  punch3       n=22 t=1.53s pivY[97..298] idleY=105 dup:{atk3,dash_attack,}
+  rage_attack  n=76 t=5.57s pivY[103..617] idleY=105 dup:{ab2,super,}
+  recovery     n= 6 t=0.43s pivY[121..141] idleY=105 dup:{air,airborne,hit,hit_high,hit_low,}
+  run          n=16 t=0.53s pivY[113..117] idleY=105 dup:{walk,}
+  special      n=46 t=3.73s pivY[104..420] idleY=105 dup:{ab1,}
+  super        n=76 t=5.57s pivY[103..617] idleY=105 dup:{ab2,rage_attack,}
+  victory      n=12 t=0.80s pivY[130..136] idleY=105 dup:{}
+  walk         n=16 t=0.53s pivY[113..117] idleY=105 dup:{run,}
+
+### 39 RONIN-KRATOS (CESTUS DE NEMEA) kf=34 beta=1 atlas=- frames=272
+abilities 5: HABILIDAD A HABILIDAD B HABILIDAD C COMBO DE HABILIDAD 1 COMBO DE HABILIDAD 2
+  ab0          n=22 t=1.27s pivY[104..321] idleY=113 dup:{energy,}
+  ab1          n=46 t=3.73s pivY[105..420] idleY=113 dup:{special,}
+  ab2          n=75 t=5.50s pivY[103..617] idleY=113 dup:{rage_attack,super,}
+  ab3          n=10 t=0.83s pivY[227..321] idleY=113 dup:{}
+  ab4          n=67 t=4.97s pivY[154..617] idleY=113 dup:{}
+  air          n= 6 t=0.60s pivY[121..141] idleY=113 dup:{airborne,hit,hit_high,hit_low,recovery,}
+  airborne     n= 6 t=0.60s pivY[121..141] idleY=113 dup:{air,hit,hit_high,hit_low,recovery,}
+  atk1         n=11 t=0.57s pivY[111..173] idleY=113 dup:{punch1,}
+  atk2         n= 5 t=0.23s pivY[108..143] idleY=113 dup:{punch2,}
+  atk3         n=11 t=0.53s pivY[131..189] idleY=113 dup:{dash_attack,punch3,}
+  atk4         n=16 t=0.97s pivY[147..253] idleY=113 dup:{finisher,kick,}
+  block        n= 1 t=0.03s pivY[113..113] idleY=113 dup:{}
+  dash         n=12 t=0.57s pivY[71..105] idleY=113 dup:{}
+  dash_attack  n=11 t=0.53s pivY[131..189] idleY=113 dup:{atk3,punch3,}
+  defeat       n=18 t=1.77s pivY[38..138] idleY=113 dup:{}
+  energy       n=22 t=1.27s pivY[104..321] idleY=113 dup:{ab0,}
+  finisher     n=16 t=0.97s pivY[147..253] idleY=113 dup:{atk4,kick,}
+  getup        n=12 t=0.83s pivY[39..290] idleY=113 dup:{}
+  hit          n= 6 t=0.43s pivY[121..141] idleY=113 dup:{air,airborne,hit_high,hit_low,recovery,}
+  hit_high     n= 6 t=0.43s pivY[121..141] idleY=113 dup:{air,airborne,hit,hit_low,recovery,}
+  hit_low      n= 6 t=0.43s pivY[121..141] idleY=113 dup:{air,airborne,hit,hit_high,recovery,}
+  idle         n=13 t=0.87s pivY[100..116] idleY=113 dup:{}
+  jump         n= 9 t=0.37s pivY[122..123] idleY=113 dup:{}
+  kick         n=16 t=0.97s pivY[147..253] idleY=113 dup:{atk4,finisher,}
+  knockdown    n= 8 t=0.53s pivY[38..119] idleY=113 dup:{}
+  punch1       n=11 t=0.57s pivY[111..173] idleY=113 dup:{atk1,}
+  punch2       n= 5 t=0.23s pivY[108..143] idleY=113 dup:{atk2,}
+  punch3       n=11 t=0.53s pivY[131..189] idleY=113 dup:{atk3,dash_attack,}
+  rage_attack  n=75 t=5.50s pivY[103..617] idleY=113 dup:{ab2,super,}
+  recovery     n= 6 t=0.43s pivY[121..141] idleY=113 dup:{air,airborne,hit,hit_high,hit_low,}
+  run          n=16 t=0.53s pivY[113..126] idleY=113 dup:{walk,}
+  special      n=46 t=3.73s pivY[105..420] idleY=113 dup:{ab1,}
+  super        n=75 t=5.50s pivY[103..617] idleY=113 dup:{ab2,rage_attack,}
+  victory      n=12 t=0.80s pivY[130..136] idleY=113 dup:{}
+  walk         n=16 t=0.53s pivY[113..126] idleY=113 dup:{run,}
+
+### 40 RONIN-KRATOS (CADENA DEL RAYO) kf=35 beta=1 atlas=- frames=264
+abilities 5: HABILIDAD A HABILIDAD B HABILIDAD C COMBO DE HABILIDAD 1 COMBO DE HABILIDAD 2
+  ab0          n=22 t=1.27s pivY[104..321] idleY=105 dup:{energy,}
+  ab1          n=46 t=3.73s pivY[118..420] idleY=105 dup:{special,}
+  ab2          n=76 t=5.57s pivY[103..617] idleY=105 dup:{rage_attack,super,}
+  ab3          n=10 t=0.83s pivY[227..321] idleY=105 dup:{}
+  ab4          n=67 t=4.97s pivY[154..617] idleY=105 dup:{}
+  air          n= 6 t=0.60s pivY[121..141] idleY=105 dup:{airborne,hit,hit_high,hit_low,recovery,}
+  airborne     n= 6 t=0.60s pivY[121..141] idleY=105 dup:{air,hit,hit_high,hit_low,recovery,}
+  atk1         n= 7 t=0.53s pivY[93..102] idleY=105 dup:{punch1,}
+  atk2         n= 6 t=0.47s pivY[84..107] idleY=105 dup:{punch2,}
+  atk3         n=22 t=1.67s pivY[97..294] idleY=105 dup:{dash_attack,punch3,}
+  atk4         n=14 t=0.93s pivY[102..179] idleY=105 dup:{finisher,kick,}
+  block        n= 1 t=0.03s pivY[105..105] idleY=105 dup:{}
+  dash         n=12 t=0.57s pivY[72..105] idleY=105 dup:{}
+  dash_attack  n=22 t=1.67s pivY[97..294] idleY=105 dup:{atk3,punch3,}
+  defeat       n=18 t=1.77s pivY[38..122] idleY=105 dup:{}
+  energy       n=22 t=1.27s pivY[104..321] idleY=105 dup:{ab0,}
+  finisher     n=14 t=0.93s pivY[102..179] idleY=105 dup:{atk4,kick,}
+  getup        n=12 t=0.83s pivY[39..290] idleY=105 dup:{}
+  hit          n= 6 t=0.43s pivY[121..141] idleY=105 dup:{air,airborne,hit_high,hit_low,recovery,}
+  hit_high     n= 6 t=0.43s pivY[121..141] idleY=105 dup:{air,airborne,hit,hit_low,recovery,}
+  hit_low      n= 6 t=0.43s pivY[121..141] idleY=105 dup:{air,airborne,hit,hit_high,recovery,}
+  idle         n=13 t=0.87s pivY[100..105] idleY=105 dup:{}
+  jump         n= 9 t=0.37s pivY[122..123] idleY=105 dup:{}
+  kick         n=14 t=0.93s pivY[102..179] idleY=105 dup:{atk4,finisher,}
+  knockdown    n= 8 t=0.53s pivY[38..119] idleY=105 dup:{}
+  punch1       n= 7 t=0.53s pivY[93..102] idleY=105 dup:{atk1,}
+  punch2       n= 6 t=0.47s pivY[84..107] idleY=105 dup:{atk2,}
+  punch3       n=22 t=1.67s pivY[97..294] idleY=105 dup:{atk3,dash_attack,}
+  rage_attack  n=76 t=5.57s pivY[103..617] idleY=105 dup:{ab2,super,}
+  recovery     n= 6 t=0.43s pivY[121..141] idleY=105 dup:{air,airborne,hit,hit_high,hit_low,}
+  run          n=16 t=0.53s pivY[113..117] idleY=105 dup:{walk,}
+  special      n=46 t=3.73s pivY[118..420] idleY=105 dup:{ab1,}
+  super        n=76 t=5.57s pivY[103..617] idleY=105 dup:{ab2,rage_attack,}
+  victory      n=12 t=0.80s pivY[130..136] idleY=105 dup:{}
+  walk         n=16 t=0.53s pivY[113..117] idleY=105 dup:{run,}
+
+### 41 RONIN-KRATOS (GARRAS DE HADES) kf=36 beta=1 atlas=- frames=263
+abilities 5: HABILIDAD A HABILIDAD B HABILIDAD C COMBO DE HABILIDAD 1 COMBO DE HABILIDAD 2
+  ab0          n=22 t=1.27s pivY[104..321] idleY=105 dup:{energy,}
+  ab1          n=46 t=3.73s pivY[105..420] idleY=105 dup:{special,}
+  ab2          n=76 t=5.57s pivY[103..617] idleY=105 dup:{rage_attack,super,}
+  ab3          n=10 t=0.83s pivY[227..321] idleY=105 dup:{}
+  ab4          n=67 t=4.97s pivY[154..617] idleY=105 dup:{}
+  air          n= 6 t=0.60s pivY[121..141] idleY=105 dup:{airborne,hit,hit_high,hit_low,recovery,}
+  airborne     n= 6 t=0.60s pivY[121..141] idleY=105 dup:{air,hit,hit_high,hit_low,recovery,}
+  atk1         n= 7 t=0.53s pivY[93..106] idleY=105 dup:{punch1,}
+  atk2         n= 6 t=0.47s pivY[82..110] idleY=105 dup:{punch2,}
+  atk3         n=22 t=1.67s pivY[97..303] idleY=105 dup:{dash_attack,punch3,}
+  atk4         n=14 t=0.93s pivY[102..179] idleY=105 dup:{finisher,kick,}
+  block        n= 1 t=0.03s pivY[105..105] idleY=105 dup:{}
+  dash         n=12 t=0.40s pivY[73..105] idleY=105 dup:{}
+  dash_attack  n=22 t=1.67s pivY[97..303] idleY=105 dup:{atk3,punch3,}
+  defeat       n=18 t=1.77s pivY[38..122] idleY=105 dup:{}
+  energy       n=22 t=1.27s pivY[104..321] idleY=105 dup:{ab0,}
+  finisher     n=14 t=0.93s pivY[102..179] idleY=105 dup:{atk4,kick,}
+  getup        n=12 t=0.83s pivY[39..290] idleY=105 dup:{}
+  hit          n= 6 t=0.43s pivY[121..141] idleY=105 dup:{air,airborne,hit_high,hit_low,recovery,}
+  hit_high     n= 6 t=0.43s pivY[121..141] idleY=105 dup:{air,airborne,hit,hit_low,recovery,}
+  hit_low      n= 6 t=0.43s pivY[121..141] idleY=105 dup:{air,airborne,hit,hit_high,recovery,}
+  idle         n=13 t=0.87s pivY[100..105] idleY=105 dup:{}
+  jump         n= 9 t=0.37s pivY[122..123] idleY=105 dup:{}
+  kick         n=14 t=0.93s pivY[102..179] idleY=105 dup:{atk4,finisher,}
+  knockdown    n= 8 t=0.53s pivY[38..119] idleY=105 dup:{}
+  punch1       n= 7 t=0.53s pivY[93..106] idleY=105 dup:{atk1,}
+  punch2       n= 6 t=0.47s pivY[82..110] idleY=105 dup:{atk2,}
+  punch3       n=22 t=1.67s pivY[97..303] idleY=105 dup:{atk3,dash_attack,}
+  rage_attack  n=76 t=5.57s pivY[103..617] idleY=105 dup:{ab2,super,}
+  recovery     n= 6 t=0.43s pivY[121..141] idleY=105 dup:{air,airborne,hit,hit_high,hit_low,}
+  run          n=16 t=0.53s pivY[113..117] idleY=105 dup:{walk,}
+  special      n=46 t=3.73s pivY[105..420] idleY=105 dup:{ab1,}
+  super        n=76 t=5.57s pivY[103..617] idleY=105 dup:{ab2,rage_attack,}
+  victory      n=12 t=0.80s pivY[130..136] idleY=105 dup:{}
+  walk         n=16 t=0.53s pivY[113..117] idleY=105 dup:{run,}
