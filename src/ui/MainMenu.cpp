@@ -1,4 +1,8 @@
 #include "ui/MainMenu.h"
+#include "audio/AudioSystem.h"
+#include "core/DisplaySettings.h"
+#include "core/InputMap.h"
+#include "game/events/GameEvents.h"
 #include <cmath>
 
 namespace district_fury {
@@ -86,6 +90,102 @@ void DrawMainMenuArt(Texture2D art, int selectedIndex, const char* difficultyLab
         DrawText(difficultyLabel, 445, static_cast<int>(y) - 8, 16, {110, 220, 255, 255});
         DrawText("< >", 445 + labelWidth + 10, static_cast<int>(y) - 8, 16, {150, 190, 205, 200});
     }
+}
+
+namespace {
+Bus BusForRow(int row) {
+    return row == static_cast<int>(OptionsRow::Music)   ? Bus::Music
+         : row == static_cast<int>(OptionsRow::Effects) ? Bus::Sfx
+                                                        : Bus::Ambient;
+}
+bool IsVolumeRow(int row) {
+    return row == static_cast<int>(OptionsRow::Music) || row == static_cast<int>(OptionsRow::Effects) ||
+           row == static_cast<int>(OptionsRow::Ambient);
+}
+int VolumePercent(Bus b) { return static_cast<int>(std::lround(AudioSystem::Get().BusVolume(b) * 100.0f)); }
+}  // namespace
+
+bool UpdateOptionsMenu(int& cursor) {
+    AudioSystem& audio = AudioSystem::Get();
+    cursor = cursor < 0 ? 0 : cursor % kOptionsRowCount;
+    if (input::Pressed(KEY_UP) || input::Pressed(KEY_W)) {
+        cursor = (cursor + kOptionsRowCount - 1) % kOptionsRowCount;
+        EmitSimpleEvent(GameEventType::UiNavigate, cursor);
+    }
+    if (input::Pressed(KEY_DOWN) || input::Pressed(KEY_S)) {
+        cursor = (cursor + 1) % kOptionsRowCount;
+        EmitSimpleEvent(GameEventType::UiNavigate, cursor);
+    }
+    const int dir = (input::Pressed(KEY_RIGHT) || input::Pressed(KEY_D)) ? 1
+                  : (input::Pressed(KEY_LEFT) || input::Pressed(KEY_A)) ? -1 : 0;
+    const bool enter = input::Pressed(KEY_ENTER) || input::Pressed(KEY_J);
+    if (cursor == static_cast<int>(OptionsRow::Sound) && (dir != 0 || enter)) {
+        const bool nowMuted = !audio.IsMuted();
+        if (nowMuted) EmitSimpleEvent(GameEventType::UiCancel);   // (ya silenciado: no se oye)
+        audio.SetMuted(nowMuted);
+        if (!nowMuted) EmitSimpleEvent(GameEventType::UiConfirm);
+    } else if (IsVolumeRow(cursor) && (dir != 0 || enter)) {
+        const Bus b = BusForRow(cursor);
+        int pct = VolumePercent(b);
+        // ENTER recorre 100 -> 90 -> ... -> 0 -> 100 (tactil sin izq/der).
+        pct = dir != 0 ? pct + dir * 10 : (pct <= 0 ? 100 : pct - 10);
+        pct = pct < 0 ? 0 : (pct > 100 ? 100 : pct);
+        audio.SetBusVolume(b, pct / 100.0f);
+        EmitSimpleEvent(GameEventType::UiNavigate, cursor);   // se oye con el volumen nuevo (EFECTOS)
+    } else if (cursor == static_cast<int>(OptionsRow::ScreenWidth)) {
+        if (dir != 0) display::SetWidthPercent(display::WidthPercent() + dir * display::kWidthStep);
+        if (enter)
+            display::SetWidthPercent(display::WidthPercent() <= display::kMinWidthPercent ? display::kMaxWidthPercent
+                                     : display::WidthPercent() - display::kWidthStep);
+        if (dir != 0 || enter) EmitSimpleEvent(GameEventType::UiNavigate, cursor);
+    }
+    if (input::Pressed(KEY_ESCAPE)) {
+        EmitSimpleEvent(GameEventType::UiCancel);
+        return true;
+    }
+    return false;
+}
+
+void DrawOptionsMenu(Texture2D art, int cursor, const char* difficultyLabel, bool touchHints) {
+    DrawRectangle(0, 0, 1280, 720, {4, 7, 11, 255});
+    if (art.id)
+        DrawTexturePro(art, {0, 0, (float)art.width, (float)art.height}, {0, 0, 1280, 720}, {0, 0}, 0,
+                       {255, 255, 255, 60});
+    DrawRectangle(0, 0, 1280, 720, {3, 7, 12, 190});
+    DrawText("OPCIONES", 520, 90, 48, WHITE);
+    const AudioSystem& audio = AudioSystem::Get();
+    const Color hi{255, 214, 72, 255}, lo{200, 220, 230, 255}, val{110, 240, 160, 255};
+    static const char* kLabels[kOptionsRowCount] = {"SONIDO", "MUSICA", "EFECTOS", "AMBIENTE", "ANCHO DE PANTALLA"};
+    for (int i = 0; i < kOptionsRowCount; ++i) {
+        const int y = 190 + i * 58;
+        const bool sel = i == cursor;
+        if (sel) DrawRectangle(380, y - 12, 620, 48, {30, 50, 70, 200});
+        DrawText(kLabels[i], 420, y, 26, sel ? hi : lo);
+        if (i == static_cast<int>(OptionsRow::Sound)) {
+            const bool muted = audio.IsMuted();
+            DrawText(muted ? "DESACTIVADO" : "ACTIVADO", 720, y, 26,
+                     muted ? Color{255, 110, 100, 255} : val);
+        } else if (IsVolumeRow(i)) {
+            const int pct = VolumePercent(BusForRow(i));
+            // Deslizador: 10 segmentos.
+            for (int k = 0; k < 10; ++k) {
+                const bool on = k < pct / 10;
+                DrawRectangle(700 + k * 18, y + 2, 14, 22, on ? (audio.IsMuted() ? Color{120, 130, 135, 255} : val)
+                                                              : Color{40, 55, 65, 255});
+            }
+            DrawText(TextFormat("%3d%%", pct), 900, y, 26, sel ? hi : lo);
+        } else {
+            DrawText(TextFormat("< %d%% >", display::WidthPercent()), 760, y, 26, val);
+        }
+    }
+    DrawText(touchHints ? "CRUCETA ARRIBA/ABAJO: ELEGIR   IZQ/DER: CAMBIAR   OK: ALTERNAR"
+                        : "W/S ELEGIR   A/D CAMBIAR   ENTER/J ALTERNAR",
+             touchHints ? 330 : 420, 490, 18, {150, 190, 200, 230});
+    DrawText("ANCHO: si tu celular es muy alargado y todo se ve ancho, bajalo (solo cambia lo horizontal).",
+             200, 525, 16, {150, 175, 185, 220});
+    if (difficultyLabel)
+        DrawText(TextFormat("DIFICULTAD ACTUAL: %s", difficultyLabel), 440, 560, 18, {150, 190, 200, 230});
+    DrawText(touchHints ? "ATRAS - VOLVER" : "ESC - VOLVER", 540, 610, 20, {180, 195, 200, 220});
 }
 
 }  // namespace ui
