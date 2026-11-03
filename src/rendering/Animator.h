@@ -21,6 +21,17 @@ struct AnimationClip {
     std::vector<float> durations = {};
     // BETA: sonidos por cuadro del clip (indice en `frames`, clave del sonido).
     std::vector<std::pair<int, std::string>> sounds = {};
+    // F0.3: escala y desfase (px de celda) por cuadro de `frames`, del manifiesto
+    // ("scale"/"scales"/"offsets"). Vacios = sin ajuste (todos los clips de hoy).
+    std::vector<float> scales = {};
+    std::vector<Vector2> offsets = {};
+    bool HasFrameAdjust() const { return !scales.empty() || !offsets.empty(); }
+    // Ajuste del paso `step`: multiplica la escala por k y mueve los pies `off`
+    // (px de celda, x hacia el frente del dibujo).
+    void FrameAdjust(std::size_t step, float& k, Vector2& off) const {
+        k = scales.empty() ? 1.0f : scales[std::min(step, scales.size() - 1)];
+        off = offsets.empty() ? Vector2{0.0f, 0.0f} : offsets[std::min(step, offsets.size() - 1)];
+    }
 };
 
 class Animator {
@@ -192,6 +203,26 @@ public:
         DrawTexturePro(texture, source, {pivotPosition.x - px, pivotPosition.y - frame.pivotY * scale, width, height}, {0.0f, 0.0f}, 0.0f, tint);
     }
 
+    // F0.3: un cuadro concreto con escala X/Y separada y giro `angle` alrededor de
+    // los pies (como DrawScaled). `clip`/`step` (opcionales) aplican la escala y el
+    // desfase por cuadro del manifiesto.
+    void DrawFrameScaled(int frameIndex, Vector2 feet, float scaleX, float scaleY, bool flipX, Color tint = WHITE,
+                         float angle = 0.0f, const AnimationClip* clip = nullptr, std::size_t step = 0) const {
+        if (texture.id == 0 || frames.empty()) return;
+        const SpriteFrame& frame = frames[static_cast<std::size_t>(std::clamp(frameIndex, 0, static_cast<int>(frames.size()) - 1))];
+        if (clip && clip->HasFrameAdjust()) {
+            float k; Vector2 off; clip->FrameAdjust(step, k, off);
+            feet.x += (flipX ? -off.x : off.x) * scaleX; feet.y += off.y * scaleY;
+            scaleX *= k; scaleY *= k;
+        }
+        if (!frame.pieces.empty()) { DrawPieces(frame, feet, scaleX, scaleY, flipX, tint, angle); return; }
+        const float width = frame.width * scaleX, height = frame.height * scaleY;
+        if (width <= 0.0f || height <= 0.0f || frame.source.width <= 0.0f || frame.source.height <= 0.0f) return;
+        const Rectangle source = {frame.source.x, frame.source.y, flipX ? -frame.source.width : frame.source.width, frame.source.height};
+        const float px = flipX ? width - frame.pivotX * scaleX : frame.pivotX * scaleX;
+        DrawTexturePro(texture, source, {feet.x, feet.y, width, height}, {px, frame.pivotY * scaleY}, angle, tint);
+    }
+
     // Frame actual con metadatos (nullptr en atlas de rejilla sin metadatos).
     const SpriteFrame* CurrentFrameData() const {
         if (frames.empty()) return nullptr;
@@ -219,6 +250,11 @@ public:
                     float angle = 0.0f) const {
         const SpriteFrame* frame = CurrentFrameData();
         if (!frame || texture.id == 0) { Draw(feetPosition, scaleY, flipX, tint); return; }
+        if (currentClip.HasFrameAdjust()) {
+            float k; Vector2 off; currentClip.FrameAdjust(clipFrameIndex, k, off);
+            feetPosition.x += (flipX ? -off.x : off.x) * scaleX; feetPosition.y += off.y * scaleY;
+            scaleX *= k; scaleY *= k;
+        }
         if (!frame->pieces.empty()) { DrawPieces(*frame, feetPosition, scaleX, scaleY, flipX, tint, angle); return; }
         const float width = frame->width * scaleX, height = frame->height * scaleY;
         if (width <= 0.0f || height <= 0.0f || frame->source.width <= 0.0f || frame->source.height <= 0.0f) return;
@@ -240,6 +276,11 @@ public:
 
         if (!frames.empty()) {
             const SpriteFrame& frame = frames[static_cast<std::size_t>(safeFrame)];
+            if (currentClip.HasFrameAdjust()) {
+                float k; Vector2 off; currentClip.FrameAdjust(clipFrameIndex, k, off);
+                feetPosition.x += (flipX ? -off.x : off.x) * scale; feetPosition.y += off.y * scale;
+                scale *= k;
+            }
             if (!frame.pieces.empty()) { DrawPieces(frame, feetPosition, scale, scale, flipX, tint); return; }
             const float width = frame.width * scale;
             const float height = frame.height * scale;

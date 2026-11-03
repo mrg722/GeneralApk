@@ -1,0 +1,6 @@
+{
+  "_comment": "Clips nuevos que se AGREGAN al juego brakk_v2 del manifiesto. Lo rellena F1.5 (BRAKK, skin 2). Formato por clip: frames, durations|duration|fps, loop, y opcionales scale|scales, offsets.",
+  "clips": {
+    "brakk_v2": {}
+  }
+}

@@ -1,5 +1,9 @@
 {
   "version": 4,
+  "includes": [
+    "data/manifest/rayden_moves.json",
+    "data/manifest/brakk_moves.json"
+  ],
   "render_target": {
     "width": 1280,
     "height": 720,

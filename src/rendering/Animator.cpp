@@ -12,11 +12,22 @@ bool Animator::ApplyProfile(const AtlasProfile& profile, const ClipMap& clips, i
     std::unordered_map<std::string, AnimationClip> loaded;
     for (const auto& entry : clips) {
         const ClipDef& def = entry.second;
-        if (def.frames.empty()) return false;
-        for (int index : def.frames) if (index < 0 || index >= frameCount) return false;
+        bool outside = def.frames.empty();
+        for (int index : def.frames) if (index < 0 || index >= frameCount) outside = true;
+        if (outside) {
+            // Clip de un include (data/manifest/*.json): se descarta solo, con aviso.
+            if (def.fromInclude) {
+                TraceLog(LOG_WARNING, "manifiesto: clip '%s' fuera de la rejilla (%d cuadros), descartado",
+                         entry.first.c_str(), frameCount);
+                continue;
+            }
+            return false;
+        }
         AnimationClip clip{def.frames.front(), def.frames.back(), def.durations.empty() ? 0.1f : def.durations.front(), def.loop};
         clip.frames = def.frames;
         clip.durations = def.durations;
+        clip.scales = def.scales;
+        for (const auto& o : def.offsets) clip.offsets.push_back({o.first, o.second});
         loaded[entry.first] = std::move(clip);
     }
 
