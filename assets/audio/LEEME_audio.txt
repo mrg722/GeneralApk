@@ -21,3 +21,48 @@ REFERENCIAS DE INVESTIGACIÓN:
 - OpenGameArt: colecciones CC0 de impactos, golpes y UI.
 - Itch.io: packs gratuitos de UI/cyberpunk y SFX.
 Estas páginas se usaron como referencia de categorías, no como fuente de los WAV incluidos.
+
+
+BANCO DE COMBATE SINTETIZADO (F1.11)
+====================================
+
+Procedencia: 100 % generado por codigo (numpy + scipy) para District Fury.
+Sin muestras externas, sin grabaciones, sin material con copyright.
+Semilla fija por archivo: regenerar da archivos identicos byte a byte.
+
+Carpetas
+- sfx/combat/       71 sonidos genericos (golpes ligero/medio/pesado, patada,
+                    corte, energia, bloqueo, rotura de guardia, dano al jugador,
+                    whoosh, salto/aterrizaje, pasos secos y mojados, KO, game over,
+                    stage clear, telegrafia, jefe, pickups, hitos de combo,
+                    props madera/metal, furia, transformacion, UI de seleccion).
+                    Nombres = contrato con F1.10 (docs/PLAN_MAESTRO_MOVIMIENTOS.md).
+- sfx/arquetipos/<agil|cuchillas|pesado|electrico>/
+                    hit_light_1..4, hit_medium_1..4, hit_heavy_1..3, kick_1..3,
+                    whoosh_light_1..3, whoosh_heavy_1..3 (pisan al generico).
+                    agil +12 % de tono y mas chasquido; cuchillas = cortes;
+                    pesado -15 % de tono y mas sub; electrico = chisporroteo.
+- sfx/rayder_v2/, sfx/ronin_v2/
+                    los packs de MAX y RONIN con los mismos nombres, pasados a
+                    mono y con medios audibles en movil (chasquido de 3 ms,
+                    +4 dB en 1.5-3 kHz, saturacion armonica). Los originales
+                    sfx/rayder/ y sfx/ronin/ se conservan como respaldo.
+
+Formato: WAV PCM 16 bit, 44.1 kHz, MONO (el pan lo pone el motor).
+Pico <= -3 dBFS (nada recorta), paso alto 20 Hz, silencio inicial < 2 ms,
+fundido de 2 ms al final. Volumen: st50 (RMS maximo en 50 ms) normalizado por
+categoria: golpes -10 dBFS; pasos -24 (14 dB bajo los golpes); telegrafia -22
+(12 dB bajo); UI/pickups/combo -13..-14; jingles -12 (game_over queda en -16
+por el limite de pico).
+Regla movil: cada archivo tiene >= 25 % de su energia entre 500 Hz y 3 kHz
+(objetivo de diseno 30 %): el altavoz de un telefono casi no da nada bajo
+~250 Hz, asi que el subgrave es un extra y el "cuerpo" va en medios.
+
+Regenerar y verificar (desde la raiz del repo):
+  python3 tools/audio/genera_banco_combate.py
+  python3 tools/audio/mejora_medios.py
+  python3 tools/audio/analiza_banco.py assets/audio/sfx/combat assets/audio/sfx/arquetipos \
+          assets/audio/sfx/rayder_v2 assets/audio/sfx/ronin_v2
+  (el analizador sale con codigo 1 si algo recorta, pasa de -1 dBFS, tiene
+   silencio inicial > 2 ms, incumple la regla movil o el spread de st50 de una
+   categoria pasa de 4 dB; --md imprime la tabla en Markdown)
