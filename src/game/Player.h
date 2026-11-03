@@ -318,6 +318,7 @@ public:
     int dashDir{1};                 // +1 = hacia facing, -1 = back-dash
     float dashSpeed{700.0f};
     int motionFrame{0};             // frames reales (MotionHistory; no se congela en el ataque)
+    int motionFacing{1};            // facing (+1/-1) al empezar el ultimo "abajo puro" (QCF/QCB)
     int stepCount{0};               // medio pasos (Footstep en cada cruce de walkPhase por 0 y pi)
     // Ataque en curso: golpes hechos (hitCount), armadura gastada, root motion.
     int attackHitsDone{0};

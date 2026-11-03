@@ -431,7 +431,9 @@ void Player::OnAttackConnected(const AttackDef& def) {
 bool Player::StartJump(bool chase) {
     const MoveSet& ms = Moves();
     if (!(ms.caps & CapJump)) return false;
-    const float vz0 = (ms.caps & CapHeavyJump) && ms.jumpVz == 720.0f ? 560.0f : ms.jumpVz;
+    // vz0 = MoveSet.jumpVz (720 = apex 173 px; un pesado como Titan-X pone 560 =
+    // 105 px). CapHeavyJump va en CapAll, asi que NO cambia la altura por si solo.
+    const float vz0 = std::max(200.0f, ms.jumpVz);
     SetState(PlayerState::Jump);
     velocity.z = vz0;
     position.z = std::max(position.z, 0.5f);
@@ -588,6 +590,9 @@ void Player::PollAttackInput() {
     const bool downHeld = frameInput.moveY > 0.5f;
     motion.Record(downHeld, h, motionFrame);
     const int facingDir = facing == Facing::Right ? 1 : -1;
+    // El facing al empezar el "abajo puro" decide QCF/QCB (caminar en diagonal
+    // atras gira al personaje a mitad del comando).
+    if (downHeld && h == 0) motionFacing = facingDir;
     // B14: direccion RELATIVA al facing al pulsar, y "abajo puro".
     const int relX = h * facingDir;
     const bool down = downHeld && h == 0;
@@ -607,12 +612,12 @@ void Player::PollAttackInput() {
     }
     const int frame = motionFrame;
     if (frameInput.punch) {
-        const int qcf = motion.QuarterCircleForward(frame, facingDir);
-        const int qcb = motion.QuarterCircleBack(frame, facingDir);
+        const int qcf = motion.QuarterCircleForward(frame, motionFacing);
+        const int qcb = motion.QuarterCircleBack(frame, motionFacing);
         if (qcf != 0) { inputBuffer.Push(InputCommand::SpecialWave, qcf, relX, down); motion.Clear(); }
         else if (qcb != 0) {
             // QCB + J: Signature1 si existe; si no, la onda hacia ese lado (como antes).
-            if (MoveEnabled(AttackId::Signature1)) inputBuffer.Push(InputCommand::Signature1, facingDir, relX, down);
+            if (MoveEnabled(AttackId::Signature1)) inputBuffer.Push(InputCommand::Signature1, motionFacing, relX, down);
             else inputBuffer.Push(InputCommand::SpecialWave, qcb, relX, down);
             motion.Clear();
         }
@@ -620,11 +625,11 @@ void Player::PollAttackInput() {
     }
     if (frameInput.kick) {
         const int dp = motion.DragonPunch(frame);
-        const int qcb = specials ? motion.QuarterCircleBack(frame, facingDir) : 0;
-        const int qcf = specials ? motion.QuarterCircleForward(frame, facingDir) : 0;
+        const int qcb = specials ? motion.QuarterCircleBack(frame, motionFacing) : 0;
+        const int qcf = specials ? motion.QuarterCircleForward(frame, motionFacing) : 0;
         if (dp != 0) { inputBuffer.Push(InputCommand::SpecialRise, dp, relX, down); motion.Clear(); }
-        else if (qcb != 0) { inputBuffer.Push(InputCommand::SpecialHurricane, facingDir, relX, down); motion.Clear(); }
-        else if (qcf != 0) { inputBuffer.Push(InputCommand::SpecialDrill, facingDir, relX, down); motion.Clear(); }
+        else if (qcb != 0) { inputBuffer.Push(InputCommand::SpecialHurricane, motionFacing, relX, down); motion.Clear(); }
+        else if (qcf != 0) { inputBuffer.Push(InputCommand::SpecialDrill, qcf, relX, down); motion.Clear(); }
         else inputBuffer.Push(InputCommand::Kick, h, relX, down);
     }
 }
@@ -882,8 +887,7 @@ bool Player::TryStartBufferedAttack(bool fromCancel) {
     }
     // Especiales: su direccion de comando. J/K (F0.4, reemplaza B21): no giran;
     // <J es el CODAZO sin girar y el J siguiente gira (turn).
-    if (IsSpecialCommand(cmd) && dir != 0 && next != AttackId::Hurricane && next != AttackId::DrillKick)
-        facing = dir > 0 ? Facing::Right : Facing::Left;
+    if (IsSpecialCommand(cmd) && dir != 0) facing = dir > 0 ? Facing::Right : Facing::Left;
     if (turn) facing = facing == Facing::Right ? Facing::Left : Facing::Right;
 
     InputCommand consumed;

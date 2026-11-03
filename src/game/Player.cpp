@@ -57,7 +57,7 @@ void Player::Reset() {
     victoryTimer = 0.0f; jumpCancelTimer = 0.0f; lastHitTargetX = 0.0f; airAttacks = 0;
     chainLinkJ = chainLinkK = -1;
     walkVelX = walkVelY = 0.0f; running = false; tapTimer = 0.0f; lastTapDir = 0; prevHoriz = 0;
-    dashDir = 1; dashSpeed = 700.0f; stepCount = 0;
+    dashDir = 1; dashSpeed = 700.0f; stepCount = 0; motionFacing = 1; motion.Clear();
     attackHitsDone = 0; armorAbsorbed = 0; projectileShots = 0; projectileClock = 0.0f; rootAppliedX = 0.0f;
     stompTargetAhead = false;
     attackClipName.clear(); attackClipOrigin = ClipOrigin::Historic;
