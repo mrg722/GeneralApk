@@ -1,0 +1,47 @@
+MUSICA DE DISTRICT FURY (assets/audio/music/) y AMBIENTES (assets/audio/ambient/)
+===============================================================================
+
+PROCEDENCIA: 100 % ORIGINAL, GENERADA POR CODIGO.
+Todos los .ogg de esta carpeta y de assets/audio/ambient/ los compone y sintetiza
+tools/audio/genera_musica.py (BRIEF F1.12) con semilla fija (SEMILLA_GLOBAL =
+20261103). Progresiones, bajos, arpegios y melodias salen de caminatas aleatorias
+(cadenas de Markov sobre grados de la escala y motivos ritmicos sorteados por
+tema); los sonidos son osciladores (sierra/cuadrada con polyBLEP, seno, FM),
+ruido y filtros escritos en ese script. No se transcribe ni imita ninguna
+melodia existente, no se usan muestras externas ni IA de audio. La percusion
+tipo taiko reutiliza la receta de tools/audio/genera_intro_ronin.py (tambien
+original).
+
+Regenerar (determinista: mismos md5 en cada ejecucion):
+    python3 -I tools/audio/genera_musica.py
+    python3 -I tools/audio/genera_musica.py --solo menu,boss   (solo algunos temas)
+Requiere numpy, scipy y ffmpeg con libvorbis (-q:a 3, modo bitexact). El script
+imprime por archivo: BPM, tonalidad, compases, duracion, LUFS, pico, salto de
+muestra en la union del bucle (render y OGG decodificado), MB y md5.
+
+PIEZAS (bucles de 32 compases; las capas de un tema tienen mismo tempo,
+tonalidad y numero de muestras, y suenan a la vez con volumen cruzado)
+  archivo                BPM  tonalidad        dur     uso
+  menu.ogg                96  La menor         80.0 s  menu / seleccion / recompensa
+  stage1_calma/combate   120  Re menor         64.0 s  calles con lluvia
+  stage2_calma/combate   110  Do menor         69.8 s  industrial (drone + metales)
+  stage3_calma/combate   126  Fa# dorica       61.0 s  puerto (campanas FM)
+  stage4_calma/combate   132  Mi menor         58.2 s  azotea (viento, arpegio)
+  stage5_calma/combate   138  Sol frigia       55.7 s  guarida (pulso grave)
+  boss_a / boss_b        140  Do# frigia       54.9 s  jefe (taiko, ostinato cromatico, bronces)
+  vs.ogg                 150  Si menor armon.  51.2 s  modo VS
+  victoria.ogg / derrota.ogg  stingers de 4.6 s sin bucle
+Capa "combate": charles, bajo saturado, bombo a negras, caja con fantasmas.
+Capa "boss_b": + bronces completos, lead, bateria; entra con BossPhase >= 2.
+Sonoridad: calma/A -16.5 LUFS, combate/B -15.5 LUFS, menu/stingers -16 LUFS;
+pico del OGG decodificado <= -1.4 dBFS.
+
+AMBIENTES POR STAGE (assets/audio/ambient/, bucles de 7.75 s a -28 LUFS, q1)
+  amb_industrial.ogg (Stage2), amb_puerto.ogg (Stage3), amb_azotea.ogg (Stage4),
+  amb_guarida.ogg (Stage5). Menu y Stage1 siguen con sfx/world_rain_loop.wav.
+  Para F1.10 / AudioSystem: MusicPlayer::AmbientFileForMode(GameMode) devuelve la
+  ruta del ambiente de cada modo (nullptr = sin ambiente); cargarla con
+  LoadMusicStream en bucle al recibir ModeEnter, en el bus Ambient.
+
+REPRODUCTOR: src/audio/MusicPlayer.* (ver cabecera). Log de depuracion
+"MUSICA: <tema>" con la variable de entorno DF_MUSICA_LOG=1.
