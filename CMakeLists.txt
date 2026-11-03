@@ -36,7 +36,8 @@ endif()
 
 FetchContent_MakeAvailable(raylib)
 
-add_library(district_fury_core
+# Lista historica de fuentes del motor (se conserva tal cual).
+set(DF_CORE_SOURCES
     src/audio/AudioSystem.cpp
     src/core/ApplicationState.cpp
     src/core/Json.cpp
@@ -78,6 +79,20 @@ add_library(district_fury_core
     src/ui/GameHUD.cpp
     src/ui/TouchControls.cpp
 )
+# Carpetas por bloque (plan maestro, F0.1): cualquier .cpp nuevo dentro de estas
+# carpetas entra solo, sin editar este archivo (CONFIGURE_DEPENDS re-escanea al compilar).
+file(GLOB DF_GLOB_SOURCES CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    src/game/moves/*.cpp
+    src/game/visual/*.cpp
+    src/game/events/*.cpp
+    src/game/player/*.cpp
+    src/game/combat/*.cpp
+    src/game/beta/*.cpp
+    src/audio/*.cpp)
+list(APPEND DF_CORE_SOURCES ${DF_GLOB_SOURCES})
+list(REMOVE_DUPLICATES DF_CORE_SOURCES)
+
+add_library(district_fury_core ${DF_CORE_SOURCES})
 target_include_directories(district_fury_core PUBLIC src)
 target_link_libraries(district_fury_core PUBLIC raylib)
 
@@ -176,4 +191,41 @@ if(BUILD_TESTING)
               touch_controls_tests stage1_playthrough_test sprite_manifest_tests)
         target_compile_options(${t} PRIVATE -UNDEBUG)
     endforeach()
+
+    # Nombre de target en snake_case a partir del nombre del archivo:
+    # ContractsTests.cpp -> contracts_tests, StateStrips.cpp -> state_strips.
+    function(df_snake_case out stem)
+        string(REGEX REPLACE "([a-z0-9])([A-Z])" "\\1_\\2" s "${stem}")
+        string(TOLOWER "${s}" s)
+        set(${out} "${s}" PARENT_SCOPE)
+    endfunction()
+
+    # Tests unitarios por bloque (tests/unit/<Nombre>Tests.cpp): se registran solos
+    # en ctest, con directorio de trabajo = raiz del repo y assert() encendido.
+    file(GLOB DF_UNIT_TESTS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/*Tests.cpp)
+    foreach(src ${DF_UNIT_TESTS})
+        get_filename_component(stem "${src}" NAME_WE)
+        df_snake_case(name "${stem}")
+        add_executable(${name} "${src}")
+        target_link_libraries(${name} PRIVATE district_fury_core)
+        target_compile_options(${name} PRIVATE -UNDEBUG)
+        add_test(NAME ${name} COMMAND ${name} WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+    endforeach()
+
+    # Herramientas (tests/tools/*.cpp): ejecutables sin add_test (necesitan ventana
+    # o generan capturas). StateStrips.cpp -> state_strips.
+    file(GLOB DF_TOOLS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tests/tools/*.cpp)
+    foreach(src ${DF_TOOLS})
+        get_filename_component(stem "${src}" NAME_WE)
+        df_snake_case(name "${stem}")
+        add_executable(${name} "${src}")
+        target_link_libraries(${name} PRIVATE district_fury_core)
+    endforeach()
+    # state_strips fija el reloj: las llamadas del juego a GetTime() se redirigen a
+    # __wrap_GetTime (definida en la herramienta) para que dos corridas den los
+    # mismos pixeles. raylib conserva su reloj interno (la redireccion solo afecta
+    # referencias externas a rcore). Solo con el enlazador de GNU/LLVM (Linux).
+    if(TARGET state_strips)
+        target_link_options(state_strips PRIVATE "-Wl,--wrap=GetTime")
+    endif()
 endif()
