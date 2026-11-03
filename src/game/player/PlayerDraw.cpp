@@ -1,5 +1,7 @@
 // Jugador: dibujo del personaje, aura de furia, escudo y proyectil de energia.
 #include "game/player/PlayerCommon.h"
+#include "game/player/PoseFxEval.h"
+#include "game/events/GameEvents.h"
 
 namespace district_fury {
 
@@ -79,36 +81,40 @@ void Player::SpawnFx(int first, int count, Vector2 pos, float dur, float scale) 
     effects.push_back({first, count, pos, 0.0f, dur, scale});
 }
 
+namespace {
+// Mete una estela al frente del anillo (la mas vieja se pierde) y apaga las que
+// pasan del tope `cap` (5 = las estelas de siempre).
+void PushTrail(PlayerVisualState& v, const TrailCopy& t, int cap) {
+    for (int i = PlayerVisualState::kMaxTrails - 1; i > 0; --i) v.trails[i] = v.trails[i - 1];
+    v.trails[0] = t;
+    for (int i = std::clamp(cap, 1, PlayerVisualState::kMaxTrails); i < PlayerVisualState::kMaxTrails; ++i) v.trails[i].life = 0.0f;
+}
+
+// Estela de un cuadro del atlas (textura + recorte + pivote del cuadro).
+bool AtlasTrail(const Animator& a, int frameIndex, Vector2 feet, float scaleX, float scaleY, float angle, bool flip,
+                TrailCopy& t) {
+    if (a.texture.id == 0 || a.frames.empty()) return false;
+    const int idx = std::clamp(frameIndex, 0, static_cast<int>(a.frames.size()) - 1);
+    const SpriteFrame& f = a.frames[static_cast<std::size_t>(idx)];
+    t = TrailCopy{};
+    t.pos = feet; t.scale = 1.0f; t.sx = scaleX; t.sy = scaleY; t.angle = angle; t.flip = flip;
+    if (!f.pieces.empty()) { t.frame = idx; t.scale = scaleY; t.sx = t.sy = 1.0f; return true; }   // BETA: se arma al dibujar
+    t.tex = a.texture;
+    t.src = {f.source.x, f.source.y, f.source.width, f.source.height};
+    t.size = {f.width, f.height};
+    t.origin = {f.pivotX, f.pivotY};
+    return true;
+}
+}  // namespace
+
 void Player::UpdateMotionFeel(float dt) {
     animClock += dt;
-    // Efectos: chispa de impacto en cuanto un golpe conecta.
+    if (static_cast<int>(state) != visual.stateSeen) { visual.stateSeen = static_cast<int>(state); visual.stateClock = 0.0f; }
+    else visual.stateClock += dt;
+    // Efectos: chispa de impacto en cuanto un golpe conecta. El SONIDO del
+    // impacto ya no sale de aqui: lo emite el resolvedor de golpes (F0.2).
     for (Fx& e : effects) e.t += dt;
     effects.erase(std::remove_if(effects.begin(), effects.end(), [](const Fx& e) { return e.t >= e.dur; }), effects.end());
-    if (hasHit && !prevHasHit && state == PlayerState::Attack) {   // impacto: sonido segun el golpe
-        const bool heavyHit = GetAttack(currentAttack).heavy || activeSkill >= 0;
-        if (IsRayder()) {
-            // Rayder: golpes y patadas propios, rotando sus 3 variantes por combo
-            // (docs/SONIDO_RAYDER.md); el remate pesado usa el impacto fuerte.
-            static const Sfx kGolpes[3] = {Sfx::RayderGolpe1, Sfx::RayderGolpe2, Sfx::RayderGolpe3};
-            static const Sfx kPatadas[3] = {Sfx::RayderPatada1, Sfx::RayderPatada2, Sfx::RayderPatada3};
-            const int variante = ((comboStep % 3) + 3) % 3;
-            AudioSystem::Get().Play(activeSkill >= 0 ? Sfx::RayderImpactoPoder
-                                    : heavyHit ? Sfx::RayderImpactoFuerte
-                                    : attackPhase == AttackPhase::Kick ? kPatadas[variante] : kGolpes[variante]);
-        } else if (IsRonin()) {
-            // Ronin: punetazos propios rotando por combo, 2 patadas (normal y la
-            // voladora del remate) y el tajo de espada en los golpes de habilidad
-            // (docs/SONIDO_RAYDER.md describe el mismo patron, aplicado aqui a Ronin).
-            static const Sfx kGolpes[3] = {Sfx::RoninGolpe1, Sfx::RoninGolpe2, Sfx::RoninGolpe3};
-            const int variante = ((comboStep % 3) + 3) % 3;
-            AudioSystem::Get().Play(activeSkill >= 0 ? Sfx::RoninEspadaImpacto
-                                    : heavyHit ? (attackPhase == AttackPhase::Kick ? Sfx::RoninPatada2 : Sfx::RoninImpactoFuerte)
-                                    : attackPhase == AttackPhase::Kick ? Sfx::RoninPatada1 : kGolpes[variante]);
-        } else {
-            AudioSystem::Get().Play(activeSkill >= 0 ? Sfx::EnergyImpact : heavyHit ? Sfx::HeavyHit
-                                    : attackPhase == AttackPhase::Kick ? Sfx::Kick : Sfx::Punch);
-        }
-    }
     if (hasHit && !prevHasHit && state == PlayerState::Attack && !IsKfCharacter()) {
         const CombatBox b = GetAttackHitbox();
         const float dir = facing == Facing::Right ? 1.0f : -1.0f;
@@ -122,13 +128,23 @@ void Player::UpdateMotionFeel(float dt) {
     turnTimer = std::max(0.0f, turnTimer - dt);
     const bool wasDown = lastState == PlayerState::Airborne || lastState == PlayerState::Knockdown;
     const bool isDown = state == PlayerState::Airborne || state == PlayerState::Knockdown;
-    if (wasDown && !isDown) { landTimer = 0.14f; AudioSystem::Get().Play(Sfx::Land); }
+    // Aterrizaje: solo el evento (el sonido lo decide el director de audio).
+    if (wasDown && !isDown) {
+        landTimer = 0.14f;
+        GameEvent e; e.type = GameEventType::KnockdownLand; e.x = position.x; e.y = position.y; e.skin = skin;
+        EmitGameEvent(e);
+    } else if (lastState == PlayerState::Jump && state != PlayerState::Jump && position.z <= 0.0f) {
+        landTimer = 0.14f;
+        GameEvent e; e.type = GameEventType::Land; e.x = position.x; e.y = position.y; e.skin = skin;
+        EmitGameEvent(e);
+    }
     if (lastState == PlayerState::Dash && state != PlayerState::Dash) landTimer = std::max(landTimer, 0.08f);
     if (state == PlayerState::Dash && lastState != PlayerState::Dash && !IsKfCharacter())   // estela de esquiva (efectos 49-56)
         SpawnFx(42, 4, {position.x - (facing == Facing::Right ? 40.0f : -40.0f), position.y - 55.0f}, 0.28f, 1.2f);
     landTimer = std::max(0.0f, landTimer - dt);
     if (state == PlayerState::Walk) walkPhase += dt * GetMoveSpeed() / 34.0f;
     lastState = state;
+    visual.prevZ = position.z;
 
     // Avance real durante el golpe (root motion): en King Fighter cada golpe
     // da un paso; aqui el personaje se desliza mientras arranca y pega.
@@ -158,17 +174,86 @@ void Player::UpdateMotionFeel(float dt) {
         }
     }else if(state!=PlayerState::Attack)attackRootMotionApplied=0.0f;
 
-    // Estelas (afterimages) en dash, golpes fuertes, habilidades y transformacion.
-    for (Ghost& g : ghosts) g.life = std::max(0.0f, g.life - dt);
+    // Estelas (afterimages) en dash, golpes fuertes, habilidades y transformacion,
+    // mas las que pida el PoseFx del movimiento (ESTELA / GIRO / BARRIDA). Guardan
+    // textura + recorte (+ transformacion si el cuerpo usa PoseFx), asi tambien
+    // salen en los personajes de poses sueltas con SU textura.
+    for (TrailCopy& g : visual.trails) g.life = std::max(0.0f, g.life - dt);
     const bool trail = state == PlayerState::Dash ||
                        (state == PlayerState::Attack && (activeSkill >= 0 || GetAttack(currentAttack).heavy)) ||
                        (IsTransformed() && state == PlayerState::Walk);
-    ghostTimer -= dt;
-    if (trail && ghostTimer <= 0.0f && animator.texture.id != 0) {
-        for (int i = kGhostCount - 1; i > 0; --i) ghosts[i] = ghosts[i - 1];
-        ghosts[0] = {position.ToScreen(), animator.currentFrame, facing == Facing::Left, 0.22f};
-        ghostTimer = 0.035f;
+    visual.trailTimer -= dt;
+    const Vector2 feet = position.ToScreen();
+    const Color histTint = IsTransformed() ? Color{255, 220, 120, 255} : Color{110, 190, 255, 255};
+    BodyCmd cmd;
+    const bool poseBody = ComputePoseBody(*this, feet, DepthScaleFor(position.y), WHITE, cmd);
+    const bool customAtlas = !poseBody && ComputeAtlasCustom(*this, feet, SpriteScale(), WHITE, cmd);
+    const int fxTrails = (poseBody || customAtlas) && cmd.hasFx ? EffectiveGhostCount(cmd.fx) : 0;
+    const bool wantTrail = trail || fxTrails > 0;
+    if (wantTrail && visual.trailTimer <= 0.0f && animator.texture.id != 0) {
+        const Color tint = fxTrails > 0 && !trail ? cmd.fx.ghostTint : histTint;
+        const int cap = std::max(kGhostCount, fxTrails) * (poseBody ? std::max(1, cmd.pieceCount) : 1);
+        if (poseBody) {
+            for (int i = cmd.pieceCount - 1; i >= 0; --i) {
+                TrailCopy t;
+                t.tex = cmd.tex[i];
+                t.src = cmd.src[i].width > 0 ? cmd.src[i] : Rectangle{0, 0, (float)cmd.tex[i].width, (float)cmd.tex[i].height};
+                t.size = {t.src.width, t.src.height};
+                t.origin = {t.src.width * 0.5f - cmd.offset[i].x, t.src.height - cmd.offset[i].y};
+                t.pos = cmd.feet; t.scale = cmd.scale; t.sx = cmd.sx; t.sy = cmd.sy; t.angle = cmd.angle;
+                t.flip = cmd.pieceFlip[i]; t.tint = tint; t.life = 0.22f;
+                PushTrail(visual, t, cap);
+            }
+        } else {
+            TrailCopy t;
+            const bool ok = customAtlas
+                ? AtlasTrail(*cmd.anim, cmd.frame, cmd.feet, cmd.scale * cmd.sx, cmd.scale * cmd.sy, cmd.angle, cmd.flip, t)
+                : AtlasTrail(animator, animator.currentFrame, feet, 1.0f, 1.0f, 0.0f, facing == Facing::Left, t);
+            if (ok) {
+                if (!customAtlas) t.scale = -1.0f;   // estela de siempre: escala del cuerpo al dibujar
+                t.tint = tint; t.life = 0.22f;
+                PushTrail(visual, t, cap);
+            }
+        }
+        visual.trailTimer = fxTrails > 0 && !trail ? std::max(0.016f, cmd.fx.ghostInterval) : 0.035f;
     }
+}
+
+// Estelas guardadas (la mas vieja primero), alfa 110 -> 0 en 0.22 s.
+void DrawBodyTrails(const Player& pl, float spriteScale) {
+    for (int i = PlayerVisualState::kMaxTrails - 1; i >= 0; --i) {
+        const TrailCopy& g = pl.visual.trails[i];
+        if (g.life <= 0.0f) continue;
+        const unsigned char a = static_cast<unsigned char>(std::clamp(g.life / 0.22f, 0.0f, 1.0f) * 110.0f);
+        const Color gc{g.tint.r, g.tint.g, g.tint.b, a};
+        const float scale = g.scale < 0.0f ? spriteScale : g.scale;
+        if (g.frame >= 0) { pl.animator.DrawFrame(g.frame, g.pos, scale, g.flip, gc); continue; }
+        if (g.tex.id == 0) continue;
+        const float w = g.size.x * scale * g.sx, h = g.size.y * scale * g.sy;
+        const float ox = (g.flip ? w - g.origin.x * scale * g.sx : g.origin.x * scale * g.sx);
+        const float oy = g.origin.y * scale * g.sy;
+        const Rectangle src{g.src.x, g.src.y, g.flip ? -g.src.width : g.src.width, g.src.height};
+        DrawTexturePro(g.tex, src, {g.pos.x, g.pos.y, w, h}, {ox, oy}, g.angle, gc);
+    }
+}
+
+// Superposiciones FX (efectos_azules.png) del PoseFx, ancladas a los pies.
+void DrawBodyOverlays(const BodyCmd& c) {
+    if (!c.hasFx || c.fx.overlayCount <= 0) return;
+    const Texture2D t = AssetManager::Get().GetTextureByPath("assets/fx/efectos_azules.png");
+    if (t.id == 0) return;
+    BeginBlendMode(BLEND_ADDITIVE);
+    for (int i = 0; i < std::min(c.fx.overlayCount, 2); ++i) {
+        const OverlayFx& o = c.fx.overlay[i];
+        const int f = OverlayFrame(o, c.clock);
+        if (f < 0) continue;
+        const float s = o.scale * c.bodyK;
+        const bool flip = c.dir < 0;
+        const Rectangle src{(float)(f % 8) * 128.0f, (float)(f / 8) * 96.0f, flip ? -128.0f : 128.0f, 96.0f};
+        const Vector2 at{c.feet.x + o.x * c.dir * c.bodyK, c.feet.y + o.y * c.bodyK};
+        DrawTexturePro(t, src, {at.x, at.y, 128.0f * s, 96.0f * s}, {64.0f * s, 48.0f * s}, o.rot * c.dir, o.tint);
+    }
+    EndBlendMode();
 }
 
 float Player::SpriteScale() const {
@@ -184,8 +269,15 @@ void Player::Draw() const {
     const float scale = DepthScaleFor(position.y);
     const float spriteScale = SpriteScale();
 
-    DrawEllipse(static_cast<int>(p.x), static_cast<int>(position.y), 30 * scale, 8 * scale,
-                {0, 0, 0, 145});
+    // Sombra en el suelo: encoge y se aclara con la altura (salto, lanzamiento).
+    if (position.z > 0.0f) {
+        const float k = 1.0f / (1.0f + position.z / 150.0f);
+        DrawEllipse(static_cast<int>(p.x), static_cast<int>(position.y), 30 * scale * k, 8 * scale * k,
+                    {0, 0, 0, static_cast<unsigned char>(145.0f * k)});
+    } else {
+        DrawEllipse(static_cast<int>(p.x), static_cast<int>(position.y), 30 * scale, 8 * scale,
+                    {0, 0, 0, 145});
+    }
 
     DrawRageAura(p, scale);
     if (IsTransformed()) {

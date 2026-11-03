@@ -32,6 +32,14 @@ const char* PoseTitanXM(PlayerState state, AttackType attack, bool rage, double 
     return idleCycle == 0 ? "idle1" : idleCycle == 1 ? "idle2" : idleCycle == 2 ? "idle3" : "idle4";
 }
 
+bool PoseFrameTitanX(const PoseContext& ctx, PoseFrame& out) {
+    return SinglePose(out, "titanx", PoseTitanX(ctx.state, ctx.attackType, ctx.rage, ctx.time));
+}
+
+bool PoseFrameTitanXM(const PoseContext& ctx, PoseFrame& out) {
+    return SinglePose(out, "titanx_mejorado", PoseTitanXM(ctx.state, ctx.attackType, ctx.rage, ctx.time));
+}
+
 int PoseFacesRightTitanX(const char* folder, const char* pose) {
     (void)pose;
     if (folder == nullptr) return -1;

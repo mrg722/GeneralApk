@@ -50,4 +50,31 @@ inline void DrawSpriteUniform(Texture2D tex, Vector2 feetPosition, float scale, 
     DrawTexturePro(tex, source, dest, {0.0f, 0.0f}, 0.0f, tint);
 }
 
+// F0.3 — poses sueltas con escala UNIFORME por personaje (la misma para todas
+// sus poses: se acaba el "cada pose a la misma altura"), recorte, rotacion y
+// estiramiento. Dibuja `src` de `tex` (src.width <= 0 = toda la textura) a
+// `scale` px de pantalla por px de textura (por sx/sy), apoyando el centro
+// inferior del recorte, desplazado `offset` px de textura (x hacia la derecha
+// del dibujo, y hacia abajo), en `feet`. Espejo si flipX (el offset tambien se
+// refleja). Gira angleDeg grados ALREDEDOR DE LOS PIES. Las de arriba no cambian
+// (las usan los jefes).
+inline void DrawBossPoseEx(Texture2D tex, Rectangle src, Vector2 feet, float scale, bool flipX, float angleDeg,
+                           float sx, float sy, Color tint = WHITE, Vector2 offset = {0.0f, 0.0f}) {
+    if (tex.id == 0 || tex.height <= 0 || tex.width <= 0) return;
+    if (src.width <= 0.0f || src.height <= 0.0f) src = {0.0f, 0.0f, static_cast<float>(tex.width), static_cast<float>(tex.height)};
+    const float w = src.width * scale * sx;
+    const float h = src.height * scale * sy;
+    if (w == 0.0f || h <= 0.0f) return;
+    const Rectangle source{src.x, src.y, flipX ? -src.width : src.width, src.height};
+    const float ox = offset.x * scale * sx * (flipX ? -1.0f : 1.0f);
+    const float oy = offset.y * scale * sy;
+    DrawTexturePro(tex, source, {feet.x, feet.y, w, h}, {w * 0.5f - ox, h - oy}, angleDeg, tint);
+}
+
+// Escala uniforme de un set de poses sueltas: `targetHeight` px de pantalla para
+// la altura del reposo (idle1). 0 si falta la textura.
+inline float PoseSetScale(Texture2D idle, float targetHeight) {
+    return (idle.id == 0 || idle.height <= 0) ? 0.0f : targetHeight / static_cast<float>(idle.height);
+}
+
 }  // namespace district_fury

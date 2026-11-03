@@ -1,0 +1,6 @@
+{
+  "_comment": "Clips nuevos que se AGREGAN al juego rayden del manifiesto. Lo rellena F1.3 (RAYDEN, skin 0: solo AGREGAR clips; override prohibido). Formato por clip: frames, durations|duration|fps, loop, y opcionales scale|scales, offsets.",
+  "clips": {
+    "rayden": {}
+  }
+}

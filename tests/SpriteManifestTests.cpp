@@ -23,6 +23,10 @@ int main() {
 
     const ClipMap* clips = real.FindClips("rayden");
     assert(clips && clips->count("punch1") && clips->count("hit_high") && clips->count("knockdown"));
+    // F0.3: el manifiesto trae "includes" (data/manifest/*.json); se cargan sin
+    // avisos y no cambian los 19 clips de rayden.
+    assert(real.Warnings().empty());
+    assert(clips->size() == 19);
 
     Animator anim;
     assert(anim.ApplyProfile(*rayden, *clips, 512, 768));
