@@ -4,6 +4,7 @@
 #include "core/Platform.h"
 #include "game/CharacterVisual.h"
 #include "game/beta/BetaCharacter.h"
+#include "game/beta/BetaDerive.h"
 #include "BetaHud.h"
 #include "game/lab/KfReference.h"
 #include "rendering/AssetManager.h"
@@ -133,6 +134,7 @@ void BetaMode::Init() {
     fighters.clear();
     effects.clear();
     result = 0;
+    SetBetaDeriveEnabled(false);   // modo BETA: personajes tal cual el original, sin derivaciones de District
     AudioSystem::Get().SetBetaAudio(true);
     LoadProgress();
     PlayMusic("menu.ogg");

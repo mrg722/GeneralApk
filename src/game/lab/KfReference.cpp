@@ -1,5 +1,6 @@
 #include "game/lab/KfReference.h"
 #include "game/beta/BetaCharacter.h"
+#include "game/beta/BetaDerive.h"
 #include "core/Platform.h"
 #include <algorithm>
 #include <cmath>
@@ -319,7 +320,7 @@ constexpr KfRosterEntry kRoster[] = {
 };
 
 KfReference Load(const KfRosterEntry& who) {
-    if (who.betaId) return LoadBetaCharacter(who.betaId);
+    if (who.betaId) { KfReference r = LoadBetaCharacter(who.betaId); if (BetaDeriveEnabled()) DeriveBetaClipsForDistrict(r, who.betaId); return r; }
     KfReference out;
     std::vector<unsigned char> data;
     for (const char* path : {"apk_reference/king_fighter_iii/bin/animation.bin", "../apk_reference/king_fighter_iii/bin/animation.bin",
