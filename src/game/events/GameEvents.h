@@ -56,6 +56,11 @@ void ClearGameEvents();
 
 constexpr int kGameEventQueueSize = 256;
 
+// Atajo (F0.2): evento sin posicion ni personaje (UI, modo, oleada...).
+void EmitSimpleEvent(GameEventType type, int value = 0);
+// Atajo: entrada a un modo de juego (ModeEnter con value = GameMode).
+inline void EmitModeEnter(GameMode mode) { EmitSimpleEvent(GameEventType::ModeEnter, static_cast<int>(mode)); }
+
 // Entrega a `f(const GameEvent&)` todos los eventos pendientes, del mas viejo al
 // mas nuevo, y deja la cola vacia.
 template <class F>

@@ -112,16 +112,25 @@ void Stage1StoryGame::UpdateBoss(float dt) {
             hit = {boss.position.x - 190, boss.position.y - 135, 380, 145};
             active = boss.attackElapsed <= tele + .30f;
         }
-        if (active && hit.Intersects(player.GetHurtbox()) && player.state != PlayerState::Hit) {
-            int dmg = boss.phase == 3 ? 34 : boss.phase == 2 ? 27 : 22;
-            int before = player.hp;
-            player.TakeDamage(dmg);
-            damageTaken += before - player.hp;
-            combo = 0;
-            comboTimer = 0;
-            SpawnImpact(player.position, {255, 70, 50, 255}, true);
-            hitstop.Trigger(.10f);
-            shake = .20f;
+        if (active && player.state != PlayerState::Hit) {
+            HitInfo info;
+            info.damage = boss.phase == 3 ? 34 : boss.phase == 2 ? 27 : 22;
+            info.dirX = dx >= 0 ? 1.f : -1.f;
+            info.knockdown = info.damage >= 28;   // como siempre (umbral de dano)
+            info.heavy = true;
+            info.hitstun = .13f;
+            CombatFeedback fb = Feedback();
+            StageHitStyle st = HitStyle();
+            st.sparkHurt = {255, 70, 50, 255};
+            const int before = player.hp;
+            if (ResolveBoxVsPlayer(hit, boss.position.y, 60.f, info, player, fb, &st) != HitResult::Miss) {
+                damageTaken += before - player.hp;
+                if (before != player.hp) {
+                    combo = 0;
+                    comboTimer = 0;
+                    shake = .20f;
+                }
+            }
         }
     }
     if (boss.attack != StoryBossAttack::None &&
@@ -189,11 +198,7 @@ void Stage1StoryGame::UpdateBossFight(float dt) {
         combo = 0;
     if (flow == StoryFlow::Boss) {
         player.Update(dt);
-        if (player.state == PlayerState::Attack && player.attackType == AttackType::Energy &&
-            player.energyReleased) {
-            SpawnEnergyProjectile();
-            player.energyReleased = false;
-        }
+        if (player.ConsumeProjectileEvent()) SpawnEnergyProjectile();   // B01
         UpdateProjectiles(dt);
     }
     UpdateBoss(dt);

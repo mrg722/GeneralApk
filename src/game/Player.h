@@ -5,6 +5,8 @@
 #include "rendering/Animator.h"
 #include "game/combat/AttackAnimation.h"
 #include "game/player/PlayerVisualState.h"
+#include "game/combat/HitTypes.h"
+#include <cstdint>
 #include <vector>
 
 namespace district_fury {
@@ -104,6 +106,41 @@ public:
     float attackCooldowns[static_cast<int>(AttackId::Count)];
 
     int comboCount; int comboStep; bool hasHit; bool energyReleased;
+
+    // ---- F0.2: resolvedor unico de golpes ----
+    // Ultimo ataque de la cadena (para NextPunchInChain); separado del ataque
+    // en curso para que expirar la ventana de combo no borre currentAttack (B04).
+    AttackId chainAttack{AttackId::None};
+    // attackElapsed del frame anterior (barrido anti-tunel del arco, V5).
+    float attackPrevElapsed{0.0f};
+    // Proyectil de la activacion actual: se dispara UNA sola vez (B01).
+    bool projectileFired{false};
+    bool projectilePending{false};
+    // Objetivos ya golpeados en esta activacion (multi-objetivo, B08) y reloj de
+    // re-golpe (AttackDef::multiHitInterval).
+    std::vector<std::uintptr_t> hitTargets;
+    float multiHitClock{0.0f};
+    // El ataque en curso ya conecto (abre el cancel en hit, B13).
+    bool attackConnected{false};
+    // Temblor de victima (V7): lo dibuja PlayerDraw (F0.3) con VictimShakeOffset.
+    float hurtShakeTimer{0.0f};
+    float hurtShakeAmp{0.0f};
+    float hurtShakeDir{1.0f};
+
+    // Recepcion de un golpe con toda su informacion (direccion, hitstun,
+    // knockback, derribo...). TakeDamage(int) es un envoltorio con lo de siempre.
+    HitResult ApplyHit(const HitInfo& info);
+    // true UNA sola vez por activacion de un ataque con proyectil (B01).
+    bool ConsumeProjectileEvent();
+    // Alto real del cuerpo en pantalla para un personaje sin escala de carril
+    // (112 = estandar) y bodyScale = (alto/112) * DepthScaleFor(y) (V3).
+    float BodyHeight() const;
+    float BodyScale() const;
+    // true si el objetivo `id` ya recibio el golpe de esta activacion.
+    bool AlreadyHit(std::uintptr_t id) const;
+    void MarkHit(std::uintptr_t id);
+    // El ataque en curso esta en su arranque (para el counter-hit).
+    bool InAttackStartup() const;
 
     // Habilidades (botones 1-6, estilo King Fighter): cada una con 15 s de espera.
     static constexpr int kSkillCount = 6;

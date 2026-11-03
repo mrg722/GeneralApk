@@ -32,6 +32,13 @@ bool PopGameEvent(GameEvent& out) {
 int PendingGameEvents() { return gCount; }
 int DroppedGameEvents() { return gDropped; }
 
+void EmitSimpleEvent(GameEventType type, int value) {
+    GameEvent e;
+    e.type = type;
+    e.value = value;
+    EmitGameEvent(e);
+}
+
 void ClearGameEvents() {
     gHead = 0;
     gCount = 0;

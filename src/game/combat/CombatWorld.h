@@ -10,7 +10,8 @@
 // HandlePlayerHits, HandleEnemyHits, HandleBossHits, SpawnImpact y
 // UpdateParticles (Stage1, Stage2, Stage3 y ProductionGame). Todas viven aqui.
 //
-// Regla: el Stage describe contenido, el CombatWorld resuelve combate.
+// Regla: el Stage describe contenido; los golpes los resuelve HitResolver (F0.2)
+// y el CombatWorld guarda particulas, hazards, pickups y cajas rompibles.
 
 namespace district_fury {
 
@@ -74,31 +75,6 @@ struct Hazard {
     bool active = false;
 };
 
-// Adaptador ligero para que los tres bosses (StoryBoss, Grinder, TitanX), que
-// son structs incompatibles entre si, puedan compartir la resolucion de golpes
-// sin reescribirlos todavia.
-struct BossTarget {
-    Vector3D position{};
-    int* hp = nullptr;
-    float* invulnerability = nullptr;
-    bool blocking = false;
-    float width = 156.0f;
-    float height = 145.0f;
-    bool valid = false;
-
-    CombatBox Box() const {
-        if (!valid) return {};
-        return {position.x - width * 0.5f, position.y - height, width, height};
-    }
-};
-
-struct HitReport {
-    int hits = 0;
-    int kills = 0;
-    int damageDealt = 0;
-    bool hitBoss = false;
-};
-
 class CombatWorld {
 public:
     std::vector<Projectile> projectiles;
@@ -142,12 +118,10 @@ public:
     bool ConsumeHitstop(float dt);  // true si el frame esta congelado
 
     // --- resolucion de combate ---
-    HitReport ResolvePlayerMelee(Player& player, std::vector<StreetEnemy>& enemies);
-    bool ResolvePlayerMeleeOnBoss(Player& player, BossTarget& boss);
-    void ResolveEnemyMelee(std::vector<StreetEnemy>& enemies, Player& player,
-                           int maxSimultaneousAttackers = 2);
-    HitReport ResolveProjectiles(std::vector<StreetEnemy>& enemies, Player& player,
-                                 BossTarget* boss);
+    // F0.2: los golpes (cuerpo a cuerpo, jefe, proyectiles) se resuelven en
+    // combat/HitResolver (unico camino). Aqui quedan cajas rompibles, hazards y
+    // pickups. Las viejas ResolvePlayerMelee/ResolveEnemyMelee/ResolveProjectiles
+    // (codigo muerto que nadie llamaba) se borraron.
     void ResolveDestructibles(Player& player);
     void ResolveHazards(Player& player, std::vector<StreetEnemy>& enemies);
     void ResolvePickups(Player& player);

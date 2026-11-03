@@ -46,6 +46,10 @@ void Player::Reset() {
     for (int i = 0; i < static_cast<int>(AttackId::Count); ++i) attackCooldowns[i] = 0.0f;
 
     comboCount = 0; comboStep = 0; hasHit = false; energyReleased = false;
+    chainAttack = AttackId::None; attackPrevElapsed = 0.0f;
+    projectileFired = false; projectilePending = false;
+    hitTargets.clear(); multiHitClock = 0.0f; attackConnected = false;
+    hurtShakeTimer = 0.0f; hurtShakeAmp = 0.0f; hurtShakeDir = 1.0f;
     for (float& cd : skillCooldown) cd = 0.0f;
     abilityCooldown.clear(); skillPage = 0;
     activeSkill = -1; clipDriven = false; multiHitTimer = 0.0f; transformTimer = 0.0f;
@@ -82,6 +86,9 @@ void Player::SetState(PlayerState next) {
     if (state == next && next != PlayerState::Attack) return;
     state = next;
     hasHit = false;
+    hitTargets.clear();
+    // B09: el dash tiene su propia velocidad; no arrastra empujes anteriores.
+    if (state == PlayerState::Dash || state == PlayerState::Defeat) velocity.x = 0.0f;
     if (state != PlayerState::Attack) { attackPhase = AttackPhase::None; activeSkill = -1; clipDriven = false; }
     if (state == PlayerState::Hit || state == PlayerState::GuardBreak ||
         state == PlayerState::Knockdown || state == PlayerState::Defeat ||
@@ -136,7 +143,7 @@ void Player::SetState(PlayerState next) {
         case PlayerState::Defeat:
             if (!named("defeat")) animator.Play(normalized ? AnimationClip{15, 15, 0.10f, false}
                                      : AnimationClip{14, 14, 0.10f, false});
-            AudioSystem::Get().Play(Sfx::GameOver);
+            EmitPlayerEvent(*this, GameEventType::PlayerDefeat);
             break;
         case PlayerState::Airborne:
             if (!named("airborne")) animator.Play(normalized ? AnimationClip{13, 13, 0.10f, false}
@@ -196,7 +203,7 @@ void Player::UpdateTransformForm() {
     if (altAnimator.texture.id == 0) return;
     std::swap(animator, altAnimator);
     usingAlt = want;
-    if (want) AudioSystem::Get().Play(IsRayder() ? Sfx::RayderFuria : Sfx::Rage);   // cambio de forma
+    if (want) EmitPlayerEvent(*this, GameEventType::TransformStart);   // cambio de forma
     const char* clip = "idle";
     switch (state) {
         case PlayerState::Walk: clip = "walk"; break;
@@ -291,6 +298,7 @@ void Player::Update(float dt) {
     for (float& cd : skillCooldown) cd = std::max(0.0f, cd - dt);
     for (float& cd : abilityCooldown) cd = std::max(0.0f, cd - dt);
     transformTimer = std::max(0.0f, transformTimer - dt);
+    hurtShakeTimer = std::max(0.0f, hurtShakeTimer - dt);
 
     UpdateRage(dt);
 
@@ -305,11 +313,15 @@ void Player::Update(float dt) {
         }
     }
 
-    if (comboWindow > 0 && (comboWindow -= dt) <= 0) {
+    // Ventana de combo: cuenta el tiempo ENTRE ataques (no corre mientras el
+    // ataque en curso se ejecuta). Al expirar se pierde la cadena, pero nunca se
+    // borra el ataque en curso (B04).
+    if (comboWindow > 0 && state != PlayerState::Attack && (comboWindow -= dt) <= 0) {
         comboWindow = 0;
         comboCount = 0;
         comboStep = 0;
-        currentAttack = AttackId::None;
+        chainAttack = AttackId::None;
+        if (state != PlayerState::Attack) currentAttack = AttackId::None;
     }
 
     // Altura (launch/knockdown): gravedad simple sobre position.z.
@@ -322,8 +334,7 @@ void Player::Update(float dt) {
     if (state == PlayerState::Defeat) return;
 
     if (state == PlayerState::Airborne) {
-        position.x += velocity.x * dt;
-        velocity.x *= 0.94f;
+        DampedStep(position.x, velocity.x, 0.94f, dt);   // B11: por dt, no por frame
         position.x = std::clamp(position.x, kStageStartX, kStageEndX - 90.f);
         if (position.z <= 0.0f && velocity.z == 0.0f) SetState(PlayerState::Knockdown);
         return;
@@ -331,8 +342,7 @@ void Player::Update(float dt) {
 
     if (state == PlayerState::Knockdown) {
         knockdownTimer -= dt;
-        position.x += velocity.x * dt;
-        velocity.x *= 0.86f;
+        DampedStep(position.x, velocity.x, 0.86f, dt);
         position.x = std::clamp(position.x, kStageStartX, kStageEndX - 90.f);
         position.y = std::clamp(position.y, kLaneMinY, kLaneMaxY);
         if (knockdownTimer <= 0 && position.z <= 0.0f) {
@@ -352,14 +362,21 @@ void Player::Update(float dt) {
     if (state == PlayerState::Hit) {
         stateTimer -= dt;
         hitstunTimer = std::max(0.0f, hitstunTimer - dt);
-        position.x += velocity.x * dt;
-        position.y += velocity.y * dt;
-        velocity.x *= 0.80f;
-        velocity.y *= 0.80f;
+        DampedStep(position.x, velocity.x, 0.80f, dt);
+        DampedStep(position.y, velocity.y, 0.80f, dt);
         if (stateTimer <= 0) SetState(PlayerState::Idle);
         position.x = std::clamp(position.x, kStageStartX, kStageEndX - 90.f);
         position.y = std::clamp(position.y, kLaneMinY, kLaneMaxY);
         return;
+    }
+
+    // B09: empujes (bloqueo, choque contra un jefe en guardia, retroceso leve de
+    // la superarmadura...) se integran tambien en los estados de suelo con
+    // v *= exp(-12 dt), en vez de acumularse sin moverse.
+    if (velocity.x != 0.0f) {
+        DampedStep(position.x, velocity.x, std::exp(-12.0f / 60.0f), dt);
+        if (std::fabs(velocity.x) < 1.0f) velocity.x = 0.0f;
+        position.x = std::clamp(position.x, kStageStartX, kStageEndX - 90.f);
     }
 
     if (state == PlayerState::Dash) {
@@ -380,15 +397,24 @@ void Player::Update(float dt) {
     }
 
     if (state == PlayerState::Attack) {
-        const float previousAttackElapsed=attackElapsed; attackElapsed+=dt; stateTimer-=dt;
+        const float previousAttackElapsed=attackElapsed; attackPrevElapsed=attackElapsed; attackElapsed+=dt; stateTimer-=dt;
         if(!attackImpactTriggered&&previousAttackElapsed<GetAttack(currentAttack).startup&&attackElapsed>=GetAttack(currentAttack).startup)attackImpactTriggered=true;
         const AttackDef& def = GetAttack(currentAttack);
-        if (def.spawnsProjectile && !energyReleased && attackElapsed >= def.startup) {
-            energyReleased = true;
+        // B01: el proyectil sale UNA vez por activacion (projectileFired solo lo
+        // reinicia BeginAttack); el stage lo recoge con ConsumeProjectileEvent().
+        if (def.spawnsProjectile && !projectileFired && attackElapsed >= def.startup) {
+            projectileFired = true;
+            projectilePending = true;
+            energyReleased = true;   // legado: ya no se usa para disparar
         }
         if (clipDriven && (multiHitTimer -= dt) <= 0.0f) {
             hasHit = false;   // la animacion larga vuelve a golpear
+            hitTargets.clear();
             multiHitTimer = currentAttack == AttackId::Skill ? 0.26f : 0.30f;
+        }
+        if (!clipDriven && def.multiHitInterval > 0.0f && (multiHitClock += dt) >= def.multiHitInterval) {
+            multiHitClock = 0.0f;
+            hitTargets.clear();   // golpe multiple controlado
         }
         // Animation cancel: con un comando valido en el buffer y el ataque en su
         // ventana final, se corta el winddown y se encadena el siguiente golpe.
@@ -432,71 +458,143 @@ CombatBox Player::GetHurtbox() const {
     if (state == PlayerState::Knockdown) {
         return {position.x - 38.f, position.y - 40.f, 76.f, 36.f};
     }
-    return {position.x - 24.f, position.y - 112.f + -position.z, 48.f, 105.f};
+    // F0.2 (B06b): cuerpo derivado del alto real del sprite (Rayden: 112 px ->
+    // ~48 x 104 como antes; Titan-X x1.5, Titan-X Mejorado x2.1) y de la escala
+    // de carril, en vez de 48 x 105 fijos para todos.
+    const float s = BodyScale();
+    const float w = 48.0f * s;
+    const float h = 105.0f * s;
+    return {position.x - w * 0.5f, position.y - position.z - 7.0f * s - h, w, h};
+}
+
+float Player::BodyHeight() const {
+    const CharacterVisual& cv = GetCharacterVisual(skin);
+    if (cv.folder != nullptr && !cv.uniformCanvas && cv.targetHeight > 0.0f) return cv.targetHeight;
+    return kStandardBodyHeight;
+}
+
+float Player::BodyScale() const { return BodyHeight() / kStandardBodyHeight * DepthScaleFor(position.y); }
+
+bool Player::AlreadyHit(std::uintptr_t id) const {
+    return std::find(hitTargets.begin(), hitTargets.end(), id) != hitTargets.end();
+}
+
+void Player::MarkHit(std::uintptr_t id) {
+    if (!AlreadyHit(id)) hitTargets.push_back(id);
+    hasHit = true;
+}
+
+bool Player::InAttackStartup() const {
+    if (state != PlayerState::Attack) return false;
+    if (clipDriven) return attackElapsed < attackDuration * 0.12f;
+    return attackElapsed < GetAttack(currentAttack).startup;
+}
+
+bool Player::ConsumeProjectileEvent() {
+    if (!projectilePending) return false;
+    projectilePending = false;
+    EmitPlayerEvent(*this, GameEventType::ProjectileSpawn);
+    return true;
 }
 
 void Player::TakeDamage(int damage) {
-    if (damage <= 0 || state == PlayerState::Defeat) return;
-    if (debugInvulnerable || dashInvulnerability > 0) return;
+    // Envoltorio historico: sin direccion (empuja hacia atras de SU facing), sin
+    // knockback en golpes normales, hitstun 0.13 s y derribo con dano >= 28.
+    HitInfo info;
+    info.damage = damage;
+    info.dirX = facing == Facing::Right ? -1.0f : 1.0f;
+    info.knockback = 0.0f;
+    info.hitstun = 0.13f;
+    info.knockdown = damage >= 28;
+    info.heavy = damage >= 28;
+    ApplyHit(info);
+}
+
+HitResult Player::ApplyHit(const HitInfo& info) {
+    const int damage = info.damage;
+    if (damage <= 0 || state == PlayerState::Defeat) return HitResult::Ignored;
+    if (debugInvulnerable || dashInvulnerability > 0) return HitResult::Ignored;
+    const float dir = info.dirX >= 0.0f ? 1.0f : -1.0f;   // hacia donde empuja el golpe
 
     shieldRegenTimer = 1.25f;
 
-    if (IsBlocking()) {
+    if (IsBlocking() && !info.unblockable) {
         const int reduced = std::max(1, static_cast<int>(std::round(damage * (1.f - blockDamageReduction))));
         const int absorbed = std::min(shield, reduced);
         shield -= absorbed;
         hp = std::max(0, hp - reduced + absorbed);
         AddRage(12);
-        velocity.x += facing == Facing::Right ? -55.f : 55.f;
+        velocity.x += dir * info.pushOnBlock;   // empuje de bloqueo (se integra: B09)
         dashInvulnerability = 0.12f;
-        AudioSystem::Get().Play(Sfx::Block);
-        if (hp == 0) SetState(PlayerState::Defeat);
-        else if (shield == 0) { SetState(PlayerState::GuardBreak); AudioSystem::Get().Play(Sfx::HeavyHit); }
-        return;
+        EmitPlayerEvent(*this, GameEventType::PlayerBlocked, info.heavy, damage);
+        if (hp == 0) { SetState(PlayerState::Defeat); return HitResult::Killed; }
+        if (shield == 0) {
+            SetState(PlayerState::GuardBreak);
+            EmitPlayerEvent(*this, GameEventType::PlayerGuardBreak, true, damage);
+        }
+        return HitResult::Blocked;
     }
 
-    if (state == PlayerState::Hit && stateTimer > 0) return;
-    if (state == PlayerState::Knockdown || state == PlayerState::Airborne) return;
+    if (state == PlayerState::Hit && stateTimer > 0) return HitResult::Ignored;
+    if (state == PlayerState::Knockdown || state == PlayerState::Airborne) return HitResult::Ignored;
 
     hp = std::max(0, hp - damage);
     AddRage(15);
+    hurtShakeTimer = 0.24f;
+    hurtShakeAmp = VictimShakeAmplitude(damage);
+    hurtShakeDir = dir;
 
     if (hp == 0) {
+        EmitPlayerEvent(*this, GameEventType::PlayerHurt, true, damage);
         SetState(PlayerState::Defeat);
-        return;
+        return HitResult::Killed;
     }
 
-    // Habilidad/especial en curso: el golpe enemigo quita vida pero no la
-    // cancela (ni la derriba); la animacion sigue hasta su final. Aun asi
-    // debe notarse: tinte rojo breve y un empujon pequeno (no un knockback
-    // real, para no sacar al personaje de su propia animacion de ataque).
-    if (state == PlayerState::Attack &&
-        (activeSkill >= 0 || currentAttack == AttackId::Skill || currentAttack == AttackId::EnergyWave ||
-         currentAttack == AttackId::RageAttack || currentAttack == AttackId::Finisher)) {
-        // Nota: en Attack la posicion la mueve el root motion del golpe, no
-        // velocity.x (el estado Attack no lo integra), por eso el retroceso
-        // se aplica aqui como un desplazamiento directo y pequeno.
+    // Habilidad en curso (activeSkill >= 0): SUPERARMADURA total (regla del
+    // usuario): el golpe quita vida pero no la cancela ni la derriba; solo tinte
+    // rojo breve y un retroceso leve en la direccion del golpe.
+    // Especiales sin ser habilidad (onda, furia, finisher, especial KF): armadura
+    // solo durante arranque + activo, no en la recuperacion (B19).
+    bool armored = false;
+    if (state == PlayerState::Attack) {
+        if (activeSkill >= 0) {
+            armored = true;
+        } else if (currentAttack == AttackId::Skill || currentAttack == AttackId::EnergyWave ||
+                   currentAttack == AttackId::RageAttack || currentAttack == AttackId::Finisher) {
+            const AttackDef& def = GetAttack(currentAttack);
+            armored = clipDriven ? attackElapsed <= attackDuration * 0.92f
+                                 : attackElapsed <= def.startup + def.active;
+        }
+    }
+    if (armored) {
+        // En Attack la posicion la mueve el root motion; el retroceso leve es un
+        // desplazamiento directo y pequeno.
         abilityHitFlashTimer = 0.16f;
-        position.x += facing == Facing::Right ? -10.f : 10.f;
+        position.x += dir * 10.f;
         position.x = std::clamp(position.x, kStageStartX, kStageEndX - 90.f);
-        AudioSystem::Get().Play(Sfx::Hit);
-        return;
+        EmitPlayerEvent(*this, GameEventType::PlayerHurt, false, damage);
+        return HitResult::Armored;
     }
 
-    // Golpes fuertes derriban: knockdown real en vez de un unico estado Hit.
-    if (damage >= 28) {
+    // Derribo por propiedad del golpe (B17): el envoltorio TakeDamage(int)
+    // conserva el umbral historico de dano >= 28.
+    if (info.knockdown) {
         knockdownTimer = 0.85f;
-        velocity.x = facing == Facing::Right ? -260.f : 260.f;
+        velocity.x = dir * 260.f;   // en la direccion del golpe (B10)
         velocity.z = 380.f;
         SetState(PlayerState::Airborne);
-        AudioSystem::Get().Play(Sfx::HeavyHit);
-        return;
+        EmitPlayerEvent(*this, GameEventType::PlayerHurt, true, damage);
+        EmitPlayerEvent(*this, GameEventType::PlayerKnockdown, true, damage);
+        return HitResult::Hit;
     }
 
-    stateTimer = 0.13f;
-    hitstunTimer = 0.18f;
+    stateTimer = std::max(0.13f, info.hitstun);
+    hitstunTimer = std::max(0.18f, info.hitstun);
+    velocity.x = dir * info.knockback;   // retroceso del golpe (0 en el envoltorio)
     SetState(PlayerState::Hit);
     dashInvulnerability = 0.28f;
+    EmitPlayerEvent(*this, GameEventType::PlayerHurt, false, damage);
+    return HitResult::Hit;
 }
 
 void Player::ApplyCharacter(int id) {

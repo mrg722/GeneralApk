@@ -20,6 +20,9 @@ struct HitInfo {
     int hitIndex = 0;            // golpe n de un movimiento multi-golpe
     int attackerSkin = -1;
     Vector3D contact{};          // punto de contacto (x, carril, altura)
+    // ---- F0.2 ----
+    int priority = 1;            // prioridad del ataque (trade, B16)
+    float pushOnBlock = 55.0f;   // empuje al bloquear (px/s en dirX)
 };
 
 enum class HitResult { Miss, Hit, Blocked, Armored, Killed, Ignored };
@@ -31,6 +34,12 @@ struct StageHitStyle {
     Color sparkHeavy{255, 150, 45, 255};
     int scorePerDamage = 10;
     int scorePerCombo = 7;
+    // ---- F0.2 ----
+    int bossRageBonus = 8;                // dano extra en rabia contra el jefe
+    Color sparkBlock{110, 180, 220, 255};  // chispa de golpe bloqueado
+    Color sparkCounter{255, 95, 210, 255}; // chispa de contraataque (CONTRA)
+    Color sparkBoss{255, 175, 55, 255};    // chispa al golpear al jefe
+    Color sparkHurt{255, 80, 70, 255};     // chispa cuando golpean al jugador
 };
 
 }  // namespace district_fury

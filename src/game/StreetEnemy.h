@@ -2,6 +2,7 @@
 #include "game/Types.h"
 #include "game/Player.h"
 #include "game/enemies/EnemyBrain.h"
+#include "game/combat/HitTypes.h"
 #include "rendering/Animator.h"
 #include <string>
 
@@ -75,6 +76,17 @@ public:
     void Update(float dt, const Player& player, CombatWorld* world = nullptr);
     void Draw() const;
     void TakeDamage(int damage, Vector3D knockback);
+    // F0.2: recepcion de un golpe con toda su informacion (direccion, hitstun
+    // de la tabla, launch, guardia, rompe-guardia). TakeDamage es el envoltorio
+    // historico (stun fijo 0.30 s, sin guardia).
+    HitResult ApplyHit(const HitInfo& info);
+    // Arranque de su ataque (telegrafia o antes del 34 %): counter-hit.
+    bool InAttackStartup() const;
+    // Prioridad de su ataque en un trade (B16): especial 3, con armadura 2, resto 1.
+    int AttackPriority() const;
+    // Temblor de victima (V7) que aplica Draw.
+    float hurtShakeT{1.0f};
+    float hurtShakeAmp{0.0f};
 
     bool AttackIsActive() const;
     bool IsDefeated() const;

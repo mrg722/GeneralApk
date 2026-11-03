@@ -229,19 +229,19 @@ void Stage1StoryGame::Update(float dt) {
         constexpr int n = (int)(sizeof(kStoryCharacters) / sizeof(kStoryCharacters[0]));
         if (input::Pressed(KEY_LEFT) || input::Pressed(KEY_A)) {
             characterCursor = (characterCursor + n - 1) % n;
-            AudioSystem::Get().Play(Sfx::Ui);
+            EmitSimpleEvent(GameEventType::UiNavigate);
         }
         if (input::Pressed(KEY_RIGHT) || input::Pressed(KEY_D)) {
             characterCursor = (characterCursor + 1) % n;
-            AudioSystem::Get().Play(Sfx::Ui);
+            EmitSimpleEvent(GameEventType::UiNavigate);
         }
         if (input::Pressed(KEY_ESCAPE)) {
-            AudioSystem::Get().Play(Sfx::UiCancel);
+            EmitSimpleEvent(GameEventType::UiCancel);
             flow = StoryFlow::Menu;
             return;
         }
         if (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J)) {
-            AudioSystem::Get().Play(Sfx::UiConfirm);
+            EmitSimpleEvent(GameEventType::UiConfirm);
             player.ApplyCharacter(kStoryCharacters[characterCursor]);
             ResetRun();
             flow = StoryFlow::Intro;
@@ -274,7 +274,7 @@ void Stage1StoryGame::Update(float dt) {
         return;
     }
     if (input::Pressed(KEY_ESCAPE)) {
-        AudioSystem::Get().Play(Sfx::UiPause);
+        EmitSimpleEvent(GameEventType::UiPause);
         if (flow == StoryFlow::Combat || flow == StoryFlow::Boss)
             flow = StoryFlow::Pause;
         else if (flow == StoryFlow::Pause)
@@ -308,8 +308,13 @@ void Stage1StoryGame::Update(float dt) {
         }
         return;
     }
-    player.PumpInput(dt);
+    PumpPlayerInput(player, hitstop, dt);   // B15: el buffer no envejece en hitstop
     if (hitstop.Consume(dt)) return;
+    camKick.Update(dt);
+    if (slowMo > 0) {   // V7: camara lenta tras el ultimo enemigo / Brakk
+        slowMo -= dt;
+        dt *= kKillSlowMoScale;
+    }
     shake = std::max(0.f, shake - dt);
     bannerTimer = std::max(0.f, bannerTimer - dt);
     UpdateParticles(dt);

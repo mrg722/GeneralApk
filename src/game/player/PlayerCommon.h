@@ -8,11 +8,28 @@
 #include "game/lab/KfReference.h"
 #include <string>
 #include "audio/AudioSystem.h"
+#include "game/events/GameEvents.h"
+#include "game/combat/CombatMath.h"
 #include <algorithm>
 #include <cmath>
 
 namespace district_fury {
 namespace {
+
+// Evento de juego originado por el jugador (el audio lo consume en AudioDirector).
+inline void EmitPlayerEvent(const Player& p, GameEventType type, bool heavy = false, int value = 0,
+                            AttackId attack = AttackId::None) {
+    GameEvent e;
+    e.type = type;
+    e.x = p.position.x;
+    e.y = p.position.y;
+    e.skin = p.skin;
+    e.heavy = heavy;
+    e.weight = heavy ? 3 : 1;
+    e.value = value;
+    e.attack = static_cast<int>(attack == AttackId::None ? p.currentAttack : attack);
+    EmitGameEvent(e);
+}
 
 constexpr float kRageStartDuration = 0.45f;
 constexpr float kRageEndDuration = 0.55f;

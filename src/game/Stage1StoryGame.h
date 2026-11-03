@@ -3,6 +3,7 @@
 #include "game/StreetEnemy.h"
 #include "game/combat/CombatWorld.h"
 #include "game/combat/HitstopClock.h"
+#include "game/combat/HitResolver.h"
 #include "game/stage/ArenaDirector.h"
 #include <string>
 #include <vector>
@@ -73,6 +74,10 @@ private:
     int bestScore{0}, bestRank{0};
     // Camara de scroll y oleadas por linea de activacion (DF-014).
     StageCamera camera; ArenaDirector arena; HitstopClock hitstop;
+    // F0.2: empujon de camara (V7) y camara lenta al morir el ultimo enemigo.
+    CameraKick camKick; float slowMo{0};
+    CombatFeedback Feedback();
+    StageHitStyle HitStyle() const;
     // Cuerpo provisional de Brakk: atlas completo del Brute (los PNG de
     // assets/bosses/brakk vienen recortados sin piernas). -1 = sin iniciar.
     Animator bossAnim; int bossAnimMode{-1}; bool brakkV2{false};   // brakkV2: hoja mejorada cargada

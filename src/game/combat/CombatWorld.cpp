@@ -1,5 +1,5 @@
 #include "game/combat/CombatWorld.h"
-#include "audio/AudioSystem.h"
+#include "game/events/GameEvents.h"
 #include <algorithm>
 #include <cmath>
 
@@ -99,7 +99,10 @@ void CombatWorld::SpawnProjectile(Vector3D position, float velocityX, int damage
     projectile.life = life;
     projectile.active = true;
     projectiles.push_back(projectile);
-    AudioSystem::Get().Play(Sfx::EnergyShot);
+    GameEvent e;
+    e.type = GameEventType::ProjectileSpawn;
+    e.x = position.x; e.y = position.y; e.fromEnemy = fromEnemy; e.kind = HitKind::Energy;
+    EmitGameEvent(e);
 }
 
 void CombatWorld::SpawnPlayerEnergyWave(const Player& player) {
@@ -230,236 +233,6 @@ void CombatWorld::BreakCombo() {
     comboTimer = 0.0f;
 }
 
-HitReport CombatWorld::ResolvePlayerMelee(Player& player, std::vector<StreetEnemy>& enemies) {
-    HitReport report;
-    if (!player.AttackIsActive() || player.hasHit) return report;
-
-    const AttackDef& def = GetAttack(player.currentAttack);
-    if (def.spawnsProjectile) return report;  // la onda la resuelve el proyectil
-
-    const CombatBox hitbox = player.GetAttackHitbox();
-    if (!hitbox.IsValid()) return report;
-
-    // Politica unificada de targeting: el enemigo valido mas cercano.
-    // Stage2 ya lo hacia asi; Stage1 y Stage3 golpeaban al primero de la lista.
-    int best = -1;
-    float bestDistance = 1e9f;
-    for (std::size_t i = 0; i < enemies.size(); ++i) {
-        StreetEnemy& enemy = enemies[i];
-        if (!enemy.active || enemy.IsDefeated()) continue;
-        if (!hitbox.Intersects(enemy.GetHurtbox())) continue;
-        const float dx = enemy.position.x - player.position.x;
-        const float dy = enemy.position.y - player.position.y;
-        const float distance = std::sqrt(dx * dx + dy * dy);
-        if (distance < bestDistance) {
-            bestDistance = distance;
-            best = static_cast<int>(i);
-        }
-    }
-    if (best < 0) return report;
-
-    StreetEnemy& enemy = enemies[static_cast<std::size_t>(best)];
-    int damage = player.GetAttackDamage();
-    const bool guarded = enemy.IsGuarding() && !def.breaksGuard;
-    if (guarded) {
-        damage = std::max(1, damage / 4);
-        enemy.AbsorbGuard(damage);
-        AudioSystem::Get().Play(Sfx::Hit);
-        SpawnImpact({enemy.position.x, enemy.position.y - 70.0f, 0.0f},
-                    {120, 190, 240, 255}, false);
-        DoHitstop(0.05f);
-        DoShake(0.05f);
-        player.hasHit = true;
-        return report;
-    }
-
-    if (def.breaksGuard && enemy.IsGuarding()) enemy.BreakGuard();
-
-    const bool dead = enemy.hp <= damage;
-    const float direction = player.facing == Facing::Right ? 1.0f : -1.0f;
-    enemy.TakeDamage(damage, {direction * def.knockback, 0.0f, def.launch});
-    enemy.ApplyHitstun(def.hitstun);
-
-    player.hasHit = true;
-    player.OnAttackConnected(def);
-
-    report.hits = 1;
-    report.damageDealt = damage;
-    if (dead) {
-        report.kills = 1;
-        ++defeated;
-        AudioSystem::Get().Play(Sfx::EnemyDeath);
-    }
-
-    RegisterCombo(damage * 10);
-    SpawnImpact({enemy.position.x, enemy.position.y - 68.0f, 0.0f},
-                def.heavy ? Color{255, 150, 45, 255} : Color{255, 235, 150, 255},
-                def.heavy);
-    DoHitstop(def.hitstop);
-    DoShake(def.shake);
-    AudioSystem::Get().Play(def.heavy ? Sfx::HeavyHit : Sfx::Hit);
-    return report;
-}
-
-bool CombatWorld::ResolvePlayerMeleeOnBoss(Player& player, BossTarget& boss) {
-    if (!boss.valid || boss.hp == nullptr) return false;
-    if (!player.AttackIsActive() || player.hasHit) return false;
-    if (boss.invulnerability != nullptr && *boss.invulnerability > 0.0f) return false;
-
-    const AttackDef& def = GetAttack(player.currentAttack);
-    if (def.spawnsProjectile) return false;
-
-    const CombatBox hitbox = player.GetAttackHitbox();
-    if (!hitbox.IsValid() || !hitbox.Intersects(boss.Box())) return false;
-
-    int damage = player.GetAttackDamage();
-    const bool guarded = boss.blocking && !def.breaksGuard;
-    if (guarded) damage = std::max(1, damage / 5);
-
-    *boss.hp = std::max(0, *boss.hp - damage);
-    if (boss.invulnerability != nullptr) *boss.invulnerability = 0.10f;
-    player.hasHit = true;
-    player.OnAttackConnected(def);
-
-    RegisterCombo(guarded ? 90 : 240);
-    SpawnImpact({boss.position.x, boss.position.y - 95.0f, 0.0f},
-                guarded ? Color{110, 180, 220, 255} : Color{255, 175, 55, 255}, true);
-    DoHitstop(guarded ? 0.06f : def.hitstop + 0.01f);
-    DoShake(guarded ? 0.08f : def.shake + 0.04f);
-    AudioSystem::Get().Play(guarded ? Sfx::Hit : Sfx::HeavyHit);
-    return true;
-}
-
-void CombatWorld::ResolveEnemyMelee(std::vector<StreetEnemy>& enemies, Player& player,
-                                    int maxSimultaneousAttackers) {
-    if (player.state == PlayerState::Defeat) return;
-    int attackers = 0;
-    for (auto& enemy : enemies) {
-        if (!enemy.active || enemy.IsDefeated() || !enemy.AttackIsActive()) continue;
-        if (++attackers > maxSimultaneousAttackers) continue;
-        if (enemy.hasHit) continue;
-        if (!enemy.GetAttackHitbox().Intersects(player.GetHurtbox())) continue;
-
-        const int before = player.hp;
-        const bool wasBlocking = player.IsBlocking();
-        player.TakeDamage(static_cast<int>(enemy.attackDamage));
-        enemy.hasHit = true;
-
-        if (before != player.hp || wasBlocking) {
-            damageTaken += before - player.hp;
-            BreakCombo();
-            SpawnImpact(player.position,
-                        wasBlocking ? Color{80, 190, 255, 255} : Color{255, 80, 70, 255},
-                        false);
-            DoHitstop(0.06f);
-            DoShake(0.09f);
-            AudioSystem::Get().Play(wasBlocking ? Sfx::Hit : Sfx::HeavyHit);
-        }
-        break;
-    }
-}
-
-HitReport CombatWorld::ResolveProjectiles(std::vector<StreetEnemy>& enemies, Player& player,
-                                          BossTarget* boss) {
-    HitReport report;
-    for (auto& projectile : projectiles) {
-        if (!projectile.active) continue;
-        const CombatBox box{projectile.position.x - projectile.radius,
-                            projectile.position.y - projectile.radius,
-                            projectile.radius * 2.0f, projectile.radius * 2.0f};
-
-        if (projectile.fromEnemy) {
-            if (player.state == PlayerState::Defeat) continue;
-            if (player.dashInvulnerability > 0.0f) continue;
-            if (!box.Intersects(player.GetHurtbox())) continue;
-            const int before = player.hp;
-            player.TakeDamage(projectile.damage);
-            damageTaken += before - player.hp;
-            projectile.active = false;
-            BreakCombo();
-            SpawnImpact(player.position, {255, 70, 50, 255}, true);
-            DoHitstop(0.10f);
-            DoShake(0.18f);
-            AudioSystem::Get().Play(Sfx::EnergyImpact);
-            continue;
-        }
-
-        bool consumed = false;
-        for (auto& enemy : enemies) {
-            if (!enemy.active || enemy.IsDefeated()) continue;
-            if (!box.Intersects(enemy.GetHurtbox())) continue;
-            const bool dead = enemy.hp <= projectile.damage;
-            enemy.TakeDamage(projectile.damage,
-                             {projectile.velocityX > 0 ? 420.0f : -420.0f, 0.0f, 0.0f});
-            enemy.ApplyHitstun(GetAttack(AttackId::EnergyWave).hitstun);
-            report.hits += 1;
-            report.damageDealt += projectile.damage;
-            if (dead) {
-                report.kills += 1;
-                ++defeated;
-                AudioSystem::Get().Play(Sfx::EnemyDeath);
-            }
-            RegisterCombo(150);
-            SpawnImpact(projectile.position, projectile.color, true);
-            DoHitstop(0.10f);
-            DoShake(0.13f);
-            AudioSystem::Get().Play(Sfx::EnergyImpact);
-            if (!projectile.piercing) {
-                projectile.active = false;
-                consumed = true;
-            }
-            break;
-        }
-        if (consumed) continue;
-
-        for (auto& destructible : destructibles) {
-            if (!destructible.active) continue;
-            const CombatBox crate{destructible.position.x - destructible.width * 0.5f,
-                                  destructible.position.y - destructible.height,
-                                  destructible.width, destructible.height};
-            if (!box.Intersects(crate)) continue;
-            destructible.hp -= projectile.damage;
-            destructible.shake = 1.0f;
-            SpawnDebris(destructible.position, destructible.color, 8);
-            if (destructible.hp <= 0) {
-                destructible.active = false;
-                SpawnDebris(destructible.position, destructible.color, 16);
-                if (destructible.dropsReward) {
-                    SpawnPickup(destructible.position, PickupType::Coins, 25);
-                }
-            }
-            projectile.active = false;
-            consumed = true;
-            break;
-        }
-        if (consumed) continue;
-
-        if (boss != nullptr && boss->valid && boss->hp != nullptr && *boss->hp > 0) {
-            if (boss->invulnerability != nullptr && *boss->invulnerability > 0.0f) continue;
-            if (!box.Intersects(boss->Box())) continue;
-            int damage = projectile.damage;
-            if (boss->blocking) damage = std::max(1, damage / 5);
-            *boss->hp = std::max(0, *boss->hp - damage);
-            if (boss->invulnerability != nullptr) *boss->invulnerability = 0.12f;
-            projectile.active = false;
-            report.hitBoss = true;
-            report.damageDealt += damage;
-            RegisterCombo(boss->blocking ? 110 : 260);
-            SpawnImpact(projectile.position,
-                        boss->blocking ? Color{120, 180, 220, 255} : Color{255, 175, 55, 255},
-                        true);
-            DoHitstop(0.12f);
-            DoShake(0.16f);
-            AudioSystem::Get().Play(Sfx::EnergyImpact);
-        }
-    }
-
-    destructibles.erase(std::remove_if(destructibles.begin(), destructibles.end(),
-                                       [](const Destructible& d) { return !d.active; }),
-                        destructibles.end());
-    return report;
-}
-
 void CombatWorld::ResolveDestructibles(Player& player) {
     if (!player.AttackIsActive() || player.hasHit) return;
     const CombatBox hitbox = player.GetAttackHitbox();
@@ -478,7 +251,10 @@ void CombatWorld::ResolveDestructibles(Player& player) {
         SpawnDebris(destructible.position, destructible.color, 9);
         DoHitstop(0.04f);
         DoShake(0.06f);
-        AudioSystem::Get().Play(Sfx::Hit);
+        GameEvent ev;
+        ev.type = GameEventType::PropHit;
+        ev.x = destructible.position.x; ev.y = destructible.position.y; ev.kind = HitKind::Prop;
+        EmitGameEvent(ev);
 
         if (destructible.hp <= 0) {
             destructible.active = false;
@@ -571,7 +347,10 @@ void CombatWorld::ResolvePickups(Player& player) {
 
         pickup.active = false;
         SpawnImpact(pickup.position, PickupColor(pickup.type), false);
-        AudioSystem::Get().Play(Sfx::Ui);
+        GameEvent ev;
+        ev.type = GameEventType::Pickup;
+        ev.x = pickup.position.x; ev.y = pickup.position.y; ev.value = static_cast<int>(pickup.type);
+        EmitGameEvent(ev);
     }
 }
 

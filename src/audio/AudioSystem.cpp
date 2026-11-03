@@ -1,4 +1,5 @@
 #include "audio/AudioSystem.h"
+#include "audio/AudioDirector.h"
 #include <algorithm>
 #include <cmath>
 #include "core/Platform.h"
@@ -129,6 +130,7 @@ void AudioSystem::Init() {
 }
 
 void AudioSystem::UpdateAmbient() {
+    AudioDirectorUpdate(GetFrameTime());   // F0.2: eventos de juego -> Sfx / musica
     if (!ambientReady) return;
     if (muted || betaAudio) { if (IsMusicStreamPlaying(ambient)) PauseMusicStream(ambient); return; }
     if (!IsMusicStreamPlaying(ambient)) ResumeMusicStream(ambient);

@@ -160,6 +160,7 @@ void Stage1StoryGame::DrawWorld() const {
     c.offset = {640, 360};
     c.target = {cameraX, 360};
     c.zoom = 1;
+    c.target.x += camKick.OffsetX();   // V7: empujon de camara en la direccion del golpe
     if (shake > 0) {
         c.target.x += GetRandomValue(-100, 100) * std::min(shake, 0.2f) * (7 * 0.15f);   // sacudida suave (antes x7)
         c.target.y += GetRandomValue(-100, 100) * std::min(shake, 0.2f) * (4 * 0.15f);   // sacudida suave (antes x4)

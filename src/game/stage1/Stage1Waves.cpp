@@ -31,7 +31,8 @@ void Stage1StoryGame::SpawnWave(int id) {
         farX = std::max(farX, enemies[(size_t)idx].position.x);
     }
     LockArenaBetween(player.position.x, farX);
-    AudioSystem::Get().Play(Sfx::Ui);
+    EmitSimpleEvent(GameEventType::WaveStart, wave);
+    EmitSimpleEvent(GameEventType::ArenaLock, wave);
 }
 
 void Stage1StoryGame::UpdateArena(float dt) {
@@ -51,7 +52,7 @@ void Stage1StoryGame::UpdateArena(float dt) {
     }
     const bool wasLocked = arena.Locked() && !scenarioBossSpawned;
     arena.Update(dt, cleared);
-    if (wasLocked && !arena.Locked()) AudioSystem::Get().Play(Sfx::Ui);
+    if (wasLocked && !arena.Locked()) EmitSimpleEvent(GameEventType::ArenaUnlock, wave);
 }
 
 // Centra el bloqueo entre el jugador y el enemigo mas lejano para que la

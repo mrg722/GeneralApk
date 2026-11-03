@@ -1,5 +1,6 @@
 #pragma once
 #include "game/Types.h"
+#include "game/moves/MoveCurves.h"   // LimbArc (F0.2)
 
 // DF-013 FASE 2 — Attack Data.
 // Los ataques dejan de ser ternarios repartidos por Player.cpp y pasan a ser
@@ -55,6 +56,17 @@ struct AttackDef {
     float hitstop;
     float shake;
     float comboWindow;     // ventana para encadenar tras impactar
+
+    // ---- F0.2 (solo se agregan campos al final; los valores por defecto
+    // reproducen el comportamiento de siempre) ----
+    // Arco del miembro (V5): forma de la caja "matematica". hasArc=false = se usa
+    // la caja historica (boxWidth/boxHeight...) o la del cuadro (KF/BETA).
+    LimbArc arc{};
+    bool  hasArc = false;
+    // Re-golpe del mismo objetivo dentro de una activacion: 0 = un solo golpe.
+    float multiHitInterval = 0.0f;
+    // Escala del hitstop de V7 (1 = formula tal cual).
+    float hitstopScale = 1.0f;
 };
 
 // Duracion total de la animacion/estado del ataque.

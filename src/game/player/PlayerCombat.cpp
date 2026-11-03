@@ -88,13 +88,17 @@ void Player::BeginClipAttack(const char* clip, int skillIndex) {
     attackElapsed = 0;
     hasHit = false;
     energyReleased = false;
+    projectileFired = false; projectilePending = false;
+    hitTargets.clear(); multiHitClock = 0.0f; attackConnected = false;
+    attackPrevElapsed = 0.0f;
     activeSkill = skillIndex;
     clipDriven = true;
     multiHitTimer = 0.0f;
     if (!animator.PlayNamed(clip) && !animator.PlayNamed("special")) animator.PlayNamed("idle");
     attackDuration = std::max(0.45f, animator.ClipSeconds(animator.currentClipName));
     stateTimer = attackDuration;
-    AudioSystem::Get().Play(skillIndex == kSkillCount - 1 ? Sfx::FuryCharge : Sfx::EnergyShot);
+    // value = boton (5 = transformar); el AudioDirector elige el sonido.
+    EmitPlayerEvent(*this, GameEventType::SpecialStart, true, skillIndex, AttackId::Skill);
 }
 
 bool Player::TryStartSkill(int i) {
@@ -164,6 +168,10 @@ void Player::BeginAttack(AttackId id) {
     stateTimer = attackDuration;
     hasHit = false;
     energyReleased = false;
+    projectileFired = false; projectilePending = false;
+    hitTargets.clear(); multiHitClock = 0.0f; attackConnected = false;
+    attackPrevElapsed = 0.0f;
+    chainAttack = id;
     if (def.cooldown > 0.0f) attackCooldowns[static_cast<int>(id)] = def.cooldown;
     if (def.spCost > 0) sp = std::max(0, sp - def.spCost);
 
@@ -184,41 +192,25 @@ void Player::BeginAttack(AttackId id) {
         stateTimer = attackDuration;
     }
 
-    // Al lanzar: silbido del golpe (el impacto suena al conectar, ver PlayerDraw).
-    if (IsRayder()) {
-        switch (id) {
-            case AttackId::EnergyWave: AudioSystem::Get().Play(Sfx::RayderCargaPoder); break;
-            case AttackId::RageAttack: AudioSystem::Get().Play(Sfx::RayderFuria); break;
-            case AttackId::Finisher:   AudioSystem::Get().Play(Sfx::RayderDisparoPoder); break;
-            default:                   AudioSystem::Get().Play(Sfx::RayderSilbido); break;
-        }
-        return;
-    } else if (IsRonin()) {
-        // Al lanzar: desenvainar para la onda/especial, tajo de energia para
-        // el super y el remate (docs pendientes, mismo patron que Rayder).
-        switch (id) {
-            case AttackId::EnergyWave: AudioSystem::Get().Play(Sfx::RoninEspadaDesenvaine); break;
-            case AttackId::RageAttack: AudioSystem::Get().Play(Sfx::RoninEspadaTajo); break;
-            case AttackId::Finisher:   AudioSystem::Get().Play(Sfx::RoninEspadaTajo); break;
-            default:                   AudioSystem::Get().Play(Sfx::Whoosh); break;
-        }
-        return;
-    }
-    switch (id) {
-        case AttackId::EnergyWave: AudioSystem::Get().Play(Sfx::EnergyCharge); break;
-        case AttackId::RageAttack: AudioSystem::Get().Play(Sfx::Rage); break;
-        case AttackId::Finisher:   AudioSystem::Get().Play(Sfx::FuryCharge); break;
-        default:                   AudioSystem::Get().Play(Sfx::Whoosh); break;
-    }
+    // Al lanzar: silbido del golpe / carga del especial. El sonido lo elige el
+    // AudioDirector segun el personaje (MAX y RONIN conservan los suyos).
+    const bool special = id == AttackId::EnergyWave || id == AttackId::RageAttack || id == AttackId::Finisher;
+    EmitPlayerEvent(*this, special ? GameEventType::SpecialStart : GameEventType::Swing, def.heavy, activeSkill, id);
 }
 
 void Player::OnAttackConnected(const AttackDef& def) {
+    // F0.2 (B03): lo llama SIEMPRE el HitResolver al conectar. Cada golpe que
+    // conecta suma al combo; la ventana (con la mejora comboWindowBonus) deja
+    // seguir la cadena despues del ataque.
     if (def.canCombo) {
         comboWindow = def.comboWindow + upgrades.comboWindowBonus;
-        ++comboCount;
     } else {
-        comboWindow = std::max(comboWindow, 0.18f);
+        comboWindow = std::max(comboWindow, std::max(0.18f, def.comboWindow) + upgrades.comboWindowBonus);
     }
+    ++comboCount;
+    attackConnected = true;
+    if (comboCount == 10 || comboCount == 20 || comboCount == 30)
+        EmitPlayerEvent(*this, GameEventType::ComboMilestone, false, comboCount);
     AddRage(def.rageGain);
 }
 
@@ -261,7 +253,7 @@ void Player::HandleInput(float dt) {
         // Ronin no tiene un sonido de esquiva propio en este paquete (su lista de
         // encargo trae golpes/patadas/espada/salto/aterrizaje, no un dash dedicado);
         // usa el Dash generico, igual que el resto del roster sin sonido propio.
-        AudioSystem::Get().Play(IsRayder() ? Sfx::RayderEsquiva : Sfx::Dash);
+        EmitPlayerEvent(*this, GameEventType::Dash);
         return;
     }
 
@@ -280,7 +272,7 @@ void Player::HandleInput(float dt) {
             rageState = RageState::Starting;
             rageStateTimer = kRageStartDuration;
             rageDrainAccumulator = 0;
-            AudioSystem::Get().Play(IsRayder() ? Sfx::RayderFuria : Sfx::Rage);
+            EmitPlayerEvent(*this, GameEventType::RageStart, true);
             return;
         }
         if (rageState == RageState::Active &&
@@ -309,12 +301,12 @@ void Player::PollAttackInput() {
     if (frameInput.punch) {
         const int dir = motion.QuarterCircle(inputBuffer.Frame());
         if (dir != 0) { inputBuffer.Push(InputCommand::SpecialWave, dir); motion.Clear(); }
-        else inputBuffer.Push(InputCommand::Punch);
+        else inputBuffer.Push(InputCommand::Punch, h);   // B21: la direccion pulsada puede girar
     }
     if (frameInput.kick) {
         const int dir = motion.DragonPunch(inputBuffer.Frame());
         if (dir != 0) { inputBuffer.Push(InputCommand::SpecialRise, dir); motion.Clear(); }
-        else inputBuffer.Push(InputCommand::Kick);
+        else inputBuffer.Push(InputCommand::Kick, h);
     }
 }
 
@@ -342,7 +334,11 @@ PlayerInput Player::ReadInput() const {
 void Player::PumpInput(float dt) {
     inputPumped = true;
     frameInput = inputEnabled ? ReadInput() : PlayerInput{};
-    inputBuffer.Tick(dt);          // avanza frames y elimina comandos > 15 frames
+    // Avanza frames y elimina comandos > 15 frames. B12: mientras dura el propio
+    // ataque (arranque + activo + recuperacion) lo pulsado no envejece, asi un J/K
+    // durante el REMATE o la PATADA no se pierde y sale al terminar. B15: el stage
+    // pasa dt = 0 durante el hitstop (ver PumpPlayerInput en HitResolver.h).
+    inputBuffer.Tick(state == PlayerState::Attack && !clipDriven ? 0.0f : dt);
     PollAttackInput();
 }
 
@@ -351,6 +347,9 @@ bool Player::InCancelWindow() const {
     if (attackPhase == AttackPhase::None || attackPhase == AttackPhase::Special) return false;
     const AttackDef& def = GetAttack(currentAttack);
     if (clipDriven) return attackElapsed >= std::max(def.startup + def.active, attackDuration * 0.38f);
+    // B13: si el golpe ya conecto, se puede cancelar desde startup + 1 frame activo
+    // hasta el final; en fallo, solo en la recuperacion (como siempre).
+    if (attackConnected) return attackElapsed >= def.startup + InputBuffer::kFrameSeconds;
     return attackElapsed >= def.startup + def.active;   // hitbox ya termino: winddown
 }
 
@@ -365,26 +364,28 @@ bool Player::TryStartBufferedAttack(bool fromCancel) {
     const int dir = front->dir;
 
     AttackId next = AttackId::None;
+    const bool finisherReady = isRageMode && comboCount >= 4 &&
+        sp >= GetAttack(AttackId::Finisher).spCost &&
+        attackCooldowns[static_cast<int>(AttackId::Finisher)] <= 0.0f;
     if (fromCancel) {
         next = ResolveCancel(currentAttack, cmd);
+        // B03: en furia con combo >= 4 la K de la cadena tambien sale como FINISHER.
+        if (cmd == InputCommand::Kick && next != AttackId::None && finisherReady) next = AttackId::Finisher;
     } else if (cmd == InputCommand::SpecialWave) {
         next = AttackId::EnergyWave;
     } else if (cmd == InputCommand::SpecialRise) {
         next = AttackId::Punch3;
     } else if (cmd == InputCommand::Kick) {
-        const bool finisher = isRageMode && comboCount >= 4 &&
-            sp >= GetAttack(AttackId::Finisher).spCost &&
-            attackCooldowns[static_cast<int>(AttackId::Finisher)] <= 0.0f;
-        next = finisher ? AttackId::Finisher : AttackId::Kick;
+        next = finisherReady ? AttackId::Finisher : AttackId::Kick;
     } else {
-        next = comboWindow > 0.0f ? NextPunchInChain(currentAttack) : AttackId::Punch1;
+        next = comboWindow > 0.0f ? NextPunchInChain(chainAttack) : AttackId::Punch1;
     }
     if (next == AttackId::None) return false;
     if (attackCooldowns[static_cast<int>(next)] > 0.0f) return false;   // queda en cola
     // Sin energia suficiente, el comando de onda sale como golpe normal.
     if (next == AttackId::EnergyWave && sp < GetAttack(AttackId::EnergyWave).spCost) {
         if (fromCancel) return false;
-        next = comboWindow > 0.0f ? NextPunchInChain(currentAttack) : AttackId::Punch1;
+        next = comboWindow > 0.0f ? NextPunchInChain(chainAttack) : AttackId::Punch1;
     }
     if (dir != 0) facing = dir > 0 ? Facing::Right : Facing::Left;
 
@@ -482,7 +483,7 @@ CombatBox Player::GetAttackHitbox() const {
         // patada o el fuego de la habilidad en este frame.
         const float sc = SpriteScale();
         const float front = std::max(60.0f, (f->width - f->pivotX) * sc);
-        const float back = std::min(f->pivotX * sc, currentAttack == AttackId::Skill ? 400.0f : 30.0f);
+        const float back = std::min(f->pivotX * sc, 30.0f);   // F0.2 (B06d): tambien en Skill (antes 400 px)
         const float top = std::clamp(f->pivotY * sc, 80.0f, 260.0f);
         const float x0 = direction > 0 ? position.x - back : position.x - front;
         return {x0, position.y - top, front + back, top + 10.0f};

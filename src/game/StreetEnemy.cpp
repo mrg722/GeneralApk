@@ -1,7 +1,8 @@
 #include "game/StreetEnemy.h"
 #include "game/combat/CombatWorld.h"
 #include "rendering/AssetManager.h"
-#include "audio/AudioSystem.h"
+#include "game/combat/CombatMath.h"
+#include "game/events/GameEvents.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -259,7 +260,10 @@ void StreetEnemy::BreakGuard() {
     state = StreetEnemyState::Stun;
     stateTimer = 0.85f;
     telegraphing = false;
-    AudioSystem::Get().Play(Sfx::HeavyHit);
+    GameEvent e;
+    e.type = GameEventType::EnemyGuardBreak;
+    e.x = position.x; e.y = position.y; e.heavy = true; e.weight = 3; e.kind = HitKind::GuardBreak;
+    EmitGameEvent(e);
 }
 
 void StreetEnemy::ApplyHitstun(float duration) {
@@ -476,6 +480,7 @@ void StreetEnemy::Update(float dt, const Player& player, CombatWorld* world) {
     attackCooldown = std::max(0.0f, attackCooldown - dt);
     specialTimer = std::max(0.0f, specialTimer - dt);
     hitstunTimer = std::max(0.0f, hitstunTimer - dt);
+    hurtShakeT += dt;
     if (telegraphTimer > 0.0f) {
         telegraphTimer -= dt;
         if (telegraphTimer <= 0.0f) telegraphing = false;
@@ -500,8 +505,7 @@ void StreetEnemy::Update(float dt, const Player& player, CombatWorld* world) {
     if (state == StreetEnemyState::Airborne) {
         velocity.z -= 1500.0f * dt;
         position.z += velocity.z * dt;
-        position.x += velocity.x * dt;
-        velocity.x *= 0.95f;
+        DampedStep(position.x, velocity.x, 0.95f, dt);   // B11: por dt
         position.x = std::clamp(position.x, kStageStartX, kStageEndX - 90.f);
         if (position.z <= 0.0f) {
             position.z = 0.0f;
@@ -515,10 +519,9 @@ void StreetEnemy::Update(float dt, const Player& player, CombatWorld* world) {
 
     if (state == StreetEnemyState::Hit) {
         stateTimer -= dt;
-        position.x += velocity.x * dt;
-        position.y += velocity.y * dt;
-        velocity.x *= 0.84f;
-        velocity.y *= 0.84f;
+        // B11: deslizamiento independiente del frame rate (antes 0.84 por frame).
+        DampedStep(position.x, velocity.x, 0.84f, dt);
+        DampedStep(position.y, velocity.y, 0.84f, dt);
         if (stateTimer <= 0 && hitstunTimer <= 0.0f) EnterState(StreetEnemyState::Idle);
         position.x = std::clamp(position.x, kStageStartX, kStageEndX - 90.f);
         position.y = std::clamp(position.y, kLaneMinY, kLaneMaxY);
@@ -658,10 +661,52 @@ CombatBox StreetEnemy::GetAttackHitbox() const {
 }
 
 void StreetEnemy::TakeDamage(int damage, Vector3D knockback) {
-    if (!active || state == StreetEnemyState::Defeat) return;
-    const EnemyProfile& profile = Profile();
+    // Envoltorio historico: empuje = knockback tal cual, stun fijo 0.30 s, sin
+    // guardia ni rompe-guardia.
+    HitInfo info;
+    info.damage = damage;
+    info.dirX = knockback.x >= 0.0f ? 1.0f : -1.0f;
+    info.knockback = std::fabs(knockback.x);
+    info.launch = knockback.z;
+    info.hitstun = 0.30f;
+    info.unblockable = true;
+    ApplyHit(info);
+}
 
-    hp = std::max(0, hp - damage);
+bool StreetEnemy::InAttackStartup() const {
+    if (IsTelegraphing()) return true;
+    return state == StreetEnemyState::Attack && attackElapsed < attackDuration * 0.34f;
+}
+
+int StreetEnemy::AttackPriority() const {
+    if (state == StreetEnemyState::Special) return 3;
+    return Profile().hasArmor ? 2 : 1;
+}
+
+HitResult StreetEnemy::ApplyHit(const HitInfo& info) {
+    if (!active || state == StreetEnemyState::Defeat) return HitResult::Ignored;
+    const EnemyProfile& profile = Profile();
+    int damage = info.damage;
+    const Vector3D knockback{info.dirX * info.knockback, 0.0f, info.launch};
+
+    hurtShakeT = 0.0f;
+    hurtShakeAmp = VictimShakeAmplitude(damage);
+
+    // Guardia (Block): un golpe normal se queda en la guardia (dano reducido a la
+    // mitad, la guardia se gasta x2.6); el que rompe guardia la rompe y entra.
+    if (IsGuarding() && !info.unblockable) {
+        if (!info.breaksGuard) {
+            damage = std::max(1, damage / 2);
+            AbsorbGuard(damage);
+            hp = std::max(1, hp - damage);
+            return HitResult::Blocked;
+        }
+        BreakGuard();
+        hp = std::max(0, hp - damage);
+        if (hp > 0) return HitResult::Hit;   // queda aturdido (Stun)
+    } else {
+        hp = std::max(0, hp - damage);
+    }
     const EnemyAnimationLayout layout = LayoutFor(type);
 
     if (hp == 0) {
@@ -671,16 +716,18 @@ void StreetEnemy::TakeDamage(int damage, Vector3D knockback) {
         telegraphing = false;
         if (animator.texture.id != 0) animator.Play({layout.deathStart, layout.deathEnd, .14f, false});
         else { animator.isFinished = true; animator.isPlaying = false; }
-        return;
+        GameEvent e;
+        e.type = GameEventType::EnemyKilled;
+        e.x = position.x; e.y = position.y; e.value = static_cast<int>(type);
+        e.heavy = info.heavy; e.attack = info.sourceAttack; e.skin = info.attackerSkin;
+        EmitGameEvent(e);
+        return HitResult::Killed;
     }
 
     // Armor: los pesados no pierden su turno con golpes ligeros.
     if (profile.hasArmor && damage < profile.armorThreshold &&
         (state == StreetEnemyState::Attack || state == StreetEnemyState::Special)) {
-        if (animator.texture.id != 0 && GetRandomValue(0, 1) == 0) {
-            // solo parpadeo visual, el ataque continua
-        }
-        return;
+        return HitResult::Armored;
     }
 
     velocity = knockback;
@@ -689,17 +736,21 @@ void StreetEnemy::TakeDamage(int damage, Vector3D knockback) {
     const bool airborne = knockback.z > 0.0f || position.z > 0.0f;
     if (position.z > 0.0f) velocity.z = std::max(knockback.z, 160.0f);
     state = airborne ? StreetEnemyState::Airborne : StreetEnemyState::Hit;
-    stateTimer = 0.30f;
+    stateTimer = std::max(0.05f, info.hitstun);   // hitstun de la tabla (B03/B17)
+    ApplyHitstun(info.hitstun);
     telegraphing = false;
     pendingSpecial = EnemySpecial::None;
     if (animator.texture.id != 0) animator.Play({layout.hitFrame, layout.hitFrame, .09f, false, {8, 9}});
+    return HitResult::Hit;
 }
+
 
 void StreetEnemy::Draw() const {
     if (!active) return;
     const Stats s = GetStats(type);
+    Vector2 p = position.ToScreen();
+    if (hurtShakeT < 0.3f) p.x += VictimShakeOffset(hurtShakeAmp, hurtShakeT);   // temblor de victima (V7)
     const EnemyProfile& profile = Profile();
-    const Vector2 p = position.ToScreen();
     const float ds = DepthScale(position.y);
     const bool authored = animator.texture.id != 0 && !animator.frames.empty();
     const float visualScale = authored ? s.scale * ds : ds;
