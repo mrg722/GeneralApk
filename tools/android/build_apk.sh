@@ -67,6 +67,7 @@ else
   cp -r "$ROOT/assets/kratos" "$STAGE/assets/assets/"
   rm -rf "$STAGE/assets/assets/kratos/audio"   # audio con copyright sin uso: fuera del APK
   cp -r "$ROOT/assets/audio"  "$STAGE/assets/assets/"
+  rm -rf "$STAGE/assets/assets/audio/music"     # la musica de District Fury no la usa BETA (~11 MB)
   cp -r "$ROOT/data/kratos"   "$STAGE/assets/data/"
   find "$STAGE/assets" -type d -name source -prune -exec rm -rf {} +
 fi

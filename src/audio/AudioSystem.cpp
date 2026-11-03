@@ -446,6 +446,7 @@ void AudioSystem::Shutdown() {
     groupByPath.clear();
     clipByFile.clear();
     limiter.Clear();
+    MusicPlayer::Get().Shutdown();   // sus streams se descargan antes de cerrar el dispositivo
     if (ambientReady) { UnloadMusicStream(ambient); ambientReady = false; }
     ready = false;
     persist = false;
