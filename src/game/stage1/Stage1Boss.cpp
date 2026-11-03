@@ -40,6 +40,7 @@ void Stage1StoryGame::UpdateBoss(float dt) {
     int phase = ratio <= .34f ? 3 : ratio <= .68f ? 2 : 1;
     if (phase != boss.phase) {
         boss.phase = phase;
+        EmitSimpleEvent(GameEventType::BossPhase, phase);
         boss.attack = StoryBossAttack::Frenzy;
         boss.attackElapsed = 0;
         boss.blockTimer = .65f;

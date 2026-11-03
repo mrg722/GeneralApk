@@ -134,13 +134,14 @@ void Boss::PickAttack() {
     attackResolved = false;
 }
 
-void Boss::Update(float dt, Player& player, CombatWorld* world, std::vector<BossProjectile>& projectiles, float* hitstop, float* shake) {
+void Boss::Update(float dt, Player& player, CombatWorld* world, std::vector<BossProjectile>& projectiles, HitstopClock* hitstop, float* shake) {
     if (!def || defeated) return;
     if (invuln > 0.0f) invuln -= dt;
 
     const int newPhase = PhaseNumber();
     if (newPhase != phase) {
         phase = newPhase;
+        EmitSimpleEvent(GameEventType::BossPhase, phase);
         if (world) world->DoShake(0.2f);
     }
     const BossPhaseDef& ph = ActivePhase();
@@ -164,12 +165,18 @@ void Boss::Update(float dt, Player& player, CombatWorld* world, std::vector<Boss
                                         static_cast<int>(atk.damage * ph.damageMultiplier), true, true});
                 attackResolved = true;
             } else {
-                const CombatBox hit{facingRight ? pos.x : pos.x - atk.boxForward - atk.boxWidth,
+                // B06f: caja simetrica (antes a la derecha ignoraba boxForward y a la
+                // izquierda lo sumaba): sale del jefe hacia donde mira.
+                const CombatBox hit{facingRight ? pos.x : pos.x - atk.boxWidth,
                                      pos.y - atk.boxHeight, atk.boxWidth, atk.boxHeight};
-                if (hit.Intersects(player.GetHurtbox()) && player.state != PlayerState::Hit) {
+                if (player.state != PlayerState::Hit && BoxTouchesPlayer(hit, pos.y, atk.depth, player)) {
                     const int dmg = static_cast<int>(atk.damage * ph.damageMultiplier);
-                    player.TakeDamage(dmg);
-                    if (hitstop) *hitstop = std::max(*hitstop, atk.hitstop);
+                    player.ApplyHit(BossHitInfo(dmg, pos.x, player));   // empuje hacia el lado del jugador (B10)
+                    GameEvent ev;
+                    ev.type = GameEventType::BossAttack;
+                    ev.x = pos.x; ev.y = pos.y; ev.value = dmg; ev.heavy = true; ev.fromEnemy = true;
+                    EmitGameEvent(ev);
+                    if (hitstop) hitstop->Trigger(atk.hitstop);
                     if (shake) *shake = std::max(*shake, atk.shake);
                     attackResolved = true;
                 }
@@ -223,6 +230,17 @@ void Boss::ApplyDamage(int dmg) {
     hp = std::max(0, hp - dmg);
     invuln = 0.1f;
     if (hp <= 0) defeated = true;
+}
+
+BossProxy Boss::Proxy() {
+    BossProxy bp;
+    bp.pos = pos;
+    if (def) { bp.width = def->bodyWidth; bp.height = def->bodyHeight; }
+    bp.hp = &hp;
+    bp.invuln = &invuln;
+    bp.invulnOnHit = 0.1f;   // como ApplyDamage
+    bp.onDefeat = [this]() { defeated = true; };
+    return bp;
 }
 
 CombatBox Boss::GetHurtbox() const {

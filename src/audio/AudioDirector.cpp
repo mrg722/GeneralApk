@@ -115,8 +115,13 @@ bool LegacySfxFor(const GameEvent& e, Sfx& out) {
         case GameEventType::UiConfirm:        out = Sfx::UiConfirm; return true;
         case GameEventType::UiCancel:         out = Sfx::UiCancel; return true;
         case GameEventType::UiPause:          out = Sfx::UiPause; return true;
-        case GameEventType::WaveStart:
-        case GameEventType::ArenaUnlock:      out = Sfx::Ui; return true;
+        case GameEventType::WaveStart:        out = Sfx::Ui; return true;
+        case GameEventType::ArenaUnlock:
+            // Stage 1 sonaba Ui al desbloquear (value = oleada >= 0); los stages
+            // 2-5 (value = -1) no sonaban: solo avisan a la musica.
+            if (e.value < 0) return false;
+            out = Sfx::Ui;
+            return true;
         default:                              return false;
     }
 }

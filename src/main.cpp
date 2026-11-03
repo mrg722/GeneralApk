@@ -1,3 +1,4 @@
+#include "game/events/GameEvents.h"
 #include "raylib.h"
 #include "audio/AudioSystem.h"
 #include "game/Stage1StoryGame.h"
@@ -125,7 +126,35 @@ int main() {
         if (activeStage == 4) return &stage4.PlayerRef();
         return &stage5.PlayerRef();
     };
+    // F0.2: eventos de modo para el audio (MusicPlayer). Se emiten al cambiar.
+    district_fury::GameMode lastMode = district_fury::GameMode::Boot;
+    bool lastCleared = false, lastDefeated = false, lastVsWon = false;
     while (district_fury::core::shouldContinue(state)) {
+        {
+            namespace df = district_fury;
+            const df::GameMode mode = vsActive ? df::GameMode::VS
+                                    : rewardStage > 0 ? df::GameMode::Reward
+                                    : (activeStage == 1 && stage1.IsMenu()) ? df::GameMode::Menu
+                                    : activeStage == 2 ? df::GameMode::Stage2
+                                    : activeStage == 3 ? df::GameMode::Stage3
+                                    : activeStage == 4 ? df::GameMode::Stage4
+                                    : activeStage == 5 ? df::GameMode::Stage5
+                                                       : df::GameMode::Stage1;
+            if (mode != lastMode) { df::EmitModeEnter(mode); lastMode = mode; }
+            const bool cleared = !vsActive && rewardStage == 0 &&
+                                 (activeStage == 1 ? stage1.StageCleared() : activeStage == 2 ? stage2.StageCleared()
+                                  : activeStage == 3 ? stage3.StageCleared() : activeStage == 4 ? stage4.StageCleared()
+                                                     : stage5.StageCleared());
+            if (cleared && !lastCleared) df::EmitSimpleEvent(df::GameEventType::StageClear, activeStage);
+            lastCleared = cleared;
+            const df::Player* ap = activePlayer();
+            const bool defeated = ap && ap->state == df::PlayerState::Defeat && mode != df::GameMode::Menu;
+            if (defeated && !lastDefeated) df::EmitSimpleEvent(df::GameEventType::GameOver, static_cast<int>(mode));
+            lastDefeated = defeated;
+            const bool vsWon = vsActive && vsMode.TouchContext() == 2 && !defeated;
+            if (vsWon && !lastVsWon) df::EmitSimpleEvent(df::GameEventType::Victory, static_cast<int>(mode));
+            lastVsWon = vsWon;
+        }
         const float screenScale =
             std::min(GetScreenWidth() / (float)windowWidth, GetScreenHeight() / (float)windowHeight);
         // OPCIONES > ANCHO DE PANTALLA: solo se angosta el ancho; la altura no cambia.

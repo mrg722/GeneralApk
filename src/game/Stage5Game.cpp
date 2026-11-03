@@ -62,41 +62,43 @@ void Stage5Game::SpawnEnergy() {
     SpawnImpact({player.position.x + d * 55, player.position.y - 72, 0}, {40, 210, 255, 255}, true);
 }
 void Stage5Game::UpdateProjectiles(float dt) {
+    CombatFeedback fb = Feedback();
+    StageHitStyle st = HitStyle();
     for (auto& p : projectiles) {
         if (!p.active) continue;
+        const float prevX = p.pos.x;
         p.pos.x += p.vx * dt;
         p.life -= dt;
         if (p.life <= 0) {
             p.active = false;
             continue;
         }
-        CombatBox b{p.pos.x - 18, p.pos.y - 18, 36, 36};
+        // Las ondas se guardan en coordenadas de pantalla (carril - 72).
+        ProjectileHitInput pr;
+        pr.pos = {p.pos.x, p.pos.y + 72.f, 72.f};
+        pr.prevX = prevX;
+        pr.radius = 18.f;
+        pr.height = 72.f;
+        pr.damage = p.damage;
+        pr.dirX = p.vx > 0 ? 1.f : -1.f;
         if (!p.fromBoss) {
-            if (flow == Flow::Boss && !boss.defeated) {
-                CombatBox bb{boss.pos.x - 72, boss.pos.y - 142, 144, 142};
-                if (b.Intersects(bb) && boss.invuln <= 0) {
-                    boss.hp = std::max(0, boss.hp - p.damage);
-                    boss.invuln = .12f;
+            if (flow == Flow::Boss && !boss.defeated && p.active) {
+                BossProxy bp = BossTarget(144.f, 142.f);
+                st.sparkBoss = {50, 215, 255, 255};
+                if (ResolveProjectileVsBoss(pr, bp, st, fb)) {
                     p.active = false;
                     ++combo;
                     comboTimer = 1;
                     maxCombo = std::max(maxCombo, combo);
-                    SpawnImpact(p.pos, {50, 215, 255, 255}, true);
-                    hitstop = .12f;
-                    shake = .16f;
                 }
             }
-        } else if (player.state != PlayerState::Defeat && player.dashInvulnerability <= 0.0f &&
-                   b.Intersects(player.GetHurtbox())) {
-            int before = player.hp;
-            player.TakeDamage(p.damage);
-            damageTaken += before - player.hp;
-            combo = 0;
-            comboTimer = 0;
-            p.active = false;
-            SpawnImpact(player.position, {255, 60, 90, 255}, true);
-            hitstop = .09f;
-            shake = .14f;
+        } else if (p.active) {
+            st.sparkHurt = {255, 60, 90, 255};
+            if (ResolveProjectileVsPlayer(pr, player, fb, false, &st, &damageTaken)) {
+                combo = 0;
+                comboTimer = 0;
+                p.active = false;
+            }
         }
     }
     projectiles.erase(
@@ -104,22 +106,15 @@ void Stage5Game::UpdateProjectiles(float dt) {
         projectiles.end());
 }
 void Stage5Game::HandleBossHits() {
-    if (flow != Flow::Boss || boss.defeated || boss.invuln > 0 || !player.AttackIsActive() || player.hasHit ||
-        player.attackType == AttackType::Energy)
-        return;
-    if (player.GetAttackHitbox().Intersects({boss.pos.x - 72, boss.pos.y - 142, 144, 142})) {
-        int dmg = player.GetAttackDamage() + (player.isRageMode ? 8 : 0);
-        boss.hp = std::max(0, boss.hp - dmg);
-        boss.invuln = .1f;
-        player.hasHit = true;
-        ++combo;
-        comboTimer = 1;
-        maxCombo = std::max(maxCombo, combo);
-        SpawnImpact(boss.pos, {255, 80, 90, 255}, true);
-        hitstop = .12f;
-        shake = .18f;
-        if (boss.hp <= 0) DefeatBoss();
-    }
+    if (flow != Flow::Boss || boss.defeated) return;
+    CombatFeedback fb = Feedback();
+    StageHitStyle st = HitStyle();
+    BossProxy bp = BossTarget(144.f, 142.f);
+    if (!ResolvePlayerVsBoss(player, bp, st, fb)) return;
+    ++combo;
+    comboTimer = 1;
+    maxCombo = std::max(maxCombo, combo);
+    if (boss.hp <= 0) DefeatBoss();
 }
 void Stage5Game::DefeatBoss() {
     if (boss.defeated) return;
@@ -174,40 +169,20 @@ void Stage5Game::SpawnZone(int id) {
     }
 }
 void Stage5Game::HandlePlayerHits() {
-    if (!player.AttackIsActive() || player.hasHit || player.attackType == AttackType::Energy) return;
-    const CombatBox hit = player.GetAttackHitbox();
-    for (auto& e : enemies)
-        if (e.active && !e.IsDefeated() && hit.Intersects(e.GetHurtbox())) {
-            const float d = player.facing == Facing::Right ? 1.f : -1.f;
-            e.TakeDamage(player.GetAttackDamage() + (player.isRageMode ? 6 : 0),
-                         {d * player.GetAttackKnockback(), 0, 0});
-            player.hasHit = true;
-            ++combo;
-            comboTimer = 1;
-            maxCombo = std::max(maxCombo, combo);
-            SpawnImpact({e.position.x, e.position.y - 70, 0}, {255, 120, 140, 255},
-                        player.attackType == AttackType::Kick);
-            hitstop = .08f;
-            shake = .1f;
-            break;
-        }
+    CombatFeedback fb = Feedback();
+    const StageHitStyle st = HitStyle();
+    const HitReport r = ResolvePlayerVsEnemies(player, enemies, st, fb);
+    ApplyComboScore(r, st, combo, maxCombo, comboTimer, nullptr);
 }
 void Stage5Game::HandleEnemyHits() {
-    if (player.state == PlayerState::Defeat) return;
-    for (auto& e : enemies)
-        if (e.active && !e.IsDefeated() && !e.hasHit && e.AttackIsActive() &&
-            e.GetAttackHitbox().Intersects(player.GetHurtbox())) {
-            const int before = player.hp;
-            player.TakeDamage((int)e.attackDamage);
-            damageTaken += before - player.hp;
-            e.hasHit = true;
-            combo = 0;
-            comboTimer = 0;
-            SpawnImpact(player.position, {255, 90, 110, 255}, false);
-            hitstop = .085f;
-            shake = .12f;
-            break;
-        }
+    CombatFeedback fb = Feedback();
+    const StageHitStyle st = HitStyle();
+    const int before = player.hp;
+    ResolveEnemiesVsPlayer(enemies, player, fb, 99, &st, &damageTaken);
+    if (before != player.hp) {
+        combo = 0;
+        comboTimer = 0;
+    }
 }
 void Stage5Game::UpdateCombat(float dt) {
     if (comboTimer > 0)
@@ -215,11 +190,7 @@ void Stage5Game::UpdateCombat(float dt) {
     else
         combo = 0;
     player.Update(dt);
-    if (player.state == PlayerState::Attack && player.attackType == AttackType::Energy &&
-        player.energyReleased) {
-        SpawnEnergy();
-        player.energyReleased = false;
-    }
+    if (player.ConsumeProjectileEvent()) SpawnEnergy();   // B01: una onda por lanzamiento
     // Zonas 1-3: guardias del proyecto. Al limpiarlas se pasa a la siguiente y,
     // tras la tercera, empieza el duelo contra el clon.
     if (zone <= 3) {
@@ -288,6 +259,7 @@ void Stage5Game::UpdateBoss(float dt) {
     int ph = ratio <= .3f ? 3 : ratio <= .65f ? 2 : 1;
     if (ph != boss.phase) {
         boss.phase = ph;
+        EmitSimpleEvent(GameEventType::BossPhase, ph);
         boss.attack = BossAttack::None;
         boss.elapsed = 0;
         SpawnImpact(boss.pos, {255, 60, 90, 255}, true);
@@ -370,18 +342,18 @@ void Stage5Game::UpdateBoss(float dt) {
                 active = boss.elapsed <= tele + .28f;
             }
         }
-        if (active && hit.Intersects(player.GetHurtbox()) && player.state != PlayerState::Hit) {
+        if (active && player.state != PlayerState::Hit && BoxTouchesPlayer(hit, boss.pos.y, 60.f, player)) {
             int dmg = boss.attack == BossAttack::Finisher ? (boss.phase >= 3 ? 42 : 34)
                       : boss.phase >= 3                   ? 28
                       : boss.phase == 2                   ? 23
                                                           : 18;
             int before = player.hp;
-            player.TakeDamage(dmg);
+            player.ApplyHit(BossHitInfo(dmg, boss.pos.x, player));
             damageTaken += before - player.hp;
             combo = 0;
             comboTimer = 0;
             SpawnImpact(player.position, {255, 60, 90, 255}, true);
-            hitstop = boss.attack == BossAttack::Finisher ? .16f : .1f;
+            hitstop.Trigger(boss.attack == BossAttack::Finisher ? .16f : .1f);
             shake = boss.attack == BossAttack::Finisher ? .3f : .2f;
         }
         if (boss.attack != BossAttack::None &&
@@ -417,10 +389,12 @@ void Stage5Game::Update(float dt) {
         if (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J)) advanceRequested = true;
         return;
     }
-    player.PumpInput(dt);
-    if (hitstop > 0) {
-        hitstop -= dt;
-        return;
+    PumpPlayerInput(player, hitstop, dt);   // B15
+    if (hitstop.Consume(dt)) return;
+    camKick.Update(dt);
+    if (slowMo > 0) {   // V7: camara lenta tras el ultimo enemigo / jefe
+        slowMo -= dt;
+        dt *= kKillSlowMoScale;
     }
     shake = std::max(0.f, shake - dt);
     bannerTimer = std::max(0.f, bannerTimer - dt);
@@ -501,6 +475,7 @@ void Stage5Game::DrawWorld() const {
     c.offset = {640, 360};
     c.target = {cameraX, 360};
     c.zoom = 1;
+    c.target.x += camKick.OffsetX();   // V7: empujon en la direccion del golpe
     if (shake > 0) {
         c.target.x += GetRandomValue(-100, 100) * std::min(shake, 0.2f) * (9 * 0.15f);   // sacudida suave (antes x9)
         c.target.y += GetRandomValue(-100, 100) * std::min(shake, 0.2f) * (6 * 0.15f);   // sacudida suave (antes x6)
@@ -631,4 +606,39 @@ void Stage5Game::Draw() const {
     }
     if (flow == Flow::Clear) DrawClear();
 }
+// ---- F0.2: resolvedor unico de golpes ----
+CombatFeedback Stage5Game::Feedback() {
+    CombatFeedback fb;
+    fb.hitstop = &hitstop;
+    fb.camera = &camKick;
+    fb.slowMo = &slowMo;
+    fb.spark = [this](Vector3D at, Color c, bool heavy) { SpawnImpact(at, c, heavy); };
+    return fb;
+}
+StageHitStyle Stage5Game::HitStyle() const {
+    StageHitStyle st;
+    st.rageBonus = 6;
+    st.bossRageBonus = 8;
+    st.scorePerDamage = 10;
+    st.scorePerCombo = 7;
+    st.spark = {255, 120, 140, 255};
+    st.sparkHeavy = {255, 120, 140, 255};
+    st.sparkHurt = {255, 90, 110, 255};
+    st.sparkBoss = {255, 80, 90, 255};
+    return st;
+}
+BossProxy Stage5Game::BossTarget(float w, float h) {
+    BossProxy bp;
+    bp.pos = boss.pos;
+    bp.width = w;
+    bp.height = h;
+    bp.hp = &boss.hp;
+    bp.blocking = false;
+    bp.invuln = &boss.invuln;
+    bp.invulnOnHit = .10f;
+    bp.blockDivisor = 5;
+    bp.pushOnBlock = 0.0f;
+    return bp;
+}
+
 } // namespace district_fury

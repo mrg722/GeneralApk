@@ -1,4 +1,5 @@
 #include "game/VSMode.h"
+#include "game/events/GameEvents.h"
 #include "ui/TouchControls.h"
 #include "core/InputMap.h"
 #include "game/lab/KfReference.h"
@@ -96,7 +97,7 @@ void VSMode::Init() {
     bossProjectiles.clear();
     player.Reset();
     player.position = {360, 585, 0};
-    hitstop = 0;
+    hitstop.Reset();
     shake = 0;
 }
 bool VSMode::ShouldExit() const {
@@ -130,7 +131,7 @@ void VSMode::ResetFight() {
     player.ApplyCharacter(selectedCharacter);
     player.position = {360, 585, 0};
     playerDefeated = false;
-    hitstop = 0;
+    hitstop.Reset();
     shake = 0;
     enemies.clear();
     bossProjectiles.clear();
@@ -177,9 +178,11 @@ void VSMode::Update(float dt) {
             exitRequested = true;
             return;
         }
-        if (input::Pressed(KEY_UP)) cursor = (cursor + kFieldCount - 1) % kFieldCount;
-        if (input::Pressed(KEY_DOWN)) cursor = (cursor + 1) % kFieldCount;
+        // Seleccion de VS: eventos de UI (el AudioDirector decide si suenan).
+        if (input::Pressed(KEY_UP)) { cursor = (cursor + kFieldCount - 1) % kFieldCount; EmitSimpleEvent(GameEventType::UiNavigate, cursor); }
+        if (input::Pressed(KEY_DOWN)) { cursor = (cursor + 1) % kFieldCount; EmitSimpleEvent(GameEventType::UiNavigate, cursor); }
         if (input::Pressed(KEY_LEFT) || input::Pressed(KEY_RIGHT)) {
+            EmitSimpleEvent(GameEventType::UiNavigate, cursor);
             int dir = input::Pressed(KEY_RIGHT) ? 1 : -1;
             if (cursor == 0) {
                 stage = (stage + dir + kStageCount) % kStageCount;
@@ -205,7 +208,10 @@ void VSMode::Update(float dt) {
                 enemyTypes[(size_t)slot] = NextEnemyType(enemyTypes[(size_t)slot], dir);
             }
         }
-        if (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J)) StartFight();
+        if (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J)) {
+            EmitSimpleEvent(GameEventType::UiConfirm, cursor);
+            StartFight();
+        }
         return;
     }
     if (input::Pressed(KEY_ESCAPE)) {
@@ -234,11 +240,8 @@ void VSMode::Update(float dt) {
         SwitchWarriorWeapon(player);
         selectedCharacter = player.skin;
     }
-    player.PumpInput(dt);
-    if (hitstop > 0) {
-        hitstop -= dt;
-        return;
-    }
+    PumpPlayerInput(player, hitstop, dt);   // B15: el buffer no envejece en hitstop
+    if (hitstop.Consume(dt)) return;
     player.Update(dt);
     player.position.x = std::clamp(player.position.x, kMinX, kMaxX);
     player.position.y = std::clamp(player.position.y, kMinY, kMaxY);
@@ -247,14 +250,12 @@ void VSMode::Update(float dt) {
         // consumidor real de BossDefinition — ver src/game/combat/Boss.h).
         boss.Update(dt, player, &combatWorld, bossProjectiles, &hitstop, &shake);
         combatWorld.Update(dt);
-        if (player.AttackIsActive() && !player.hasHit && player.attackType != AttackType::Energy &&
-            boss.CanBeHit()) {
-            const CombatBox hit = player.GetAttackHitbox();
-            if (hit.Intersects(boss.GetHurtbox())) {
-                boss.ApplyDamage(player.GetAttackDamage() + (player.isRageMode ? 8 : 0));
-                player.hasHit = true;
-                shake = .12f;
-            }
+        if (boss.CanBeHit()) {
+            CombatFeedback fb = Feedback();
+            BossProxy bp = boss.Proxy();
+            StageHitStyle st;
+            st.bossRageBonus = 8;
+            if (ResolvePlayerVsBoss(player, bp, st, fb)) shake = .12f;
         }
         for (auto& p : bossProjectiles) {
             if (!p.active) continue;
@@ -264,12 +265,19 @@ void VSMode::Update(float dt) {
                 p.active = false;
                 continue;
             }
-            const CombatBox b{p.pos.x - 18, p.pos.y - 18, 36, 36};
-            if (p.fromBoss && player.state != PlayerState::Defeat && player.dashInvulnerability <= 0.0f &&
-                b.Intersects(player.GetHurtbox())) {
-                player.TakeDamage(p.damage);
-                p.active = false;
-                shake = .14f;
+            if (p.fromBoss) {
+                ProjectileHitInput pr;
+                pr.pos = {p.pos.x, p.pos.y + 80.f, 80.f};   // sale a la altura del pecho (carril - 80)
+                pr.prevX = p.pos.x - p.vx * dt;
+                pr.height = 80.f;
+                pr.radius = 18.f;
+                pr.damage = p.damage;
+                pr.dirX = p.vx > 0 ? 1.f : -1.f;
+                CombatFeedback fb = Feedback();
+                if (ResolveProjectileVsPlayer(pr, player, fb)) {
+                    p.active = false;
+                    shake = .14f;
+                }
             }
         }
         bossProjectiles.erase(std::remove_if(bossProjectiles.begin(), bossProjectiles.end(),
@@ -287,27 +295,15 @@ void VSMode::Update(float dt) {
             }
         combatWorld.Update(dt);
         combatWorld.ResolveHazards(player, enemies);
-        if (player.AttackIsActive() && !player.hasHit && player.attackType != AttackType::Energy) {
-            const CombatBox hit = player.GetAttackHitbox();
-            for (auto& e : enemies)
-                if (e.active && !e.IsDefeated() && hit.Intersects(e.GetHurtbox())) {
-                    const float d = player.facing == Facing::Right ? 1.f : -1.f;
-                    e.TakeDamage(player.GetAttackDamage() + (player.isRageMode ? 5 : 0),
-                                 {d * player.GetAttackKnockback(), 0, 0});
-                    player.hasHit = true;
-                    shake = .08f;
-                    break;
-                }
+        {
+            CombatFeedback fb = Feedback();
+            StageHitStyle st;
+            st.rageBonus = 5;
+            if (ResolvePlayerVsEnemies(player, enemies, st, fb).hits > 0) shake = .08f;
+            const int before = player.hp;
+            ResolveEnemiesVsPlayer(enemies, player, fb, 99, &st);
+            if (before != player.hp) shake = .10f;
         }
-        if (player.state != PlayerState::Defeat)
-            for (auto& e : enemies)
-                if (e.active && !e.IsDefeated() && !e.hasHit && e.AttackIsActive() &&
-                    e.GetAttackHitbox().Intersects(player.GetHurtbox())) {
-                    player.TakeDamage((int)e.attackDamage);
-                    e.hasHit = true;
-                    shake = .10f;
-                    break;
-                }
     }
     playerDefeated = player.state == PlayerState::Defeat;
 }
@@ -327,19 +323,14 @@ void VSMode::UpdateRival(float dt) {
     rival.Update(dt);
     rival.position.x = std::clamp(rival.position.x, kMinX, kMaxX);
     rival.position.y = std::clamp(rival.position.y, kMinY, kMaxY);
-    // Golpes de ida y vuelta: las mismas cajas y danos que contra enemigos.
-    if (player.AttackIsActive() && !player.hasHit && player.attackType != AttackType::Energy &&
-        rival.state != PlayerState::Defeat && player.GetAttackHitbox().Intersects(rival.GetHurtbox())) {
-        rival.TakeDamage(player.GetAttackDamage() + (player.isRageMode ? 5 : 0));
-        player.hasHit = true;
-        shake = .08f;
-    }
-    if (rival.AttackIsActive() && !rival.hasHit && player.state != PlayerState::Defeat &&
-        rival.GetAttackHitbox().Intersects(player.GetHurtbox())) {
-        player.TakeDamage(rival.GetAttackDamage() + (rival.isRageMode ? 5 : 0));
-        rival.hasHit = true;
-        shake = .08f;
-    }
+    // Golpes de ida y vuelta por el resolvedor unico: ambos se prueban en el
+    // mismo frame (prioridad / trade), con knockback, hitstun y OnAttackConnected.
+    CombatFeedback fb = Feedback();
+    StageHitStyle st;
+    st.rageBonus = 5;
+    int byRival = 0;
+    const int byPlayer = ResolvePlayerVsPlayer(player, rival, fb, st, &byRival);
+    if (byPlayer > 0 || byRival > 0) shake = .08f;
 }
 void VSMode::DrawBackground() const {
     DrawRectangle(0, 0, 1280, 720, {5, 8, 12, 255});
@@ -541,4 +532,13 @@ void VSMode::Draw() const {
     else
         DrawFight();
 }
+// F0.2: feedback del Modo VS para el resolvedor unico (hitstop y chispas del
+// CombatWorld; VS no tiene camara que empujar).
+CombatFeedback VSMode::Feedback() {
+    CombatFeedback fb;
+    fb.hitstop = &hitstop;
+    fb.spark = [this](Vector3D at, Color c, bool heavy) { combatWorld.SpawnImpact(at, c, heavy); };
+    return fb;
+}
+
 } // namespace district_fury

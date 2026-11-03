@@ -140,6 +140,12 @@ int ResolvePlayerVsPlayer(Player& a, Player& b, CombatFeedback& fb, const StageH
 // golpe. Devuelve el resultado de Player::ApplyHit (Miss si no toca).
 HitResult ResolveBoxVsPlayer(const CombatBox& box, float laneY, float depth, const HitInfo& info, Player& player,
                              CombatFeedback& fb, const StageHitStyle* style = nullptr);
+// Solo la prueba geometrica de una caja de jefe contra el jugador (carril +
+// plano), para stages que aplican su propio feedback.
+bool BoxTouchesPlayer(const CombatBox& box, float laneY, float depth, const Player& player);
+// Golpe de jefe de Historia: dano, empuje hacia el lado del jugador y derribo con
+// el umbral historico (dano >= 28).
+HitInfo BossHitInfo(int damage, float bossX, const Player& player);
 // Proyectil del jugador contra enemigos: indice del enemigo golpeado o -1.
 int ResolveProjectileVsEnemies(const ProjectileHitInput& pr, std::vector<StreetEnemy>& enemies,
                                const StageHitStyle& style, CombatFeedback& fb, HitReport* report = nullptr,

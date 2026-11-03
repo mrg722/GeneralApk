@@ -99,8 +99,15 @@ inline float CombatEase(Ease e, float u, float p1 = 0.3f, float p2 = 0.9f) {
     }
 }
 
+// Fraccion del miembro desde la que golpea. V5 propone 0.35 L; con 0.35 un
+// enemigo pegado al cuerpo (centros a < 20 px) quedaba en un hueco que la caja
+// historica si cubria (borde cercano a 13 px), y el rival de VS RAYDER CLON
+// dejaba de recibir golpes en all_modes_check. Con 0.15 el borde cercano del
+// JAB queda a ~0 px del centro, como antes (ajuste reportado en F0.2).
+constexpr float kLimbBaseFrac = 0.15f;
+
 // Pose del miembro en el plano (X, altura): base del tramo que golpea
-// (Pw + 0.35 L dir), punta y radio ya escalados.
+// (Pw + kLimbBaseFrac L dir), punta y radio ya escalados.
 struct LimbPose { Vector2 pivot, base, tip; float radius; };
 
 // Evalua el arco V5 en u (fraccion del activo). x/z = pies del atacante,
@@ -115,7 +122,7 @@ inline LimbPose EvalLimbArc(const LimbArc& a, float x, float z, float facing, fl
     LimbPose p;
     p.pivot = {x + f * scale * a.px, z - scale * a.ph};
     p.tip = {p.pivot.x + scale * L * dir.x, p.pivot.y + scale * L * dir.y};
-    p.base = {p.pivot.x + scale * 0.35f * L * dir.x, p.pivot.y + scale * 0.35f * L * dir.y};
+    p.base = {p.pivot.x + scale * kLimbBaseFrac * L * dir.x, p.pivot.y + scale * kLimbBaseFrac * L * dir.y};
     p.radius = scale * a.r;
     return p;
 }
@@ -185,13 +192,12 @@ inline Vector2 RectContact(const Rect2& a, const Rect2& b) {
 }
 
 // Amortiguacion "k por frame a 60 fps" independiente del frame rate (B11):
-// integra exactamente x += v dt con v(t) = v0 k^(60 t).
+// x += v dt; v *= k^(60 dt). A 60 fps da exactamente lo mismo que el viejo
+// v *= k por frame; a 30 fps el deslizamiento total difiere < 10 %.
 inline void DampedStep(float& pos, float& vel, float k60, float dt) {
     if (dt <= 0.0f) return;
-    const float lambda = -std::log(std::clamp(k60, 1e-4f, 0.9999f)) * 60.0f;
-    const float decay = std::exp(-lambda * dt);
-    pos += vel * (1.0f - decay) / lambda;
-    vel *= decay;
+    pos += vel * dt;
+    vel *= std::pow(k60, dt * 60.0f);
 }
 // Solo el factor (para velocidades que no mueven posicion aqui).
 inline float DampFactor(float k60, float dt) { return std::pow(k60, dt * 60.0f); }

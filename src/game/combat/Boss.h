@@ -2,6 +2,8 @@
 #include "game/combat/BossDefinition.h"
 #include "game/Player.h"
 #include "game/combat/CombatWorld.h"
+#include "game/combat/HitResolver.h"
+#include "game/combat/HitstopClock.h"
 #include "rendering/Animator.h"
 #include "game/combat/RayderCloneVisual.h"
 #include <vector>
@@ -32,11 +34,14 @@ struct BossProjectile { Vector3D pos; float vx; float life; int damage; bool act
 class Boss {
 public:
     void Reset(BossId bossId, Vector3D startPos);
-    void Update(float dt, Player& player, CombatWorld* world, std::vector<BossProjectile>& projectiles, float* hitstop, float* shake);
+    // F0.2: hitstop = el reloj unico del modo (HitstopClock).
+    void Update(float dt, Player& player, CombatWorld* world, std::vector<BossProjectile>& projectiles, HitstopClock* hitstop, float* shake);
     void ApplyDamage(int dmg);
     bool IsDefeated() const { return defeated; }
     bool CanBeHit() const { return !defeated && invuln <= 0.0f; }
     CombatBox GetHurtbox() const;
+    // F0.2: el jefe adaptado al resolvedor unico (vida, invulnerabilidad, cuerpo).
+    BossProxy Proxy();
     Vector3D GetPos() const { return pos; }
     int GetHp() const { return hp; }
     int GetMaxHp() const { return maxHp; }

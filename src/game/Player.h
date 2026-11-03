@@ -272,7 +272,9 @@ private:
     void PollAttackInput();
     PlayerInput ReadInput() const;
     bool inputPumped{false};
+    bool inputFrozen{false};   // PumpInput(0): el stage esta en hitstop (B15)
     bool TryStartBufferedAttack(bool fromCancel);
+    bool ChainOpen() const;
     void EndAttack();
     void UpdateRage(float dt);
     void HandleInput(float dt);

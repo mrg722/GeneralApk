@@ -1,4 +1,5 @@
 #pragma once
+#include "game/combat/HitResolver.h"
 #include "game/Player.h"
 #include "game/StreetEnemy.h"
 #include "game/combat/CombatWorld.h"
@@ -79,8 +80,9 @@ private:
     CombatWorld combatWorld;
     Boss boss;
     std::vector<BossProjectile> bossProjectiles;
-    float hitstop{0.0f};
+    HitstopClock hitstop;   // F0.2: reloj unico de hitstop
     float shake{0.0f};
+    CombatFeedback Feedback();
 
     void ResetFight();
     void StartFight();

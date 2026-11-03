@@ -2,6 +2,7 @@
 #include "game/Player.h"
 #include "game/StreetEnemy.h"
 #include "game/combat/CombatWorld.h"
+#include "game/combat/HitResolver.h"
 #include <vector>
 
 namespace district_fury {
@@ -23,6 +24,9 @@ public:
     bool StageCleared() const { return flow == Flow::Clear; }
     bool ConsumeAdvance() { const bool a = advanceRequested; advanceRequested = false; return a; }
 private:
+    // F0.2: un solo reloj de hitstop, empujon de camara V7 y camara lenta.
+    HitstopClock hitstop; CameraKick camKick; float slowMo{0};
+    CombatFeedback Feedback(); StageHitStyle HitStyle() const; BossProxy BossTarget(float w, float h);
     struct Projectile { Vector3D pos; float vx; float life; float radius; int damage; bool fromBoss; bool active; };
     struct Particle { Vector3D pos; Vector2 vel; float life; float maxLife; float size; Color color; };
     struct TitanX {
@@ -43,7 +47,7 @@ private:
     Flow flow{Flow::Intro};
     Difficulty difficulty{Difficulty::Normal};
     int scenario{1}; int combo{0}; int maxCombo{0}; int defeated{0}; int damageTaken{0}; int score{0};
-    float stageTime{0}; float comboTimer{0}; float hitstop{0}; float shake{0}; float bannerTimer{0}; float transitionTimer{0}; float cameraX{640};
+    float stageTime{0}; float comboTimer{0}; float shake{0}; float bannerTimer{0}; float transitionTimer{0}; float cameraX{640};
     bool arenaLocked{false};
     bool advanceRequested{false}; bool scenarioGatekeeperSpawned{false}; bool bossSpawned{false}; bool stageComplete{false};
     const char* storyMessage{"Rayden enters Astra Tower. The chain network ends in the corporate command floor."};

@@ -180,9 +180,15 @@ void Stage1StoryGame::Update(float dt) {
                                                                      : StoryDifficulty::Hard;
             SaveProgress();
         };
-        if (input::Pressed(KEY_UP) || input::Pressed(KEY_W))
+        // Menu principal: eventos de UI (el AudioDirector decide si suenan).
+        if (input::Pressed(KEY_UP) || input::Pressed(KEY_W)) {
             menuCursor = (menuCursor + kMenuItemCount - 1) % kMenuItemCount;
-        if (input::Pressed(KEY_DOWN) || input::Pressed(KEY_S)) menuCursor = (menuCursor + 1) % kMenuItemCount;
+            EmitSimpleEvent(GameEventType::UiNavigate, menuCursor);
+        }
+        if (input::Pressed(KEY_DOWN) || input::Pressed(KEY_S)) {
+            menuCursor = (menuCursor + 1) % kMenuItemCount;
+            EmitSimpleEvent(GameEventType::UiNavigate, menuCursor);
+        }
         if (menuCursor == 2 && (input::Pressed(KEY_LEFT) || input::Pressed(KEY_RIGHT)))
             CycleDifficulty(input::Pressed(KEY_RIGHT) ? 1 : -1);
         if (input::Pressed(KEY_V)) {
@@ -194,6 +200,7 @@ void Stage1StoryGame::Update(float dt) {
             return;
         }
         if (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J)) {
+            EmitSimpleEvent(GameEventType::UiConfirm, menuCursor);
             switch (menuCursor) {
             case 0:
                 ResetRun();

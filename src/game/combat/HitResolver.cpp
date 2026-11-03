@@ -1,6 +1,7 @@
 // Resolvedor unico de golpes (ver HitResolver.h).
 #include "game/combat/HitResolver.h"
 #include "game/events/GameEvents.h"
+#include "game/CharacterVisual.h"
 #include <algorithm>
 #include <cmath>
 
@@ -341,6 +342,11 @@ int ApplyPlayerHit(Player& a, Player& b, CombatFeedback& fb, const StageHitStyle
     const AttackDef& def = GetAttack(a.currentAttack);
     HitInfo info = PlayerHitInfo(a, style.rageBonus);
     info.counter = b.InAttackStartup();
+    // Atacante KF/BETA (golpes por clip): sus filas de AttackDef son genericas
+    // (todavia sin datos por clip, F1.6/F1.7), asi que contra otro jugador
+    // conservan el empuje y el hitstun historicos (0 px/s, 0.13 s) y no hacen
+    // counter-hit (sin arranque/activo propio por clip todavia).
+    if (a.clipDriven) { info.knockback = 0.0f; info.hitstun = 0.13f; info.counter = false; }
     if (info.counter) {
         info.damage = static_cast<int>(std::round(info.damage * 1.25f));
         info.hitstun += 0.12f;
@@ -371,10 +377,45 @@ int ApplyPlayerHit(Player& a, Player& b, CombatFeedback& fb, const StageHitStyle
 }
 }  // namespace
 
+namespace {
+bool IsBetaSkin(const Player& p) { return p.skin >= 0 && p.skin < CharacterCount() && GetCharacterVisual(p.skin).beta; }
+
+// Personajes BETA por piezas (GUERRERO, RONIN-KRATOS, bestias): conservan la
+// resolucion historica entre jugadores (como en GowApk/BetaMode) hasta que
+// F1.7/F1.8 les den datos propios: caja del cuadro sin carril, dano directo,
+// sin hitstop ni empuje; el que golpea primero interrumpe al otro.
+int LegacyBetaDuel(Player& a, Player& b, const StageHitStyle& style, int* damageB) {
+    int dealtA = 0, dealtB = 0;
+    if (a.AttackIsActive() && !a.hasHit && a.attackType != AttackType::Energy && b.state != PlayerState::Defeat &&
+        a.GetAttackHitbox().Intersects(b.GetHurtbox())) {
+        const int before = b.hp;
+        b.TakeDamage(a.GetAttackDamage() + (a.isRageMode ? style.rageBonus : 0));
+        a.hasHit = true;
+        dealtA = std::max(0, before - b.hp);
+        Emit(GameEventType::HitLanded, b.position.x, b.position.y, a.skin, PlayerHitKind(a), PlayerHitHeavy(a),
+             dealtA, static_cast<int>(a.currentAttack), false);
+    }
+    if (b.AttackIsActive() && !b.hasHit && a.state != PlayerState::Defeat &&
+        b.GetAttackHitbox().Intersects(a.GetHurtbox())) {
+        const int before = a.hp;
+        a.TakeDamage(b.GetAttackDamage() + (b.isRageMode ? style.rageBonus : 0));
+        b.hasHit = true;
+        dealtB = std::max(0, before - a.hp);
+        Emit(GameEventType::HitLanded, a.position.x, a.position.y, b.skin, PlayerHitKind(b), PlayerHitHeavy(b),
+             dealtB, static_cast<int>(b.currentAttack), false);
+    }
+    if (damageB) *damageB = dealtB;
+    return dealtA;
+}
+}  // namespace
+
 int ResolvePlayerVsPlayer(Player& a, Player& b, CombatFeedback& fb, const StageHitStyle& style, int* damageB) {
+    if (IsBetaSkin(a) || IsBetaSkin(b)) return LegacyBetaDuel(a, b, style, damageB);
     bool aHits = PlayerConnects(a, b);
     bool bHits = PlayerConnects(b, a);
-    if (aHits && bHits) {   // B16: prioridad; empate = trade
+    // B16: prioridad; empate = trade. Los ataques por clip (KF/BETA) no traen una
+    // prioridad real (su fila es la generica de HABILIDAD): con ellos, trade.
+    if (aHits && bHits && !a.clipDriven && !b.clipDriven) {
         const int pa = GetAttack(a.currentAttack).priority, pb = GetAttack(b.currentAttack).priority;
         if (pa > pb) bHits = false;
         else if (pb > pa) aHits = false;
@@ -406,6 +447,23 @@ HitResult ResolveBoxVsPlayer(const CombatBox& box, float laneY, float depth, con
         Feel(fb, HitstopSeconds(info.damage, false, false, blocked), info.damage, info.dirX);
     }
     return res;
+}
+
+bool BoxTouchesPlayer(const CombatBox& box, float laneY, float depth, const Player& player) {
+    if (!box.IsValid() || player.state == PlayerState::Defeat) return false;
+    if (!LaneOverlap(laneY, player.position.y, depth)) return false;
+    return RectOverlap(ScreenBoxToPlane(box.x, box.y, box.width, box.height, laneY), PlayerHurtRect(player));
+}
+
+HitInfo BossHitInfo(int damage, float bossX, const Player& player) {
+    HitInfo info;
+    info.damage = damage;
+    info.dirX = player.position.x >= bossX ? 1.0f : -1.0f;
+    info.knockback = 0.0f;
+    info.hitstun = 0.13f;
+    info.knockdown = damage >= 28;
+    info.heavy = true;
+    return info;
 }
 
 // ---------------------------------------------------------------------------

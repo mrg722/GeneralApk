@@ -288,8 +288,11 @@ void Player::HandleInput(float dt) {
 
 void Player::PollAttackInput() {
     if (!inputEnabled) return;
-    if (state == PlayerState::Defeat || state == PlayerState::Knockdown ||
-        state == PlayerState::GuardBreak || state == PlayerState::Hit) return;
+    if (state == PlayerState::Defeat || state == PlayerState::Knockdown || state == PlayerState::GuardBreak) return;
+    // En Hit no se registra nada... salvo durante el congelamiento de impacto
+    // (B15): lo pulsado mientras el hitstop para el juego no se pierde y sale al
+    // terminar el hitstun, como si se hubiera pulsado justo despues.
+    if (state == PlayerState::Hit && !inputFrozen) return;
     // Historial de direcciones para los comandos especiales.
     const int h = frameInput.moveX > 0.5f ? 1 : (frameInput.moveX < -0.5f ? -1 : 0);
     motion.Record(frameInput.moveY > 0.5f, h, inputBuffer.Frame());
@@ -338,6 +341,7 @@ void Player::PumpInput(float dt) {
     // ataque (arranque + activo + recuperacion) lo pulsado no envejece, asi un J/K
     // durante el REMATE o la PATADA no se pierde y sale al terminar. B15: el stage
     // pasa dt = 0 durante el hitstop (ver PumpPlayerInput en HitResolver.h).
+    inputFrozen = dt <= 0.0f;
     inputBuffer.Tick(state == PlayerState::Attack && !clipDriven ? 0.0f : dt);
     PollAttackInput();
 }
@@ -356,6 +360,11 @@ bool Player::InCancelWindow() const {
 // Consume el comando mas antiguo del buffer y arranca el ataque que le
 // corresponde. fromCancel=true aplica la tabla de cancelacion sobre el ataque en
 // curso; false resuelve un inicio normal desde Idle/Walk/Recovery.
+// Ventana de combo abierta para seguir la cadena J desde Idle/Recovery. Los
+// personajes KF/BETA encadenan sus clips por cancelacion, como siempre (su cadena
+// propia la definen F1.6/F1.7); el resto sigue P1 -> P2 -> P3 (B03).
+bool Player::ChainOpen() const { return comboWindow > 0.0f && !IsKfCharacter(); }
+
 bool Player::TryStartBufferedAttack(bool fromCancel) {
     inputBuffer.PruneExpired();
     const InputBuffer::Entry* front = inputBuffer.Peek();
@@ -378,16 +387,20 @@ bool Player::TryStartBufferedAttack(bool fromCancel) {
     } else if (cmd == InputCommand::Kick) {
         next = finisherReady ? AttackId::Finisher : AttackId::Kick;
     } else {
-        next = comboWindow > 0.0f ? NextPunchInChain(chainAttack) : AttackId::Punch1;
+        next = ChainOpen() ? NextPunchInChain(chainAttack) : AttackId::Punch1;
     }
     if (next == AttackId::None) return false;
     if (attackCooldowns[static_cast<int>(next)] > 0.0f) return false;   // queda en cola
     // Sin energia suficiente, el comando de onda sale como golpe normal.
     if (next == AttackId::EnergyWave && sp < GetAttack(AttackId::EnergyWave).spCost) {
         if (fromCancel) return false;
-        next = comboWindow > 0.0f ? NextPunchInChain(chainAttack) : AttackId::Punch1;
+        next = ChainOpen() ? NextPunchInChain(chainAttack) : AttackId::Punch1;
     }
-    if (dir != 0) facing = dir > 0 ? Facing::Right : Facing::Left;
+    // Especiales: su direccion de comando. J/K (B21): la direccion pulsada al
+    // apretar gira el golpe tambien dentro de la cadena (los KF/BETA siguen como
+    // siempre: su clip manda).
+    const bool normalCmd = cmd == InputCommand::Punch || cmd == InputCommand::Kick;
+    if (dir != 0 && (!normalCmd || !IsKfCharacter())) facing = dir > 0 ? Facing::Right : Facing::Left;
 
     InputCommand consumed;
     inputBuffer.Pop(consumed);

@@ -3,6 +3,7 @@
 #include "game/Player.h"
 #include "game/StreetEnemy.h"
 #include "game/combat/CombatWorld.h"
+#include "game/combat/HitResolver.h"
 #include "game/npc/KesslerCameo.h"
 #include <vector>
 
@@ -42,6 +43,9 @@ public:
     bool StageCleared() const { return flow == Flow::Clear; }
     bool ConsumeAdvance() { const bool a = advanceRequested; advanceRequested = false; return a; }
 private:
+    // F0.2: un solo reloj de hitstop, empujon de camara V7 y camara lenta.
+    HitstopClock hitstop; CameraKick camKick; float slowMo{0};
+    CombatFeedback Feedback(); StageHitStyle HitStyle() const; BossProxy BossTarget(float w, float h);
     struct Projectile { Vector3D pos; float vx; float life; int damage; bool active; bool fromBoss; };
     struct Particle { Vector3D pos; Vector2 vel; float life; float maxLife; float size; Color color; };
     enum class Flow { Intro, Combat, BossIntro, Boss, Clear, GameOver, Pause };
@@ -61,7 +65,7 @@ private:
     RayderClone boss;
     // Dibujo del clon con su diseno final (rojo, sin mangas); si no carga, poses sueltas.
     RayderCloneVisual cloneVisual;
-    float cameraX{640}; float stageTime{0}; float hitstop{0}; float shake{0}; float comboTimer{0};
+    float cameraX{640}; float stageTime{0}; float shake{0}; float comboTimer{0};
     int combo{0}; int maxCombo{0}; int damageTaken{0};
     float bannerTimer{0};
     bool advanceRequested{false};
