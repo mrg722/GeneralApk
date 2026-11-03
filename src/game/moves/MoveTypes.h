@@ -25,7 +25,10 @@ struct FxKey { char phase = 'A'; float v = 0; float sx = 1, sy = 1, angle = 0, d
 enum class FxPreset { None, Anticipa, Impacto, Recobro, Saltito, Upper, Giro, Barrida, CaidaRot, Temblor, Latido, Tinte };
 
 // Uso de un preset: a/b = parametros (k, h, n, amp/f, a/hz...) segun el preset.
-struct PresetUse { FxPreset preset = FxPreset::None; float a = 1, b = 0; char phase = 'A'; };
+// phase: 'S', 'A', 'R' (fase del ataque; en estados no-ataque todo el estado es
+// 'A') o '*' = todo el movimiento (v sobre S+A+R, t = segundos desde el inicio).
+// color (F0.3): color de TINTE (a = duracion en s, <= 0 = toda la fase).
+struct PresetUse { FxPreset preset = FxPreset::None; float a = 1, b = 0; char phase = 'A'; Color color{255, 255, 255, 255}; };
 
 // Superposicion de cuadros first..first+count-1 de assets/fx/efectos_azules.png
 // (rejilla 8x5) anclada en (x, y) relativo a los pies.
@@ -55,6 +58,10 @@ struct MoveVisual {
     const char* clipFallback = nullptr;
     PoseSegment segs[4]; int segCount = 0;
     PoseFx fx;
+    // F0.3: estados no-ataque (MoveSet.hit/walk/...): duracion en s de la
+    // secuencia (0 = la natural de sus clips) y si se repite (walk, block...).
+    float duration = 0;
+    bool loop = false;
 };
 
 // Proyectil propio de un movimiento (disparado una vez por activacion).
@@ -101,6 +108,12 @@ enum MoveCaps : unsigned {
 };
 
 // Cuanto "feel" procedural recibe el personaje (KF/BETA usan Light o None).
+// Atlas propios y poses sueltas: Full (por defecto) = respiracion, paso, dash,
+// impacto, retroceso, aterrizaje; None = sin nada. KF/BETA/RONIN (dibujan su clip
+// tal cual): SOLO `Light` enciende algo (inclinacion y temblor al recibir golpe,
+// caida rotada si el clip de derribo tiene <= 2 cuadros, rebote de victoria);
+// Full o None = nada (pixel identico), asi un MoveSet de KF que no toque `feel`
+// no cambia su dibujo.
 enum class FeelLevel { None, Light, Full };
 
 // Moveset de un personaje. Las cadenas y los botones de habilidad se guardan como

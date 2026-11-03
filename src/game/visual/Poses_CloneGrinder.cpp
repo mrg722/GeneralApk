@@ -45,6 +45,23 @@ const char* PoseGrinder(PlayerState state, AttackType attack, bool rage, double 
     return "idle";
 }
 
+bool PoseFrameClone(const PoseContext& ctx, PoseFrame& out) {
+    const char* pose = PoseClone(ctx.state, ctx.attackType, ctx.rage, ctx.time);
+    // Golpes del clon por fase real del ataque (startup/active/recovery de
+    // AttackData), como lo hacia PlayerDraw antes de F0.3.
+    if (ctx.state == PlayerState::Attack) {
+        const char ph = ctx.phase;
+        if (ctx.attackType == AttackType::Energy) pose = ph == 'S' ? "ready" : ph == 'A' ? "release_orb" : "idle2";
+        else if (ctx.attackType == AttackType::Kick) pose = ph == 'S' ? "ready" : ph == 'A' ? "kick" : "idle3";
+        else pose = ph == 'S' ? "ready" : ph == 'A' ? "punch" : "idle1";
+    }
+    return SinglePose(out, "rayder_clone", pose);
+}
+
+bool PoseFrameGrinder(const PoseContext& ctx, PoseFrame& out) {
+    return SinglePose(out, "grinder", PoseGrinder(ctx.state, ctx.attackType, ctx.rage, ctx.time));
+}
+
 int PoseFacesRightCloneGrinder(const char* folder, const char* pose) {
     (void)pose;
     if (folder == nullptr) return -1;

@@ -20,6 +20,10 @@ const char* PoseBrakkLegacy(PlayerState state, AttackType attack, bool rage, dou
     return "idle";
 }
 
+bool PoseFrameBrakkLegacy(const PoseContext& ctx, PoseFrame& out) {
+    return SinglePose(out, "brakk", PoseBrakkLegacy(ctx.state, ctx.attackType, ctx.rage, ctx.time));
+}
+
 int PoseFacesRightBrakk(const char* folder, const char* pose) {
     (void)pose;
     if (folder == nullptr) return -1;

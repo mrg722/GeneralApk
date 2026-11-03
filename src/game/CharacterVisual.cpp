@@ -1,6 +1,8 @@
 #include "game/CharacterVisual.h"
 #include "game/Player.h"
 #include "game/visual/PoseTables.h"
+#include "game/player/PoseFxEval.h"
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstring>
@@ -125,6 +127,60 @@ const char* CharacterPose(int id, PlayerState state, AttackType attack, bool rag
         case 5:  return PoseTitanXM(state, attack, rage, time);       // Titan-X Mejorado
         default: return "idle1";
     }
+}
+
+namespace {
+// Segmento de MoveVisual que cubre (phase, v); el ultimo de la fase si v se pasa.
+const PoseSegment* FindSegment(const MoveVisual& mv, char phase, float v) {
+    const PoseSegment* best = nullptr;
+    for (int i = 0; i < std::min(mv.segCount, 4); ++i) {
+        const PoseSegment& s = mv.segs[i];
+        if (s.phase != phase && s.phase != '*') continue;
+        if (v >= s.v0 && v <= s.v1) return &s;
+        if (best == nullptr || s.v1 < v) best = &s;
+    }
+    return best;
+}
+}  // namespace
+
+bool ResolvePoseFrame(int skin, const PoseContext& in, PoseFrame& out) {
+    const CharacterVisual& cv = GetCharacterVisual(skin);
+    if (skin == 0 || cv.folder == nullptr || cv.atlasId != nullptr) return false;
+    out = PoseFrame{};
+    PoseContext ctx = in;
+    if (ctx.state == PlayerState::Airborne) ctx.state = PlayerState::Knockdown;
+    // 1) Datos del MoveSet (Fase 1): segmentos del ataque en curso o del estado.
+    const MoveSet& set = VisualMoveSet(skin);
+    const MoveVisual* mv = nullptr;
+    if (ctx.state == PlayerState::Attack) {
+        if (const MoveOverride* ov = FindOverride(set, ctx.attack)) mv = &ov->visual;
+    } else {
+        mv = StateVisual(set, in.state, in.z > 0.0f ? 1.0f : -1.0f);
+        if (ctx.gettingUp && HasVisual(set.getup)) mv = &set.getup;
+    }
+    if (mv != nullptr && mv->segCount > 0) {
+        const char ph = ctx.state == PlayerState::Attack ? ctx.phase : 'A';
+        if (const PoseSegment* seg = FindSegment(*mv, ph, ctx.v)) {
+            out.pieceCount = std::clamp(seg->pieceCount, 1, 2);
+            for (int i = 0; i < out.pieceCount; ++i) out.pieces[i] = seg->pieces[i];
+            out.fx = mv->fx;
+            out.fromMoveSet = true;
+            if (out.pieces[0].pose != nullptr) return true;
+            out = PoseFrame{};
+        }
+    }
+    // 2) Tabla del bloque (las poses de hoy).
+    bool ok = false;
+    switch (skin) {
+        case 1: ok = PoseFrameClone(ctx, out); break;
+        case 2: ok = PoseFrameBrakkLegacy(ctx, out); break;
+        case 3: ok = PoseFrameGrinder(ctx, out); break;
+        case 4: ok = PoseFrameTitanX(ctx, out); break;
+        case 5: ok = PoseFrameTitanXM(ctx, out); break;
+        default: ok = SinglePose(out, cv.folder, "idle1"); break;
+    }
+    if (mv != nullptr) out.fx = mv->fx;   // override solo de PoseFx sobre la pose de la tabla
+    return ok;
 }
 
 bool PoseFacesRight(const char* folder, const char* pose) {
