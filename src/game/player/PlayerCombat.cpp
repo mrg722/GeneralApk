@@ -527,6 +527,7 @@ void Player::HandleInput(float dt) {
     const bool moving = move.x != 0 || move.y != 0;
     const float speed = GetMoveSpeed() * ms.walkSpeedScale * (running ? 1.45f : 1.0f);
     float tx = 0.0f, ty = 0.0f;
+    const Facing before = facing;
     if (moving) {
         const float length = std::sqrt(move.x * move.x + move.y * move.y);
         tx = move.x / length * speed;
@@ -534,6 +535,9 @@ void Player::HandleInput(float dt) {
         if (move.x < 0) facing = Facing::Left;
         if (move.x > 0) facing = Facing::Right;
     }
+    // Giro: clip "turn" si el personaje lo tiene (turnTimer lo lleva el dibujo).
+    turnClipTimer = std::max(0.0f, turnClipTimer - dt);
+    const bool turned = facing != before;
     // Aceleracion / frenado: v += (vObj - v)(1 - exp(-14 dt)).
     const float k = 1.0f - std::exp(-14.0f * dt);
     walkVelX += (tx - walkVelX) * k;
@@ -543,10 +547,14 @@ void Player::HandleInput(float dt) {
     position.y += walkVelY * dt;
     if (moving) {
         if (state != PlayerState::Walk) SetState(PlayerState::Walk);
+        if (turned && CharacterHasRealClip("turn")) { animator.PlayNamed("turn"); turnClipTimer = 0.12f; }
+        else if (turnClipTimer <= 0.0f && animator.currentClipName == "turn") animator.PlayNamed(running && CharacterHasRealClip("run") ? "run" : "walk");
         if (running && animator.currentClipName != "run" && CharacterHasRealClip("run")) animator.PlayNamed("run");
         else if (!running && animator.currentClipName == "run") animator.PlayNamed("walk");
     } else if (state == PlayerState::Walk) {
         SetState(PlayerState::Idle);
+    } else if (state == PlayerState::Idle && animator.currentClipName == "turn" && turnClipTimer <= 0.0f) {
+        animator.PlayNamed("idle");
     }
 
     // Los carriles se acotan aqui, no en cada stage. Stage2 no lo hacia (DF-013 D3).

@@ -316,6 +316,7 @@ public:
     float tapTimer{0.0f};
     int lastTapDir{0}, prevHoriz{0};
     int dashDir{1};                 // +1 = hacia facing, -1 = back-dash
+    float turnClipTimer{0.0f};      // clip "turn" en curso al girar caminando
     float dashSpeed{700.0f};
     int motionFrame{0};             // frames reales (MotionHistory; no se congela en el ataque)
     int motionFacing{1};            // facing (+1/-1) al empezar el ultimo "abajo puro" (QCF/QCB)
