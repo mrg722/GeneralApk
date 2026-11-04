@@ -41,7 +41,7 @@ void HistoricFeel(const Player& pl, float scale, float dir, float& sx, float& sy
         case PlayerState::Attack: {
             if (skipAttack) break;
             const float attackElapsed = pl.attackElapsed;
-            const AttackDef& ad=GetAttack(pl.currentAttack); const float activeStart=ad.startup,activeEnd=ad.startup+ad.active;
+            const AttackDef& ad=pl.CurrentAttackDef(); const float activeStart=ad.startup,activeEnd=ad.startup+ad.active;
             const float t=std::clamp(attackElapsed/std::max(.01f,activeEnd),0.0f,1.0f); const float impact=std::sin(t*3.14159f);
             angle=5.0f*dir*impact;sx=1.0f+.05f*impact;sy=1.0f-.025f*impact;
             if(UsesAttackAnimationProfile(skin)){const auto& pr=GetAttackAnimationProfile(skin,pl.currentAttack);

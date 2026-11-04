@@ -6,6 +6,8 @@
 #include "game/combat/AttackAnimation.h"
 #include "game/player/PlayerVisualState.h"
 #include "game/combat/HitTypes.h"
+#include "game/moves/MoveTypes.h"
+#include <string>
 #include <cstdint>
 #include <vector>
 
@@ -13,8 +15,8 @@ namespace district_fury {
 
 // Recovery va al final para no alterar los valores historicos. PlayerState::Attack
 // se conserva (los stages lo consultan); el detalle vive en AttackPhase.
-// Jump y Victory (F0.1, plan maestro): reservados al final; nadie entra todavia
-// (F0.4 implementa el salto y la victoria). Donde un switch los ve, valen Idle.
+// Jump y Victory (F0.4): Jump = salto propio (no es Airborne, que es "derribado en
+// el aire", B22); Victory = pose de victoria 1.6 s (no actua ni recibe golpes).
 enum class PlayerState { Idle, Walk, Dash, Attack, Block, Hit, GuardBreak, Knockdown, Defeat, Recovery, Airborne, Jump, Victory };
 
 // Entrada de un frame. Por defecto se lee del teclado (WASD, Shift, B, J, K, L,
@@ -26,7 +28,7 @@ struct PlayerInput {
     bool specialWave = false, specialRise = false;
     int skill = -1;   // habilidad pulsada este frame (0..5), -1 = ninguna
     bool skillPage = false;   // pasar a la siguiente pagina de habilidades
-    bool jump = false;        // salto (F0.4: tecla I / boton SALTO); todavia nadie lo lee
+    bool jump = false;        // salto (F0.4: tecla I / boton SALTO)
 };
 
 // Sub-estado de la FSM mientras state == Attack.
@@ -184,10 +186,7 @@ public:
     // Fluidez (estilo King Fighter) para nuestros personajes: respiracion,
     // balanceo, inclinacion, giro suave, aterrizaje y estelas. Solo visual,
     // salvo el avance de los golpes (root motion), que si mueve al personaje.
-    struct Ghost { Vector2 pos; int frame; bool flip; float life; };
-    static constexpr int kGhostCount = 5;
-    Ghost ghosts[kGhostCount] = {};
-    float ghostTimer{0.0f};
+    static constexpr int kGhostCount = 5;   // estelas por defecto (PlayerVisualState)
     float animClock{0.0f};
     float walkPhase{0.0f};
     float turnTimer{0.0f};
@@ -265,7 +264,91 @@ public:
     CombatBox GetHurtbox() const;
     CombatBox GetAttackHitbox() const;
 
+    // ================= F0.4: framework de movimientos =================
+    // MoveSet efectivo del personaje: GetMoveSet(skin) con los huecos rellenados
+    // (FillDefaultChains). Los KF/BETA (clip) con el MoveSet generico usan el
+    // "legado": cadena J P1 P2 P3, K = Kick, sin salto ni normales de comando
+    // (como antes de F0.4) hasta que F1.6/F1.7/F1.8 declaren el suyo.
+    const MoveSet& Moves() const;
+    // Tests y herramientas: reemplaza GetMoveSet(skin) (nullptr = el del registro).
+    const MoveSet* customMoveSet{nullptr};
+    // Override del personaje para el ataque `id` (nullptr = fila generica).
+    const MoveOverride* OverrideFor(AttackId id) const;
+    // Definicion EFECTIVA del ataque `id` para este personaje: fila generica o
+    // replaceDef, con damageScale/timeScale/reachScale, arco, root, hitCount,
+    // armadura y proyectil del override.
+    AttackDef EffectiveDef(AttackId id) const;
+    // El personaje puede usar `id` (override.enabled / requiresOverride / caps y
+    // que tenga con que dibujarlo: nunca `idle` como ataque, B18).
+    bool MoveEnabled(AttackId id) const;
+    // El clip existe en el animador y no es un relleno de `idle` (KfReference
+    // rellena con idle los clips que faltan: esos cuentan como inexistentes).
+    bool CharacterHasRealClip(const char* name) const;
+    // Clip que usaria el ataque `id` y de donde sale (para moves_sheet / tests).
+    enum class ClipOrigin { Override, Canonical, Fallback, Historic, Pose, Idle };
+    const char* AttackClipFor(AttackId id, ClipOrigin* origin) const;
+    std::string attackClipName;               // clip reproducido por el ataque en curso
+    ClipOrigin attackClipOrigin{ClipOrigin::Historic};
+    static const char* ClipOriginName(ClipOrigin o);
+    // Proyectil del ataque en curso (override.projectile o el de siempre) y
+    // numero de disparo (0..count-1) del ultimo ConsumeProjectileEvent().
+    ProjectileSpec CurrentProjectile() const;
+    int ProjectileShotIndex() const { return projectileShots - 1; }
+    // Victoria: pose 1.6 s (no actua, no recibe golpes) y luego Idle.
+    void EnterVictory();
+    static constexpr float kVictoryDuration = 1.6f;
+    float victoryTimer{0.0f};
+    // Salto (V9): vz0 = MoveSet.jumpVz (720; pesado 560), subida g 1500, caida
+    // 1875, control aereo 60 %, sin cambio de carril, aterrizaje 4 f.
+    bool StartJump(bool chase);
+    static constexpr float kJumpRiseGravity = 1500.0f;
+    static constexpr float kJumpFallGravity = 1875.0f;
+    static constexpr float kJumpCancelWindow = 10.0f / 60.0f;
+    float jumpCancelTimer{0.0f};    // ventana de persecucion tras un lanzador que conecta
+    float lastHitTargetX{0.0f};     // X del ultimo objetivo golpeado (persecucion)
+    int airAttacks{0};              // golpes aereos de este salto
+    bool InAir() const { return state == PlayerState::Jump || (state == PlayerState::Attack && CurrentAttackDef().air); }
+    // Cadena: eslabon (indice en chainJ / chainK) del ultimo ataque de cadena, -1 = ninguno.
+    int chainLinkJ{-1}, chainLinkK{-1};
+    // Movimiento: velocidad suavizada al caminar, carrera (doble toque), back-dash.
+    float walkVelX{0.0f}, walkVelY{0.0f};
+    bool running{false};
+    float tapTimer{0.0f};
+    int lastTapDir{0}, prevHoriz{0};
+    int dashDir{1};                 // +1 = hacia facing, -1 = back-dash
+    float turnClipTimer{0.0f};      // clip "turn" en curso al girar caminando
+    float dashSpeed{700.0f};
+    int motionFrame{0};             // frames reales (MotionHistory; no se congela en el ataque)
+    int motionFacing{1};            // facing (+1/-1) al empezar el ultimo "abajo puro" (QCF/QCB)
+    int stepCount{0};               // medio pasos (Footstep en cada cruce de walkPhase por 0 y pi)
+    // Ataque en curso: golpes hechos (hitCount), armadura gastada, root motion.
+    int attackHitsDone{0};
+    int armorAbsorbed{0};
+    int projectileShots{0};
+    float projectileClock{0.0f};
+    float rootAppliedX{0.0f};
+    // Resolucion pura de una pulsacion (V2: comando > direccion > cadena); la usa
+    // TryStartBufferedAttack. turn = girar antes de golpear (<J J).
+    AttackId ResolveCommand(const InputBuffer::Entry& e, bool fromCancel, bool* turn) const;
+    // Stomp: hay un enemigo derribado delante (lo fija el stage/HitResolver; F1.9).
+    bool stompTargetAhead{false};
+
 private:
+    mutable AttackDef effectiveDef_{};
+    mutable AttackId effectiveId_{AttackId::Count};
+    mutable int effectiveSkin_{-1};
+    mutable const MoveSet* effectiveSet_{nullptr};
+    mutable MoveSet moves_{};
+    mutable int movesSkin_{-999};
+    mutable const MoveSet* movesCustom_{nullptr};
+    bool ChainEnded(int link, bool j) const;
+    AttackId ChainLink(bool j, int index) const;
+    void PlayAttackClip(AttackId id);
+    void UpdateJump(float dt);
+    void UpdateAttackMotion(float dt, const AttackDef& def);
+    void FinishLanding(float recovery);
+    bool CancelAllowed(const CancelRule& r, const InputBuffer::Entry& e) const;
+
     void BeginAttack(AttackId id);
     void BeginClipAttack(const char* clip, int skillIndex);
     float ClipSeconds(const char* clip) const;

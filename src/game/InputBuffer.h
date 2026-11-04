@@ -8,7 +8,13 @@ namespace district_fury {
 // Punch/Kick = J/K. Los especiales se reconocen por comando de direccion al
 // estilo King Fighter (ver MotionHistory): SpecialWave = abajo, abajo-adelante,
 // adelante + J; SpecialRise = adelante, abajo, abajo-adelante + K.
-enum class InputCommand { Punch, Kick, SpecialWave, SpecialRise };
+// F0.4 (al final): SpecialHurricane = QCB + K, SpecialDrill = QCF + K,
+// Signature1 = QCB + J, Signature2 = >L, Signature3 = vL.
+enum class InputCommand { Punch, Kick, SpecialWave, SpecialRise, SpecialHurricane, SpecialDrill,
+                          Signature1, Signature2, Signature3 };
+
+// true si el comando es un especial (no J/K normal).
+inline bool IsSpecialCommand(InputCommand c) { return c != InputCommand::Punch && c != InputCommand::Kick; }
 
 // Cola circular de tamano fijo (sin asignaciones dinamicas) con caducidad
 // estricta en frames de 1/60 s. Un comando que supera kExpiryFrames sin ser
@@ -23,6 +29,10 @@ public:
         InputCommand command = InputCommand::Punch;
         int frame = 0;  // frame global en el que se pulso
         int dir = 0;    // -1/+1: direccion del comando especial (0 = sin direccion)
+        // F0.4 (B14): direccion RELATIVA al facing al pulsar (-1 atras, 0, +1
+        // adelante) y "abajo puro" (S sin horizontal).
+        int relX = 0;
+        bool down = false;
     };
 
     // Avanza el reloj interno en frames enteros y limpia lo caducado.
@@ -36,9 +46,9 @@ public:
     }
 
     // Registra un comando. Con la cola llena descarta el mas antiguo.
-    void Push(InputCommand command, int dir = 0) {
+    void Push(InputCommand command, int dir = 0, int relX = 0, bool down = false) {
         if (count_ == kCapacity) PopFront();
-        entries_[(head_ + count_) % kCapacity] = {command, frame_, dir};
+        entries_[(head_ + count_) % kCapacity] = {command, frame_, dir, relX, down};
         ++count_;
     }
 
@@ -80,6 +90,9 @@ class MotionHistory {
 public:
     static constexpr int kWindowFrames = 15;
     static constexpr std::size_t kCapacity = 16;
+    // F0.4 (B14): el "abajo" puro de QCF/QCB/DP debe durar al menos esto (caminar
+    // en diagonal y pulsar J no saca la onda).
+    static constexpr int kMinDownFrames = 2;
 
     struct Step { bool down = false; int h = 0; int frame = 0; };
 
@@ -102,7 +115,8 @@ public:
         for (int i = static_cast<int>(count_) - 2; i >= 0; --i) {
             const Step& s = At(static_cast<std::size_t>(i));
             if (frame - s.frame > kWindowFrames) break;
-            if (s.down && s.h == 0) return last.h;          // abajo puro encontrado
+            if (s.down && s.h == 0)                          // abajo puro encontrado
+                return DownLasted(static_cast<std::size_t>(i)) ? last.h : 0;
             if (s.h != last.h && s.h != 0) break;            // cambio de lado: invalido
         }
         return 0;
@@ -117,14 +131,30 @@ public:
         for (int i = static_cast<int>(count_) - 2; i >= 0; --i) {
             const Step& s = At(static_cast<std::size_t>(i));
             if (frame - s.frame > kWindowFrames) break;
-            if (s.down && s.h == 0) sawDown = true;
+            if (s.down && s.h == 0) sawDown = sawDown || DownLasted(static_cast<std::size_t>(i));
             else if (!s.down && s.h == last.h) return sawDown ? last.h : 0;
         }
         return 0;
     }
 
+    // F0.4: cuarto de circulo HACIA ATRAS (abajo, abajo-atras, atras) respecto a
+    // `facingDir` (+1/-1). Devuelve la direccion de la palanca (-facingDir) o 0.
+    int QuarterCircleBack(int frame, int facingDir) const {
+        const int d = QuarterCircle(frame);
+        return d != 0 && d == -facingDir ? d : 0;
+    }
+    // Cuarto de circulo HACIA ADELANTE respecto a facingDir (+1/-1) o 0.
+    int QuarterCircleForward(int frame, int facingDir) const {
+        const int d = QuarterCircle(frame);
+        return d != 0 && d == facingDir ? d : 0;
+    }
+
 private:
     const Step& At(std::size_t i) const { return steps_[(head_ + i) % kCapacity]; }
+    // El paso i (abajo puro) duro >= kMinDownFrames hasta el siguiente cambio.
+    bool DownLasted(std::size_t i) const {
+        return i + 1 < count_ && At(i + 1).frame - At(i).frame >= kMinDownFrames;
+    }
     std::array<Step, kCapacity> steps_{};
     std::size_t head_ = 0, count_ = 0;
 };

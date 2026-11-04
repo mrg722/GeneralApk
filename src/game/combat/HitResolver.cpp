@@ -16,16 +16,18 @@ float FacingSign(Facing f) { return f == Facing::Right ? 1.0f : -1.0f; }
 HitKind PlayerHitKind(const Player& p) {
     if (p.activeSkill >= 0) return HitKind::Energy;
     if (p.attackPhase == AttackPhase::Kick || p.attackType == AttackType::Kick) return HitKind::Kick;
-    const AttackDef& def = GetAttack(p.currentAttack);
+    const AttackDef& def = p.CurrentAttackDef();
     if (def.heavy) return HitKind::Heavy;
     if (p.currentAttack == AttackId::Punch2) return HitKind::Medium;
     return HitKind::Light;
 }
 
-bool PlayerHitHeavy(const Player& p) { return GetAttack(p.currentAttack).heavy || p.activeSkill >= 0; }
+bool PlayerHitHeavy(const Player& p) { return p.CurrentAttackDef().heavy || p.activeSkill >= 0; }
 
 // Ultimo golpe de una ruta (REMATE / PATADA): hitstop x1.35 (V7).
-bool LastOfRoute(AttackId id) { return id == AttackId::Punch3 || id == AttackId::Kick || id == AttackId::Finisher; }
+bool LastOfRoute(AttackId id) {
+    return id == AttackId::Punch3 || id == AttackId::Kick || id == AttackId::Finisher || id == AttackId::Kick3;
+}
 
 void Emit(GameEventType type, float x, float y, int skin, HitKind kind, bool heavy, int value, int attack,
           bool fromEnemy) {
@@ -80,10 +82,19 @@ bool EnemyTouchesPlayer(const StreetEnemy& e, const Player& p) {
 AttackShape PlayerAttackShape(const Player& p) {
     AttackShape s;
     if (!p.AttackIsActive()) return s;
-    const AttackDef& def = GetAttack(p.currentAttack);
+    const AttackDef& def = p.CurrentAttackDef();
     s.lane = p.position.y;
     s.depth = def.depth;
     s.facing = FacingSign(p.facing);
+    if (const MoveOverride* ov = p.OverrideFor(p.currentAttack); ov && ov->areaRadius > 0.0f && !p.clipDriven) {
+        // F0.4: golpe de area (MoveOverride.areaRadius): todo lo que este en el
+        // radio, a los dos lados, desde los pies hasta 1.4 cuerpos de alto.
+        const float r = ov->areaRadius * p.BodyScale();
+        s.rect = {p.position.x - r, p.position.z - 10.0f, p.position.x + r, p.position.z + 150.0f * p.BodyScale()};
+        s.depth = std::max(def.depth, ov->areaRadius * 0.5f);
+        s.valid = true;
+        return s;
+    }
     if (p.clipDriven || !def.hasArc) {
         // KF / BETA: la caja del cuadro (back limitado a 30 px); sin arco: la caja
         // historica de AttackDef. Se pasa al plano (X, altura) desde el carril.
@@ -129,7 +140,7 @@ Rect2 EnemyHurtRect(const StreetEnemy& e) {
 }
 
 HitInfo PlayerHitInfo(const Player& p, int rageBonus) {
-    const AttackDef& def = GetAttack(p.currentAttack);
+    const AttackDef& def = p.CurrentAttackDef();
     HitInfo info;
     info.damage = p.GetAttackDamage() + (p.isRageMode ? rageBonus : 0);
     info.dirX = FacingSign(p.facing);
@@ -141,9 +152,20 @@ HitInfo PlayerHitInfo(const Player& p, int rageBonus) {
     info.priority = def.priority;
     info.sourceAttack = static_cast<int>(p.currentAttack);
     info.attackerSkin = p.skin;
-    // Jugador recibiendo (VS): sin propiedad de derribo en AttackDef todavia, se
-    // conserva el umbral historico (dano >= 28).
-    info.knockdown = info.damage >= 28;
+    // F0.4: propiedades del ataque (AttackDef). Derribo: propiedad de la fila
+    // (en multi-golpe, solo el ultimo) o el umbral historico (dano >= 28).
+    const bool lastHit = def.hitCount <= 1 || p.attackHitsDone + 1 >= def.hitCount;
+    info.knockdown = (def.knockdown && lastHit) || info.damage >= 28;
+    info.otg = def.otg;
+    info.wallBounce = def.wallBounce;
+    info.groundBounce = def.groundBounce;
+    info.low = def.low;
+    info.overhead = def.overhead;
+    info.juggleCost = def.juggleCost;
+    info.blockstun = def.blockstun;
+    info.hitIndex = p.attackHitsDone;
+    if (def.pushback > 0.0f) info.pushOnBlock = def.pushback;
+    if (const MoveOverride* ov = p.OverrideFor(p.currentAttack); ov && ov->pullPx > 0.0f) info.pull = true;
     return info;
 }
 
@@ -171,7 +193,7 @@ HitReport ResolvePlayerVsEnemies(Player& player, std::vector<StreetEnemy>& enemi
                                  CombatFeedback& fb) {
     HitReport r;
     if (!player.AttackIsActive() || player.state == PlayerState::Defeat) return r;
-    const AttackDef& def = GetAttack(player.currentAttack);
+    const AttackDef& def = player.CurrentAttackDef();
     if (def.spawnsProjectile || player.attackType == AttackType::Energy) return r;   // la onda la resuelve su proyectil
     const AttackShape shape = PlayerAttackShape(player);
     if (!shape.valid) return r;
@@ -205,6 +227,9 @@ HitReport ResolvePlayerVsEnemies(Player& player, std::vector<StreetEnemy>& enemi
         }
 
         HitInfo info = base;
+        // Picadas (launch < 0) solo empujan hacia abajo a quien esta en el aire;
+        // en el suelo no levantan ni hunden (el rebote lo hace F1.9).
+        if (info.launch < 0.0f && e.position.z <= 0.0f) info.launch = 0.0f;
         info.counter = e.InAttackStartup();
         if (info.counter) {   // counter-hit: x1.25 dano, +0.12 s de hitstun
             info.damage = static_cast<int>(std::round(info.damage * 1.25f));
@@ -214,6 +239,13 @@ HitReport ResolvePlayerVsEnemies(Player& player, std::vector<StreetEnemy>& enemi
         const HitResult res = e.ApplyHit(info);
         if (res == HitResult::Ignored) continue;
         player.MarkHit(id);
+        player.lastHitTargetX = e.position.x;   // persecucion tras un lanzador (F0.4)
+        if (info.pull) {   // MoveOverride.pullPx: atrae a la victima hacia el atacante
+            const MoveOverride* ov = player.OverrideFor(player.currentAttack);
+            const float pull = ov ? ov->pullPx : 0.0f;
+            const float dx = player.position.x - e.position.x;
+            e.position.x += std::clamp(dx, -pull, pull) * 0.5f;
+        }
         connected = true;
         r.Add(info.damage);
         const bool blocked = res == HitResult::Blocked;
@@ -290,7 +322,7 @@ bool ResolvePlayerVsBoss(Player& player, BossProxy& boss, const StageHitStyle& s
     if (boss.hp == nullptr || *boss.hp <= 0) return false;
     if (boss.invuln != nullptr && *boss.invuln > 0.0f) return false;
     if (!player.AttackIsActive() || player.state == PlayerState::Defeat) return false;
-    const AttackDef& def = GetAttack(player.currentAttack);
+    const AttackDef& def = player.CurrentAttackDef();
     if (def.spawnsProjectile || player.attackType == AttackType::Energy) return false;
     const std::uintptr_t id = IdOf(boss.hp);
     if (player.AlreadyHit(id)) return false;
@@ -307,6 +339,7 @@ bool ResolvePlayerVsBoss(Player& player, BossProxy& boss, const StageHitStyle& s
     *boss.hp = std::max(0, *boss.hp - dmg);
     if (boss.invuln != nullptr) *boss.invuln = boss.invulnOnHit;
     player.MarkHit(id);
+    player.lastHitTargetX = boss.pos.x;
     player.OnAttackConnected(def);
 
     const bool heavy = PlayerHitHeavy(player);
@@ -332,14 +365,14 @@ bool ResolvePlayerVsBoss(Player& player, BossProxy& boss, const StageHitStyle& s
 namespace {
 bool PlayerConnects(const Player& a, const Player& b) {
     if (!a.AttackIsActive() || b.state == PlayerState::Defeat || a.state == PlayerState::Defeat) return false;
-    const AttackDef& def = GetAttack(a.currentAttack);
+    const AttackDef& def = a.CurrentAttackDef();
     if (def.spawnsProjectile || a.attackType == AttackType::Energy) return false;
     if (a.AlreadyHit(IdOf(&b))) return false;
     return ShapeHits(PlayerAttackShape(a), PlayerHurtRect(b), b.position.y, kLanePad, nullptr);
 }
 
 int ApplyPlayerHit(Player& a, Player& b, CombatFeedback& fb, const StageHitStyle& style, float& stop) {
-    const AttackDef& def = GetAttack(a.currentAttack);
+    const AttackDef& def = a.CurrentAttackDef();
     HitInfo info = PlayerHitInfo(a, style.rageBonus);
     info.counter = b.InAttackStartup();
     // Atacante KF/BETA (golpes por clip): sus filas de AttackDef son genericas
@@ -355,9 +388,11 @@ int ApplyPlayerHit(Player& a, Player& b, CombatFeedback& fb, const StageHitStyle
     ShapeHits(PlayerAttackShape(a), PlayerHurtRect(b), b.position.y, kLanePad, &c);
     info.contact = {c.x, b.position.y, c.y};
     const int before = b.hp;
+    if (info.launch < 0.0f && b.position.z <= 0.0f) info.launch = 0.0f;
     const HitResult res = b.ApplyHit(info);
     a.MarkHit(IdOf(&b));
     if (res == HitResult::Ignored) return 0;
+    a.lastHitTargetX = b.position.x;
     a.OnAttackConnected(def);
     const bool blocked = res == HitResult::Blocked;
     const GameEventType type = blocked ? GameEventType::HitBlocked
@@ -416,7 +451,7 @@ int ResolvePlayerVsPlayer(Player& a, Player& b, CombatFeedback& fb, const StageH
     // B16: prioridad; empate = trade. Los ataques por clip (KF/BETA) no traen una
     // prioridad real (su fila es la generica de HABILIDAD): con ellos, trade.
     if (aHits && bHits && !a.clipDriven && !b.clipDriven) {
-        const int pa = GetAttack(a.currentAttack).priority, pb = GetAttack(b.currentAttack).priority;
+        const int pa = a.CurrentAttackDef().priority, pb = b.CurrentAttackDef().priority;
         if (pa > pb) bHits = false;
         else if (pb > pa) aHits = false;
     }

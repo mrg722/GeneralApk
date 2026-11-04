@@ -286,6 +286,7 @@ void Stage1StoryGame::Update(float dt) {
         return;
     }
     if (flow == StoryFlow::StageClear) {
+        if (player.state != PlayerState::Victory && player.state != PlayerState::Defeat) player.EnterVictory();   // F0.4
         if (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J))
             advanceRequested = true;
         else if (input::Pressed(KEY_R))

@@ -120,7 +120,7 @@ void Player::UpdateMotionFeel(float dt) {
         const float dir = facing == Facing::Right ? 1.0f : -1.0f;
         const Vector2 at = b.width > 0 ? Vector2{position.x + dir * std::min(b.width, 90.0f), position.y - 70.0f}
                                    : Vector2{position.x + dir * 60.0f, position.y - 70.0f};
-        const bool heavy = GetAttack(currentAttack).heavy || activeSkill >= 0;
+        const bool heavy = CurrentAttackDef().heavy || activeSkill >= 0;
         SpawnFx(heavy ? 10 : 8, heavy ? 4 : 3, at, heavy ? 0.30f : 0.20f, heavy ? 1.1f : 0.8f);
     }
     prevHasHit = hasHit;
@@ -149,7 +149,7 @@ void Player::UpdateMotionFeel(float dt) {
     // Avance real durante el golpe (root motion): en King Fighter cada golpe
     // da un paso; aqui el personaje se desliza mientras arranca y pega.
     if(!IsKfCharacter()&&state==PlayerState::Attack&&!clipDriven&&UsesAttackAnimationProfile(skin)){
-        const auto& def=GetAttack(currentAttack); const auto& profile=GetAttackAnimationProfile(skin,currentAttack);
+        const auto& def=CurrentAttackDef(); const auto& profile=GetAttackAnimationProfile(skin,currentAttack);
         const float target=profile.rootMotion*AttackRootMotionProgress(attackElapsed,def); const float delta=target-attackRootMotionApplied;
         if(std::fabs(delta)>0.0001f){position.x+=(facing==Facing::Right?1.0f:-1.0f)*delta;position.x=std::clamp(position.x,kStageStartX,kStageEndX-90.0f);attackRootMotionApplied+=delta;}
     }else if(!IsKfCharacter()&&state==PlayerState::Attack&&!clipDriven){
@@ -166,7 +166,7 @@ void Player::UpdateMotionFeel(float dt) {
             case AttackId::RageAttack: dist = 20.0f; break;
             default: break;
         }
-        const AttackDef& def = GetAttack(currentAttack);
+        const AttackDef& def = CurrentAttackDef();
         const float window = std::max(0.05f, def.startup + def.active);
         if (dist > 0.0f && attackElapsed <= window) {
             position.x += (facing == Facing::Right ? 1.0f : -1.0f) * dist / window * dt;
@@ -180,7 +180,7 @@ void Player::UpdateMotionFeel(float dt) {
     // salen en los personajes de poses sueltas con SU textura.
     for (TrailCopy& g : visual.trails) g.life = std::max(0.0f, g.life - dt);
     const bool trail = state == PlayerState::Dash ||
-                       (state == PlayerState::Attack && (activeSkill >= 0 || GetAttack(currentAttack).heavy)) ||
+                       (state == PlayerState::Attack && (activeSkill >= 0 || CurrentAttackDef().heavy)) ||
                        (IsTransformed() && state == PlayerState::Walk);
     visual.trailTimer -= dt;
     const Vector2 feet = position.ToScreen();
@@ -279,6 +279,9 @@ void Player::Draw() const {
                     {0, 0, 0, 145});
     }
 
+    // Temblor de victima (V7, pedido de F0.2): solo el cuerpo, la sombra no.
+    if (hurtShakeTimer > 0.0f) p.x += VictimShakeOffset(hurtShakeAmp, 0.24f - hurtShakeTimer) * hurtShakeDir;
+
     DrawRageAura(p, scale);
     if (IsTransformed()) {
         // Transformacion: aura dorada que late (se apaga en los ultimos 2 s).
@@ -365,7 +368,7 @@ void Player::Draw() const {
     }
 
     // Carga visible de la Energy Wave en las manos.
-    const AttackDef& def = GetAttack(currentAttack);
+    const AttackDef& def = CurrentAttackDef();
     if (state == PlayerState::Attack && def.spawnsProjectile) {
         const float charge = std::clamp(attackElapsed / std::max(0.01f, def.startup), 0.f, 1.f);
         const float handX = p.x + (facing == Facing::Right ? 30 : -30);
@@ -430,7 +433,7 @@ bool Player::DrawEnergyProjectile(Vector2 center, bool movingLeft, float time) c
 
 void Player::DrawAnimationDebug(Vector2 screen) const {
     if(state!=PlayerState::Attack||!UsesAttackAnimationProfile(skin))return;
-    const auto& def=GetAttack(currentAttack);const auto& pr=GetAttackAnimationProfile(skin,currentAttack);const float total=AttackTotalDuration(def),ae=def.startup+def.active;
+    const auto& def=CurrentAttackDef();const auto& pr=GetAttackAnimationProfile(skin,currentAttack);const float total=AttackTotalDuration(def),ae=def.startup+def.active;
     const int bx=14,by=470,bw=360;DrawRectangle(bx,by,bw,174,{5,5,9,224});DrawRectangleLines(bx,by,bw,174,{255,205,110,220});
     DrawText(TextFormat("ANIM DEBUG %s / %s",GetCharacterVisual(skin).name,pr.clip),bx+10,by+8,14,WHITE);
     DrawText(TextFormat("TIME %.3f/%.3f FRAME %d/%d IMPACT %d",attackElapsed,total,animator.currentFrame,(int)animator.CurrentClipFrameCount(),pr.impactFrameIndex),bx+10,by+29,12,WHITE);

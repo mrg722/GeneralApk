@@ -12,6 +12,7 @@ constexpr int kVirtualSpecialRise = 401;   // "GANCHO": adelante, abajo, abajo-a
 constexpr int kVirtualSkill0 = 402;
 constexpr int kSkillKeys = 6;
 constexpr int kVirtualSkillPage = 408;   // "PAG": siguiente pagina de habilidades (teclado: TAB)
+constexpr int kVirtualJump = 409;        // "SALTO" (F0.4; teclado: I)
 constexpr int kKeyCount = 512;
 
 // La UI tactil marca teclas virtuales pulsadas este frame y luego llama a Commit().
