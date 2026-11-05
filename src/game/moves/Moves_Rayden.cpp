@@ -94,7 +94,9 @@ AttackDef Sig1Def() {
     d.heavy = true; d.breaksGuard = true; d.knockdown = true; d.overhead = false;
     d.hitCount = 4; d.multiHitInterval = F(4);
     d.arc = LimbArc{8, -86, 56, 100, -4, 2, 22}; d.hasArc = true;
-    d.root = RootCurve{}; d.root.dx = 180; d.root.t0 = 0; d.root.t1 = UpTo(d); d.root.ease = Ease::OutBack;
+    // Anticipo quieto y embestida de 180 px durante el activo (outBack): frena
+    // x0.3 al conectar, asi los 4 golpes caen sobre el rival.
+    d.root = RootCurve{}; d.root.dx = 180; d.root.t0 = UpTo(d, false); d.root.t1 = UpTo(d); d.root.ease = Ease::OutBack;
     d.hitstop = .10f; d.shake = .14f;
     return d;
 }
@@ -170,8 +172,7 @@ std::vector<MoveOverride> BuildOverrides() {
     // atras y vuelve (GIRO de 1.25 vueltas sobre todo el movimiento: espejado
     // desde el 20 % hasta el 60 %, que cubre el activo).
     { Ov x(AttackId::BackElbow, "CODAZO TRASERO");
-      x.Clip("back_elbow").Fx(GIRO(1.25f, '*')).Fx(IMPACTO(.6f))
-       .Over(Overlay(8, 2, -60, -86, .6f, 'A'));
+      x.Clip("back_elbow").Fx(GIRO(1.25f, '*')).Fx(IMPACTO(.6f));
       add(x); }
     { Ov x(AttackId::SpinKick, "PATADA GIRATORIA");     // bothSides de la fila generica
       x.Clip("spin_kick").Fx(ANTICIPA(.8f)).Fx(GIRO(1, 'A')).Fx(RECOBRO(.8f)).Ghost(3)
@@ -198,11 +199,12 @@ std::vector<MoveOverride> BuildOverrides() {
 
     // ---------------- Aire ----------------
     { Ov x(AttackId::AirPunch, "PUNO AEREO");
-      x.Clip("air_punch").K(Key('S', 1, 6)).K(Key('A', .3f, 12, 4)).K(Key('R', .5f, 8))
+      // Golpes aereos en diagonal hacia abajo (alcanzan al rival desde el salto).
+      x.Clip("air_punch").Arc(LimbArc{10, -60, 60, 96, -40, -55, 20}).K(Key('S', 1, 10)).K(Key('A', .3f, 28, 4)).K(Key('R', .5f, 16))
        .Over(Overlay(8, 2, 76, -84, .6f, 'A'));
       add(x); }
     { Ov x(AttackId::AirPunch2, "PUNO AEREO 2");
-      x.Clip("air_punch2").K(Key('S', 1, 8)).K(Key('A', .3f, 18, 4)).K(Key('R', .5f, 10)).Ghost(2)
+      x.Clip("air_punch2").Arc(LimbArc{10, -60, 64, 100, -35, -60, 20}).K(Key('S', 1, 12)).K(Key('A', .3f, 32, 4)).K(Key('R', .5f, 18)).Ghost(2)
        .Over(Overlay(9, 2, 66, -90, .6f, 'A'));
       add(x); }
     { Ov x(AttackId::AirKick, "PATADA VOLADORA");
@@ -214,7 +216,9 @@ std::vector<MoveOverride> BuildOverrides() {
        .Over(Overlay(42, 4, -30, -110, .8f, 'A', -45));
       add(x); }
     { Ov x(AttackId::AirSpike, "MARTILLO");             // groundBounce
-      x.Clip("air_spike").K(Key('S', 1, -30, 0, -6)).K(Key('A', 0, 60)).K(Key('A', 1, -60 + 120, 4))
+      // Martillo de arriba abajo: el arco baja de +40 a -75 grados.
+      x.Clip("air_spike").K(Key('S', 1, -30, 0, -6)).K(Key('A', 0, 35)).K(Key('A', 1, 70, 4))
+       .Arc(LimbArc{8, -70, 80, 96, 40, -75, 22})
        .Ghost(3).Over(Overlay(26, 4, 54, -40, .8f, 'A'));
       add(x); }
 
