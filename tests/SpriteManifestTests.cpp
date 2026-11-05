@@ -26,7 +26,13 @@ int main() {
     // F0.3: el manifiesto trae "includes" (data/manifest/*.json); se cargan sin
     // avisos y no cambian los 19 clips de rayden.
     assert(real.Warnings().empty());
-    assert(clips->size() == 19);
+    // F1.3: los includes AGREGAN clips nuevos a rayden; los 19 historicos (no
+    // fromInclude) siguen siendo exactamente 19.
+    {
+        int historic = 0;
+        for (const auto& kv : *clips) if (!kv.second.fromInclude) ++historic;
+        assert(historic == 19 && clips->size() >= 19);
+    }
 
     Animator anim;
     assert(anim.ApplyProfile(*rayden, *clips, 512, 768));

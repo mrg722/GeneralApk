@@ -52,6 +52,10 @@ static void TestMoveRegistry() {
             assert(&ms != &generic && std::strcmp(ms.name, "max") == 0 && ms.overrides != nullptr);
             continue;
         }
+        if (skin == 0) {   // F1.3: RAYDEN (ORIGINAL) declara su MoveSet (sin overrides historicos)
+            assert(&ms != &generic && FindOverride(ms, static_cast<int>(AttackId::Punch1)) == nullptr);
+            continue;
+        }
         assert(&ms == &generic);
         assert(std::strcmp(ms.name, "generico") == 0);
         assert(ms.caps == CapAll && ms.feel == FeelLevel::Full && ms.overrides == nullptr);

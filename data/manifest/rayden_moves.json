@@ -1,6 +1,39 @@
 {
-  "_comment": "Clips nuevos que se AGREGAN al juego rayden del manifiesto. Lo rellena F1.3 (RAYDEN, skin 0: solo AGREGAR clips; override prohibido). Formato por clip: frames, durations|duration|fps, loop, y opcionales scale|scales, offsets.",
+  "_comment": "F1.3: clips NUEVOS que se AGREGAN al juego rayden (skin 0) sin tocar sus 19 clips ni el atlas rayden_128.png. Solo celdas existentes (0-21); override prohibido. Sin nombres que el motor busca por su cuenta (victory, transform, turn, run, jump): el visual de victoria es victoria (MoveSet.victory). Las duraciones reparten el arranque/impacto de cada movimiento (el dibujo reparte la secuencia sobre la duracion real del ataque). Indices: 8 jab, 9 gancho, 10 patada media, 11 patada alta, 12 aura, 14 dash, 16 guardia, 20 guardia baja, 21 bloqueo.",
   "clips": {
-    "rayden": {}
+    "rayden": {
+      "punch_hook":      {"frames": [16, 9],  "durations": [0.117, 0.267], "loop": false},
+      "kick2":           {"frames": [16, 10], "durations": [0.133, 0.300], "loop": false},
+      "kick3":           {"frames": [20, 11], "durations": [0.183, 0.400], "loop": false},
+      "kick_launcher":   {"frames": [20, 11], "durations": [0.133, 0.350], "loop": false},
+      "fwd_punch":       {"frames": [16, 8],  "durations": [0.200, 0.317], "loop": false},
+      "fwd_kick":        {"frames": [16, 10], "durations": [0.167, 0.333], "loop": false},
+      "back_elbow":      {"frames": [9],      "durations": [0.367], "loop": false},
+      "spin_kick":       {"frames": [16, 10], "durations": [0.150, 0.400], "loop": false},
+      "sweep":           {"frames": [20, 10, 20], "durations": [0.117, 0.220, 0.147], "loop": false},
+      "uppercut":        {"frames": [20, 9],  "durations": [0.100, 0.400], "loop": false},
+      "stomp":           {"frames": [21, 20], "durations": [0.167, 0.300], "loop": false},
+      "dash_kick":       {"frames": [14, 10, 20], "durations": [0.067, 0.233, 0.167], "loop": false},
+      "jump_rise":       {"frames": [20, 14], "durations": [0.080, 0.400], "loop": false},
+      "jump_fall":       {"frames": [16],     "durations": [0.300], "loop": false},
+      "air_punch":       {"frames": [8],      "durations": [0.300], "loop": false},
+      "air_punch2":      {"frames": [9],      "durations": [0.300], "loop": false},
+      "air_kick":        {"frames": [10],     "durations": [0.383], "loop": false},
+      "dive_kick":       {"frames": [11],     "durations": [0.600], "loop": false},
+      "air_spike":       {"frames": [16, 9],  "durations": [0.133, 0.317], "loop": false},
+      "rising_uppercut": {"frames": [20, 9],  "durations": [0.050, 0.567], "loop": false},
+      "hurricane":       {"frames": [20, 10, 11, 10, 11, 10], "durations": [0.133, 0.100, 0.100, 0.100, 0.100, 0.367], "loop": false},
+      "drill_kick":      {"frames": [20, 11], "durations": [0.167, 0.533], "loop": false},
+      "sig1":            {"frames": [16, 14, 8], "durations": [0.167, 0.083, 0.450], "loop": false},
+      "sig2":            {"frames": [16, 12, 8], "durations": [0.100, 0.200, 0.400], "loop": false},
+      "sig3":            {"frames": [20, 12], "durations": [0.080, 0.500], "loop": false},
+      "victoria":        {"frames": [12, 21], "durations": [0.900, 0.700], "loop": false},
+      "grab":            {"frames": [9],      "durations": [0.300], "loop": false},
+      "grab_knee":       {"frames": [10],     "durations": [0.317], "loop": false},
+      "throw_forward":   {"frames": [9, 11],  "durations": [0.133, 0.433], "loop": false},
+      "throw_back":      {"frames": [9, 11],  "durations": [0.167, 0.433], "loop": false},
+      "guard_counter":   {"frames": [21, 8],  "durations": [0.067, 0.400], "loop": false},
+      "wakeup_attack":   {"frames": [20, 10], "durations": [0.100, 0.367], "loop": false}
+    }
   }
 }
