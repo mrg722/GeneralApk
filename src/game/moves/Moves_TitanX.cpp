@@ -199,13 +199,13 @@ std::vector<MoveOverride> TitanXOverrides() {
                     .fx(ANTICIPA(1.0f)).fx(SALTITO(10, 'S')).key('A', .5f, 1.04f, .90f, 0, 0, 0).fx(TEMBLOR(3, 26, 'A'))
                     .over(23, 1, 24, -6, 1.3f).over(15, 1, 30, -4, 1.2f).o);
     v.push_back(Mv(f, AttackId::Kick2, "RODILLAZO BAJO").row(13, 8, 5, 14, 300, .34f)
-                    .arc(6, -40, 20, 46, -12, 0, 18).lunge(30)
+                    .arc(6, -40, 20, 46, -12, 0, 18).lunge(12)
                     .seg('S', 0, 1, "idle3").seg('A', 0, 1, "lean", 12).seg('R', 0, .5f, "lean", 12).seg('R', .5f, 1, "idle1")
                     .fx(ANTICIPA(0.8f)).fx(IMPACTO(1.0f)).key('A', .5f, 1, 1, 10, 0, 0).ghost(2)
                     .over(8, 3, 50, -40, 0.7f).o);
     v.push_back(Mv(f, AttackId::Kick3, "EMBESTIDA DE HOMBRO").row(18, 10, 8, 18, 600, .42f, 160)
                     .with([](AttackDef& d) { d.wallBounce = true; d.knockdown = true; d.breaksGuard = true; })
-                    .arc(10, -80, 10, 42, -8, -8, 24).lunge(90, Ease::OutBack, 0.7f).armor(1)
+                    .arc(-10, -78, 24, 62, -8, -8, 24).lunge(90, Ease::InOutSine, 1.0f).armor(1)
                     .seg('S', 0, 1, "lean", -10).seg('A', 0, 1, "lean", 22).seg('R', 0, .5f, "lean", 22).seg('R', .5f, 1, "idle1")
                     .fx(ANTICIPA(1.2f)).fx(IMPACTO(1.2f)).fx(RECOBRO(1.0f)).ghost(3)
                     .over(10, 3, 56, -80, 1.0f).o);
@@ -264,7 +264,7 @@ std::vector<MoveOverride> TitanXOverrides() {
                     .seg('S', 0, 1, "uppercut").seg('A', 0, 1, "slam", 8).seg('R', 0, 1, "slam", 8)
                     .fx(ANTICIPA(0.8f)).key('A', .5f, 1, 1, -12, 0, 0).over(14, 1, 30, -8, 1.3f, 'R').o);
     v.push_back(Mv(f, AttackId::AirPunch2, "MARTILLO AEREO", AttackId::AirPunch2).row(12, 4, 6, 8, 200, .30f, 200)
-                    .arc(4, -72, 20, 46, -10, -20, 18)
+                    .arc(4, -60, 24, 60, -30, -45, 20)
                     .seg('S', 0, 1, "carga").seg('A', 0, 1, "shoot_orb", 16).seg('R', 0, 1, "lean")
                     .fx(IMPACTO(1.0f)).key('A', .5f, 1, 1, -15, 0, 0).over(8, 3, 54, -70, 0.8f).o);
     v.push_back(Mv(f, AttackId::AirKick, "PATADA AEREA", AttackId::AirKick).row(14, 5, 12, 6, 380, .34f)
@@ -343,21 +343,21 @@ std::vector<MoveOverride> TitanXMOverrides() {
     const char* f = kTXM;
     std::vector<MoveOverride> v;
     v.push_back(Mv(f, AttackId::Punch1, "CULATAZO").row(13, 8, 5, 12, 320, .28f)
-                    .arc(0, -72, 16, 44, 0, 0, 18).lunge(20)
+                    .arc(0, -50, 16, 44, 0, 0, 24).lunge(6)
                     .seg('S', 0, 1, "idle4").seg('A', 0, 1, "cannon_aim", 16).seg('R', 0, .5f, "cannon_aim", 16).seg('R', .5f, 1, "idle1")
                     .fx(ANTICIPA(1.0f)).fx(IMPACTO(1.2f)).fx(RECOBRO(1.0f)).over(8, 3, 56, -72, 0.8f).o);
     v.push_back(Mv(f, AttackId::Punch2, "RAFAGA CORTA").row(5, 8, 12, 12, 160, .26f)
-                    .hits(3, F(4)).arc(0, -60, 40, 80, 0, 0, 16).lunge(6)
+                    .hits(3, F(4)).arc(0, -46, 40, 80, 0, 0, 22)
                     .seg('S', 0, 1, "cannon_aim").seg('A', 0, 1, "charge_orb", 8).seg('R', 0, .5f, "charge_orb", 8).seg('R', .5f, 1, "idle1")
                     .fx(ANTICIPA(0.6f)).fx(TEMBLOR(2, 30, 'A')).over(8, 3, 50, -60, 0.9f).over(5, 3, 80, -60, 0.8f).o);
     v.push_back(Mv(f, AttackId::PunchHook, "EMBESTIDA").row(16, 10, 6, 16, 520, .38f)
                     .with([](AttackDef& d) { d.wallBounce = true; })
-                    .arc(6, -72, 10, 42, -5, -5, 22).lunge(70)
+                    .arc(6, -50, 10, 46, -5, -5, 28).lunge(70, Ease::InOutSine, 0.8f)
                     .seg('S', 0, 1, "idle3").seg('A', 0, 1, "rage_aura", 16).seg('R', 0, .5f, "rage_aura", 16).seg('R', .5f, 1, "idle1")
                     .fx(ANTICIPA(1.2f)).fx(IMPACTO(1.0f)).ghost(3).over(10, 3, 50, -64, 1.0f).o);
     v.push_back(Mv(f, AttackId::Punch3, "CANONAZO A QUEMARROPA").row(22, 12, 6, 20, 560, .45f, 300)
                     .with([](AttackDef& d) { d.knockdown = true; d.breaksGuard = true; d.hitstopScale = 1.3f; })
-                    .arc(0, -60, 24, 60, 0, 0, 24)
+                    .arc(0, -46, 24, 60, 0, 0, 30)
                     .seg('S', 0, 1, "charge_orb").seg('A', 0, 1, "shoot_orb", 6).seg('R', 0, .6f, "shoot_orb", 6).seg('R', .6f, 1, "idle1")
                     .fx(LATIDO(0.04f, 6, 'S')).fx(IMPACTO(1.0f)).fx(RECOBRO(1.2f))
                     .over(0, 4, 46, -60, 1.0f, 'S').over(11, 3, 60, -60, 1.5f).o);
@@ -374,21 +374,21 @@ std::vector<MoveOverride> TitanXMOverrides() {
     v.push_back(Off(AttackId::Kick3));   // cadena K de 2 eslabones (K, K K): el 3er K no existe
     v.push_back(Mv(f, AttackId::KickLauncher, "LANZADOR").row(14, 8, 5, 16, 80, .55f, 700)
                     .with([](AttackDef& d) { d.launcher = true; d.jumpCancel = true; d.juggleCost = 2; })
-                    .arc(6, -72, 20, 48, -10, 80, 20).hop(10)
+                    .arc(6, -50, 20, 48, -10, 80, 26).hop(10)
                     .seg('S', 0, 1, "idle4").seg('A', 0, 1, "rage_aura", 8).seg('R', 0, .6f, "rage_aura", 8).seg('R', .6f, 1, "idle1")
                     .fx(ANTICIPA(0.8f)).key('A', .5f, 1, 1, -15, 0, 0).over(21, 2, 20, -100, 0.9f).o);
     v.push_back(Mv(f, AttackId::FwdPunch, "CARGA DE TANQUE").row(18, 12, 10, 18, 600, .40f)
                     .with([](AttackDef& d) { d.overhead = false; d.breaksGuard = true; })
-                    .arc(10, -80, 10, 48, -6, -6, 26).lunge(160, Ease::InOutSine, 0.8f).armor(2)
+                    .arc(10, -54, 10, 48, -6, -6, 32).lunge(160, Ease::InOutSine, 0.8f).armor(2)
                     .seg('S', 0, 1, "idle3", -8).seg('A', 0, 1, "dash", 16).seg('R', 0, .5f, "dash", 16).seg('R', .5f, 1, "idle1")
                     .fx(ANTICIPA(1.3f)).fx(IMPACTO(0.8f)).ghost(4).over(42, 4, -40, -60, 1.3f).o);
     v.push_back(Mv(f, AttackId::BackElbow, "CODAZO").row(12, 6, 4, 12, 380, .34f)
                     .with([](AttackDef& d) { d.hitsBehind = true; d.boxForward = -40.0f; })
-                    .arc(-6, -72, 14, 42, 180, 180, 18)
+                    .arc(-6, -50, 14, 42, 180, 180, 24)
                     .seg('S', 0, 1, "idle1").seg('A', 0, 1, "cannon_aim", 14, true).seg('R', 0, .5f, "cannon_aim", 14, true).seg('R', .5f, 1, "idle1")
                     .fx(ANTICIPA(0.6f)).key('A', .5f, 1.04f, .98f, -4, -6, 0).over(8, 3, -56, -72, 0.8f).o);
     v.push_back(Mv(f, AttackId::Uppercut, "GANCHO", AttackId::Uppercut).row(14, 6, 6, 18, 60, .60f, 680)
-                    .arc(6, -72, 20, 50, -10, 85, 20).hop(16)
+                    .arc(6, -50, 20, 50, -10, 85, 26).hop(16)
                     .seg('S', 0, 1, "slam").seg('A', 0, 1, "rage_aura", 6).seg('R', 0, .6f, "rage_aura", 6).seg('R', .6f, 1, "idle1")
                     .fx(ANTICIPA(0.8f)).key('A', .5f, 1, 1, -20, 0, 0).over(21, 2, 18, -104, 0.9f).o);
     v.push_back(Mv(f, AttackId::Sweep, "BARRIDO").row(12, 8, 6, 16, 140, .50f)
@@ -397,7 +397,7 @@ std::vector<MoveOverride> TitanXMOverrides() {
                     .fx(ANTICIPA(0.8f)).fx(BARRIDA('A')).over(37, 1, 50, -10, 1.1f).o);
     v.push_back(Mv(f, AttackId::SpinKick, "GIRO").row(14, 9, 8, 16, 420, .34f)
                     .with([](AttackDef& d) { d.hitsBehind = true; })
-                    .arc(0, -62, 30, 42, 0, 0, 20, true)
+                    .arc(0, -46, 30, 42, 0, 0, 26, true)
                     .seg('S', 0, 1, "idle1").seg('A', 0, 1, "charge_orb", 6).seg('R', 0, .5f, "charge_orb", 6).seg('R', .5f, 1, "idle1")
                     .fx(ANTICIPA(0.6f)).fx(GIRO(1)).ghost(3).over(36, 1, 0, -64, 1.4f).o);
     v.push_back(Mv(f, AttackId::FwdKick, "PATADA DE TANQUE").row(15, 10, 6, 16, 430, .34f)
@@ -410,7 +410,7 @@ std::vector<MoveOverride> TitanXMOverrides() {
                     .fx(SALTITO(10, 'S')).key('A', .5f, 1.04f, .9f, 0, 0, 0).fx(TEMBLOR(3, 26, 'A')).over(15, 1, 30, -4, 1.2f).o);
     v.push_back(Mv(f, AttackId::DashAttack, "ARROLLAR").row(16, 6, 10, 16, 560, .34f)
                     .with([](AttackDef& d) { d.breaksGuard = true; d.cooldown = 0.35f; })
-                    .arc(10, -78, 10, 46, -6, -6, 26).lunge(140, Ease::InOutSine, 0.8f)
+                    .arc(10, -52, 10, 46, -6, -6, 32).lunge(140, Ease::InOutSine, 0.8f)
                     .seg('S', 0, 1, "dash", 6).seg('A', 0, 1, "dash", 20).seg('R', 0, .5f, "dash", 20).seg('R', .5f, 1, "idle1")
                     .fx(IMPACTO(1.0f)).ghost(5).over(42, 4, -40, -60, 1.3f).o);
     v.push_back(Mv(f, AttackId::DashKick, "DERRAPE").row(13, 4, 10, 14, 300, .40f)
@@ -423,18 +423,18 @@ std::vector<MoveOverride> TitanXMOverrides() {
     // con la carga fija mas larga (orbe que crece en la boca) y el dano medio.
     v.push_back(Mv(f, AttackId::EnergyWave, "CANONAZO CARGADO").row(26, 18, 10, 16, 560, .36f)
                     .with([](AttackDef& d) { d.breaksGuard = true; d.spCost = 20; d.spawnsProjectile = true; d.knockdown = true; })
-                    .arc(0, -58, 24, 60, 0, 0, 24).shot(26, {46, -58}, 1.8f)
+                    .arc(0, -46, 24, 60, 0, 0, 30).shot(26, {46, -58}, 1.8f)
                     .seg('S', 0, 1, "charge_orb").seg('A', 0, 1, "shoot_orb", 6).seg('R', 0, .6f, "shoot_orb", 6).seg('R', .6f, 1, "idle1")
                     .fx(LATIDO(0.03f, 5, 'S')).fx(TINTE(kToxic, 0, 'S')).fx(IMPACTO(0.8f))
                     .over(0, 4, 42, -60, 1.4f, 'S').over(11, 3, 56, -58, 1.4f).o);
     v.push_back(Mv(f, AttackId::Signature2, "RAFAGA CONTINUA", AttackId::EnergyWave).row(5, 10, 30, 18, 200, .26f)
                     .with([](AttackDef& d) { d.breaksGuard = false; })
-                    .sp(25).hits(6, F(5)).arc(0, -60, 40, 90, 0, 0, 16).shot(5, {42, -60}, 0.7f, 6, 0.08f, 0, false, 260, 760)
+                    .sp(25).hits(6, F(5)).arc(0, -46, 40, 90, 0, 0, 22).shot(5, {42, -60}, 0.7f, 6, 0.08f, 0, false, 260, 760)
                     .seg('S', 0, 1, "cannon_aim").seg('A', 0, 1, "charge_orb", 4).seg('R', 0, .5f, "charge_orb", 4).seg('R', .5f, 1, "idle1")
                     .fx(TEMBLOR(2, 30, 'A')).fx(LATIDO(0.02f, 12, 'A')).over(8, 2, 48, -60, 0.9f).over(5, 3, 80, -60, 0.8f).o);
     v.push_back(Mv(f, AttackId::Signature1, "MORTERO", AttackId::EnergyWave).row(20, 14, 8, 18, 400, .40f, 200)
                     .with([](AttackDef& d) { d.knockdown = true; d.spCost = 20; })
-                    .arc(0, -60, 24, 56, 20, 40, 22).shot(20, {40, -80}, 1.3f, 1, 0, 0, true, 260, 420)
+                    .arc(0, -46, 24, 56, 20, 40, 28).shot(20, {40, -80}, 1.3f, 1, 0, 0, true, 260, 420)
                     .seg('S', 0, 1, "charge_orb").seg('A', 0, 1, "shoot_orb", 4).seg('R', 0, .6f, "shoot_orb", 4).seg('R', .6f, 1, "idle1")
                     .fx(ANTICIPA(0.8f)).key('A', .5f, 1, 1, -30, 0, -4).over(0, 4, 40, -60, 1.0f, 'S').over(12, 2, 40, -90, 1.2f).o);
     v.push_back(Mv(f, AttackId::Signature3, "AURA MUTANTE", AttackId::RageAttack).row(6, 8, 40, 16, 300, .32f, 120)
@@ -444,7 +444,7 @@ std::vector<MoveOverride> TitanXMOverrides() {
                     .fx(LATIDO(0.05f, 5, '*')).fx(TINTE(kToxic, 0, 'A')).over(21, 2, 0, -20, 2.4f).over(23, 1, 0, -6, 2.6f).o);
     v.push_back(Mv(f, AttackId::RisingUppercut, "UPPERCUT DE CANON").row(13, 3, 12, 22, 200, .50f, 780)
                     .with([](AttackDef& d) { d.launcher = true; d.jumpCancel = true; d.juggleCost = 2; d.invulnTo = F(5); d.heavy = true; d.priority = 3; })
-                    .hits(2, F(6)).arc(6, -72, 30, 66, -20, 95, 24).hop(60)
+                    .hits(2, F(6)).arc(6, -50, 30, 66, -20, 95, 30).hop(60)
                     .seg('S', 0, 1, "slam").seg('A', 0, 1, "rage_aura", 4).seg('R', 0, .6f, "rage_aura", 4).seg('R', .6f, 1, "idle1")
                     .fx(UPPER(20)).fx(TINTE(kToxic, 0.2f, 'A')).over(21, 2, 10, -20, 2.0f).over(22, 1, 10, -10, 1.8f, 'R').o);
     v.push_back(Off(AttackId::Hurricane));   // forma final: ni giro aereo...
@@ -456,7 +456,7 @@ std::vector<MoveOverride> TitanXMOverrides() {
                     .fx(ANTICIPA(1.3f)).fx(TEMBLOR(6, 20, 'A')).over(14, 2, 0, -8, 2.2f).over(24, 2, 0, -180, 1.6f).o);
     v.push_back(Mv(f, AttackId::Finisher, "JUICIO FINAL", AttackId::Finisher).row(44, 16, 24, 26, 760, .55f, 300)
                     .with([](AttackDef& d) { d.knockdown = true; })
-                    .arc(6, -60, 30, 70, -10, 20, 30)
+                    .arc(6, -46, 30, 70, -10, 20, 36)
                     .seg('S', 0, 1, "slam").seg('A', 0, .45f, "slam", 6).seg('A', .45f, 1, "shoot_orb", 8).seg('R', 0, 1, "shoot_orb", 8)
                     .fx(ANTICIPA(1.4f)).fx(TEMBLOR(4, 22, 'A')).over(11, 3, 56, -60, 1.6f).over(26, 3, 60, -60, 1.8f, 'R').o);
     v.push_back(Phase2Visual(f, AttackId::Grab, "AGARRE", "idle4", "cannon_aim", "cannon_aim"));
