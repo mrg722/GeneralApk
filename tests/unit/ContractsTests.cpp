@@ -47,6 +47,10 @@ static void TestMoveRegistry() {
     const MoveSet& generic = GenericMoveSet();
     for (int skin = 0; skin <= 41; ++skin) {
         const MoveSet& ms = GetMoveSet(skin);
+        if (skin == 6) {   // F1.4: MAX declara su propio MoveSet (Moves_Max.cpp)
+            assert(&ms != &generic && std::strcmp(ms.name, "max") == 0 && ms.overrides != nullptr);
+            continue;
+        }
         assert(&ms == &generic);
         assert(std::strcmp(ms.name, "generico") == 0);
         assert(ms.caps == CapAll && ms.feel == FeelLevel::Full && ms.overrides == nullptr);
