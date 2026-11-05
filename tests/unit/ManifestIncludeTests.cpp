@@ -104,7 +104,7 @@ int main() {
         assert(bare.LoadFromString(text, false));
         const ClipMap* a = real.FindClips("rayden");
         const ClipMap* b = bare.FindClips("rayden");
-        assert(a && b && a->size() == 19 && b->size() == 19);
+        assert(a && b && a->size() >= 19 && b->size() == 19);   // F1.3: el include agrega clips nuevos a rayden
         for (const auto& kv : *b) {
             const ClipDef& x = a->at(kv.first);
             assert(x.frames == kv.second.frames && x.durations == kv.second.durations && x.loop == kv.second.loop);

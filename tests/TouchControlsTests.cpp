@@ -1,6 +1,7 @@
 // Controles tactiles -> teclas virtuales -> jugador (sin ventana).
 #include "core/InputMap.h"
 #include "game/Player.h"
+#include "game/moves/MoveRegistry.h"
 #include "ui/TouchControls.h"
 #include <cassert>
 #include <cmath>
@@ -66,7 +67,9 @@ int main() {
 
     // Habilidad 2 (GANCHO) -> gancho ascendente. F0.4: MoveSet.skillSlots[1] por
     // defecto = Uppercut (el GANCHO ASCENDENTE nuevo; antes salia el REMATE Punch3).
+    // (MoveSet generico: desde F1.3 el boton 2 de RAYDEN, skin 0, es su PUNO RELAMPAGO.)
     Player q;
+    q.customMoveSet = &GenericMoveSet();
     touch::Update(touch::Context::Combat);
     touch::InjectTouchForTest({965, 568});
     touch::Update(touch::Context::Combat);

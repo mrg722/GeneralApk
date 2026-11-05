@@ -47,6 +47,10 @@ static void TestMoveRegistry() {
     const MoveSet& generic = GenericMoveSet();
     for (int skin = 0; skin <= 41; ++skin) {
         const MoveSet& ms = GetMoveSet(skin);
+        if (skin == 0) {   // F1.3: RAYDEN (ORIGINAL) declara su MoveSet (sin overrides historicos)
+            assert(&ms != &generic && FindOverride(ms, static_cast<int>(AttackId::Punch1)) == nullptr);
+            continue;
+        }
         assert(&ms == &generic);
         assert(std::strcmp(ms.name, "generico") == 0);
         assert(ms.caps == CapAll && ms.feel == FeelLevel::Full && ms.overrides == nullptr);

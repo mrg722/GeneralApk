@@ -271,7 +271,9 @@ void TestSixHitChain() {
     }
     assert(std::strcmp(p.CurrentAttackDef().name, "CADENA 6") == 0);
     // Sin override, Chain5 no existe: la cadena por defecto se corta antes.
+    // (Con el MoveSet generico: desde F1.3 el skin 0 por defecto, RAYDEN, si tiene Signature1.)
     Player q;
+    q.customMoveSet = &GenericMoveSet();
     assert(!q.MoveEnabled(AttackId::Chain5) && !q.MoveEnabled(AttackId::Signature1));
     assert(!q.MoveEnabled(AttackId::Grab));
 }
