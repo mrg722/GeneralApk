@@ -162,7 +162,10 @@ static void TestFeelAndPoses() {
         for (PlayerState st : {PlayerState::Idle, PlayerState::Walk, PlayerState::Dash, PlayerState::Hit,
                                PlayerState::Airborne, PlayerState::Knockdown, PlayerState::Defeat, PlayerState::Block}) {
             ctx = PoseContext{}; ctx.state = st; ctx.time = 0.4;
-            assert(ResolvePoseFrame(skin, ctx, f) && f.pieceCount == 1);
+            assert(ResolvePoseFrame(skin, ctx, f) && f.pieceCount >= 1);
+            // F1.2: el clon y Grinder recortan los restos de recorte con 2 piezas
+            // (ver PoseCloneGrinderTests); Titan-X sigue con 1.
+            assert(skin == 1 || skin == 3 || f.pieceCount == 1);
             assert(std::strcmp(f.pieces[0].pose, CharacterPose(skin, st, AttackType::None, false, 0.4)) == 0);
             assert(f.pieces[0].facesRight == GetCharacterVisual(skin).facesRightByDefault);
         }
@@ -173,7 +176,8 @@ static void TestFeelAndPoses() {
     ctx = PoseContext{}; ctx.state = PlayerState::Attack; ctx.attackType = AttackType::Punch;
     ctx.phase = 'S'; assert(ResolvePoseFrame(1, ctx, f) && std::strcmp(f.pieces[0].pose, "ready") == 0);
     ctx.phase = 'A'; assert(ResolvePoseFrame(1, ctx, f) && std::strcmp(f.pieces[0].pose, "punch") == 0);
-    ctx.phase = 'R'; assert(ResolvePoseFrame(1, ctx, f) && std::strcmp(f.pieces[0].pose, "idle1") == 0);
+    // F1.2: la recuperacion mantiene el golpe (antes volvia a idle1 de golpe).
+    ctx.phase = 'R'; assert(ResolvePoseFrame(1, ctx, f) && std::strcmp(f.pieces[0].pose, "punch") == 0);
     ctx.attackType = AttackType::Kick; ctx.phase = 'A';
     assert(ResolvePoseFrame(1, ctx, f) && std::strcmp(f.pieces[0].pose, "kick") == 0);
 

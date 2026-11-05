@@ -46,6 +46,7 @@ static void TestEventQueue() {
 static void TestMoveRegistry() {
     const MoveSet& generic = GenericMoveSet();
     for (int skin = 0; skin <= 41; ++skin) {
+        if (skin == 1 || skin == 3) continue;   // F1.2: clon y Grinder ya declaran su MoveSet
         const MoveSet& ms = GetMoveSet(skin);
         assert(&ms == &generic);
         assert(std::strcmp(ms.name, "generico") == 0);
