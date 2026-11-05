@@ -47,7 +47,12 @@ static void TestMoveRegistry() {
     const MoveSet& generic = GenericMoveSet();
     for (int skin = 0; skin <= 41; ++skin) {
         const MoveSet& ms = GetMoveSet(skin);
-        assert(&ms == &generic);
+        // Fase 1: un bloque que ya declaro su MoveSet responde con el suyo (con
+        // nombre y overrides propios); el resto sigue con el generico.
+        if (&ms != &generic) {
+            assert(std::strcmp(ms.name, "generico") != 0 && ms.overrides != nullptr);
+            continue;
+        }
         assert(std::strcmp(ms.name, "generico") == 0);
         assert(ms.caps == CapAll && ms.feel == FeelLevel::Full && ms.overrides == nullptr);
         assert(FindOverride(ms, static_cast<int>(AttackId::Punch1)) == nullptr);
@@ -79,15 +84,17 @@ static void TestHistoricIds() {
 static void TestPoseTables() {
     // Mismas poses que antes de partir CharacterPose (muestras).
     assert(std::strcmp(CharacterPose(1, PlayerState::Defeat, AttackType::None, false, 0.0), "death") == 0);
-    assert(std::strcmp(CharacterPose(4, PlayerState::Airborne, AttackType::None, false, 0.0), "recoil") == 0);
+    assert(std::strcmp(CharacterPose(4, PlayerState::Airborne, AttackType::None, false, 0.0), "death") == 0);   // F1.1: cae, no dispara
     assert(std::strcmp(CharacterPose(5, PlayerState::Attack, AttackType::Energy, false, 0.0), "shoot_orb") == 0);
     assert(std::strcmp(CharacterPose(2, PlayerState::Walk, AttackType::None, false, 0.0), "walk") == 0);
     assert(std::strcmp(CharacterPose(3, PlayerState::Attack, AttackType::Kick, false, 0.0), "slam") == 0);
     assert(std::strcmp(CharacterPose(0, PlayerState::Idle, AttackType::None, false, 0.0), "idle1") == 0);
-    // PoseFacesRight = facesRightByDefault de la ficha (hoy).
+    // PoseFacesRight = facesRightByDefault de la ficha, salvo las carpetas que su
+    // bloque ya corrigio pose por pose (F1.1: el arte de Titan-X mira a la derecha).
     for (int id = 0; id < CharacterCount(); ++id) {
         const CharacterVisual& cv = GetCharacterVisual(id);
         if (cv.folder == nullptr) continue;
+        if (id == 4 || id == 5) { assert(PoseFacesRight(cv.folder, "idle1")); continue; }
         assert(PoseFacesRight(cv.folder, "idle1") == cv.facesRightByDefault);
     }
 }

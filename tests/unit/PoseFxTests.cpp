@@ -158,7 +158,9 @@ static void TestFeelAndPoses() {
     assert(!ResolvePoseFrame(6, ctx, f));   // MAX: atlas
     assert(!ResolvePoseFrame(2, ctx, f));   // BRAKK: atlas brakk_v2
     // Poses de hoy (misma pose que CharacterPose) con la orientacion de la ficha.
-    for (int skin : {1, 3, 4, 5}) {
+    // F1.1: Titan-X (4, 5) tiene su propia tabla (orientacion por pose, caminar por
+    // walkPhase, 1-2 piezas): lo prueba tests/unit/PoseTitanXTests.cpp.
+    for (int skin : {1, 3}) {
         for (PlayerState st : {PlayerState::Idle, PlayerState::Walk, PlayerState::Dash, PlayerState::Hit,
                                PlayerState::Airborne, PlayerState::Knockdown, PlayerState::Defeat, PlayerState::Block}) {
             ctx = PoseContext{}; ctx.state = st; ctx.time = 0.4;
@@ -167,8 +169,8 @@ static void TestFeelAndPoses() {
             assert(f.pieces[0].facesRight == GetCharacterVisual(skin).facesRightByDefault);
         }
     }
-    ctx = PoseContext{}; ctx.state = PlayerState::Airborne;
-    assert(ResolvePoseFrame(4, ctx, f) && std::strcmp(f.pieces[0].pose, "recoil") == 0 && !f.pieces[0].facesRight);
+    ctx = PoseContext{}; ctx.state = PlayerState::Airborne;   // F1.1: derribo = pose caida (no el disparo)
+    assert(ResolvePoseFrame(4, ctx, f) && std::strcmp(f.pieces[0].pose, "death") == 0 && f.pieces[0].facesRight);
     // Clon: el golpe sigue la fase real del ataque.
     ctx = PoseContext{}; ctx.state = PlayerState::Attack; ctx.attackType = AttackType::Punch;
     ctx.phase = 'S'; assert(ResolvePoseFrame(1, ctx, f) && std::strcmp(f.pieces[0].pose, "ready") == 0);
@@ -194,7 +196,7 @@ static void TestFeelAndPoses() {
     ctx.phase = 'S';   // sin segmento para S: la tabla de hoy (+ el PoseFx del override)
     assert(ResolvePoseFrame(4, ctx, f) && !f.fromMoveSet && std::strcmp(f.pieces[0].pose, "punch1") == 0 && f.fx.presetCount == 1);
     ctx.attack = static_cast<int>(AttackId::Kick); ctx.attackType = AttackType::Kick;
-    assert(ResolvePoseFrame(4, ctx, f) && std::strcmp(f.pieces[0].pose, "uppercut") == 0 && f.fx.presetCount == 0);
+    assert(ResolvePoseFrame(4, ctx, f) && std::strcmp(f.pieces[0].pose, "slam") == 0 && f.fx.presetCount == 0);   // F1.1
     SetVisualMoveSetForTests(4, nullptr);
     assert(&VisualMoveSet(4) == &GetMoveSet(4));
 }
