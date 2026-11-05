@@ -1052,8 +1052,10 @@ void StreetEnemy::TakeDamage(int damage, Vector3D knockback) {
 }
 
 bool StreetEnemy::InAttackStartup() const {
-    if (IsTelegraphing()) return true;
-    return state == StreetEnemyState::Attack && attackElapsed < CurrentAttack().startup;
+    // Ataque de datos: el arranque lo dice su EnemyAttackDef (fiable frame a
+    // frame); el resto (specials), la telegrafia.
+    if (state == StreetEnemyState::Attack) return attackElapsed < CurrentAttack().startup;
+    return IsTelegraphing();
 }
 
 int StreetEnemy::AttackPriority() const {

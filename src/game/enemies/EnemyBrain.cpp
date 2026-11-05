@@ -119,7 +119,7 @@ LimbArc StrikeArc(const EnemyProfile& p, float reachFrac = 0.86f, float ph = -66
     a.px = 8.0f;
     a.ph = ph;
     const float reach = p.attackRange * reachFrac / p.visualScale;
-    a.L1 = std::max(30.0f, reach - a.px);
+    a.L1 = std::max(30.0f, reach - a.px - r);   // la capsula llega a reach (punta + radio)
     a.L0 = a.L1 * 0.64f;
     a.theta0 = 0.0f; a.theta1 = 0.0f;
     a.r = r;
