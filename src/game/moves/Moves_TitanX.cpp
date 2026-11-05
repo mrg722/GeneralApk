@@ -170,7 +170,7 @@ std::vector<MoveOverride> TitanXOverrides() {
     std::vector<MoveOverride> v;
     // ---- Cadena J ----
     v.push_back(Mv(f, AttackId::Punch1, "MARTILLO").row(12, 9, 5, 12, 320, .28f)
-                    .arc(0, -74, 14, 40, 0, 0, 18).lunge(32)
+                    .arc(0, -74, 16, 44, 0, 0, 18).lunge(32)
                     .seg('S', 0, 1, "carga").seg('A', 0, 1, "shoot_orb", 20).seg('R', 0, .5f, "shoot_orb", 20).seg('R', .5f, 1, "idle1")
                     .fx(ANTICIPA(1.4f)).fx(IMPACTO(1.3f)).fx(RECOBRO(1.0f))
                     .over(8, 3, 62, -76, 0.8f).o);

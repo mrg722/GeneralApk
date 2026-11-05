@@ -189,8 +189,9 @@ bool StateFrame(const PoseContext& ctx, PoseFrame& out, bool m) {
             return true;
         }
         case PlayerState::Jump:
-            // Subida/caida las da MoveSet.jumpRise/jumpFall (saben la velocidad).
-            Piece(out, f, "lean");
+            // Subida/caida las da MoveSet.jumpRise/jumpFall (saben la velocidad);
+            // el Mejorado no salta (sin CapJump).
+            Piece(out, f, m ? "idle1" : "lean");
             return true;
         case PlayerState::Victory:
             Piece(out, f, m ? "rage_aura" : "uppercut");
