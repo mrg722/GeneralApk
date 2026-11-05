@@ -518,6 +518,10 @@ void Stage3Game::DrawWorld() const {
     if (bossSpawned && (flow == Flow::BossIntro || flow == Flow::Boss)) DrawBoss();
     EndMode2D();
 }
+// F1.1: dibujo compartido de los jefes Titan-X (src/game/visual/Poses_TitanX.cpp).
+void DrawTitanXBossBody(int skin, PlayerState state, int attackId, float elapsed, float startup, float active,
+                        float recovery, float stateTime, float walkPhase, Vector2 feet, float targetHeight,
+                        bool facingRight, Color tint);
 // DF-013.2: Titan-X (prototipo, Stage 3) ahora se dibuja con el sprite real
 // aportado por el usuario en vez de las primitivas raylib originales. La
 // pose se elige a partir del estado real del boss (blocking/invuln/
@@ -528,23 +532,29 @@ void Stage3Game::DrawWorld() const {
 void Stage3Game::DrawBoss() const {
     if (!bossSpawned || boss.defeated) return;
     const float x = boss.pos.x, y = boss.pos.y;
-    const bool flip = player.position.x > boss.pos.x;
+    // F1.1: el mismo cuerpo que el Titan-X jugable (orientacion por pose, escala
+    // uniforme, PoseFx): mira al jugador. Este jefe resuelve sus ataques en un
+    // instante (UpdateBoss); se ensena la CARGA del golpe en los 0.18 s previos
+    // al temporizador y el golpe completo + recuperacion en los 0.3 s siguientes.
+    const bool facingRight = player.position.x > x;
     if (boss.blocking) DrawCircleV({x, y - 95}, 105, A({90, 170, 255, 255}, .22f));
-    const char* pose = "idle1";
+    const Color tint = boss.invuln > 0 ? Color{255, 180, 180, 255} : WHITE;
+    constexpr float kS = 9 / 60.0f, kA = 5 / 60.0f, kR = 12 / 60.0f;   // MARTILLO de Moves_TitanX.cpp
+    const float reset = boss.phase == 3 ? .72f : boss.phase == 2 ? .95f : 1.18f;
+    const float since = reset - boss.attackTimer;
+    const int punch = static_cast<int>(AttackId::Punch1);
     if (boss.invuln > .08f)
-        pose = "recoil";
-    else if (!boss.blocking && boss.attackTimer <= .15f)
-        pose = "lean";
-    else {
-        const int cycle = ((int)(boss.elapsed * 1.6f)) % 4;
-        pose = cycle == 0 ? "idle1" : cycle == 1 ? "idle2" : cycle == 2 ? "idle3" : "idle4";
-    }
-    Texture2D tex = AssetManager::Get().GetTexture(std::string("titanx_") + pose);
-    Color tint = boss.invuln > 0 ? Color{255, 180, 180, 255} : WHITE;
-    // Titan-X (prototipo) es notoriamente mas grande que Rayden pero NO la
-    // forma XL (canon confirmado por las hojas de referencia del usuario:
-    // "aun es un prototipo... pero ya no es humano").
-    DrawBossPose(tex, {x, y}, 170.f, flip, tint);
+        DrawTitanXBossBody(4, PlayerState::Hit, 0, 0, 0, 0, 0, .12f - boss.invuln, 0, {x, y}, 170.f, facingRight, tint);
+    else if (boss.blocking)
+        DrawTitanXBossBody(4, PlayerState::Block, 0, 0, 0, 0, 0, boss.elapsed, 0, {x, y}, 170.f, facingRight, tint);
+    else if (boss.attackTimer > 0 && boss.attackTimer <= .18f)
+        DrawTitanXBossBody(4, PlayerState::Attack, punch, (.18f - boss.attackTimer) / .18f * kS, kS, kA, kR, 0, 0, {x, y},
+                           170.f, facingRight, tint);
+    else if (since >= 0 && since < .3f)
+        DrawTitanXBossBody(4, PlayerState::Attack, punch, kS + since / .3f * (kA + kR), kS, kA, kR, 0, 0, {x, y}, 170.f,
+                           facingRight, tint);
+    else
+        DrawTitanXBossBody(4, PlayerState::Idle, 0, 0, 0, 0, 0, boss.elapsed, 0, {x, y}, 170.f, facingRight, tint);
 }
 void Stage3Game::DrawHUD() const {
     DrawRectangle(18, 16, 430, 88, {5, 8, 16, 225});

@@ -291,7 +291,7 @@ std::vector<MoveOverride> TitanXOverrides() {
                     .with([](AttackDef& d) { d.launcher = true; d.jumpCancel = true; d.juggleCost = 2; d.invulnTo = F(5); d.heavy = true; d.priority = 3; })
                     .hits(2, F(6)).arc(6, -80, 30, 70, -20, 95, 22).hop(70)
                     .seg('S', 0, 1, "slam").seg('A', 0, 1, "uppercut", 4).seg('R', 0, .6f, "uppercut", 4).seg('R', .6f, 1, "idle1")
-                    .fx(UPPER(24)).fx(TINTE(kToxic, 0.2f, 'A')).over(21, 2, 10, -20, 1.8f).over(22, 1, 10, -10, 1.6f, 'R').o);
+                    .fx(UPPER(24)).fx(TINTE(kToxic, 0.2f, 'A')).over(21, 2, 10, -20, 1.0f).over(22, 1, 10, -10, 1.0f, 'R').o);
     v.push_back(Off(AttackId::Hurricane));   // TX no gira sobre si mismo en el aire: QCB+K cae al base
     v.push_back(Mv(f, AttackId::DrillKick, "BOLA DE DEMOLICION").row(7, 10, 14, 18, 320, .32f)
                     .with([](AttackDef& d) { d.knockdown = true; d.spCost = 15; d.priority = 3; })
@@ -436,7 +436,7 @@ std::vector<MoveOverride> TitanXMOverrides() {
                     .with([](AttackDef& d) { d.knockdown = true; d.spCost = 20; })
                     .arc(0, -46, 24, 56, 20, 40, 28).shot(20, {40, -80}, 1.3f, 1, 0, 0, true, 260, 420)
                     .seg('S', 0, 1, "charge_orb").seg('A', 0, 1, "shoot_orb", 4).seg('R', 0, .6f, "shoot_orb", 4).seg('R', .6f, 1, "idle1")
-                    .fx(ANTICIPA(0.8f)).key('A', .5f, 1, 1, -30, 0, -4).over(0, 4, 40, -60, 1.0f, 'S').over(12, 2, 40, -90, 1.2f).o);
+                    .fx(ANTICIPA(0.8f)).key('A', .5f, 1, 1, -30, 0, -4).over(0, 4, 40, -60, 1.0f, 'S').over(12, 2, 46, -66, 1.0f).o);
     v.push_back(Mv(f, AttackId::Signature3, "AURA MUTANTE", AttackId::RageAttack).row(6, 8, 40, 16, 300, .32f, 120)
                     .with([](AttackDef& d) { d.spCost = 30; d.priority = 4; d.knockdown = false; })
                     .hits(4, F(10)).area(130).armor(0)
@@ -446,7 +446,7 @@ std::vector<MoveOverride> TitanXMOverrides() {
                     .with([](AttackDef& d) { d.launcher = true; d.jumpCancel = true; d.juggleCost = 2; d.invulnTo = F(5); d.heavy = true; d.priority = 3; })
                     .hits(2, F(6)).arc(6, -50, 30, 66, -20, 95, 30).hop(60)
                     .seg('S', 0, 1, "slam").seg('A', 0, 1, "rage_aura", 4).seg('R', 0, .6f, "rage_aura", 4).seg('R', .6f, 1, "idle1")
-                    .fx(UPPER(20)).fx(TINTE(kToxic, 0.2f, 'A')).over(21, 2, 10, -20, 2.0f).over(22, 1, 10, -10, 1.8f, 'R').o);
+                    .fx(UPPER(20)).fx(TINTE(kToxic, 0.2f, 'A')).over(21, 2, 10, -20, 1.0f).over(22, 1, 10, -10, 1.0f, 'R').o);
     v.push_back(Off(AttackId::Hurricane));   // forma final: ni giro aereo...
     v.push_back(Off(AttackId::DrillKick));   // ...ni taladro: QCB+K / QCF+K caen al base
     v.push_back(Mv(f, AttackId::RageAttack, "BOMBARDEO", AttackId::RageAttack).row(30, 13, 22, 20, 620, .42f, 220)

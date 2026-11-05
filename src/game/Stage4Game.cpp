@@ -395,6 +395,10 @@ void Stage4Game::DrawArenaLock() const {
     const int gate = arenaEnd - 8;
     (void)gate;
 }
+// F1.1: dibujo compartido de los jefes Titan-X (src/game/visual/Poses_TitanX.cpp).
+void DrawTitanXBossBody(int skin, PlayerState state, int attackId, float elapsed, float startup, float active,
+                        float recovery, float stateTime, float walkPhase, Vector2 feet, float targetHeight,
+                        bool facingRight, Color tint);
 // DF-013.2: Titan-X Mejorado ahora se dibuja con el sprite real (segunda
 // hoja de pose aportada por el usuario, mas dañada/con mas energia verde
 // expuesta que la del prototipo de Stage3 — encaja con el canon de
@@ -410,27 +414,31 @@ void Stage4Game::DrawArenaLock() const {
 void Stage4Game::DrawBoss() const {
     if (!boss.pos.x || boss.defeated) return;
     const float x = boss.pos.x, y = boss.pos.y;
-    const bool flip = player.position.x > boss.pos.x;
-    const char* pose = "idle1";
-    if (boss.attack == BossAttack::Dash)
-        pose = "dash";
-    else if (boss.attack == BossAttack::Shockwave)
-        pose = "slam";
-    else if (boss.attack == BossAttack::ProjectileBurst)
-        pose = (boss.elapsed < .5f) ? "charge_orb" : "shoot_orb";
-    else if (boss.attack == BossAttack::Overdrive)
-        pose = "rage_aura";
-    else if (boss.invuln > .06f)
-        pose = "cannon_aim";
-    else {
-        const int cycle = ((int)(boss.elapsed * 1.4f)) % 4;
-        pose = cycle == 0 ? "idle1" : cycle == 1 ? "idle2" : cycle == 2 ? "idle3" : "idle4";
-    }
-    Texture2D tex = AssetManager::Get().GetTexture(std::string("titanx_mejorado_") + pose);
+    // F1.1: el mismo cuerpo que el Titan-X Mejorado jugable (orientacion por pose,
+    // escala uniforme, PoseFx); mira al jugador. Cada BossAttack usa el movimiento
+    // jugable equivalente con los tiempos reales de UpdateBoss (telegrafia = S).
+    const bool facingRight = player.position.x > x;
     Color tint = boss.phase >= 4 ? Color{255, 215, 190, 255} : WHITE;
     if (boss.invuln > 0) tint = {255, 190, 190, 255};
     const float targetHeight = 225.f + (boss.phase - 1) * 8.f;
-    DrawBossPose(tex, {x, y}, targetHeight, flip, tint);
+    int move = 0;
+    float s = 0, a = 0, r = 0;
+    switch (boss.attack) {
+        case BossAttack::Dash: move = static_cast<int>(AttackId::FwdPunch); s = .4f; a = .4f; r = .2f; break;
+        case BossAttack::Shockwave: move = static_cast<int>(AttackId::Kick); s = .6f; a = .22f; r = .08f; break;
+        case BossAttack::ProjectileBurst: move = static_cast<int>(AttackId::EnergyWave); s = .5f; a = .1f; r = .3f; break;
+        case BossAttack::Overdrive: move = static_cast<int>(AttackId::Signature3); s = .32f; a = .34f; r = .24f; break;
+        default: break;
+    }
+    if (move != 0)
+        DrawTitanXBossBody(5, PlayerState::Attack, move, boss.elapsed, s, a, r, 0, 0, {x, y}, targetHeight, facingRight, tint);
+    else if (boss.invuln > .06f)
+        DrawTitanXBossBody(5, PlayerState::Hit, 0, 0, 0, 0, 0, .1f - boss.invuln, 0, {x, y}, targetHeight, facingRight, tint);
+    else if (std::abs(player.position.x - x) > 210)
+        DrawTitanXBossBody(5, PlayerState::Walk, 0, 0, 0, 0, 0, boss.elapsed, std::fabs(x) * 0.03f, {x, y}, targetHeight,
+                           facingRight, tint);
+    else
+        DrawTitanXBossBody(5, PlayerState::Idle, 0, 0, 0, 0, 0, boss.elapsed, 0, {x, y}, targetHeight, facingRight, tint);
     if (boss.attack == BossAttack::Shockwave)
         DrawCircleLines((int)x, (int)y, 90 + std::sin((float)GetTime() * 11) * 10, {140, 255, 180, 180});
 }

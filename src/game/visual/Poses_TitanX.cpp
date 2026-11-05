@@ -166,7 +166,7 @@ bool StateFrame(const PoseContext& ctx, PoseFrame& out, bool m) {
         case PlayerState::Dash:
             Piece(out, f, m ? "dash" : "lean");
             out.fx.ghostCount = 4; out.fx.ghostInterval = 0.03f; out.fx.ghostTint = kGreenGhost;
-            AddOverlay(out.fx, 37, 1, -40, -8, 0.9f, kGreen);   // polvo detras
+            AddOverlay(out.fx, 37, 1, -40, -24, 0.7f, kGreen);   // polvo detras
             return true;
         case PlayerState::Block:
             Piece(out, f, "idle1");
@@ -185,7 +185,7 @@ bool StateFrame(const PoseContext& ctx, PoseFrame& out, bool m) {
             // hasta -5|sin| (-6 el Mejorado) y la pisada aplastada.
             ConstKey(out.fx, 1.0f + 0.015f * (1 - st), 1.0f - 0.02f * (1 - st), -0.5f, 0, -(m ? 3.0f : 2.0f) * st);
             if (m) AddPreset(out.fx, posefx::LATIDO(0.01f, 1.2f));
-            if (st < 0.35f) AddOverlay(out.fx, 37, 1, -10, -4, 0.7f, kGreen);   // polvo en la pisada
+            if (st < 0.35f) AddOverlay(out.fx, 37, 1, -10, -22, 0.6f, kGreen);   // polvo en la pisada
             return true;
         }
         case PlayerState::Jump:

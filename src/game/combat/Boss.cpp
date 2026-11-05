@@ -8,7 +8,30 @@
 #include <cstring>
 
 namespace district_fury {
+
+// F1.1: dibujo compartido de los jefes Titan-X (definida en
+// src/game/visual/Poses_TitanX.cpp): orientacion por pose, escala uniforme, PoseFx.
+void DrawTitanXBossBody(int skin, PlayerState state, int attackId, float elapsed, float startup, float active,
+                        float recovery, float stateTime, float walkPhase, Vector2 feet, float targetHeight,
+                        bool facingRight, Color tint);
+
 namespace {
+
+// F1.1: ataque del jefe Titan-X -> movimiento del MoveSet jugable con su visual.
+AttackId TitanXBossMove(BossId id, const char* name) {
+    auto eq = [&](const char* s) { return name && std::strcmp(name, s) == 0; };
+    if (id == BossId::TitanX) {
+        if (eq("Dash")) return AttackId::DashAttack;
+        if (eq("GuardCounter")) return AttackId::Punch1;   // golpe de carga completo
+        if (eq("ProjectileBurst")) return AttackId::EnergyWave;
+        return AttackId::Punch1;
+    }
+    if (eq("Dash")) return AttackId::FwdPunch;
+    if (eq("Shockwave")) return AttackId::Kick;
+    if (eq("ProjectileBurst")) return AttackId::EnergyWave;
+    if (eq("Overdrive")) return AttackId::Signature3;
+    return AttackId::Punch1;
+}
 
 // Altura objetivo en pantalla para los bosses que ya tienen sprite real
 // (mismos valores usados en Stage3/4/5Game::DrawBoss — ver esos archivos y
@@ -261,6 +284,27 @@ void Boss::Draw(float playerX) const {
         DrawEllipse(static_cast<int>(pos.x), static_cast<int>(pos.y), 70, 14, {0, 0, 0, 150});
         const Color tv = invuln > 0.0f ? Color{255, 180, 180, 255} : WHITE;
         anim.Draw({pos.x, pos.y}, 1.45f, !facingRight, tv);
+        return;
+    }
+    if (id == BossId::TitanX || id == BossId::TitanXMejorado) {
+        // F1.1: mismas poses, orientacion y movimientos que el Titan-X jugable; mira al jugador.
+        const int skin = id == BossId::TitanX ? 4 : 5;
+        const float h = SpriteTargetHeight(id);
+        DrawEllipse(static_cast<int>(pos.x), static_cast<int>(pos.y), h * 0.30f, h * 0.06f, {0, 0, 0, 150});
+        const Color tint = invuln > 0.0f ? Color{255, 190, 190, 255} : WHITE;
+        const float t = static_cast<float>(GetTime());
+        if (invuln > 0.02f) {
+            DrawTitanXBossBody(skin, PlayerState::Hit, 0, 0, 0, 0, 0, 0.1f - invuln, 0, {pos.x, pos.y}, h, facingRight, tint);
+        } else if (currentAttack >= 0) {
+            const BossAttackDef& a = def->attacks[static_cast<std::size_t>(currentAttack)];
+            DrawTitanXBossBody(skin, PlayerState::Attack, static_cast<int>(TitanXBossMove(id, a.name)), elapsed, a.startup,
+                               a.active, a.recovery, elapsed, 0, {pos.x, pos.y}, h, facingRight, tint);
+        } else if (std::abs(playerX - pos.x) > 190.0f) {   // se acerca (Update avanza hacia el jugador)
+            DrawTitanXBossBody(skin, PlayerState::Walk, 0, 0, 0, 0, 0, t, std::fabs(pos.x) * 0.03f, {pos.x, pos.y}, h,
+                               facingRight, tint);
+        } else {
+            DrawTitanXBossBody(skin, PlayerState::Idle, 0, 0, 0, 0, 0, t, 0, {pos.x, pos.y}, h, facingRight, tint);
+        }
         return;
     }
     const char* folder = SpriteFolder(id);
