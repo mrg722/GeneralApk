@@ -68,9 +68,64 @@ void KillSlowMo(CombatFeedback& fb) {
 bool EnemyTouchesPlayer(const StreetEnemy& e, const Player& p) {
     if (!e.active || e.IsDefeated() || !e.AttackIsActive()) return false;
     if (!LaneOverlap(e.position.y, p.position.y, e.attackDepth)) return false;
-    const CombatBox b = e.GetAttackHitbox();
-    if (!b.IsValid()) return false;
-    return RectOverlap(ScreenBoxToPlane(b.x, b.y, b.width, b.height, e.position.y), PlayerHurtRect(p));
+    // F1.9: arco del EnemyAttackDef (escalado con visualScale), area a ras de
+    // suelo o la caja historica de los specials.
+    return e.AttackShapeHits(PlayerHurtRect(p), nullptr);
+}
+
+// F1.9: Stomp del jugador: enemigo en el suelo a <= 70 px delante, abs(dy) <= 20.
+void UpdateStompTarget(Player& player, const std::vector<StreetEnemy>& enemies) {
+    const float f = FacingSign(player.facing);
+    bool ahead = false;
+    for (const StreetEnemy& e : enemies) {
+        if (!e.active || e.IsDefeated() || !e.IsDown() || e.otgUsed) continue;
+        const float dx = (e.position.x - player.position.x) * f;
+        if (dx >= -10.0f && dx <= 70.0f && std::fabs(e.position.y - player.position.y) <= 20.0f) { ahead = true; break; }
+    }
+    player.stompTargetAhead = ahead;
+}
+
+// F1.9: cuerpos que vuelan (proyectados por un agarre, o lanzados muy rapido)
+// golpean a los otros enemigos que tocan: 8 de dano y derribo, una vez cada uno.
+void ResolveFlyingBodies(std::vector<StreetEnemy>& enemies, const StageHitStyle& style, CombatFeedback& fb,
+                         HitReport& r) {
+    for (StreetEnemy& b : enemies) {
+        if (!b.IsFlyingBody()) continue;
+        const Rect2 body = EnemyHurtRect(b);
+        for (StreetEnemy& e : enemies) {
+            if (&e == &b || !e.active || e.IsDefeated()) continue;
+            if (e.state == StreetEnemyState::Down || e.state == StreetEnemyState::WakeUp ||
+                e.state == StreetEnemyState::Thrown || e.state == StreetEnemyState::Grabbed)
+                continue;
+            const std::uintptr_t id = IdOf(&e);
+            if (std::find(b.bodyHits.begin(), b.bodyHits.end(), id) != b.bodyHits.end()) continue;
+            if (!LaneOverlap(b.position.y, e.position.y, 12.0f)) continue;
+            const Rect2 hurt = EnemyHurtRect(e);
+            if (!RectOverlap(body, hurt)) continue;
+            b.bodyHits.push_back(id);
+            HitInfo info;
+            info.damage = 8;
+            info.dirX = b.velocity.x >= 0.0f ? 1.0f : -1.0f;
+            info.knockback = 300.0f;
+            info.launch = 260.0f;
+            info.knockdown = true;
+            info.heavy = true;
+            info.unblockable = true;
+            info.hitstun = 0.40f;
+            info.attackerSkin = b.throwerSkin;
+            const Vector2 c = RectContact(body, hurt);
+            info.contact = {c.x, e.position.y, c.y};
+            const HitResult res = e.ApplyHit(info);
+            if (res == HitResult::Ignored) continue;
+            r.Add(info.damage);
+            r.heavy = true;
+            if (res == HitResult::Killed) ++r.kills;
+            Emit(GameEventType::HitLanded, c.x, e.position.y, b.throwerSkin, HitKind::Heavy, true, info.damage, 0,
+                 false);
+            Spark(fb, info.contact, style.sparkHeavy, true);
+            Feel(fb, HitstopSeconds(info.damage, false, false, false), info.damage, info.dirX);
+        }
+    }
 }
 
 }  // namespace
@@ -136,6 +191,9 @@ Rect2 PlayerHurtRect(const Player& p) {
 
 Rect2 EnemyHurtRect(const StreetEnemy& e) {
     const EnemyProfile& prof = e.Profile();
+    // F1.9: en el suelo (Down / levantandose) el cuerpo es bajo y ancho.
+    if (e.state == StreetEnemyState::Down || e.state == StreetEnemyState::WakeUp)
+        return BodyRect(e.position.x, 76.0f, 0.0f, 36.0f);
     return BodyRect(e.position.x, prof.bodyWidth, e.position.z, prof.bodyHeight);
 }
 
@@ -173,6 +231,25 @@ HitInfo EnemyHitInfo(const StreetEnemy& e, const Player& target) {
     HitInfo info;
     info.damage = static_cast<int>(e.attackDamage);
     info.dirX = target.position.x >= e.position.x ? 1.0f : -1.0f;
+    if (e.state == StreetEnemyState::Attack) {
+        // F1.9: datos del ataque (EnemyAttackDef): dano, empuje, launch, derribo,
+        // bajo / alto / imbloqueable.
+        const EnemyAttackDef& a = e.CurrentAttack();
+        info.damage = std::max(1, static_cast<int>(std::lround(e.attackDamage * a.damageScale)));
+        if (a.kind == EnemyMoveKind::Roar) info.damage = 1;   // el rugido aturde (hitstun), casi sin dano
+        info.knockback = a.knockback;
+        info.launch = a.launch;
+        info.hitstun = a.hitstun;
+        info.knockdown = a.knockdown || a.launch > 0.0f;
+        info.heavy = a.heavy || a.knockdown || e.Profile().hasArmor;
+        info.low = a.low;
+        info.overhead = a.overhead;
+        info.unblockable = a.unblockable;
+        info.priority = e.AttackPriority();
+        info.hitIndex = e.attackHitsDone;
+        info.sourceAttack = e.attackIndex;
+        return info;
+    }
     // Derribo por perfil (B17), no por dano: el Mutant siempre derriba y el Brute
     // con su golpe pesado (HeavySlam). El resto empuja y aturde un poco.
     const bool slam = e.state == StreetEnemyState::Special && e.pendingSpecial == EnemySpecial::HeavySlam;
@@ -192,6 +269,8 @@ HitInfo EnemyHitInfo(const StreetEnemy& e, const Player& target) {
 HitReport ResolvePlayerVsEnemies(Player& player, std::vector<StreetEnemy>& enemies, const StageHitStyle& style,
                                  CombatFeedback& fb) {
     HitReport r;
+    UpdateStompTarget(player, enemies);
+    ResolveFlyingBodies(enemies, style, fb, r);
     if (!player.AttackIsActive() || player.state == PlayerState::Defeat) return r;
     const AttackDef& def = player.CurrentAttackDef();
     if (def.spawnsProjectile || player.attackType == AttackType::Energy) return r;   // la onda la resuelve su proyectil

@@ -30,6 +30,10 @@ Stats GetStats(StreetEnemyType type) {
 
 float DepthScale(float y) { return DepthScaleFor(y); }
 
+// V8: tiempos en el suelo.
+constexpr float kDownSeconds = 0.55f;
+constexpr float kWakeUpSeconds = 0.35f;
+
 struct EnemyAnimationLayout { int columns; int rows; int idleStart; int idleEnd; int walkStart; int walkEnd; int attackStart; int attackEnd; int hitFrame; int deathStart; int deathEnd; };
 EnemyAnimationLayout LayoutFor(StreetEnemyType){ return {4,3,0,3,0,3,4,7,8,10,11}; }
 
@@ -211,6 +215,13 @@ void StreetEnemy::Init(Vector3D startPos, StreetEnemyType enemyType) {
     telegraphing = false;
     pendingSpecial = EnemySpecial::None;
 
+    attackIndex = 0; attackPrevElapsed = 0; lungeApplied = 0; attackHitsDone = 0;
+    telegraphFlash = 0; footstepTimer = 0;
+    juggleUsed = 0; airHits = 0; hitCombo = 0; juggleExhausted = false; otgUsed = false;
+    pendingGroundBounce = groundBounced = pendingWallBounce = wallBounced = false;
+    grabEscapeTimer = 0; throwTimer = 0; throwDuration = 0.6f; throwDamage = 8; throwerSkin = -1;
+    bodyHits.clear();
+
     animator = Animator{};
 }
 
@@ -286,10 +297,74 @@ const char* StreetEnemy::GetStateName() const {
         case StreetEnemyState::Stun:     return "STUN";
         case StreetEnemyState::Retreat:  return "RETREAT";
         case StreetEnemyState::Special:  return "SPECIAL";
-        case StreetEnemyState::Airborne: return "AIRBORNE";
-        default:                          return "DEAD";
+        case StreetEnemyState::Launched: return "LAUNCHED";
+        case StreetEnemyState::Down:     return "DOWN";
+        case StreetEnemyState::WakeUp:   return "WAKEUP";
+        case StreetEnemyState::WallBounce: return "WALLBOUNCE";
+        case StreetEnemyState::Grabbed:  return "GRABBED";
+        case StreetEnemyState::Thrown:   return "THROWN";
+        case StreetEnemyState::Defeat:   return "DEAD";
     }
+    return "DEAD";
 }
+
+namespace {
+
+// Telegrafia (F1.9): evento Telegraph para el audio (solo al pasar a true) y
+// destello rojo de 0.15 s en el sprite.
+void BeginTelegraph(StreetEnemy& e, float seconds, bool special) {
+    if (!e.telegraphing || e.telegraphTimer <= 0.0f) {
+        GameEvent ev;
+        ev.type = GameEventType::Telegraph;
+        ev.x = e.position.x; ev.y = e.position.y;
+        ev.fromEnemy = true;
+        ev.heavy = special || e.Profile().hasArmor;
+        ev.weight = ev.heavy ? 3 : 1;
+        ev.value = static_cast<int>(e.type);
+        EmitGameEvent(ev);
+        e.telegraphFlash = 0.15f;
+    }
+    e.telegraphing = true;
+    e.telegraphTimer = seconds;
+}
+
+int AfterBlockAttack(StreetEnemyType type) {
+    const EnemyMoveSet& m = GetEnemyMoveSet(type);
+    for (std::size_t i = 0; i < m.attacks.size(); ++i)
+        if (m.attacks[i].afterBlock) return static_cast<int>(i);
+    return -1;
+}
+
+// Eleccion del ataque de datos por distancia y estado del jugador (pesos del
+// perfil): golpe bajo / alto x3 contra la guardia, nada bajo si salta.
+int ChooseAttack(const StreetEnemy& e, const Player& player, float horizontal) {
+    const EnemyMoveSet& m = GetEnemyMoveSet(e.type);
+    if (m.attacks.empty()) return 0;
+    float w[8] = {};
+    float total = 0.0f;
+    const bool guarding = player.IsBlocking();
+    const bool airborne = player.position.z > 4.0f;
+    for (std::size_t i = 0; i < m.attacks.size() && i < 8; ++i) {
+        const EnemyAttackDef& a = m.attacks[i];
+        if (a.afterBlock) continue;
+        if (horizontal < a.minDist || horizontal > a.maxDist) continue;
+        if (airborne && (a.low || a.kind == EnemyMoveKind::Roar)) continue;
+        float k = a.weight;
+        if (guarding && a.vsGuard) k *= 3.0f;
+        w[i] = k;
+        total += k;
+    }
+    if (total <= 0.0f) return 0;
+    float pick = static_cast<float>(GetRandomValue(0, 999)) / 1000.0f * total;
+    for (std::size_t i = 0; i < m.attacks.size() && i < 8; ++i) {
+        if (w[i] <= 0.0f) continue;
+        if (pick < w[i]) return static_cast<int>(i);
+        pick -= w[i];
+    }
+    return 0;
+}
+
+}  // namespace
 
 void StreetEnemy::RunSpecial(float dt, const Player& player, CombatWorld* world) {
     const EnemyProfile& profile = Profile();
@@ -377,9 +452,9 @@ void StreetEnemy::Decide(float dt, const Player& player) {
         distance < profile.specialRange && attackCooldown <= 0.0f) {
         pendingSpecial = profile.special;
         specialTimer = profile.specialCooldown;
-        telegraphing = true;
-        telegraphTimer = profile.special == EnemySpecial::Charge ? 0.55f
-                       : profile.special == EnemySpecial::HeavySlam ? 0.62f : 0.35f;
+        BeginTelegraph(*this, profile.special == EnemySpecial::Charge ? 0.55f
+                            : profile.special == EnemySpecial::HeavySlam ? 0.62f : 0.35f,
+                       true);
         comboHits = 0;
         hasHit = false;
         attackElapsed = 0;
@@ -400,16 +475,7 @@ void StreetEnemy::Decide(float dt, const Player& player) {
     const float stopDistance = std::max(72.0f, attackRange * 0.60f);
     if (horizontal < attackRange && depth < attackDepth && horizontal > stopDistance * 0.55f &&
         attackCooldown <= 0.0f) {
-        EnterState(StreetEnemyState::Attack);
-        stateTimer = attackDuration;
-        attackElapsed = 0;
-        hasHit = false;
-        telegraphing = true;
-        telegraphTimer = attackDuration * 0.32f;
-        const float frameTime = type == StreetEnemyType::UrbanNinja ? 0.055f
-                              : type == StreetEnemyType::ChemicalSoldier ? 0.09f : 0.10f;
-        const EnemyAnimationLayout layout = LayoutFor(type);
-        animator.Play({layout.attackStart, layout.attackEnd, frameTime, false});
+        StartAttack(ChooseAttack(*this, player, horizontal));
         return;
     }
 
@@ -454,7 +520,12 @@ const char* SkinClipFor(StreetEnemyState s, int attackVariant) {
         case StreetEnemyState::Special:  return "special";
         case StreetEnemyState::Hit:
         case StreetEnemyState::Stun:     return "hit";
-        case StreetEnemyState::Airborne: return "air";
+        case StreetEnemyState::Launched:
+        case StreetEnemyState::WallBounce:
+        case StreetEnemyState::Thrown:   return "air";
+        case StreetEnemyState::Grabbed:  return "hit";
+        case StreetEnemyState::Down:     return "knockdown";
+        case StreetEnemyState::WakeUp:   return "getup";
         case StreetEnemyState::Defeat:   return "defeat";
         default:                         return "idle";
     }
@@ -481,6 +552,7 @@ void StreetEnemy::Update(float dt, const Player& player, CombatWorld* world) {
     specialTimer = std::max(0.0f, specialTimer - dt);
     hitstunTimer = std::max(0.0f, hitstunTimer - dt);
     hurtShakeT += dt;
+    telegraphFlash = std::max(0.0f, telegraphFlash - dt);
     if (telegraphTimer > 0.0f) {
         telegraphTimer -= dt;
         if (telegraphTimer <= 0.0f) telegraphing = false;
@@ -492,6 +564,10 @@ void StreetEnemy::Update(float dt, const Player& player, CombatWorld* world) {
 
     if (state == StreetEnemyState::Defeat) {
         stateTimer -= dt;
+        if (position.z > 0.0f) {   // derrotado en el aire: cae (antes se quedaba flotando)
+            position.z = std::max(0.0f, position.z + velocity.z * dt - 750.0f * dt * dt);
+            velocity.z -= 1500.0f * dt;
+        }
         if (stateTimer <= 0) active = false;
         return;
     }
@@ -502,17 +578,66 @@ void StreetEnemy::Update(float dt, const Player& player, CombatWorld* world) {
         return;
     }
 
-    if (state == StreetEnemyState::Airborne) {
+    // ---- F1.9: estados sin decision de IA ----
+    if (state == StreetEnemyState::Launched || state == StreetEnemyState::WallBounce) {
+        UpdateAirborne(dt);
+        return;
+    }
+    if (state == StreetEnemyState::Down) {
+        stateTimer -= dt;
+        DampedStep(position.x, velocity.x, 0.84f, dt);
+        position.x = std::clamp(position.x, kStageStartX, kStageEndX - 90.f);
+        if (stateTimer <= 0.0f) {
+            state = StreetEnemyState::WakeUp;
+            stateTimer = kWakeUpSeconds;
+            velocity = {0, 0, 0};
+        }
+        return;
+    }
+    if (state == StreetEnemyState::WakeUp) {
+        stateTimer -= dt;
+        if (stateTimer <= 0.0f) {
+            juggleUsed = 0; airHits = 0; hitCombo = 0; juggleExhausted = false; otgUsed = false;
+            pendingGroundBounce = groundBounced = pendingWallBounce = wallBounced = false;
+            decisionTimer = profile.reactionTime;
+            animator.isFinished = true;   // EnterState(Idle) vuelve a poner el idle
+            EnterState(StreetEnemyState::Idle);
+            PlayIdle(animator, type);
+        }
+        return;
+    }
+    if (state == StreetEnemyState::Grabbed) {
+        grabEscapeTimer += dt;
+        // Los que tienen armadura se zafan a los 0.6 s.
+        if (profile.hasArmor && grabEscapeTimer >= 0.6f) SetGrabbed(false, position);
+        return;
+    }
+    if (state == StreetEnemyState::Thrown) {
+        throwTimer += dt;
+        position.x += velocity.x * dt;
+        position.z += velocity.z * dt - 750.0f * dt * dt;
         velocity.z -= 1500.0f * dt;
-        position.z += velocity.z * dt;
-        DampedStep(position.x, velocity.x, 0.95f, dt);   // B11: por dt
+        if (position.x <= arenaMinX || position.x >= arenaMaxX) {
+            position.x = std::clamp(position.x, arenaMinX, arenaMaxX);
+            velocity.x = -0.3f * velocity.x;
+        }
         position.x = std::clamp(position.x, kStageStartX, kStageEndX - 90.f);
         if (position.z <= 0.0f) {
             position.z = 0.0f;
-            velocity = {velocity.x * 0.4f, 0.0f, 0.0f};
-            state = StreetEnemyState::Hit;     // derribado: tarda en reincorporarse
-            stateTimer = 0.45f;
-            hitstunTimer = std::max(hitstunTimer, 0.45f);
+            hp = std::max(0, hp - throwDamage);   // dano de impacto contra el suelo
+            if (hp == 0) {
+                state = StreetEnemyState::Defeat;
+                stateTimer = 0.85f;
+                const EnemyAnimationLayout layout = LayoutFor(type);
+                if (animator.texture.id != 0) animator.Play({layout.deathStart, layout.deathEnd, .14f, false});
+                GameEvent e;
+                e.type = GameEventType::EnemyKilled;
+                e.x = position.x; e.y = position.y; e.value = static_cast<int>(type);
+                e.heavy = true; e.skin = throwerSkin;
+                EmitGameEvent(e);
+            } else {
+                EnterDown();
+            }
         }
         return;
     }
@@ -522,7 +647,10 @@ void StreetEnemy::Update(float dt, const Player& player, CombatWorld* world) {
         // B11: deslizamiento independiente del frame rate (antes 0.84 por frame).
         DampedStep(position.x, velocity.x, 0.84f, dt);
         DampedStep(position.y, velocity.y, 0.84f, dt);
-        if (stateTimer <= 0 && hitstunTimer <= 0.0f) EnterState(StreetEnemyState::Idle);
+        if (stateTimer <= 0 && hitstunTimer <= 0.0f) {
+            hitCombo = 0;   // se corto la racha: el escalado de combo vuelve a 0
+            EnterState(StreetEnemyState::Idle);
+        }
         position.x = std::clamp(position.x, kStageStartX, kStageEndX - 90.f);
         position.y = std::clamp(position.y, kLaneMinY, kLaneMaxY);
         return;
@@ -534,13 +662,13 @@ void StreetEnemy::Update(float dt, const Player& player, CombatWorld* world) {
         const float dx = player.position.x - position.x;
         position.x += (dx > 0 ? 1.0f : -1.0f) * profile.repositionSpeed * 0.25f * dt;
         if (stateTimer <= 0) {
-            if (profile.special == EnemySpecial::GuardCounter && specialTimer <= 0.0f) {
-                pendingSpecial = EnemySpecial::GuardCounter;
-                specialTimer = profile.specialCooldown;
-                stateTimer = attackDuration;
-                attackElapsed = 0;
-                hasHit = false;
-                EnterState(StreetEnemyState::Attack);
+            const int counter = AfterBlockAttack(type);
+            const bool canCounter = counter >= 0 &&
+                (profile.special == EnemySpecial::GuardCounter ? specialTimer <= 0.0f
+                                                               : GetRandomValue(0, 99) < 50);
+            if (canCounter) {
+                if (profile.special == EnemySpecial::GuardCounter) specialTimer = profile.specialCooldown;
+                StartAttack(counter);
             } else {
                 EnterState(StreetEnemyState::Idle);
             }
@@ -549,13 +677,29 @@ void StreetEnemy::Update(float dt, const Player& player, CombatWorld* world) {
     }
 
     if (state == StreetEnemyState::Attack) {
+        const EnemyAttackDef& a = CurrentAttack();
         stateTimer -= dt;
+        attackPrevElapsed = attackElapsed;
         attackElapsed += dt;
-        if (stateTimer <= 0 || animator.isFinished) {
+        const float dir = facing == Facing::Right ? 1.0f : -1.0f;
+        if (a.lunge > 0.0f) {   // root motion: lunge con outCubic sobre S+A (frena x0.3 al conectar)
+            const float u = std::clamp(attackElapsed / std::max(1e-4f, a.startup + a.active), 0.0f, 1.0f);
+            const float want = a.lunge * CombatEase(Ease::OutCubic, u);
+            float step = want - lungeApplied;
+            if (hasHit) step *= 0.3f;
+            position.x += dir * step;
+            lungeApplied = want;
+        }
+        if (a.hits > 1 && attackElapsed >= a.startup) {   // multi-golpe: re-golpe por tramo del activo
+            const int idx = static_cast<int>((attackElapsed - a.startup) / std::max(1e-4f, a.active / a.hits));
+            if (idx > attackHitsDone && idx < a.hits) { attackHitsDone = idx; hasHit = false; }
+        }
+        if (attackElapsed >= a.Total()) {
             attackCooldown = profile.attackCooldown;
             pendingSpecial = EnemySpecial::None;
             EnterState(StreetEnemyState::Idle);
         }
+        position.x = std::clamp(position.x, kStageStartX, kStageEndX - 90.f);
         return;
     }
 
@@ -608,6 +752,21 @@ void StreetEnemy::Update(float dt, const Player& player, CombatWorld* world) {
         if (GetRandomValue(0, 400) == 0) flankSide = -flankSide;
     }
 
+    // Pasos de los pesados (audio: Footstep, peso 3).
+    const bool walking = state == StreetEnemyState::Chase || state == StreetEnemyState::Position ||
+                         state == StreetEnemyState::Retreat || state == StreetEnemyState::Patrol;
+    if (walking && profile.hasArmor) {
+        footstepTimer -= dt;
+        if (footstepTimer <= 0.0f) {
+            footstepTimer = 0.42f;
+            GameEvent e;
+            e.type = GameEventType::Footstep;
+            e.x = position.x; e.y = position.y; e.weight = 3; e.heavy = true; e.fromEnemy = true;
+            e.value = static_cast<int>(type);
+            EmitGameEvent(e);
+        }
+    }
+
     // --- decision periodica ---
     decisionTimer -= dt;
     if (decisionTimer <= 0.0f && hitstunTimer <= 0.0f) {
@@ -619,9 +778,186 @@ void StreetEnemy::Update(float dt, const Player& player, CombatWorld* world) {
     position.y = std::clamp(position.y, kLaneMinY, kLaneMaxY);
 }
 
+const EnemyAttackDef& StreetEnemy::CurrentAttack() const {
+    const EnemyMoveSet& m = GetEnemyMoveSet(type);
+    static const EnemyAttackDef kNone{};
+    if (m.attacks.empty()) return kNone;
+    return m.attacks[static_cast<std::size_t>(std::clamp(attackIndex, 0, static_cast<int>(m.attacks.size()) - 1))];
+}
+
+float StreetEnemy::AttackScale() const { return EnemyAttackScale(type); }
+int StreetEnemy::JuggleBudget() const { return GetEnemyMoveSet(type).juggleBudget; }
+
+bool StreetEnemy::InAir() const {
+    return state == StreetEnemyState::Launched || state == StreetEnemyState::WallBounce ||
+           (position.z > 0.0f && state != StreetEnemyState::Grabbed && state != StreetEnemyState::Thrown);
+}
+
+void StreetEnemy::StartAttack(int index) {
+    const EnemyMoveSet& m = GetEnemyMoveSet(type);
+    attackIndex = m.attacks.empty() ? 0 : std::clamp(index, 0, static_cast<int>(m.attacks.size()) - 1);
+    const EnemyAttackDef& a = CurrentAttack();
+    EnterState(StreetEnemyState::Attack);
+    stateTimer = a.Total();
+    attackElapsed = 0.0f;
+    attackPrevElapsed = 0.0f;
+    lungeApplied = 0.0f;
+    attackHitsDone = 0;
+    hasHit = false;
+    pendingSpecial = a.counterSpecial ? EnemySpecial::GuardCounter : EnemySpecial::None;
+    BeginTelegraph(*this, a.startup, false);
+    // Los 4 cuadros de ataque cubren arranque + activo; en la recuperacion queda
+    // el ultimo.
+    const EnemyAnimationLayout layout = LayoutFor(type);
+    animator.Play({layout.attackStart, layout.attackEnd, std::max(0.03f, (a.startup + a.active) / 4.0f), false});
+}
+
+void StreetEnemy::EnterDown() {
+    state = StreetEnemyState::Down;
+    stateTimer = kDownSeconds;
+    position.z = 0.0f;
+    velocity = {velocity.x * 0.4f, 0.0f, 0.0f};
+    telegraphing = false;
+    pendingSpecial = EnemySpecial::None;
+    pendingGroundBounce = false;
+    pendingWallBounce = false;
+    bodyHits.clear();
+    GameEvent e;
+    e.type = GameEventType::KnockdownLand;
+    e.x = position.x; e.y = position.y; e.fromEnemy = true;
+    e.heavy = Profile().hasArmor; e.weight = e.heavy ? 3 : 2;
+    e.value = static_cast<int>(type);
+    EmitGameEvent(e);
+}
+
+// V8: gravedad creciente con los golpes en el aire, integracion exacta por paso
+// (misma altura maxima a 30 y a 60 fps), rebote en el borde y en el suelo.
+void StreetEnemy::UpdateAirborne(float dt) {
+    const float g = 1500.0f * (1.0f + 0.12f * static_cast<float>(airHits));
+    position.z += velocity.z * dt - 0.5f * g * dt * dt;
+    velocity.z -= g * dt;
+    DampedStep(position.x, velocity.x, 0.95f, dt);   // B11: por dt
+    if (position.x <= arenaMinX || position.x >= arenaMaxX) {
+        position.x = std::clamp(position.x, arenaMinX, arenaMaxX);
+        if (pendingWallBounce && !wallBounced) {
+            wallBounced = true;
+            pendingWallBounce = false;
+            velocity.x = -0.5f * velocity.x;
+            velocity.z = 260.0f;
+            state = StreetEnemyState::WallBounce;
+            stateTimer = 0.25f;
+            GameEvent e;
+            e.type = GameEventType::KnockdownLand;
+            e.x = position.x; e.y = position.y; e.fromEnemy = true; e.heavy = true; e.weight = 3;
+            EmitGameEvent(e);
+        } else {
+            velocity.x = 0.0f;
+        }
+    }
+    position.x = std::clamp(position.x, kStageStartX, kStageEndX - 90.f);
+    if (state == StreetEnemyState::WallBounce) {
+        stateTimer -= dt;
+        if (stateTimer <= 0.0f) state = StreetEnemyState::Launched;
+    }
+    if (position.z <= 0.0f) {
+        position.z = 0.0f;
+        if (pendingGroundBounce && !groundBounced && !juggleExhausted) {
+            groundBounced = true;
+            pendingGroundBounce = false;
+            velocity.z = 300.0f;
+            velocity.x *= 0.6f;
+            state = StreetEnemyState::Launched;
+            GameEvent e;
+            e.type = GameEventType::KnockdownLand;
+            e.x = position.x; e.y = position.y; e.fromEnemy = true; e.weight = 2;
+            EmitGameEvent(e);
+        } else {
+            EnterDown();
+        }
+    }
+}
+
+bool StreetEnemy::CanBeGrabbed() const {
+    if (!active || IsDefeated()) return false;
+    if (type == StreetEnemyType::Brute || type == StreetEnemyType::Mutant || type == StreetEnemyType::ArmoredGuard)
+        return false;
+    switch (state) {
+        case StreetEnemyState::Launched: case StreetEnemyState::WallBounce: case StreetEnemyState::Down:
+        case StreetEnemyState::WakeUp: case StreetEnemyState::Grabbed: case StreetEnemyState::Thrown:
+            return false;
+        case StreetEnemyState::Attack: {
+            const EnemyAttackDef& a = CurrentAttack();
+            return !(a.armor && attackElapsed <= a.startup + a.active);
+        }
+        default:
+            return true;
+    }
+}
+
+void StreetEnemy::SetGrabbed(bool on, Vector3D hand) {
+    if (!active || IsDefeated()) return;
+    if (on) {
+        if (state != StreetEnemyState::Grabbed) {
+            state = StreetEnemyState::Grabbed;
+            grabEscapeTimer = 0.0f;
+            telegraphing = false;
+            pendingSpecial = EnemySpecial::None;
+            velocity = {0, 0, 0};
+        }
+        position = hand;
+        return;
+    }
+    if (state == StreetEnemyState::Grabbed) {
+        position.z = 0.0f;
+        velocity = {0, 0, 0};
+        attackCooldown = std::max(attackCooldown, 0.3f);
+        EnterState(StreetEnemyState::Idle);
+    }
+}
+
+void StreetEnemy::Throw(const HitInfo& info, Vector3D vel) {
+    if (!active || IsDefeated()) return;
+    if (info.damage > 0) {
+        hp = std::max(0, hp - info.damage);
+        if (hp == 0) {
+            state = StreetEnemyState::Defeat;
+            stateTimer = 0.85f;
+            velocity = vel;
+            const EnemyAnimationLayout layout = LayoutFor(type);
+            if (animator.texture.id != 0) animator.Play({layout.deathStart, layout.deathEnd, .14f, false});
+            GameEvent e;
+            e.type = GameEventType::EnemyKilled;
+            e.x = position.x; e.y = position.y; e.value = static_cast<int>(type);
+            e.heavy = true; e.attack = info.sourceAttack; e.skin = info.attackerSkin;
+            EmitGameEvent(e);
+            return;
+        }
+    }
+    state = StreetEnemyState::Thrown;
+    velocity = vel;
+    position.z = std::max(position.z, 1.0f);
+    throwTimer = 0.0f;
+    // Tiempo de vuelo de la parabola (para el giro de 540 grados).
+    const float disc = vel.z * vel.z + 2.0f * 1500.0f * position.z;
+    throwDuration = std::max(0.2f, (vel.z + std::sqrt(std::max(0.0f, disc))) / 1500.0f);
+    throwerSkin = info.attackerSkin;
+    bodyHits.clear();
+    telegraphing = false;
+    pendingSpecial = EnemySpecial::None;
+    juggleExhausted = true;
+}
+
+bool StreetEnemy::IsFlyingBody() const {
+    if (!active || IsDefeated()) return false;
+    if (state == StreetEnemyState::Thrown) return true;
+    return (state == StreetEnemyState::Launched || state == StreetEnemyState::WallBounce) &&
+           std::fabs(velocity.x) >= 420.0f;
+}
+
 bool StreetEnemy::AttackIsActive() const {
     if (state == StreetEnemyState::Attack) {
-        return attackElapsed >= attackDuration * 0.34f && attackElapsed <= attackDuration * 0.74f;
+        const EnemyAttackDef& a = CurrentAttack();
+        return attackElapsed >= a.startup && attackElapsed <= a.startup + a.active;
     }
     if (state == StreetEnemyState::Special && !telegraphing) {
         return pendingSpecial == EnemySpecial::Charge ||
@@ -634,30 +970,72 @@ bool StreetEnemy::AttackIsActive() const {
 CombatBox StreetEnemy::GetHurtbox() const {
     if (!active || IsDefeated()) return {};
     const EnemyProfile& profile = Profile();
+    if (state == StreetEnemyState::Down) return {position.x - 38.0f, position.y - 36.0f, 76.0f, 36.0f};
     return {position.x - profile.bodyWidth * 0.5f, position.y - profile.bodyHeight,
             profile.bodyWidth, profile.bodyHeight};
 }
 
+namespace {
+// Caja historica de los specials (Charge / HeavySlam / Frenzy), en pantalla.
+CombatBox SpecialBox(const StreetEnemy& e) {
+    const float direction = e.facing == Facing::Right ? 1.f : -1.f;
+    float width = e.attackRange * 0.68f;
+    float height = 52.f;
+    float forward = e.attackRange * 0.52f;
+    if (e.pendingSpecial == EnemySpecial::HeavySlam) { width = 220.f; height = 78.f; forward = 80.f; }
+    else if (e.pendingSpecial == EnemySpecial::Charge) { width = 110.f; height = 92.f; forward = 55.f; }
+    const float cx = e.position.x + direction * forward;
+    const float cy = e.position.y - 66.f;
+    return {cx - width * 0.5f, cy - height * 0.5f, width, height};
+}
+}  // namespace
+
+bool StreetEnemy::AttackShapeHits(const Rect2& hurt, Vector2* contact) const {
+    if (!AttackIsActive()) return false;
+    if (state == StreetEnemyState::Special) {
+        const CombatBox b = SpecialBox(*this);
+        const Rect2 r = ScreenBoxToPlane(b.x, b.y, b.width, b.height, position.y);
+        if (!RectOverlap(r, hurt)) return false;
+        if (contact) *contact = RectContact(r, hurt);
+        return true;
+    }
+    const EnemyAttackDef& a = CurrentAttack();
+    const float s = AttackScale();
+    if (a.areaRadius > 0.0f) {
+        const float r = a.areaRadius * s;
+        const float top = a.kind == EnemyMoveKind::Roar ? 200.0f * s : 40.0f * s;
+        const Rect2 area{position.x - r, position.z - 10.0f, position.x + r, position.z + top};
+        if (!RectOverlap(area, hurt)) return false;
+        if (contact) *contact = RectContact(area, hurt);
+        return true;
+    }
+    const float act = std::max(1e-4f, a.active);
+    const float u = std::clamp((attackElapsed - a.startup) / act, 0.0f, 1.0f);
+    const float uPrev = std::clamp((attackPrevElapsed - a.startup) / act, 0.0f, 1.0f);
+    const float f = facing == Facing::Right ? 1.0f : -1.0f;
+    const ArcHit h = LimbArcVsRect(a.arc, position.x, position.z, f, s, uPrev, u, hurt);
+    if (h.hit && contact) *contact = h.contact;
+    return h.hit;
+}
+
 CombatBox StreetEnemy::GetAttackHitbox() const {
     if (!AttackIsActive()) return {};
-    const EnemyProfile& profile = Profile();
-    const float direction = facing == Facing::Right ? 1.f : -1.f;
-    float width = attackRange * 0.68f;
-    float height = 52.f;
-    float forward = attackRange * 0.52f;
-
-    if (state == StreetEnemyState::Special) {
-        if (pendingSpecial == EnemySpecial::HeavySlam) { width = 220.f; height = 78.f; forward = 80.f; }
-        else if (pendingSpecial == EnemySpecial::Charge) { width = 110.f; height = 92.f; forward = 55.f; }
-    } else if (pendingSpecial == EnemySpecial::GuardCounter) {
-        width = attackRange * 0.95f;
-        forward = attackRange * 0.60f;
+    if (state == StreetEnemyState::Special) return SpecialBox(*this);
+    // Caja envolvente (pantalla) de la forma real: depuracion y compatibilidad.
+    const EnemyAttackDef& a = CurrentAttack();
+    const float s = AttackScale();
+    float x0, x1, h0, h1;
+    if (a.areaRadius > 0.0f) {
+        const float r = a.areaRadius * s;
+        x0 = position.x - r; x1 = position.x + r;
+        h0 = position.z; h1 = position.z + (a.kind == EnemyMoveKind::Roar ? 200.0f : 40.0f) * s;
+    } else {
+        const float u = std::clamp((attackElapsed - a.startup) / std::max(1e-4f, a.active), 0.0f, 1.0f);
+        const LimbPose lp = EvalLimbArc(a.arc, position.x, position.z, facing == Facing::Right ? 1.0f : -1.0f, s, u);
+        x0 = std::min(lp.base.x, lp.tip.x) - lp.radius; x1 = std::max(lp.base.x, lp.tip.x) + lp.radius;
+        h0 = std::min(lp.base.y, lp.tip.y) - lp.radius; h1 = std::max(lp.base.y, lp.tip.y) + lp.radius;
     }
-    (void)profile;
-
-    const float cx = position.x + direction * forward;
-    const float cy = position.y - 66.f;
-    return {cx - width * 0.5f, cy - height * 0.5f, width, height};
+    return {x0, position.y - h1, x1 - x0, h1 - h0};
 }
 
 void StreetEnemy::TakeDamage(int damage, Vector3D knockback) {
@@ -674,20 +1052,41 @@ void StreetEnemy::TakeDamage(int damage, Vector3D knockback) {
 }
 
 bool StreetEnemy::InAttackStartup() const {
-    if (IsTelegraphing()) return true;
-    return state == StreetEnemyState::Attack && attackElapsed < attackDuration * 0.34f;
+    // Ataque de datos: el arranque lo dice su EnemyAttackDef (fiable frame a
+    // frame); el resto (specials), la telegrafia.
+    if (state == StreetEnemyState::Attack) return attackElapsed < CurrentAttack().startup;
+    return IsTelegraphing();
 }
 
 int StreetEnemy::AttackPriority() const {
     if (state == StreetEnemyState::Special) return 3;
+    if (state == StreetEnemyState::Attack && CurrentAttack().armor) return 2;
     return Profile().hasArmor ? 2 : 1;
 }
 
 HitResult StreetEnemy::ApplyHit(const HitInfo& info) {
     if (!active || state == StreetEnemyState::Defeat) return HitResult::Ignored;
+    // F1.9: levantandose es invulnerable; en vuelo de proyeccion no se le golpea;
+    // en el suelo solo entra un golpe otg por derribo.
+    if (state == StreetEnemyState::WakeUp || state == StreetEnemyState::Thrown) return HitResult::Ignored;
+    const bool down = state == StreetEnemyState::Down;
+    if (down && (!info.otg || otgUsed)) return HitResult::Ignored;
     const EnemyProfile& profile = Profile();
+    const bool inAir = InAir();
+    const float dir = info.dirX >= 0.0f ? 1.0f : -1.0f;
+    const float kb = std::fabs(info.knockback);
+
+    // V8: escalado de dano y degradacion de hitstun por racha; presupuesto de juggle.
     int damage = info.damage;
-    const Vector3D knockback{info.dirX * info.knockback, 0.0f, info.launch};
+    if (damage > 0) {
+        const float k = std::max(0.35f, 1.0f - 0.08f * static_cast<float>(std::max(0, hitCombo - 3)));
+        damage = std::max(1, static_cast<int>(std::lround(damage * k)));
+    }
+    const int cost = std::max(1, info.juggleCost);
+    const bool juggleFail = inAir && (juggleExhausted || juggleUsed + cost > JuggleBudget());
+    if (juggleFail && damage > 0) damage = std::max(1, static_cast<int>(std::lround(damage * 0.3f)));
+    const float hitstun = info.hitstun * std::pow(0.92f, static_cast<float>(hitCombo));
+    ++hitCombo;
 
     hurtShakeT = 0.0f;
     hurtShakeAmp = VictimShakeAmplitude(damage);
@@ -710,7 +1109,7 @@ HitResult StreetEnemy::ApplyHit(const HitInfo& info) {
     const EnemyAnimationLayout layout = LayoutFor(type);
 
     if (hp == 0) {
-        velocity = knockback;
+        velocity = {dir * std::min(kb, 300.0f), 0.0f, std::max(0.0f, info.launch)};
         state = StreetEnemyState::Defeat;
         stateTimer = 0.85f;
         telegraphing = false;
@@ -724,23 +1123,84 @@ HitResult StreetEnemy::ApplyHit(const HitInfo& info) {
         return HitResult::Killed;
     }
 
-    // Armor: los pesados no pierden su turno con golpes ligeros.
-    if (profile.hasArmor && damage < profile.armorThreshold &&
-        (state == StreetEnemyState::Attack || state == StreetEnemyState::Special)) {
-        return HitResult::Armored;
+    if (state == StreetEnemyState::Grabbed) return HitResult::Hit;   // rodillazos: solo dano
+
+    // Armor: los pesados no pierden su turno con golpes ligeros; los ataques de
+    // datos con superarmadura (carga corta del Brute) aguantan en arranque + activo.
+    if (!inAir && !down) {
+        if (profile.hasArmor && damage < profile.armorThreshold &&
+            (state == StreetEnemyState::Attack || state == StreetEnemyState::Special)) {
+            return HitResult::Armored;
+        }
+        if (state == StreetEnemyState::Attack) {
+            const EnemyAttackDef& a = CurrentAttack();
+            if (a.armor && attackElapsed <= a.startup + a.active) return HitResult::Armored;
+        }
     }
 
-    velocity = knockback;
-    // Remates con launch lanzan al enemigo por el aire (sin armadura activa).
-    // Golpeado en el aire (juggle): sigue en el aire con un pequeno rebote.
-    const bool airborne = knockback.z > 0.0f || position.z > 0.0f;
-    if (position.z > 0.0f) velocity.z = std::max(knockback.z, 160.0f);
-    state = airborne ? StreetEnemyState::Airborne : StreetEnemyState::Hit;
-    stateTimer = std::max(0.05f, info.hitstun);   // hitstun de la tabla (B03/B17)
-    ApplyHitstun(info.hitstun);
     telegraphing = false;
     pendingSpecial = EnemySpecial::None;
     if (animator.texture.id != 0) animator.Play({layout.hitFrame, layout.hitFrame, .09f, false, {8, 9}});
+
+    if (down) {   // OTG: rebote corto y vuelve al suelo (no reinicia el derribo)
+        otgUsed = true;
+        juggleExhausted = true;
+        velocity = {dir * 60.0f, 0.0f, 150.0f};
+        position.z = std::max(position.z, 0.5f);
+        state = StreetEnemyState::Launched;
+        return HitResult::Hit;
+    }
+
+    if (inAir) {
+        if (juggleFail) {   // presupuesto agotado: no levanta, cae a Down
+            juggleExhausted = true;
+            pendingGroundBounce = false;
+            velocity.z = std::min(velocity.z, 0.0f);
+            velocity.x = dir * std::min(kb, 180.0f) * 0.5f;
+        } else {
+            juggleUsed += cost;
+            ++airHits;
+            velocity.z = info.launch < 0.0f ? info.launch
+                                             : std::max(info.launch, 220.0f) * std::pow(0.9f, static_cast<float>(airHits));
+            velocity.x = dir * std::min(kb, 180.0f);
+            if (info.groundBounce && !groundBounced) pendingGroundBounce = true;
+            if (info.wallBounce && !wallBounced) { pendingWallBounce = true; velocity.x = dir * kb; }
+        }
+        if (state != StreetEnemyState::WallBounce) state = StreetEnemyState::Launched;
+        stateTimer = hitstun;
+        return HitResult::Hit;
+    }
+
+    // En el suelo.
+    const bool groundSlam = info.groundBounce && !groundBounced;   // picada sobre alguien de pie
+    if (info.launch > 0.0f || groundSlam || (info.knockdown && !info.low)) {
+        juggleUsed = cost;
+        airHits = 0;
+        juggleExhausted = false;
+        otgUsed = false;
+        groundBounced = groundSlam;
+        wallBounced = false;
+        pendingGroundBounce = false;
+        pendingWallBounce = info.wallBounce;
+        velocity.z = info.launch > 0.0f ? info.launch : groundSlam ? 300.0f : 240.0f;
+        velocity.x = dir * (info.wallBounce ? kb : std::min(kb, 300.0f));
+        position.z = std::max(position.z, 0.5f);
+        state = StreetEnemyState::Launched;
+        stateTimer = hitstun;
+        bodyHits.clear();
+        return HitResult::Hit;
+    }
+    if (info.knockdown && info.low) {   // barrida: al suelo directo
+        otgUsed = false;
+        velocity = {dir * std::min(kb, 200.0f), 0.0f, 0.0f};
+        EnterDown();
+        return HitResult::Hit;
+    }
+
+    velocity = {dir * kb, 0.0f, 0.0f};
+    state = StreetEnemyState::Hit;
+    stateTimer = std::max(0.05f, hitstun);   // hitstun de la tabla (B03/B17), degradado (V8)
+    ApplyHitstun(hitstun);
     return HitResult::Hit;
 }
 
@@ -782,10 +1242,68 @@ void StreetEnemy::Draw() const {
         if (skinLabel) DrawText(skinLabel, (int)p.x - MeasureText(skinLabel, 10) / 2, (int)p.y + 8, 10, {255, 200, 90, 220});
     } else if (authored) {
         Color tint = WHITE;
-        if (state == StreetEnemyState::Hit) tint = {255, 225, 225, 255};
+        if (state == StreetEnemyState::Hit || state == StreetEnemyState::Launched ||
+            state == StreetEnemyState::WallBounce || state == StreetEnemyState::Grabbed)
+            tint = {255, 225, 225, 255};
         if (state == StreetEnemyState::Stun) tint = {215, 215, 160, 255};
         if (state == StreetEnemyState::Defeat) tint = {180, 180, 185, 255};
-        animator.Draw(p, visualScale, facing == Facing::Left, tint);
+        if (telegraphFlash > 0.0f) {   // destello rojo al empezar a telegrafiar
+            const float k = std::clamp(telegraphFlash / 0.15f, 0.0f, 1.0f) * 0.65f;
+            tint.g = (unsigned char)(tint.g * (1.0f - k));
+            tint.b = (unsigned char)(tint.b * (1.0f - k));
+        }
+        // F1.9: poses procedurales sin arte nuevo (cuadros 8-11 girados/aplastados).
+        const float fs = facing == Facing::Right ? 1.0f : -1.0f;
+        int frame = -1;
+        float angle = 0.0f, sy = 1.0f;
+        switch (state) {
+            case StreetEnemyState::Launched:
+            case StreetEnemyState::WallBounce: {
+                frame = velocity.z >= 0.0f ? 8 : 9;
+                const float deg = std::atan2(velocity.z, std::max(1.0f, std::fabs(velocity.x))) * 57.29578f * 0.6f;
+                angle = -fs * deg;   // hacia atras (lejos de su frente)
+                break;
+            }
+            case StreetEnemyState::Down:
+                frame = (kDownSeconds - stateTimer) < 0.12f ? 10 : 11;
+                sy = 0.55f;
+                break;
+            case StreetEnemyState::WakeUp: {
+                const float t = kWakeUpSeconds - stateTimer;
+                frame = t < 0.12f ? 11 : t < 0.24f ? 10 : 0;
+                sy = 0.55f + 0.45f * std::clamp(t / kWakeUpSeconds, 0.0f, 1.0f);
+                break;
+            }
+            case StreetEnemyState::Grabbed:
+                frame = 8;
+                break;
+            case StreetEnemyState::Thrown: {
+                frame = 8;
+                const float u = std::clamp(throwTimer / std::max(0.05f, throwDuration), 0.0f, 1.0f);
+                angle = (velocity.x >= 0.0f ? 1.0f : -1.0f) * 540.0f * u;
+                break;
+            }
+            case StreetEnemyState::Attack:
+                sy = CurrentAttack().sy;
+                break;
+            default:
+                break;
+        }
+        if (frame >= 0 || sy != 1.0f || angle != 0.0f) {
+            const int f = frame >= 0 ? frame : animator.currentFrame;
+            Vector2 at = p;
+            if (angle != 0.0f && (state == StreetEnemyState::Thrown || state == StreetEnemyState::Launched ||
+                                  state == StreetEnemyState::WallBounce)) {
+                // Giro alrededor del centro del cuerpo, no de los pies.
+                const float half = s.bodyHeight * visualScale / s.scale * 0.5f;
+                const float rad = angle * 0.0174533f;
+                at.x -= std::sin(rad) * half;
+                at.y += std::cos(rad) * half - half;
+            }
+            animator.DrawFrameScaled(f, at, visualScale, visualScale * sy, facing == Facing::Left, tint, angle);
+        } else {
+            animator.Draw(p, visualScale, facing == Facing::Left, tint);
+        }
     } else {
         Color tint = state == StreetEnemyState::Hit ? WHITE
                    : state == StreetEnemyState::Defeat ? Color{110, 110, 115, 255}

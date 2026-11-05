@@ -1,5 +1,7 @@
 #include "game/enemies/EnemyBrain.h"
 #include "game/StreetEnemy.h"
+#include <algorithm>
+#include <cmath>
 
 namespace district_fury {
 namespace {
@@ -103,6 +105,158 @@ const char* EnemySpecialName(EnemySpecial special) {
         case EnemySpecial::Frenzy:        return "FRENESI";
         default:                          return "-";
     }
+}
+
+// ---------------------------------------------------------------------------
+// F1.9: ataques de datos por tipo.
+// ---------------------------------------------------------------------------
+namespace {
+
+// Golpe frontal "historico": reproduce la caja de antes (de 0.18 R a 0.86 R al
+// frente, alto 44-88 px) como arco del miembro, en px nominales (/ visualScale).
+LimbArc StrikeArc(const EnemyProfile& p, float reachFrac = 0.86f, float ph = -66.0f, float r = 22.0f) {
+    LimbArc a;
+    a.px = 8.0f;
+    a.ph = ph;
+    const float reach = p.attackRange * reachFrac / p.visualScale;
+    a.L1 = std::max(30.0f, reach - a.px - r);   // la capsula llega a reach (punta + radio)
+    a.L0 = a.L1 * 0.64f;
+    a.theta0 = 0.0f; a.theta1 = 0.0f;
+    a.r = r;
+    a.ease = Ease::OutCubic;
+    return a;
+}
+
+// Ataque A: el historico de cada tipo (antes activo del 34 % al 74 % de
+// attackDuration, cortado por el fin de la animacion de 4 cuadros).
+EnemyAttackDef Base(const EnemyProfile& p, const char* name, float s, float a, float r) {
+    EnemyAttackDef d;
+    d.name = name;
+    d.startup = s; d.active = a; d.recovery = r;
+    d.arc = StrikeArc(p);
+    d.heavy = p.hasArmor;
+    d.knockback = d.heavy ? 220.0f : 120.0f;
+    d.hitstun = d.heavy ? 0.20f : 0.13f;
+    return d;
+}
+
+EnemyMoveSet Build(StreetEnemyType type) {
+    const EnemyProfile& p = GetEnemyProfile(type);
+    EnemyMoveSet m;
+    m.juggleBudget = (type == StreetEnemyType::Brute || type == StreetEnemyType::Mutant ||
+                      type == StreetEnemyType::ArmoredGuard) ? 4 : 6;
+    switch (type) {
+        case StreetEnemyType::Punk: {
+            EnemyAttackDef a = Base(p, "JAB", 0.18f, 0.14f, 0.12f);
+            a.weight = 2.0f;
+            EnemyAttackDef b = Base(p, "PATADA BAJA", 0.24f, 0.12f, 0.18f);
+            b.low = true; b.sy = 0.85f; b.damageScale = 1.1f; b.knockback = 140.0f;
+            b.arc = StrikeArc(p, 0.92f, -22.0f, 18.0f); b.arc.theta0 = -12.0f; b.arc.theta1 = -4.0f;
+            b.vsGuard = true;
+            m.attacks = {a, b};
+            break;
+        }
+        case StreetEnemyType::Charger: {
+            EnemyAttackDef a = Base(p, "GOLPE", 0.18f, 0.18f, 0.10f);
+            a.weight = 1.5f;
+            EnemyAttackDef b = Base(p, "HOMBRO", 0.22f, 0.12f, 0.16f);
+            b.lunge = 60.0f; b.damageScale = 1.2f; b.knockback = 260.0f; b.hitstun = 0.18f;
+            b.arc = StrikeArc(p, 0.62f, -72.0f, 26.0f);
+            b.minDist = 70.0f;
+            m.attacks = {a, b};
+            break;
+        }
+        case StreetEnemyType::Brute: {
+            EnemyAttackDef a = Base(p, "GOLPE PESADO", 0.24f, 0.16f, 0.14f);
+            a.knockdown = true; a.weight = 2.0f;
+            EnemyAttackDef b = Base(p, "PISOTON", 0.34f, 0.10f, 0.22f);
+            b.low = true; b.areaRadius = 80.0f; b.sy = 0.9f; b.knockback = 160.0f; b.hitstun = 0.22f;
+            b.maxDist = 95.0f; b.vsGuard = true;
+            EnemyAttackDef c = Base(p, "CARGA CORTA", 0.30f, 0.16f, 0.20f);
+            c.lunge = 80.0f; c.armor = true; c.damageScale = 1.15f; c.knockback = 300.0f;
+            c.arc = StrikeArc(p, 0.70f, -70.0f, 26.0f); c.minDist = 80.0f;
+            m.attacks = {a, b, c};
+            break;
+        }
+        case StreetEnemyType::Enforcer: {
+            EnemyAttackDef a = Base(p, "PORRA", 0.26f, 0.14f, 0.14f);
+            a.weight = 2.0f;
+            EnemyAttackDef b = Base(p, "GOLPE ALTO", 0.32f, 0.12f, 0.18f);
+            b.overhead = true; b.damageScale = 1.2f; b.knockback = 180.0f; b.hitstun = 0.18f;
+            b.arc = StrikeArc(p, 0.80f, -104.0f, 22.0f); b.arc.theta0 = 70.0f; b.arc.theta1 = -35.0f;
+            b.arc.L0 = b.arc.L1 * 0.8f; b.vsGuard = true;
+            EnemyAttackDef c = Base(p, "CONTRA", 0.12f, 0.14f, 0.18f);
+            c.arc = StrikeArc(p, 1.0f); c.damageScale = 1.1f; c.knockback = 260.0f; c.afterBlock = true;
+            m.attacks = {a, b, c};
+            break;
+        }
+        case StreetEnemyType::ChemicalSoldier: {
+            EnemyAttackDef a = Base(p, "ROCIADOR", 0.26f, 0.10f, 0.12f);
+            a.weight = 2.0f;
+            EnemyAttackDef b = Base(p, "CULATAZO", 0.16f, 0.10f, 0.14f);
+            b.damageScale = 0.8f; b.knockback = 220.0f; b.arc = StrikeArc(p, 0.55f, -76.0f, 22.0f);
+            b.maxDist = 110.0f; b.weight = 1.5f;
+            m.attacks = {a, b};
+            break;
+        }
+        case StreetEnemyType::UrbanNinja: {
+            EnemyAttackDef a = Base(p, "TAJO", 0.15f, 0.07f, 0.08f);
+            a.weight = 2.0f;
+            EnemyAttackDef b = Base(p, "PATADA VOLADORA", 0.22f, 0.16f, 0.18f);
+            b.lunge = 120.0f; b.launch = 300.0f; b.knockdown = true; b.knockback = 260.0f; b.damageScale = 1.1f;
+            b.arc = StrikeArc(p, 0.60f, -60.0f, 22.0f); b.arc.theta0 = 10.0f; b.arc.theta1 = -8.0f;
+            b.minDist = 90.0f;
+            EnemyAttackDef c = Base(p, "DOBLE TAJO", 0.12f, 0.16f, 0.12f);
+            c.hits = 2; c.damageScale = 0.6f; c.hitstun = 0.16f;
+            m.attacks = {a, b, c};
+            break;
+        }
+        case StreetEnemyType::Mutant: {
+            EnemyAttackDef a = Base(p, "GOLPE PESADO", 0.28f, 0.12f, 0.14f);
+            a.knockdown = true; a.heavy = true; a.weight = 2.0f;
+            EnemyAttackDef b = Base(p, "BARRIDO", 0.30f, 0.14f, 0.20f);
+            b.low = true; b.knockdown = true; b.sy = 0.85f; b.knockback = 200.0f;
+            b.arc = StrikeArc(p, 0.95f, -20.0f, 18.0f); b.arc.theta0 = -8.0f; b.arc.theta1 = -2.0f;
+            b.vsGuard = true;
+            EnemyAttackDef c = Base(p, "RUGIDO", 0.35f, 0.10f, 0.25f);
+            c.kind = EnemyMoveKind::Roar; c.areaRadius = 120.0f; c.damageScale = 0.0f; c.hitstun = 0.40f;
+            c.knockback = 0.0f; c.unblockable = true; c.heavy = false; c.maxDist = 120.0f; c.weight = 0.6f;
+            m.attacks = {a, b, c};
+            break;
+        }
+        case StreetEnemyType::ArmoredGuard:
+        default: {
+            if (type != StreetEnemyType::ArmoredGuard) break;
+            EnemyAttackDef a = Base(p, "ESCUDO", 0.27f, 0.13f, 0.14f);
+            a.weight = 2.0f;
+            EnemyAttackDef b = Base(p, "EMPUJON", 0.26f, 0.12f, 0.18f);
+            b.knockback = 520.0f; b.damageScale = 0.8f; b.arc = StrikeArc(p, 0.70f, -70.0f, 30.0f);
+            EnemyAttackDef c = Base(p, "CONTRA", 0.27f, 0.13f, 0.14f);
+            c.arc = StrikeArc(p, 1.075f); c.afterBlock = true; c.counterSpecial = true;
+            m.attacks = {a, b, c};
+            break;
+        }
+    }
+    return m;
+}
+
+}  // namespace
+
+const EnemyMoveSet& GetEnemyMoveSet(StreetEnemyType type) {
+    static const EnemyMoveSet kSets[8] = {
+        Build(StreetEnemyType::Punk), Build(StreetEnemyType::Brute), Build(StreetEnemyType::Charger),
+        Build(StreetEnemyType::Enforcer), Build(StreetEnemyType::ChemicalSoldier),
+        Build(StreetEnemyType::UrbanNinja), Build(StreetEnemyType::Mutant), Build(StreetEnemyType::ArmoredGuard)};
+    const int i = static_cast<int>(type);
+    return kSets[(i >= 0 && i < 8) ? i : 0];
+}
+
+float EnemyAttackScale(StreetEnemyType type) { return GetEnemyProfile(type).visualScale; }
+
+float EnemyAttackReach(const EnemyAttackDef& a, float scale) {
+    if (a.areaRadius > 0.0f) return a.areaRadius * scale;
+    const float th = a.arc.theta1 * 3.14159265f / 180.0f;
+    return scale * (a.arc.px + a.arc.L1 * std::cos(th) + a.arc.r);
 }
 
 }  // namespace district_fury
