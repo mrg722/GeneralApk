@@ -877,7 +877,14 @@
           0.05,
           0.06
         ],
-        "loop": false
+        "loop": false,
+        "scales": [
+          1.0,
+          0.64,
+          0.64,
+          0.64,
+          0.64
+        ]
       },
       "punch1": {
         "frames": [
@@ -924,7 +931,14 @@
           0.1,
           0.12
         ],
-        "loop": false
+        "loop": false,
+        "scales": [
+          0.64,
+          0.64,
+          0.64,
+          0.64,
+          0.64
+        ]
       },
       "kick": {
         "frames": [
@@ -943,7 +957,15 @@
           0.08,
           0.09
         ],
-        "loop": false
+        "loop": false,
+        "scales": [
+          0.64,
+          0.64,
+          0.64,
+          0.64,
+          0.64,
+          0.64
+        ]
       },
       "energy": {
         "frames": [
@@ -964,7 +986,16 @@
           0.1,
           0.14
         ],
-        "loop": false
+        "loop": false,
+        "scales": [
+          0.64,
+          0.64,
+          0.64,
+          0.64,
+          0.64,
+          1.0,
+          1.0
+        ]
       },
       "projectile": {
         "frames": [
@@ -996,7 +1027,13 @@
           0.1,
           0.14
         ],
-        "loop": false
+        "loop": false,
+        "scales": [
+          0.64,
+          0.64,
+          0.64,
+          0.64
+        ]
       },
       "rage_attack": {
         "frames": [
@@ -1021,7 +1058,18 @@
           0.12,
           0.16
         ],
-        "loop": false
+        "loop": false,
+        "scales": [
+          0.64,
+          0.64,
+          0.64,
+          0.64,
+          0.64,
+          0.64,
+          1.0,
+          1.0,
+          1.0
+        ]
       },
       "finisher": {
         "frames": [
@@ -1040,7 +1088,15 @@
           0.12,
           0.16
         ],
-        "loop": false
+        "loop": false,
+        "scales": [
+          0.64,
+          0.64,
+          0.64,
+          0.64,
+          0.64,
+          0.64
+        ]
       },
       "block": {
         "frames": [
@@ -1092,26 +1148,22 @@
       },
       "knockdown": {
         "frames": [
-          277,
-          278,
-          279,
+          102,
+          103,
           104
         ],
         "durations": [
           0.08,
-          0.09,
           0.1,
-          0.12
+          0.16
         ],
         "loop": false
       },
       "getup": {
         "frames": [
-          107,
-          108,
           109,
-          280,
-          281,
+          108,
+          107,
           110,
           111
         ],
@@ -1119,8 +1171,6 @@
           0.08,
           0.08,
           0.08,
-          0.09,
-          0.09,
           0.08,
           0.08
         ],
@@ -1128,20 +1178,21 @@
       },
       "defeat": {
         "frames": [
-          102,
-          103,
-          104,
-          105,
-          106
+          299,
+          300,
+          301
         ],
         "durations": [
-          0.1,
-          0.1,
           0.12,
-          0.15,
-          0.3
+          0.16,
+          0.45
         ],
-        "loop": false
+        "loop": false,
+        "scales": [
+          1.05,
+          1.05,
+          1.05
+        ]
       },
       "recovery": {
         "frames": [
@@ -1161,7 +1212,11 @@
           0.3,
           0.6
         ],
-        "loop": false
+        "loop": false,
+        "scales": [
+          1.15,
+          1.15
+        ]
       },
       "turn": {
         "frames": [
@@ -1203,7 +1258,21 @@
           0.1,
           0.18
         ],
-        "loop": false
+        "loop": false,
+        "scales": [
+          1.15,
+          1.15,
+          1.15,
+          1.15,
+          1.15,
+          1.15,
+          1.15,
+          1.15,
+          1.15,
+          1.15,
+          1.15,
+          1.15
+        ]
       },
       "landing": {
         "frames": [
@@ -1217,6 +1286,434 @@
           0.05,
           0.05,
           0.05
+        ],
+        "loop": false
+      },
+      "jump": {
+        "frames": [
+          21,
+          22,
+          23,
+          24
+        ],
+        "durations": [
+          0.05,
+          0.07,
+          0.08,
+          0.14
+        ],
+        "loop": false
+      },
+      "jump_rise": {
+        "frames": [
+          21,
+          22,
+          23,
+          24
+        ],
+        "durations": [
+          0.05,
+          0.07,
+          0.08,
+          0.14
+        ],
+        "loop": false
+      },
+      "jump_fall": {
+        "frames": [
+          27
+        ],
+        "durations": [
+          0.2
+        ],
+        "loop": false
+      },
+      "punch_hook": {
+        "frames": [
+          122,
+          123,
+          124,
+          135
+        ],
+        "durations": [
+          0.06,
+          0.06,
+          0.09,
+          0.17
+        ],
+        "loop": false
+      },
+      "media_luna": {
+        "frames": [
+          113,
+          53,
+          58
+        ],
+        "durations": [
+          0.15,
+          0.1,
+          0.2667
+        ],
+        "loop": false
+      },
+      "kick_front": {
+        "frames": [
+          52,
+          118,
+          54
+        ],
+        "durations": [
+          0.1167,
+          0.0833,
+          0.1667
+        ],
+        "loop": false
+      },
+      "kick2": {
+        "frames": [
+          51,
+          57,
+          56
+        ],
+        "durations": [
+          0.1333,
+          0.1,
+          0.2
+        ],
+        "loop": false
+      },
+      "kick3": {
+        "frames": [
+          52,
+          53,
+          58
+        ],
+        "durations": [
+          0.1833,
+          0.1,
+          0.3
+        ],
+        "loop": false
+      },
+      "kick_launcher": {
+        "frames": [
+          56,
+          60,
+          77
+        ],
+        "durations": [
+          0.1333,
+          0.0833,
+          0.2667
+        ],
+        "loop": false
+      },
+      "fwd_punch": {
+        "frames": [
+          121,
+          45,
+          46
+        ],
+        "durations": [
+          0.2,
+          0.0833,
+          0.2333
+        ],
+        "loop": false
+      },
+      "fwd_kick": {
+        "frames": [
+          27,
+          30,
+          33
+        ],
+        "durations": [
+          0.1667,
+          0.1,
+          0.2333
+        ],
+        "loop": false
+      },
+      "back_elbow": {
+        "frames": [
+          54,
+          55,
+          56
+        ],
+        "durations": [
+          0.1,
+          0.0667,
+          0.2
+        ],
+        "loop": false
+      },
+      "spin_kick": {
+        "frames": [
+          52,
+          86,
+          77
+        ],
+        "durations": [
+          0.15,
+          0.1333,
+          0.2667
+        ],
+        "loop": false
+      },
+      "sweep": {
+        "frames": [
+          71,
+          75,
+          76
+        ],
+        "durations": [
+          0.1167,
+          0.1,
+          0.2667
+        ],
+        "loop": false
+      },
+      "uppercut": {
+        "frames": [
+          61,
+          63,
+          60
+        ],
+        "durations": [
+          0.1,
+          0.05,
+          0.35
+        ],
+        "loop": false
+      },
+      "stomp": {
+        "frames": [
+          22,
+          39,
+          40
+        ],
+        "durations": [
+          0.1667,
+          0.0667,
+          0.2333
+        ],
+        "loop": false
+      },
+      "dash_kick": {
+        "frames": [
+          72,
+          74,
+          73
+        ],
+        "durations": [
+          0.0667,
+          0.1667,
+          0.2333
+        ],
+        "loop": false
+      },
+      "air_punch": {
+        "frames": [
+          35,
+          36
+        ],
+        "durations": [
+          0.0667,
+          0.2333
+        ],
+        "loop": false
+      },
+      "air_punch2": {
+        "frames": [
+          37,
+          34
+        ],
+        "durations": [
+          0.0667,
+          0.2333
+        ],
+        "loop": false
+      },
+      "air_kick": {
+        "frames": [
+          28,
+          30
+        ],
+        "durations": [
+          0.0833,
+          0.3
+        ],
+        "loop": false
+      },
+      "dive_kick": {
+        "frames": [
+          32,
+          33
+        ],
+        "durations": [
+          0.1,
+          0.5
+        ],
+        "loop": false
+      },
+      "air_spike": {
+        "frames": [
+          23,
+          38
+        ],
+        "durations": [
+          0.1333,
+          0.3167
+        ],
+        "loop": false
+      },
+      "rising_uppercut": {
+        "frames": [
+          129,
+          130,
+          131,
+          132,
+          133
+        ],
+        "durations": [
+          0.05,
+          0.0833,
+          0.1167,
+          0.1667,
+          0.2
+        ],
+        "loop": false
+      },
+      "hurricane": {
+        "frames": [
+          30,
+          31,
+          32,
+          34
+        ],
+        "durations": [
+          0.1333,
+          0.25,
+          0.25,
+          0.2667
+        ],
+        "loop": false
+      },
+      "drill_kick": {
+        "frames": [
+          31,
+          86,
+          33
+        ],
+        "durations": [
+          0.1667,
+          0.2333,
+          0.3
+        ],
+        "loop": false
+      },
+      "signature1": {
+        "frames": [
+          126,
+          139,
+          140,
+          127
+        ],
+        "durations": [
+          0.2,
+          0.1667,
+          0.2,
+          0.2333
+        ],
+        "loop": false
+      },
+      "signature2": {
+        "frames": [
+          130,
+          131,
+          132,
+          134
+        ],
+        "durations": [
+          0.2333,
+          0.1667,
+          0.2,
+          0.2667
+        ],
+        "loop": false
+      },
+      "signature3": {
+        "frames": [
+          143,
+          144,
+          145,
+          141
+        ],
+        "durations": [
+          0.2667,
+          0.1333,
+          0.1667,
+          0.3
+        ],
+        "loop": false
+      },
+      "grab": {
+        "frames": [
+          114
+        ],
+        "durations": [
+          0.2
+        ],
+        "loop": false
+      },
+      "grab_knee": {
+        "frames": [
+          54
+        ],
+        "durations": [
+          0.2
+        ],
+        "loop": false
+      },
+      "throw_forward": {
+        "frames": [
+          47,
+          50
+        ],
+        "durations": [
+          0.1,
+          0.2
+        ],
+        "loop": false
+      },
+      "throw_back": {
+        "frames": [
+          67
+        ],
+        "durations": [
+          0.25
+        ],
+        "loop": false
+      },
+      "guard_counter": {
+        "frames": [
+          88,
+          46
+        ],
+        "durations": [
+          0.08,
+          0.2
+        ],
+        "loop": false
+      },
+      "wakeup_attack": {
+        "frames": [
+          111,
+          75
+        ],
+        "durations": [
+          0.1,
+          0.2
         ],
         "loop": false
       }
@@ -1626,7 +2123,7 @@
         "loop": false
       }
     },
-    "rayder_kf_white": {
+    "max_white": {
       "idle": {
         "frames": [
           0,
@@ -1778,7 +2275,13 @@
           0.12,
           0.18
         ],
-        "loop": false
+        "loop": false,
+        "scales": [
+          1.15,
+          1.15,
+          1.15,
+          1.15
+        ]
       },
       "projectile": {
         "frames": [
@@ -1806,7 +2309,11 @@
           0.12,
           0.26
         ],
-        "loop": false
+        "loop": false,
+        "scales": [
+          1.15,
+          1.15
+        ]
       },
       "rage_attack": {
         "frames": [
@@ -1821,7 +2328,13 @@
           0.12,
           0.15
         ],
-        "loop": false
+        "loop": false,
+        "scales": [
+          1.15,
+          1.15,
+          1.15,
+          1.15
+        ]
       },
       "finisher": {
         "frames": [
@@ -1834,7 +2347,12 @@
           0.2,
           0.28
         ],
-        "loop": false
+        "loop": false,
+        "scales": [
+          1.15,
+          1.15,
+          1.15
+        ]
       },
       "block": {
         "frames": [
@@ -1886,18 +2404,22 @@
       },
       "knockdown": {
         "frames": [
+          102,
+          103,
           104
         ],
         "durations": [
-          0.1
+          0.08,
+          0.1,
+          0.16
         ],
         "loop": false
       },
       "getup": {
         "frames": [
-          107,
-          108,
           109,
+          108,
+          107,
           110,
           111
         ],
@@ -1914,12 +2436,14 @@
         "frames": [
           102,
           103,
-          104
+          104,
+          105
         ],
         "durations": [
           0.1,
           0.12,
-          0.1
+          0.14,
+          0.4
         ],
         "loop": false
       },
@@ -1940,6 +2464,460 @@
         "durations": [
           0.25,
           0.6
+        ],
+        "loop": false
+      },
+      "jump": {
+        "frames": [
+          21,
+          22,
+          23,
+          24
+        ],
+        "durations": [
+          0.05,
+          0.07,
+          0.08,
+          0.14
+        ],
+        "loop": false
+      },
+      "jump_rise": {
+        "frames": [
+          21,
+          22,
+          23,
+          24
+        ],
+        "durations": [
+          0.05,
+          0.07,
+          0.08,
+          0.14
+        ],
+        "loop": false
+      },
+      "jump_fall": {
+        "frames": [
+          27
+        ],
+        "durations": [
+          0.2
+        ],
+        "loop": false
+      },
+      "punch_hook": {
+        "frames": [
+          122,
+          123,
+          124,
+          135
+        ],
+        "durations": [
+          0.06,
+          0.06,
+          0.09,
+          0.17
+        ],
+        "loop": false
+      },
+      "media_luna": {
+        "frames": [
+          113,
+          53,
+          58
+        ],
+        "durations": [
+          0.15,
+          0.1,
+          0.2667
+        ],
+        "loop": false
+      },
+      "kick_front": {
+        "frames": [
+          52,
+          118,
+          54
+        ],
+        "durations": [
+          0.1167,
+          0.0833,
+          0.1667
+        ],
+        "loop": false
+      },
+      "kick2": {
+        "frames": [
+          51,
+          57,
+          56
+        ],
+        "durations": [
+          0.1333,
+          0.1,
+          0.2
+        ],
+        "loop": false
+      },
+      "kick3": {
+        "frames": [
+          52,
+          53,
+          58
+        ],
+        "durations": [
+          0.1833,
+          0.1,
+          0.3
+        ],
+        "loop": false
+      },
+      "kick_launcher": {
+        "frames": [
+          56,
+          60,
+          77
+        ],
+        "durations": [
+          0.1333,
+          0.0833,
+          0.2667
+        ],
+        "loop": false
+      },
+      "fwd_punch": {
+        "frames": [
+          121,
+          45,
+          46
+        ],
+        "durations": [
+          0.2,
+          0.0833,
+          0.2333
+        ],
+        "loop": false
+      },
+      "fwd_kick": {
+        "frames": [
+          27,
+          30,
+          33
+        ],
+        "durations": [
+          0.1667,
+          0.1,
+          0.2333
+        ],
+        "loop": false
+      },
+      "back_elbow": {
+        "frames": [
+          54,
+          55,
+          56
+        ],
+        "durations": [
+          0.1,
+          0.0667,
+          0.2
+        ],
+        "loop": false
+      },
+      "spin_kick": {
+        "frames": [
+          52,
+          86,
+          77
+        ],
+        "durations": [
+          0.15,
+          0.1333,
+          0.2667
+        ],
+        "loop": false
+      },
+      "sweep": {
+        "frames": [
+          71,
+          75,
+          76
+        ],
+        "durations": [
+          0.1167,
+          0.1,
+          0.2667
+        ],
+        "loop": false
+      },
+      "uppercut": {
+        "frames": [
+          61,
+          63,
+          60
+        ],
+        "durations": [
+          0.1,
+          0.05,
+          0.35
+        ],
+        "loop": false
+      },
+      "stomp": {
+        "frames": [
+          22,
+          39,
+          40
+        ],
+        "durations": [
+          0.1667,
+          0.0667,
+          0.2333
+        ],
+        "loop": false
+      },
+      "dash_kick": {
+        "frames": [
+          72,
+          74,
+          73
+        ],
+        "durations": [
+          0.0667,
+          0.1667,
+          0.2333
+        ],
+        "loop": false
+      },
+      "air_punch": {
+        "frames": [
+          35,
+          36
+        ],
+        "durations": [
+          0.0667,
+          0.2333
+        ],
+        "loop": false
+      },
+      "air_punch2": {
+        "frames": [
+          37,
+          34
+        ],
+        "durations": [
+          0.0667,
+          0.2333
+        ],
+        "loop": false
+      },
+      "air_kick": {
+        "frames": [
+          28,
+          30
+        ],
+        "durations": [
+          0.0833,
+          0.3
+        ],
+        "loop": false
+      },
+      "dive_kick": {
+        "frames": [
+          32,
+          33
+        ],
+        "durations": [
+          0.1,
+          0.5
+        ],
+        "loop": false
+      },
+      "air_spike": {
+        "frames": [
+          23,
+          38
+        ],
+        "durations": [
+          0.1333,
+          0.3167
+        ],
+        "loop": false
+      },
+      "rising_uppercut": {
+        "frames": [
+          129,
+          130,
+          131,
+          132,
+          133
+        ],
+        "durations": [
+          0.05,
+          0.0833,
+          0.1167,
+          0.1667,
+          0.2
+        ],
+        "loop": false
+      },
+      "hurricane": {
+        "frames": [
+          30,
+          31,
+          32,
+          34
+        ],
+        "durations": [
+          0.1333,
+          0.25,
+          0.25,
+          0.2667
+        ],
+        "loop": false
+      },
+      "drill_kick": {
+        "frames": [
+          31,
+          86,
+          33
+        ],
+        "durations": [
+          0.1667,
+          0.2333,
+          0.3
+        ],
+        "loop": false
+      },
+      "signature1": {
+        "frames": [
+          126,
+          139,
+          140,
+          127
+        ],
+        "durations": [
+          0.2,
+          0.1667,
+          0.2,
+          0.2333
+        ],
+        "loop": false
+      },
+      "signature2": {
+        "frames": [
+          130,
+          131,
+          132,
+          134
+        ],
+        "durations": [
+          0.2333,
+          0.1667,
+          0.2,
+          0.2667
+        ],
+        "loop": false
+      },
+      "signature3": {
+        "frames": [
+          143,
+          144,
+          145,
+          141
+        ],
+        "durations": [
+          0.2667,
+          0.1333,
+          0.1667,
+          0.3
+        ],
+        "loop": false
+      },
+      "grab": {
+        "frames": [
+          114
+        ],
+        "durations": [
+          0.2
+        ],
+        "loop": false
+      },
+      "grab_knee": {
+        "frames": [
+          54
+        ],
+        "durations": [
+          0.2
+        ],
+        "loop": false
+      },
+      "throw_forward": {
+        "frames": [
+          47,
+          50
+        ],
+        "durations": [
+          0.1,
+          0.2
+        ],
+        "loop": false
+      },
+      "throw_back": {
+        "frames": [
+          67
+        ],
+        "durations": [
+          0.25
+        ],
+        "loop": false
+      },
+      "guard_counter": {
+        "frames": [
+          88,
+          46
+        ],
+        "durations": [
+          0.08,
+          0.2
+        ],
+        "loop": false
+      },
+      "wakeup_attack": {
+        "frames": [
+          111,
+          75
+        ],
+        "durations": [
+          0.1,
+          0.2
+        ],
+        "loop": false
+      },
+      "turn": {
+        "frames": [
+          0,
+          1
+        ],
+        "durations": [
+          0.06,
+          0.06
+        ],
+        "loop": false
+      },
+      "landing": {
+        "frames": [
+          39,
+          40,
+          41,
+          42
+        ],
+        "durations": [
+          0.05,
+          0.05,
+          0.05,
+          0.05
         ],
         "loop": false
       }
