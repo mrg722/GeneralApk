@@ -770,11 +770,16 @@ const KfRosterEntry& KfRoster(int index) {
 const KfReference& GetKfCharacter(int rosterIndex) {
     static std::map<int, KfReference> cache;
     const int idx = std::clamp(rosterIndex, 0, KfRosterCount() - 1);
-    auto it = cache.find(idx);
+    // La derivacion de District (DeriveBetaClipsForDistrict) depende de
+    // BetaDeriveEnabled(), que el modo BETA apaga. La clave de cache separa los
+    // dos estados: asi una bestia cargada en District (derivada) no se le
+    // entrega al modo BETA, que la quiere tal cual el original, ni al reves.
+    const int key = idx * 2 + (BetaDeriveEnabled() ? 1 : 0);
+    auto it = cache.find(key);
     if (it != cache.end()) return it->second;
     static KfReference empty;
     if (!IsWindowReady()) return empty;
-    KfReference& ref = cache[idx];
+    KfReference& ref = cache[key];
     ref = Load(kRoster[(size_t)idx]);
     if (!ref.loaded) TraceLog(LOG_WARNING, "KF %s: %s", kRoster[(size_t)idx].name, ref.error.c_str());
     return ref;
