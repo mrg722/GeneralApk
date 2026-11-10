@@ -331,11 +331,14 @@ constexpr DerivedDef kDerived[] = {
     // Heroe KF (sprite 0): airborne ya muestra el golpe + la caida + tumbado;
     // knockdown arranca en el cuadro "tumbado" (sin segunda caida).
     {0, "knockdown", {"knockdown", 9, -1}, kNoSeg, 1.0f, false},
+    // La derrota (2.95 s) acaba tumbada: se acelera para que llegue al suelo a tiempo.
+    {0, "defeat", {"defeat", 0, -1}, kNoSeg, 2.2f, false},
     // Heroina KF (sprite 2): idem; su bloqueo/recuperacion es una pose tumbada.
     {2, "knockdown", {"knockdown", 10, -1}, kNoSeg, 1.0f, false},
     {2, "block", {"idle", 0, 0}, kNoSeg, 1.0f, false},
     {2, "recovery", {"idle", 0, 0}, kNoSeg, 1.0f, false},
     // Heroe transformado (sprite 1): sus knockdown/air/block eran 4 chispas de golpe.
+    {1, "defeat", {"defeat", 0, -1}, kNoSeg, 1.6f, false},
     {1, "knockdown", {"defeat", 8, -1}, kNoSeg, 1.0f, false},
     {1, "getup", {"defeat", 12, 8}, {"idle", 0, 0}, 1.6f, false},
     {1, "block", {"idle", 0, 0}, kNoSeg, 1.0f, false},
