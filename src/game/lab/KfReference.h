@@ -6,6 +6,7 @@
 // ni se guarda arte de la APK en assets/: si el respaldo no esta, no hay bot.
 #include "rendering/Animator.h"
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -42,6 +43,10 @@ struct KfReference {
     std::string displayName;
     int maxHp = 0;
     std::map<std::string, std::string> sounds;
+    // F1.6: clips de `kRequired` que la accion de la APK no trae y se rellenaron
+    // con `idle` (el motor los trata como inexistentes para atacar).
+    std::set<std::string> synthetic;
+    bool IsSynthetic(const std::string& clip) const { return synthetic.count(clip) != 0; }
 };
 
 // Carga perezosa (necesita ventana abierta) del personaje `rosterIndex`.

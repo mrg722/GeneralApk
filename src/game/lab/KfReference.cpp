@@ -9,6 +9,7 @@
 #include <iterator>
 #include <map>
 #include <cstdio>
+#include <cstring>
 #include <unordered_map>
 #include <cstdlib>
 #include <string>
@@ -319,6 +320,97 @@ constexpr KfRosterEntry kRoster[] = {
     {-1, "RONIN-KRATOS (GARRAS DE HADES)", true, 150, 1.0f, 0, "ronin_kratos_garras"},
 };
 
+// ---- F1.6: clips derivados (subrangos / concatenaciones de clips reales) ----
+// Segmento de un clip ya existente: cuadros from..to (negativo = desde el final;
+// -1 = ultimo). `src` puede ser un clip con nombre o un alias "act<N>" (la accion
+// N de la APK). Un derivado con el nombre de un clip existente lo REEMPLAZA.
+struct DSeg { const char* src; int from; int to; };
+struct DerivedDef { int sprite; const char* name; DSeg a; DSeg b; float speed; bool reverse; };
+constexpr DSeg kNoSeg{nullptr, 0, 0};
+constexpr DerivedDef kDerived[] = {
+    // Heroe KF (sprite 0): airborne ya muestra el golpe + la caida + tumbado;
+    // knockdown arranca en el cuadro "tumbado" (sin segunda caida).
+    {0, "knockdown", {"knockdown", 9, -1}, kNoSeg, 1.0f, false},
+    // Heroina KF (sprite 2): idem; su bloqueo/recuperacion es una pose tumbada.
+    {2, "knockdown", {"knockdown", 10, -1}, kNoSeg, 1.0f, false},
+    {2, "block", {"idle", 0, 0}, kNoSeg, 1.0f, false},
+    {2, "recovery", {"idle", 0, 0}, kNoSeg, 1.0f, false},
+    // Heroe transformado (sprite 1): sus knockdown/air/block eran 4 chispas de golpe.
+    {1, "knockdown", {"defeat", 8, -1}, kNoSeg, 1.0f, false},
+    {1, "getup", {"defeat", 12, 8}, {"idle", 0, 0}, 1.6f, false},
+    {1, "block", {"idle", 0, 0}, kNoSeg, 1.0f, false},
+    {1, "recovery", {"idle", 0, 0}, kNoSeg, 1.0f, false},
+    {1, "rage_attack", {"atk3", 0, -1}, {"atk4", 0, -1}, 1.0f, false},
+    {1, "super", {"atk3", 0, -1}, {"atk4", 0, -1}, 1.0f, false},
+    // Heroina transformada (sprite 3): hit/defeat/knockdown eran idle de 1 cuadro:
+    // el ultimo cuadro de atk3 (feel Light le da CAIDA_ROT) hace de caida.
+    {3, "knockdown", {"atk3", -1, -1}, kNoSeg, 1.0f, false},
+    {3, "air", {"atk3", -1, -1}, kNoSeg, 1.0f, false},
+    {3, "airborne", {"atk3", -1, -1}, kNoSeg, 1.0f, false},
+    {3, "defeat", {"atk3", -1, -1}, kNoSeg, 1.0f, false},
+    {3, "getup", {"idle", 0, 0}, kNoSeg, 1.0f, false},
+    {3, "block", {"idle", 0, 0}, kNoSeg, 1.0f, false},
+    {3, "recovery", {"idle", 0, 0}, kNoSeg, 1.0f, false},
+    {3, "rage_attack", {"atk3", 0, -1}, {"atk4", 0, -1}, 1.0f, false},
+    {3, "super", {"atk3", 0, -1}, {"atk4", 0, -1}, 1.0f, false},
+    // ---- Enemigos: energy/special/finisher/atk3/atk4 de 1 cuadro -> subrangos reales ----
+    // MATON (6): carga de atk1 (salto, cuadros 3-6) como especial; atk2 lento y atk1 entero como atk3/atk4.
+    {6, "atk3", {"atk2", 0, -1}, kNoSeg, 0.8f, false},
+    {6, "atk4", {"atk1", 0, -1}, kNoSeg, 1.0f, false},
+    {6, "special", {"atk1", 3, 6}, kNoSeg, 1.0f, false},
+    {6, "super", {"atk1", 0, -1}, {"atk2", 0, -1}, 1.15f, false},
+    // NAVAJERA (10): atk2 (estocada) como especial; furia = atk1 + atk2.
+    {10, "special", {"atk2", 0, -1}, kNoSeg, 0.9f, false},
+    {10, "super", {"atk1", 0, -1}, {"atk2", 0, -1}, 1.2f, false},
+    // SOLDADO (11): skill5 (4 cuadros, granada) como especial.
+    {11, "special", {"skill5", 0, -1}, kNoSeg, 0.7f, false},
+    {11, "super", {"atk3", 0, -1}, {"atk1", 0, -1}, 1.15f, false},
+    // RUBIA (13): FENIX (skill5) como especial.
+    {13, "special", {"skill5", 0, -1}, kNoSeg, 1.0f, false},
+    {13, "super", {"atk1", 0, -1}, {"atk3", 0, -1}, 1.15f, false},
+    // GORRA (14): skill5 como especial.
+    {14, "special", {"skill5", 0, -1}, kNoSeg, 1.0f, false},
+    {14, "super", {"atk2", 0, -1}, {"atk4", 0, -1}, 1.15f, false},
+    // PELEADOR (16): especial real; furia = atk3 + atk4 (distinta de la patada).
+    {16, "super", {"atk3", 0, -1}, {"atk4", 0, -1}, 1.1f, false},
+    // CUCHILLERO (18): atk2 largo como especial.
+    {18, "special", {"atk2", 0, -1}, kNoSeg, 0.85f, false},
+    {18, "super", {"atk1", 0, -1}, {"atk3", 0, -1}, 1.15f, false},
+    // JEFE GARRA (12): levantarse = knockdown al reves; furia = atk2 + atk3.
+    {12, "getup", {"knockdown", 0, -1}, kNoSeg, 1.0f, true},
+    {12, "super", {"atk2", 0, -1}, {"atk3", 0, -1}, 1.0f, false},
+    // BUFONA (15): idem.
+    {15, "getup", {"knockdown", 0, -1}, kNoSeg, 1.0f, true},
+    {15, "super", {"atk2", 0, -1}, {"atk3", 0, -1}, 1.0f, false},
+};
+
+// Copia (cuadros + duraciones) de los segmentos pedidos en un clip nuevo.
+bool BuildDerived(Animator& t, const char* name, const DSeg& a, const DSeg& b, float speed, bool reverse) {
+    AnimationClip out{0, 0, kTickSeconds, false};
+    for (const DSeg* sg : {&a, &b}) {
+        if (!sg->src) continue;
+        auto it = t.namedClips.find(sg->src);
+        if (it == t.namedClips.end() || it->second.frames.empty()) return false;
+        const AnimationClip& c = it->second;
+        const int n = (int)c.frames.size();
+        int f = sg->from < 0 ? n + sg->from : sg->from;
+        int to = sg->to < 0 ? n + sg->to : sg->to;
+        f = std::clamp(f, 0, n - 1); to = std::clamp(to, 0, n - 1);
+        const int step = f <= to ? 1 : -1;
+        for (int k = f;; k += step) {
+            const float d = c.durations.empty() ? c.frameDuration : c.durations[std::min<size_t>((size_t)k, c.durations.size() - 1)];
+            out.frames.push_back(c.frames[(size_t)k]);
+            out.durations.push_back(std::max(0.016f, d / std::max(0.05f, speed)));
+            if (k == to) break;
+        }
+    }
+    if (out.frames.empty()) return false;
+    if (reverse) { std::reverse(out.frames.begin(), out.frames.end()); std::reverse(out.durations.begin(), out.durations.end()); }
+    out.startFrame = out.frames.front(); out.endFrame = out.frames.back();
+    t.namedClips[name] = out;
+    return true;
+}
+
 KfReference Load(const KfRosterEntry& who) {
     if (who.betaId) { KfReference r = LoadBetaCharacter(who.betaId); if (BetaDeriveEnabled()) DeriveBetaClipsForDistrict(r, who.betaId); return r; }
     KfReference out;
@@ -370,7 +462,7 @@ KfReference Load(const KfRosterEntry& who) {
     std::vector<int> abActs;
     for (const Ab& ab : kHeroAbilities) {
         if (!usable(ab.act)) continue;
-        if (!who.hero && ab.act < 19) continue;
+        if (!who.hero && (ab.act < 19 || ab.act == 20)) continue;   // 20 = levantarse del enemigo, no un ataque
         if (ab.act < 19 && abActs.size() >= 10) continue;   // golpes normales: solo si faltan habilidades
         bool dup = false;
         for (int a : abActs) dup |= a == ab.act;
@@ -395,6 +487,19 @@ KfReference Load(const KfRosterEntry& who) {
     for (size_t k = 0; k < nAb; ++k) {
         out.abilityClips.push_back(kAbClip[k]);
         clipList.push_back({kAbClip[k], abActs[k], false});
+    }
+    // F1.6: mapeos distintos para los heroes (antes repetian el especial / el dash).
+    if (who.hero) {
+        auto remap = [&](const char* name, int act) {
+            if (!usable(act)) return;
+            for (ClipMap& c : clipList) if (std::strcmp(c.name, name) == 0) c.action = act;
+        };
+        const bool volt = usable(36);
+        if (who.sprite == 0) remap("dash_attack", 36);
+        else if (who.sprite == 2) remap("dash_attack", 38);
+        if (usable(51)) remap("finisher", 51); else if (usable(24)) remap("finisher", 24);
+        if (usable(57)) clipList.push_back({"jump", 57, false}); else if (volt) clipList.push_back({"jump", 36, false});
+        if (usable(31)) clipList.push_back({"victory", 31, false});
     }
     const ClipMap* clips = clipList.data();
     const size_t nclips = clipList.size();
@@ -576,11 +681,50 @@ KfReference Load(const KfRosterEntry& who) {
         clip.startFrame = clip.frames.front(); clip.endFrame = clip.frames.back();
         out.templ.namedClips[c.name] = clip;
         out.clipNames.push_back(c.name);
+        const std::string alias = "act" + std::to_string(c.action);   // F1.6: accion de la APK por numero
+        if (!out.templ.namedClips.count(alias)) { out.templ.namedClips[alias] = clip; out.clipNames.push_back(alias); }
+    }
+    // F1.6: clips derivados (reemplazan a los degenerados) y variantes por velocidad/subrango.
+    auto addName = [&](const char* nm) {
+        if (std::find(out.clipNames.begin(), out.clipNames.end(), nm) == out.clipNames.end()) out.clipNames.push_back(nm);
+    };
+    for (const DerivedDef& d : kDerived)
+        if (d.sprite == who.sprite && BuildDerived(out.templ, d.name, d.a, d.b, d.speed, d.reverse)) addName(d.name);
+    if (!who.hero) {
+        // Espejos con nombre de jugador de los ataques de enemigo (ya corregidos).
+        auto mirror = [&](const char* dst, const char* src) {
+            auto it = out.templ.namedClips.find(src);
+            if (it == out.templ.namedClips.end()) return;
+            const AnimationClip c = it->second;
+            out.templ.namedClips[dst] = c; addName(dst);
+        };
+        mirror("punch1", "atk1"); mirror("punch2", "atk2"); mirror("punch3", "atk3"); mirror("kick", "atk4");
+        mirror("energy", "special"); mirror("finisher", "special"); mirror("rage_attack", "super");
+    }
+    // Variantes (.a primera parte, .b ultima parte, .f rapida, .s lenta) de los ataques:
+    // los usan los movesets (src/game/moves/Moves_Kf.cpp) para crear golpes distintos del mismo arte.
+    for (const char* base : {"atk1", "atk2", "atk3", "atk4", "special", "super", "skill1", "skill2", "skill3", "skill4", "skill5"}) {
+        auto it = out.templ.namedClips.find(base);
+        if (it == out.templ.namedClips.end()) continue;
+        const int n = (int)it->second.frames.size();
+        if (n < 2) continue;
+        const std::string b = base;
+        BuildDerived(out.templ, (b + ".f").c_str(), {base, 0, -1}, kNoSeg, 1.4f, false);
+        BuildDerived(out.templ, (b + ".s").c_str(), {base, 0, -1}, kNoSeg, 0.75f, false);
+        out.clipNames.push_back(b + ".f"); out.clipNames.push_back(b + ".s");
+        if (n >= 4) {
+            BuildDerived(out.templ, (b + ".a").c_str(), {base, 0, std::max(1, n * 6 / 10 - 1)}, kNoSeg, 1.0f, false);
+            BuildDerived(out.templ, (b + ".b").c_str(), {base, n * 4 / 10, -1}, kNoSeg, 1.0f, false);
+            out.clipNames.push_back(b + ".a"); out.clipNames.push_back(b + ".b");
+        }
     }
     out.scale = who.scale;
     if (!out.templ.HasClip("idle")) { out.error = "sin clip idle"; return out; }
     for (const char* req : kRequired)
-        if (!out.templ.HasClip(req)) { out.templ.namedClips[req] = out.templ.namedClips["idle"]; out.clipNames.push_back(req); }
+        if (!out.templ.HasClip(req)) {
+            out.templ.namedClips[req] = out.templ.namedClips["idle"]; out.clipNames.push_back(req);
+            out.synthetic.insert(req);   // relleno con idle: no es una animacion real
+        }
     out.loaded = true;
     return out;
 }
