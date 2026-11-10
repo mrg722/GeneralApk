@@ -110,8 +110,12 @@ int main() {
             assert(x.frames == kv.second.frames && x.durations == kv.second.durations && x.loop == kv.second.loop);
             assert(x.scales.empty() && x.offsets.empty() && !x.fromInclude);
         }
-        assert(real.FindClips("brakk_v2") && bare.FindClips("brakk_v2") &&
-               real.FindClips("brakk_v2")->size() == bare.FindClips("brakk_v2")->size());
+        // F1.5: el include agrega clips nuevos a brakk_v2 (y sus override de
+        // arreglo: rage_attack/hit_high/hit_low); los clips base siguen ahi.
+        const ClipMap* ba = real.FindClips("brakk_v2");
+        const ClipMap* bb = bare.FindClips("brakk_v2");
+        assert(ba && bb && ba->size() > bb->size());
+        for (const auto& kv : *bb) assert(ba->count(kv.first) == 1);
     }
     // 6) Include que no existe: aviso, la carga sigue.
     {
