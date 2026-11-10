@@ -14,6 +14,7 @@
 // habilidades 1-5 por la lista de habilidades del clip (no por skillSlots).
 // El avance se hace en los cuadros (derivacion); la armadura total la dan las
 // habilidades 1-5 y los especiales L / furia (superarmadura del motor).
+#include "game/beta/BetaDerive.h"
 #include "game/moves/MoveRegistry.h"
 #include "game/player/PoseFxPresets.h"
 #include <algorithm>
@@ -186,7 +187,8 @@ const MoveSet* MovesetFor_Beasts(int skin) {
         }
         return out;
     }();
-    if (skin < 27 || skin > 37) return nullptr;
+    // Sin las derivaciones (modo BETA de GowApk) los clips canonicos son los originales: sin MoveSet propio.
+    if (skin < 27 || skin > 37 || !BetaDeriveEnabled()) return nullptr;
     return &sets[static_cast<std::size_t>(skin - 27)]->ms;
 }
 

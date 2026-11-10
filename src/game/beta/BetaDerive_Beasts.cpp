@@ -56,7 +56,7 @@ const Fam kFams[] = {
      {"ESCUDAZO", "MURO DE ESCUDO", "VENDAS", "EMBESTIDA", "FURIA DE ARENA"}},
     {"bestia_elefante", {"punch1", 0, 16}, {"punch1", 16, 28}, {"punch1", 28, 35}, {"punch1", 6, 16}, 1, 1, 0, false,
      {"ESTAMPIDA", "PISOTON", "DOBLE PISOTON", "EMBESTIDA", "FURIA SALVAJE"}},
-    {"ave_sanadora", {"punch1", 0, 8}, {"punch1", 9, 16}, {"punch1", 17, 24}, {"punch1", 25, 32}, 0, 1, 0, false,
+    {"ave_sanadora", {"punch1", 0, 8}, {"punch1", 9, 16, false, 1.0f, Mod{14}}, {"punch1", 17, 24, true}, {"punch1", 25, 32, false, 1.15f, Mod{26}}, 0, 1, 0, false,
      {"CICLON", "PICADA", "TORNADO DE PLUMAS", "PICOTAZO", "FURIA SANADORA"}},
     {"centauro", {"punch1", 0, 9}, {"punch1", 10, 17}, {"punch1", 18, 24}, {"punch1", 3, 9}, 0, 0, 0, true,
      {"LANZAZO", "LLUVIA DE LANZAS", "PISOTON MAGICO", "CARGA DE LANZA", "FURIA DE GALOPE"}},
@@ -104,7 +104,7 @@ struct Builder {
     // Pasos (cuadro, duracion) de una parte, con sus cajas y avance aplicados.
     std::vector<std::pair<int, float>> Steps(const Part& p) {
         std::vector<std::pair<int, float>> out;
-        const AnimationClip* c = Clip(p.src);
+        const AnimationClip* c = Clip((std::string("df_src_") + p.src).c_str());
         if (!c || c->frames.empty()) return out;
         const int last = static_cast<int>(c->frames.size()) - 1;
         const int from = std::clamp(p.from, 0, last), to = std::clamp(p.to, from, last);
@@ -191,6 +191,8 @@ void Derive(KfReference& ref, const Fam& f) {
     Builder b{ref};
     if (!b.Clip("punch1") || !b.Clip("idle")) return;
     const AnimationClip origP1 = *b.Clip("punch1");
+    b.Copy("df_src_punch1", origP1);   // los subrangos salen SIEMPRE de los clips originales
+    if (b.Clip("kick")) b.Copy("df_src_kick", *b.Clip("kick"));
     const AnimationClip* en = b.Clip("energy");
     const AnimationClip origEnergy = en ? *en : origP1;
     const AnimationClip* kn = b.Clip("knockdown");
@@ -203,7 +205,7 @@ void Derive(KfReference& ref, const Fam& f) {
             fr.pieces.erase(std::remove_if(fr.pieces.begin(), fr.pieces.end(),
                                            [](const FramePiece& p) {
                                                return p.tex == 0 && p.y > -45 && p.y < 10 && p.src.width >= 110 &&
-                                                      p.src.height <= 80;
+                                                      p.src.height <= 90;
                                            }),
                             fr.pieces.end());
 
