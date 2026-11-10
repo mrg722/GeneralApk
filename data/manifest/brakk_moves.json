@@ -1,6 +1,26 @@
 {
-  "_comment": "Clips nuevos que se AGREGAN al juego brakk_v2 del manifiesto. Lo rellena F1.5 (BRAKK, skin 2). Formato por clip: frames, durations|duration|fps, loop, y opcionales scale|scales, offsets.",
+  "_comment": "F1.5 BRAKK (skin 2): clips que se AGREGAN al juego brakk_v2 (atlas 12x9, celdas 256x176, pivote (128,168)). Solo celdas con el cuerpo entero (nunca 7, 12, 15, 20-22, 28, 32, 40, 45, 47, 50, 52, 54, 69, 81, 83, 84, 87, 88, 102). override: true SOLO en rage_attack (sin el cuadro 88 = solo el arco de cadena), hit_high y hit_low (eran de 1 cuadro). Las duraciones son pesos: el ataque escala el clip a su duracion real. Celdas usadas que el jugador no usaba: 10 cadena sobre la cabeza, 33/35 arco de cadena, 48/57/68/70 remolino, 49/51/53/55/56 golpe al suelo, 62/63 barrida, 67/71-76 latigazos y punetazos, 82 furia, 100 caida con cadena.",
   "clips": {
-    "brakk_v2": {}
+    "brakk_v2": {
+      "rage_attack":    {"frames": [85, 86, 82], "durations": [0.12, 0.18, 0.25], "loop": false, "override": true},
+      "hit_high":       {"frames": [93, 94], "durations": [0.06, 0.10], "loop": false, "override": true},
+      "hit_low":        {"frames": [94, 93], "durations": [0.06, 0.10], "loop": false, "override": true},
+      "latigo":         {"frames": [71, 72, 73, 67], "durations": [0.08, 0.08, 0.10, 0.14], "loop": false},
+      "latigo_largo":   {"frames": [74, 75, 76, 67], "durations": [0.08, 0.08, 0.10, 0.16], "loop": false},
+      "cadena_giro":    {"frames": [23, 24, 25, 26, 27, 29, 30], "durations": [0.06, 0.07, 0.07, 0.07, 0.07, 0.07, 0.10], "loop": false},
+      "cadena_atras":   {"frames": [23, 24, 25, 26, 31], "durations": [0.06, 0.08, 0.10, 0.10, 0.14], "loop": false},
+      "golpe_suelo":    {"frames": [10, 48, 49, 51, 53, 55], "durations": [0.12, 0.08, 0.06, 0.08, 0.14, 0.16], "loop": false},
+      "gancho_cielo":   {"frames": [36, 59, 60, 65, 66], "durations": [0.08, 0.06, 0.08, 0.12, 0.14], "loop": false},
+      "cadena_alta":    {"frames": [58, 33, 35, 76, 65], "durations": [0.08, 0.06, 0.08, 0.12, 0.14], "loop": false},
+      "gancho_cadena":  {"frames": [56, 33, 35, 70, 65, 66], "durations": [0.08, 0.06, 0.08, 0.10, 0.12, 0.14], "loop": false},
+      "barrida_cadena": {"frames": [58, 61, 62, 63], "durations": [0.08, 0.10, 0.12, 0.14], "loop": false},
+      "hombro":         {"frames": [13, 14, 16, 17], "durations": [0.08, 0.08, 0.10, 0.16], "loop": false},
+      "pisoton":        {"frames": [10, 56, 53, 55], "durations": [0.10, 0.06, 0.12, 0.14], "loop": false},
+      "remolino":       {"frames": [36, 48, 68, 57, 70, 48, 68, 57], "durations": [0.08, 0.06, 0.06, 0.06, 0.06, 0.06, 0.06, 0.10], "loop": false},
+      "jalon":          {"frames": [36, 39, 41, 42, 43, 46], "durations": [0.08, 0.08, 0.08, 0.08, 0.10, 0.14], "loop": false},
+      "explosivo":      {"frames": [80, 85, 86, 82], "durations": [0.09, 0.09, 0.09, 0.12], "loop": false},
+      "estrangular":    {"frames": [39, 41, 42], "durations": [0.10, 0.10, 0.20], "loop": false},
+      "levantarse_cadena": {"frames": [100, 99, 62, 63], "durations": [0.10, 0.10, 0.12, 0.14], "loop": false}
+    }
   }
 }
