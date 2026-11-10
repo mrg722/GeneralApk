@@ -353,6 +353,28 @@ constexpr DerivedDef kDerived[] = {
     {3, "recovery", {"idle", 0, 0}, kNoSeg, 1.0f, false},
     {3, "rage_attack", {"atk3", 0, -1}, {"atk4", 0, -1}, 1.0f, false},
     {3, "super", {"atk3", 0, -1}, {"atk4", 0, -1}, 1.0f, false},
+    // Saltos de heroes: solo la parte aerea (el clip sigue con la caida al suelo).
+    {0, "jump", {"jump", 0, 10}, kNoSeg, 0.7f, false},
+    {2, "jump", {"jump", 0, 9}, kNoSeg, 0.7f, false},
+    // Enemigos: bloqueo = primer cuadro de un ataque (guardia), en vez de idle.
+    {6, "block", {"atk1", 0, 0}, kNoSeg, 1.0f, false},
+    {6, "recovery", {"atk1", 0, 0}, kNoSeg, 1.0f, false},
+    {10, "block", {"atk1", 0, 0}, kNoSeg, 1.0f, false},
+    {10, "recovery", {"atk1", 0, 0}, kNoSeg, 1.0f, false},
+    {11, "block", {"atk1", 0, 0}, kNoSeg, 1.0f, false},
+    {11, "recovery", {"atk1", 0, 0}, kNoSeg, 1.0f, false},
+    {13, "block", {"atk1", 0, 0}, kNoSeg, 1.0f, false},
+    {13, "recovery", {"atk1", 0, 0}, kNoSeg, 1.0f, false},
+    {14, "block", {"atk1", 0, 0}, kNoSeg, 1.0f, false},
+    {14, "recovery", {"atk1", 0, 0}, kNoSeg, 1.0f, false},
+    {16, "block", {"atk1", 0, 0}, kNoSeg, 1.0f, false},
+    {16, "recovery", {"atk1", 0, 0}, kNoSeg, 1.0f, false},
+    {18, "block", {"atk1", 0, 0}, kNoSeg, 1.0f, false},
+    {18, "recovery", {"atk1", 0, 0}, kNoSeg, 1.0f, false},
+    {12, "block", {"atk1", 0, 0}, kNoSeg, 1.0f, false},
+    {12, "recovery", {"atk1", 0, 0}, kNoSeg, 1.0f, false},
+    {15, "block", {"atk1", 0, 0}, kNoSeg, 1.0f, false},
+    {15, "recovery", {"atk1", 0, 0}, kNoSeg, 1.0f, false},
     // ---- Enemigos: energy/special/finisher/atk3/atk4 de 1 cuadro -> subrangos reales ----
     // MATON (6): carga de atk1 (salto, cuadros 3-6) como especial; atk2 lento y atk1 entero como atk3/atk4.
     {6, "atk3", {"atk2", 0, -1}, kNoSeg, 0.8f, false},
