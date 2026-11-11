@@ -155,6 +155,18 @@ void Boss::PickAttack() {
     currentAttack = eligible[static_cast<std::size_t>(GetRandomValue(0, static_cast<int>(eligible.size()) - 1))];
     elapsed = 0.0f;
     attackResolved = false;
+    // F2.2 (tarea 3): telegrafia. El jefe avisa su ataque al empezar el arranque,
+    // como hacen los enemigos de calle (F1.9). Reusa GameEventType::Telegraph (el
+    // audio/dibujo ya lo conoce); los pesados (Golpe sismico/Shockwave, Overdrive,
+    // el Ariete/Dash con empuje) avisan "fuerte" (heavy + mas peso).
+    const BossAttackDef& atk = def->attacks[static_cast<std::size_t>(currentAttack)];
+    GameEvent ev;
+    ev.type = GameEventType::Telegraph;
+    ev.x = pos.x; ev.y = pos.y;
+    ev.fromEnemy = true;
+    ev.heavy = atk.heavy;
+    ev.weight = atk.heavy ? 3 : 1;
+    EmitGameEvent(ev);
 }
 
 void Boss::Update(float dt, Player& player, CombatWorld* world, std::vector<BossProjectile>& projectiles, HitstopClock* hitstop, float* shake) {
