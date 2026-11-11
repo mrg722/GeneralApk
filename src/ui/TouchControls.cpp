@@ -25,6 +25,10 @@ struct Button {
 bool gEnabled = false;
 float gScaleX = 1.0f, gScaleY = 1.0f, gOffX = 0.0f, gOffY = 0.0f;
 std::vector<Vector2> gInjected;
+// F2.3: toque nuevo de este frame (flanco: mas dedos que en el frame anterior o clic).
+bool gTapValid = false;
+Vector2 gTapPoint{0, 0};
+size_t gPrevTouchCount = 0;
 
 // Joystick (izquierda).
 constexpr Vector2 kStick{175.0f, 560.0f};
@@ -157,10 +161,32 @@ void SetScreenTransform(float scaleX, float scaleY, float offsetX, float offsetY
     gScaleX = scaleX > 0.0f ? scaleX : 1.0f; gScaleY = scaleY > 0.0f ? scaleY : 1.0f; gOffX = offsetX; gOffY = offsetY;
 }
 void InjectTouchForTest(Vector2 p) { gInjected.push_back(p); }
+bool PeekTap(Vector2* p) {
+    if (!gTapValid) return false;
+    if (p) *p = gTapPoint;
+    return true;
+}
+bool TakeTap(Vector2* p) {
+    if (!gTapValid) return false;
+    gTapValid = false;
+    if (p) *p = gTapPoint;
+    return true;
+}
 
 void Update(Context context) {
     input::ClearNext();
     gKnob = kStick;
+    {   // F2.3: flanco de toque (o clic de mouse) para la lista de movimientos.
+        const std::vector<Vector2> pts = Touches();
+        gTapValid = false;
+        if (pts.size() > gPrevTouchCount) { gTapValid = true; gTapPoint = pts.back(); }
+        gPrevTouchCount = pts.size();
+        if (!gTapValid && IsWindowReady() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            const Vector2 m = GetMousePosition();
+            gTapValid = true;
+            gTapPoint = {(m.x - gOffX) / gScaleX, (m.y - gOffY) / gScaleY};
+        }
+    }
     if (gEnabled) {
         size_t n = 0;
         const Button* buttons = ButtonsFor(context, n);

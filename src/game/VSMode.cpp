@@ -5,6 +5,7 @@
 #include "game/lab/KfReference.h"
 #include "rendering/AssetManager.h"
 #include "ui/GameHUD.h"
+#include "ui/MoveListScreen.h"
 #include "game/CharacterVisual.h"
 #include "raylib.h"
 #include <algorithm>
@@ -218,10 +219,20 @@ void VSMode::Update(float dt) {
         }
         return;
     }
+    // F2.3: lista de movimientos del luchador (M, o toque en su boton). Mientras esta
+    // abierta el combate queda congelado y ESC la cierra en vez de salir.
+    if (ui::MoveList().IsOpen()) {
+        ui::MoveList().Update();
+        return;
+    }
     if (input::Pressed(KEY_ESCAPE)) {
         EmitSimpleEvent(GameEventType::UiCancel);
         flow = VSFlow::Select;
         enemies.clear();
+        return;
+    }
+    if (ui::MoveListRequested({570, 660, 140, 30}, false) && !playerDefeated) {
+        ui::MoveList().Open(player);
         return;
     }
     if (input::Pressed(KEY_R)) {
@@ -253,6 +264,9 @@ void VSMode::Update(float dt) {
     player.Update(dt);
     player.position.x = std::clamp(player.position.x, kMinX, kMaxX);
     player.position.y = std::clamp(player.position.y, kMinY, kMaxY);
+    ui::Combat().Update(dt, player, enemies);   // F2.3: HUD de combate (contador propio: VS no cuenta combo)
+    if (selectedBoss >= 0) ui::Combat().ObserveTarget(1000, boss.GetHp(), boss.GetPos());
+    else if (RivalActive()) ui::Combat().ObserveTarget(1001, rival.hp, rival.position, rival.InAttackStartup());
     if (selectedBoss >= 0) {
         // DF-013.2: pelea de boss en VS via la clase Boss compartida (primer
         // consumidor real de BossDefinition — ver src/game/combat/Boss.h).
@@ -506,7 +520,14 @@ void VSMode::DrawFight() const {
         }
     }
     combatWorld.DrawEffects();
+    ui::Combat().DrawWorld();   // F2.3: numeros de dano (VS dibuja sin camara: mundo = pantalla)
     DrawHud();
+    ui::Combat().DrawScreen();
+    if (touch::Enabled()) {   // F2.3: boton de la lista de movimientos (VS no tiene pausa)
+        DrawRectangle(570, 660, 140, 30, {3, 7, 11, 225});
+        DrawRectangleLines(570, 660, 140, 30, {70, 200, 235, 170});
+        DrawText("MOVIMIENTOS", 585, 668, 14, {120, 225, 255, 255});
+    }
     if (!touch::Enabled()) {
         DrawRectangle(260, 657, 760, 45, {3, 7, 11, 225});
         DrawText(PlayerIsWarrior() ? "J GOLPE   K PATADA   1-5 HABILIDADES   B BLOQUEO   SHIFT ESQUIVA   SPACE FURIA   Q ARMA"
@@ -515,9 +536,10 @@ void VSMode::DrawFight() const {
         DrawText(!enemies.empty() && enemies[0].referenceSkin
                      ? TextFormat("R REINICIAR   ESC CONFIGURACION   N ACCION DEL BOT KF: %s",
                                   enemies[0].skinClip.c_str())
-                     : "R REINICIAR   ESC CONFIGURACION",
+                     : "R REINICIAR   M MOVIMIENTOS   ESC CONFIGURACION",
                  489, 687, 11, {135, 155, 165, 220});
     }
+    if (ui::MoveList().IsOpen()) ui::MoveList().Draw();
     if (playerDefeated) {
         DrawRectangle(0, 0, 1280, 720, {0, 0, 0, 160});
         const char* lost = TextFormat("%s DERROTADO", GetCharacterVisual(selectedCharacter).name);

@@ -1,6 +1,7 @@
 // Stage 1 (La ruta de las cadenas): ciclo de vida, flujo de pantallas, dificultad, guardado y puntuacion.
 #include "game/stage1/Stage1Common.h"
 #include "core/DisplaySettings.h"
+#include "ui/MoveListScreen.h"
 
 namespace district_fury {
 
@@ -269,6 +270,8 @@ void Stage1StoryGame::Update(float dt) {
         if (input::Pressed(KEY_ESCAPE) || input::Pressed(KEY_C)) flow = StoryFlow::Menu;
         return;
     }
+    // F2.3: la lista de movimientos (desde la pausa) se come ESC/flechas mientras esta abierta.
+    if (ui::UpdateMoveListInPause(flow == StoryFlow::Pause)) return;
     if (input::Pressed(KEY_ESCAPE)) {
         EmitSimpleEvent(GameEventType::UiPause);
         if (flow == StoryFlow::Combat || flow == StoryFlow::Boss)
@@ -276,7 +279,10 @@ void Stage1StoryGame::Update(float dt) {
         else if (flow == StoryFlow::Pause)
             flow = finalBossSpawned ? StoryFlow::Boss : StoryFlow::Combat;
     }
-    if (flow == StoryFlow::Pause) return;
+    if (flow == StoryFlow::Pause) {
+        if (ui::MoveListRequested({330, 420, 620, 44})) ui::MoveList().Open(player);   // F2.3
+        return;
+    }
     if (flow == StoryFlow::GameOver) {
         if (input::Pressed(KEY_R)) {
             ResetRun();
@@ -315,6 +321,8 @@ void Stage1StoryGame::Update(float dt) {
     shake = std::max(0.f, shake - dt);
     bannerTimer = std::max(0.f, bannerTimer - dt);
     UpdateParticles(dt);
+    ui::Combat().Update(dt, player, enemies, combo);   // F2.3: HUD de combate
+    if (flow == StoryFlow::Boss && !boss.defeated) ui::Combat().ObserveTarget(1000, boss.hp, boss.position);
     if (flow == StoryFlow::Intro) {
         bannerTimer -= dt;
         if (bannerTimer <= 0) {

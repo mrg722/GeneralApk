@@ -3,6 +3,7 @@
 #include "ui/TouchControls.h"
 #include "core/InputMap.h"
 #include "ui/GameHUD.h"
+#include "ui/MoveListScreen.h"
 #include "rendering/AssetManager.h"
 #include "rendering/BossSprite.h"
 #include "rendering/Backdrop.h"
@@ -407,12 +408,14 @@ void Stage3Game::UpdateParticles(float dt) {
         particles.end());
 }
 void Stage3Game::Update(float dt) {
+    if (ui::UpdateMoveListInPause(flow == Flow::Pause)) return;   // F2.3: lista de movimientos
     if (input::Pressed(KEY_P) || input::Pressed(KEY_ESCAPE))
         if (flow != Flow::Clear && flow != Flow::GameOver && flow != Flow::BossIntro) {
             flow = flow == Flow::Pause ? Flow::Combat : Flow::Pause;
         }
     if (flow == Flow::Pause) {
-        if (input::Pressed(KEY_ENTER)) flow = Flow::Combat;
+        if (ui::MoveListRequested({485, 370, 310, 44}, false)) ui::MoveList().Open(player);   // F2.3 (M o toque)
+        else if (input::Pressed(KEY_ENTER)) flow = Flow::Combat;
         return;
     }
     if (flow == Flow::Intro) {
@@ -467,6 +470,8 @@ void Stage3Game::Update(float dt) {
     else
         combo = 0;
     UpdateParticles(dt);
+    if (flow == Flow::Combat || flow == Flow::Gatekeeper || flow == Flow::Boss || flow == Flow::BossIntro)
+        ui::Combat().Update(dt, player, enemies, combo);   // F2.3: HUD de combate
     cameraX = std::clamp(player.position.x, 640.f, 5360.f);
 }
 void Stage3Game::DrawWorld() const {
@@ -516,6 +521,7 @@ void Stage3Game::DrawWorld() const {
         if (e.active) e.Draw();
     if (!bossSpawned || !boss.defeated) player.Draw();
     if (bossSpawned && (flow == Flow::BossIntro || flow == Flow::Boss)) DrawBoss();
+    ui::Combat().DrawWorld();   // F2.3: numeros de dano flotantes
     EndMode2D();
 }
 // F1.1: dibujo compartido de los jefes Titan-X (src/game/visual/Poses_TitanX.cpp).
@@ -601,6 +607,7 @@ void Stage3Game::DrawHUD() const {
                       {95, 190, 255, 255});
         DrawText(TextFormat("PHASE %d", boss.phase), 875, 49, 12, {190, 205, 220, 255});
     }
+    ui::Combat().DrawScreen();   // F2.3: contador de golpes, avisos y nombre del especial
 }
 void Stage3Game::DrawClear() const {
     DrawRectangle(0, 0, 1280, 720, {4, 7, 14, 235});
@@ -648,6 +655,8 @@ void Stage3Game::DrawOverlay() const {
         DrawRectangle(0, 0, 1280, 720, {0, 0, 0, 175});
         DrawText("PAUSED", 550, 280, 38, RAYWHITE);
         DrawText("ENTER / P / ESC  RESUME", 485, 340, 16, {190, 205, 220, 255});
+        DrawText("M — MOVE LIST", 545, 380, 20, {120, 225, 255, 255});   // F2.3
+        if (ui::MoveList().IsOpen()) ui::MoveList().Draw();
     } else if (flow == Flow::GameOver) {
         DrawRectangle(0, 0, 1280, 720, {15, 3, 10, 220});
         DrawText("ASTRA TOWER // FAILURE", 380, 210, 32, {255, 75, 125, 255});

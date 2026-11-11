@@ -2,6 +2,7 @@
 #include "game/stage1/Stage1Common.h"
 #include "core/DisplaySettings.h"
 #include "ui/TouchControls.h"
+#include "ui/MoveListScreen.h"
 
 namespace district_fury {
 
@@ -200,6 +201,7 @@ void Stage1StoryGame::DrawWorld() const {
         DrawCircle((int)s.x, (int)s.y, p.size * a, A(p.color, a));
     }
     combatWorld.DrawEffects();
+    ui::Combat().DrawWorld();   // F2.3: numeros de dano flotantes
     EndMode2D();
 }
 
@@ -247,6 +249,7 @@ void Stage1StoryGame::DrawHUD() const {
                  {175, 200, 205, 225});
     }
     DrawGoArrow(arena.GoTimer());
+    ui::Combat().DrawScreen();   // F2.3: contador de golpes, avisos y nombre del especial
 }
 
 void Stage1StoryGame::DrawMenu() const {
@@ -325,7 +328,9 @@ void Stage1StoryGame::DrawPause() const {
     DrawText("ESC — REANUDAR", 480, 300, 22, WHITE);
     DrawText("R — REINICIAR", 495, 345, 22, WHITE);
     DrawText("Q — VOLVER AL MENU", 450, 390, 22, WHITE);
-    DrawText("El combate se detiene completamente.", 430, 465, 17, {140, 175, 190, 230});
+    DrawText("M — MOVIMIENTOS", 475, 435, 22, {120, 225, 255, 255});   // F2.3 (tambien ENTER / OK)
+    DrawText("El combate se detiene completamente.", 430, 495, 17, {140, 175, 190, 230});
+    if (ui::MoveList().IsOpen()) ui::MoveList().Draw();
 }
 
 void Stage1StoryGame::DrawGameOver() const {

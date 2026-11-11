@@ -5,6 +5,7 @@
 #include "rendering/BossSprite.h"
 #include "rendering/Backdrop.h"
 #include "ui/GameHUD.h"
+#include "ui/MoveListScreen.h"
 #include "raylib.h"
 #include <algorithm>
 #include <cmath>
@@ -351,6 +352,7 @@ void Stage4Game::UpdateParticles(float dt) {
 }
 void Stage4Game::Update(float dt) {
     dt = std::min(dt, .033f);
+    if (ui::UpdateMoveListInPause(flow == Flow::Pause)) return;   // F2.3: lista de movimientos
     if (input::Pressed(KEY_ESCAPE)) {
         if (flow == Flow::Combat || flow == Flow::Boss)
             flow = Flow::Pause;
@@ -359,6 +361,7 @@ void Stage4Game::Update(float dt) {
     }
     if (flow == Flow::Pause) {
         if (input::Pressed(KEY_R)) Init();
+        else if (ui::MoveListRequested({480, 410, 330, 44})) ui::MoveList().Open(player);   // F2.3
         return;
     }
     if (flow == Flow::GameOver) {
@@ -379,6 +382,7 @@ void Stage4Game::Update(float dt) {
     shake = std::max(0.f, shake - dt);
     bannerTimer = std::max(0.f, bannerTimer - dt);
     UpdateParticles(dt);
+    ui::Combat().Update(dt, player, enemies, combo);   // F2.3: HUD de combate
     if (flow == Flow::Intro) {
         if (input::Pressed(KEY_ENTER) || input::Pressed(KEY_J)) flow = Flow::Combat;
         return;
@@ -510,6 +514,7 @@ void Stage4Game::DrawWorld() const {
         DrawCircle((int)s.x, (int)s.y, p.size * a, Alpha(p.color, a));
     }
     combatWorld.DrawEffects();
+    ui::Combat().DrawWorld();   // F2.3: numeros de dano flotantes
     EndMode2D();
 }
 void Stage4Game::DrawHUD() const {
@@ -543,6 +548,7 @@ void Stage4Game::DrawHUD() const {
         const char* t = TextFormat("KESSLER TOWER // OLEADA %d", wave);
         DrawText(t, 640 - MeasureText(t, 32) / 2, 190, 32, {170, 255, 195, 230});
     }
+    ui::Combat().DrawScreen();   // F2.3: contador de golpes, avisos y nombre del especial
 }
 void Stage4Game::DrawClear() const {
     DrawRectangle(0, 0, 1280, 720, {6, 10, 8, 245});
@@ -572,6 +578,8 @@ void Stage4Game::Draw() const {
         DrawText("PAUSED", 545, 235, 48, WHITE);
         DrawText("ESC — RESUME", 500, 330, 22, WHITE);
         DrawText("R — RESTART", 510, 375, 22, WHITE);
+        DrawText("M — MOVE LIST", 505, 420, 22, {120, 225, 255, 255});   // F2.3
+        if (ui::MoveList().IsOpen()) ui::MoveList().Draw();
     }
     if (flow == Flow::GameOver) {
         DrawHUD();

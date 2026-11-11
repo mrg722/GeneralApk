@@ -30,6 +30,13 @@ void Update(Context context);
 // sin energia y hace brillar FURIA cuando esta lista.
 void Draw(Context context, const Player* player);
 
+// F2.3: ultimo toque/clic NUEVO de este frame en coordenadas virtuales (para
+// pestanas y filas de la lista de movimientos). Lo consume quien lo pide: devuelve
+// true una sola vez por toque. No reemplaza ningun boton de combate.
+bool TakeTap(Vector2* virtualPoint);
+// Igual que TakeTap pero sin consumirlo.
+bool PeekTap(Vector2* virtualPoint);
+
 // Para tests: evalua un toque en coordenadas virtuales como si fuera real.
 void InjectTouchForTest(Vector2 virtualPoint);
 

@@ -77,6 +77,7 @@ set(DF_CORE_SOURCES
     src/rendering/SpriteManifest.cpp
     src/ui/MainMenu.cpp
     src/ui/GameHUD.cpp
+    src/ui/MoveListScreen.cpp
     src/ui/TouchControls.cpp
 )
 # Carpetas por bloque (plan maestro, F0.1): cualquier .cpp nuevo dentro de estas
