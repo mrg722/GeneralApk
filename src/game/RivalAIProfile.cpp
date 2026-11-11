@@ -74,6 +74,8 @@ AiArchetype ArchetypeForName(const char* name) {
 
 }  // namespace
 
+AiProfile ProfileForArchetype(AiArchetype a) { return Preset(a); }
+
 AiProfile ProfileFor(int skin) {
     if (skin == kMaxSkinIndex) {
         // MAX: zoner que ademas ama los aereos (persigue con salto + picada).

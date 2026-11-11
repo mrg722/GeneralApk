@@ -36,5 +36,8 @@ struct AiProfile {
 };
 
 AiProfile ProfileFor(int skin);
+// Preset base de un arquetipo (sin los ajustes por personaje de ProfileFor).
+// Lo usan RivalAITests y el log de depuracion de VS.
+AiProfile ProfileForArchetype(AiArchetype a);
 
 }  // namespace district_fury
